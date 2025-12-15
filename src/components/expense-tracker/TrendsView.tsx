@@ -181,8 +181,8 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
       >
         <Card className="p-4 overflow-hidden">
           <h3 className="text-sm font-medium mb-3">
-            {chartMode === "daily" ? "Last 14 Days" : "Last 6 Months"}
-          </h3>
+              {chartMode === "daily" ? "Last 14 Days" : "Last 6 Months"}
+            </h3>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
@@ -351,7 +351,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: cat.color }}
                         />
-                        <span className="font-medium">{cat.name}</span>
+                      <span className="font-medium">{cat.name}</span>
                       </div>
                       <span className="text-muted-foreground font-mono">
                         {formatCurrency(cat.value)}{" "}
@@ -382,7 +382,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
                             background:
                               "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
                           }}
-                        />
+                      />
                       </motion.div>
                     </div>
                   </motion.div>

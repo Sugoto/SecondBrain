@@ -260,30 +260,32 @@ export function CategoriesView({
         </motion.div>
       )}
 
-      {/* Category Cards */}
+      {/* Category Cards - sorted by total descending */}
       <div className="space-y-2">
-        {EXPENSE_CATEGORIES.map((cat, index) => {
-          const data = categoryTotals[cat.name];
-          if (!data || data.count === 0) return null;
-          return (
-            <CategoryCard
-              key={cat.name}
-              name={cat.name}
-              icon={cat.icon}
-              total={data.total}
-              count={data.count}
-              transactions={data.transactions}
-              isExpanded={expandedCategory === cat.name}
-              onToggle={() =>
-                onToggleCategory(
-                  expandedCategory === cat.name ? null : cat.name
-                )
-              }
-              onTransactionClick={onTransactionClick}
-              index={index}
-            />
-          );
-        })}
+        {EXPENSE_CATEGORIES
+          .filter((cat) => categoryTotals[cat.name]?.count > 0)
+          .sort((a, b) => (categoryTotals[b.name]?.total ?? 0) - (categoryTotals[a.name]?.total ?? 0))
+          .map((cat, index) => {
+            const data = categoryTotals[cat.name];
+            return (
+              <CategoryCard
+                key={cat.name}
+                name={cat.name}
+                icon={cat.icon}
+                total={data.total}
+                count={data.count}
+                transactions={data.transactions}
+                isExpanded={expandedCategory === cat.name}
+                onToggle={() =>
+                  onToggleCategory(
+                    expandedCategory === cat.name ? null : cat.name
+                  )
+                }
+                onTransactionClick={onTransactionClick}
+                index={index}
+              />
+            );
+          })}
         {categoryTotals["Uncategorized"]?.count > 0 && (
           <CategoryCard
             name="Uncategorized"

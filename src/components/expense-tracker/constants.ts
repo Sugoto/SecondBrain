@@ -99,7 +99,7 @@ export const formatCurrencyCompact = (amount: number) => {
 
 export const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  return date.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
 };
 
 export const formatTime = (timeStr: string) => {

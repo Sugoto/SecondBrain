@@ -146,10 +146,10 @@ export function Header({
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(100, percentUsed)}%` }}
-            transition={{ 
-              duration: 1, 
+            transition={{
+              duration: 1,
               ease: [0.25, 0.46, 0.45, 0.94],
-              delay: 0.2 
+              delay: 0.2,
             }}
             className="h-full rounded-full relative overflow-hidden"
             style={{
@@ -170,7 +170,7 @@ export function Header({
               }}
             />
           </motion.div>
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.3 }}

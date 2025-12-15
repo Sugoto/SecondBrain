@@ -10,7 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EXPENSE_CATEGORIES, EXCLUDED_CATEGORIES, formatCurrency } from "./constants";
+import {
+  EXPENSE_CATEGORIES,
+  EXCLUDED_CATEGORIES,
+  formatCurrency,
+} from "./constants";
 import { CalendarRange, Loader2 } from "lucide-react";
 
 interface TransactionDialogProps {
@@ -60,20 +64,27 @@ export function TransactionDialog({
   };
 
   return (
-    <Dialog open={!!transaction} onOpenChange={(open) => !open && !saving && onClose()}>
-      <DialogContent className="max-w-md w-[calc(100%-2rem)] rounded-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+    <Dialog
+      open={!!transaction}
+      onOpenChange={(open) => !open && !saving && onClose()}
+    >
+      <DialogContent
+        className="max-w-md w-[calc(100%-2rem)] rounded-xl max-h-[90vh] overflow-hidden flex flex-col"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="shrink-0">
           <DialogTitle className="text-lg">
             {isNew ? "Add Expense" : "Edit Transaction"}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
+        <div className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
           <div className="space-y-2">
             <Label htmlFor="merchant" className="text-sm">
               Merchant
             </Label>
             <Input
               id="merchant"
+              autoFocus={false}
               className="h-11 text-base"
               value={transaction.merchant || ""}
               onChange={(e) =>
@@ -110,7 +121,9 @@ export function TransactionDialog({
               {EXPENSE_CATEGORIES.map((cat) => {
                 const IconComp = cat.icon;
                 const isSelected = transaction.category === cat.name;
-                const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
+                const isExcludedCategory = EXCLUDED_CATEGORIES.includes(
+                  cat.name
+                );
                 return (
                   <Badge
                     key={cat.name}
@@ -125,9 +138,10 @@ export function TransactionDialog({
                         ...transaction,
                         category: newCategory,
                         // Auto-enable excluded_from_budget for excluded categories
-                        excluded_from_budget: isExcludedCategory && !isSelected
-                          ? true
-                          : transaction.excluded_from_budget,
+                        excluded_from_budget:
+                          isExcludedCategory && !isSelected
+                            ? true
+                            : transaction.excluded_from_budget,
                       });
                     }}
                   >
@@ -189,11 +203,16 @@ export function TransactionDialog({
               disabled={saving}
             />
             <Label className="text-sm shrink-0">
-              {transaction.prorate_months && transaction.prorate_months > 1 ? "months" : "month"}
+              {transaction.prorate_months && transaction.prorate_months > 1
+                ? "months"
+                : "month"}
             </Label>
             {transaction.prorate_months && transaction.prorate_months > 1 && (
               <span className="text-xs text-muted-foreground ml-auto font-mono">
-                {formatCurrency(transaction.amount / transaction.prorate_months)}/mo
+                {formatCurrency(
+                  transaction.amount / transaction.prorate_months
+                )}
+                /mo
               </span>
             )}
           </div>
@@ -232,31 +251,32 @@ export function TransactionDialog({
               disabled={saving}
             />
           </div>
+        </div>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="flex-1 h-11"
-              onClick={onClose}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="flex-1 h-11"
-              onClick={() => onSave(transaction)}
-              disabled={saving}
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </div>
+        {/* Fixed footer buttons */}
+        <div className="flex gap-3 pt-4 shrink-0 border-t mt-2">
+          <Button
+            variant="outline"
+            className="flex-1 h-11"
+            onClick={onClose}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="flex-1 h-11"
+            onClick={() => onSave(transaction)}
+            disabled={saving}
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

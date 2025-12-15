@@ -28,7 +28,7 @@ import {
 
 // Constants outside component to avoid recreation
 const VIEWS: ActiveView[] = ["trends", "expenses", "categories"];
-const MIN_SWIPE_DISTANCE = 50;
+const MIN_SWIPE_DISTANCE = 100;
 
 const VIEW_ANIMATION = {
   initial: { opacity: 0, x: -20 },
@@ -221,13 +221,20 @@ export function ExpenseTracker() {
 
   // Category totals for display (includes all transactions)
   const categoryTotals = useMemo(
-    () => getCategoryTotals(transactions, timeFilter, { customRange: customDateRange }),
+    () =>
+      getCategoryTotals(transactions, timeFilter, {
+        customRange: customDateRange,
+      }),
     [transactions, timeFilter, customDateRange]
   );
 
   // Category totals for summary (excludes budget-excluded, uses prorated amounts)
   const summaryCategoryTotals = useMemo(
-    () => getCategoryTotals(transactions, timeFilter, { excludeBudgetExcluded: true, customRange: customDateRange }),
+    () =>
+      getCategoryTotals(transactions, timeFilter, {
+        excludeBudgetExcluded: true,
+        customRange: customDateRange,
+      }),
     [transactions, timeFilter, customDateRange]
   );
 
@@ -346,32 +353,35 @@ export function ExpenseTracker() {
             onClick={openAddExpense}
             className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-full overflow-hidden"
             style={{
-              background: theme === "dark"
-                ? "linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%)"
-                : "linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(59, 130, 246, 1) 100%)",
-              boxShadow: theme === "dark"
-                ? "0 8px 32px rgba(139, 92, 246, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset"
-                : "0 8px 32px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)",
+              background:
+                theme === "dark"
+                  ? "linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%)"
+                  : "linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(59, 130, 246, 1) 100%)",
+              boxShadow:
+                theme === "dark"
+                  ? "0 8px 32px rgba(139, 92, 246, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset"
+                  : "0 8px 32px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)",
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
             }}
             aria-label="Add expense"
           >
             {/* Glass shine effect */}
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 60%)",
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 60%)",
               }}
             />
             {/* Animated ring */}
             <motion.div
               className="absolute inset-0 rounded-full pointer-events-none"
-              animate={{ 
+              animate={{
                 boxShadow: [
                   "0 0 0 0px rgba(139, 92, 246, 0.4)",
                   "0 0 0 8px rgba(139, 92, 246, 0)",
-                ]
+                ],
               }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
             />

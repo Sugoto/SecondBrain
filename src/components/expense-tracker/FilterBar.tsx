@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
-import { format, startOfMonth, endOfMonth, isSameMonth, subMonths } from "date-fns";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  isSameMonth,
+  subMonths,
+} from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import type { TimeFilter, ChartMode, ActiveView, DateRange } from "./types";
 
@@ -47,7 +57,9 @@ export function FilterBar({
   onCustomDateRangeChange,
 }: FilterBarProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [pendingRange, setPendingRange] = useState<{ from?: Date; to?: Date }>({});
+  const [pendingRange, setPendingRange] = useState<{ from?: Date; to?: Date }>(
+    {}
+  );
   const [showMonths, setShowMonths] = useState(true); // Start with month view
 
   const recentMonths = getRecentMonths();
@@ -65,9 +77,14 @@ export function FilterBar({
                 ? "bg-background text-foreground font-medium"
                 : "text-muted-foreground hover:text-foreground"
             }`}
-            style={chartMode === mode ? {
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
-            } : undefined}
+            style={
+              chartMode === mode
+                ? {
+                    boxShadow:
+                      "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
+                  }
+                : undefined
+            }
           >
             {mode === "daily" ? "Daily" : "Monthly"}
           </button>
@@ -95,7 +112,7 @@ export function FilterBar({
       // Second click - set end date and apply
       const from = pendingRange.from;
       const to = date;
-      
+
       // Ensure from <= to
       if (to >= from) {
         onCustomDateRangeChange({ from, to });
@@ -112,14 +129,16 @@ export function FilterBar({
   const getCustomLabel = () => {
     if (!customDateRange) return "";
     const { from, to } = customDateRange;
-    
+
     // If it's a full month, show just the month name
-    if (isSameMonth(from, to) && 
-        from.getDate() === 1 && 
-        to.getDate() === endOfMonth(to).getDate()) {
+    if (
+      isSameMonth(from, to) &&
+      from.getDate() === 1 &&
+      to.getDate() === endOfMonth(to).getDate()
+    ) {
       return format(from, "MMM yyyy");
     }
-    
+
     // Otherwise show date range
     if (isSameMonth(from, to)) {
       return `${format(from, "d")}-${format(to, "d MMM")}`;
@@ -142,22 +161,30 @@ export function FilterBar({
                 ? "bg-background text-foreground font-medium"
                 : "text-muted-foreground hover:text-foreground"
             }`}
-            style={timeFilter === filter ? {
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
-            } : undefined}
+            style={
+              timeFilter === filter
+                ? {
+                    boxShadow:
+                      "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
+                  }
+                : undefined
+            }
           >
             {TIME_LABELS[filter]}
           </button>
         ))}
       </div>
 
-      <Popover open={calendarOpen} onOpenChange={(open) => {
-        setCalendarOpen(open);
-        if (open) {
-          setShowMonths(true); // Reset to month view when opening
-          setPendingRange({});
-        }
-      }}>
+      <Popover
+        open={calendarOpen}
+        onOpenChange={(open) => {
+          setCalendarOpen(open);
+          if (open) {
+            setShowMonths(true); // Reset to month view when opening
+            setPendingRange({});
+          }
+        }}
+      >
         <PopoverTrigger asChild>
           <Button
             variant={isCustomActive ? "default" : "outline"}
@@ -220,8 +247,11 @@ export function FilterBar({
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {pendingRange.from 
-                    ? `From ${format(pendingRange.from, "d MMM")} — pick end date`
+                  {pendingRange.from
+                    ? `From ${format(
+                        pendingRange.from,
+                        "d MMM"
+                      )} — pick end date`
                     : "Click to select start date"}
                 </p>
               </div>
