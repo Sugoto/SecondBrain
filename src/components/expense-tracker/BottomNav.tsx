@@ -6,6 +6,7 @@ import { useTheme } from "@/hooks/useTheme";
 interface BottomNavProps {
   activeView: ActiveView;
   onViewChange: (view: ActiveView) => void;
+  hidden?: boolean;
 }
 
 const NAV_ITEMS = [
@@ -14,12 +15,18 @@ const NAV_ITEMS = [
   { view: "categories" as const, icon: LayoutGrid, label: "Categories" },
 ];
 
-export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
+export function BottomNav({ activeView, onViewChange, hidden = false }: BottomNavProps) {
   const { theme } = useTheme();
   
   return (
-    <nav 
+    <motion.nav 
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-pb"
+      initial={false}
+      animate={{ 
+        y: hidden ? 100 : 0,
+        opacity: hidden ? 0 : 1,
+      }}
+      transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={{
         background: theme === "dark" 
           ? "rgba(24, 24, 27, 0.85)"
@@ -90,7 +97,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
           </motion.button>
         ))}
       </div>
-    </nav>
+    </motion.nav>
   );
 }
 

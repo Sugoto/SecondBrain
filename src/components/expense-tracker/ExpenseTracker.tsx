@@ -65,6 +65,28 @@ export function ExpenseTracker() {
 
   const { theme, toggle: toggleTheme } = useTheme();
 
+  // Scroll-to-hide for mobile UI
+  const [uiHidden, setUiHidden] = useState(false);
+  const lastScrollY = useRef(0);
+  const scrollThreshold = 10;
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    const delta = currentScrollY - lastScrollY.current;
+    
+    // Only trigger if scrolled past threshold
+    if (Math.abs(delta) > scrollThreshold) {
+      if (delta > 0 && currentScrollY > 50) {
+        // Scrolling down & past header
+        setUiHidden(true);
+      } else if (delta < 0) {
+        // Scrolling up
+        setUiHidden(false);
+      }
+      lastScrollY.current = currentScrollY;
+    }
+  }, []);
+
   // Swipe navigation for mobile
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
@@ -265,9 +287,16 @@ export function ExpenseTracker() {
   }
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="shrink-0 bg-background border-b border-border sticky top-0 z-10">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
+      {/* Header - Fixed on mobile */}
+      <motion.header 
+        className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background border-b border-border z-20"
+        initial={false}
+        animate={{ 
+          y: uiHidden ? "-100%" : 0,
+        }}
+        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
         <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-4">
           <Header
             totalExpenses={monthlyBudgetExpenses}
@@ -292,11 +321,12 @@ export function ExpenseTracker() {
             />
           </div>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Main Content */}
+      {/* Main Content - with top padding for fixed header on mobile */}
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[140px] md:pt-0"
+        onScroll={handleScroll}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -344,8 +374,12 @@ export function ExpenseTracker() {
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ scale: 0, opacity: 0, y: 0 }}
+            animate={{ 
+              scale: uiHidden ? 0.8 : 1, 
+              opacity: uiHidden ? 0 : 1,
+              y: uiHidden ? 100 : 0,
+            }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             whileTap={{ scale: 0.9 }}
@@ -391,7 +425,7 @@ export function ExpenseTracker() {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <BottomNav activeView={activeView} onViewChange={setActiveView} />
+      <BottomNav activeView={activeView} onViewChange={setActiveView} hidden={uiHidden} />
     </div>
   );
 }
