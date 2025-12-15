@@ -43,7 +43,11 @@ type DialogState = {
   mode: "new" | "edit";
 } | null;
 
-export function ExpenseTracker() {
+interface ExpenseTrackerProps {
+  onGoHome?: () => void;
+}
+
+export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
   // Data state
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -325,7 +329,7 @@ export function ExpenseTracker() {
 
       {/* Main Content - with top padding for fixed header on mobile */}
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[140px] md:pt-0"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[180px] md:pt-0"
         onScroll={handleScroll}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -425,7 +429,7 @@ export function ExpenseTracker() {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <BottomNav activeView={activeView} onViewChange={setActiveView} hidden={uiHidden} />
+      <BottomNav activeView={activeView} onViewChange={setActiveView} hidden={uiHidden} onGoHome={onGoHome} />
     </div>
   );
 }

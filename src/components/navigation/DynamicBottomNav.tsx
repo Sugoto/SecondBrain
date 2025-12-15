@@ -1,36 +1,52 @@
 import { motion } from "framer-motion";
-import { TrendingUp, Wallet, LayoutGrid, Home } from "lucide-react";
-import type { ActiveView } from "./types";
+import { Home, Wallet, Dumbbell } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import type { AppSection } from "@/types/navigation";
 
-interface BottomNavProps {
-  activeView: ActiveView;
-  onViewChange: (view: ActiveView) => void;
-  hidden?: boolean;
-  onGoHome?: () => void;
+interface NavItem {
+  id: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
 }
 
-const NAV_ITEMS = [
-  { view: "trends" as const, icon: TrendingUp, label: "Trends" },
-  { view: "expenses" as const, icon: Wallet, label: "Expenses" },
-  { view: "categories" as const, icon: LayoutGrid, label: "Categories" },
+interface DynamicBottomNavProps {
+  currentSection: AppSection;
+  activeView: string;
+  navItems: NavItem[];
+  onViewChange: (view: string) => void;
+  onGoHome: () => void;
+  hidden?: boolean;
+}
+
+// Home page nav items
+export const HOME_NAV_ITEMS: NavItem[] = [
+  { id: "expenses", icon: Wallet, label: "Expenses" },
+  { id: "fitness", icon: Dumbbell, label: "Fitness" },
 ];
 
-export function BottomNav({ activeView, onViewChange, hidden = false, onGoHome }: BottomNavProps) {
+export function DynamicBottomNav({
+  currentSection,
+  activeView,
+  navItems,
+  onViewChange,
+  onGoHome,
+  hidden = false,
+}: DynamicBottomNavProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  
+  const isHome = currentSection === "home";
+
   return (
-    <motion.nav 
+    <motion.nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-pb"
       initial={false}
-      animate={{ 
+      animate={{
         y: hidden ? 100 : 0,
         opacity: hidden ? 0 : 1,
       }}
       transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={{
-        background: isDark 
+        background: isDark
           ? "rgba(24, 24, 27, 0.85)"
           : "rgba(255, 255, 255, 0.85)",
         backdropFilter: "blur(20px) saturate(180%)",
@@ -44,7 +60,7 @@ export function BottomNav({ activeView, onViewChange, hidden = false, onGoHome }
       }}
     >
       {/* Top shine effect */}
-      <div 
+      <div
         className="absolute inset-x-0 top-0 h-px pointer-events-none"
         style={{
           background: isDark
@@ -52,13 +68,14 @@ export function BottomNav({ activeView, onViewChange, hidden = false, onGoHome }
             : "linear-gradient(90deg, transparent, rgba(255,255,255,0.8) 50%, transparent)",
         }}
       />
-      
+
       <div className="flex items-center h-14 relative">
-        {/* Home button - curved semicircle on left edge */}
-        {onGoHome && (
+        {/* Home button - only shown when not on home page */}
+        {!isHome && (
           <motion.button
             initial={{ scale: 0, x: -20 }}
             animate={{ scale: 1, x: 0 }}
+            exit={{ scale: 0, x: -20 }}
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={onGoHome}
@@ -108,57 +125,59 @@ export function BottomNav({ activeView, onViewChange, hidden = false, onGoHome }
             <Home className="h-5 w-5 relative z-10" />
           </motion.button>
         )}
-        
-        {/* Nav items */}
-        <div 
+
+        {/* Nav items container */}
+        <div
           className="flex items-center justify-around flex-1 h-full"
-          style={{ marginLeft: onGoHome ? 44 : 0 }}
+          style={{
+            marginLeft: isHome ? 0 : 44,
+          }}
         >
-        {NAV_ITEMS.map(({ view, icon: Icon, label }) => (
-          <motion.button
-            key={view}
-            onClick={() => onViewChange(view)}
-            whileTap={{ scale: 0.9 }}
-            className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-              activeView === view ? "text-primary" : "text-muted-foreground"
-            }`}
-          >
-            {/* Active background glow */}
-            {activeView === view && (
-              <motion.div
-                layoutId="activeGlow"
-                className="absolute inset-x-4 -top-1 bottom-2 rounded-xl -z-10"
-                style={{
-                  background: theme === "dark"
-                    ? "radial-gradient(ellipse at center top, rgba(139, 92, 246, 0.15) 0%, transparent 70%)"
-                    : "radial-gradient(ellipse at center top, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              />
-            )}
-            <motion.div
-              animate={{
-                scale: activeView === view ? 1.1 : 1,
-                y: activeView === view ? -2 : 0,
-              }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          {navItems.map(({ id, icon: Icon, label }) => (
+            <motion.button
+              key={id}
+              onClick={() => onViewChange(id)}
+              whileTap={{ scale: 0.9 }}
+              className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+                activeView === id ? "text-primary" : "text-muted-foreground"
+              }`}
             >
-              <Icon className="h-5 w-5" />
-            </motion.div>
-            <span className="text-[10px] mt-0.5">{label}</span>
-            {activeView === view && (
+              {/* Active background glow */}
+              {activeView === id && (
+                <motion.div
+                  layoutId="activeGlow"
+                  className="absolute inset-x-4 -top-1 bottom-2 rounded-xl -z-10"
+                  style={{
+                    background: isDark
+                      ? "radial-gradient(ellipse at center top, rgba(139, 92, 246, 0.15) 0%, transparent 70%)"
+                      : "radial-gradient(ellipse at center top, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
               <motion.div
-                layoutId="activeTab"
-                className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, #8b5cf6, #3b82f6)",
-                  boxShadow: "0 0 8px rgba(139, 92, 246, 0.5)",
+                animate={{
+                  scale: activeView === id ? 1.1 : 1,
+                  y: activeView === id ? -2 : 0,
                 }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              />
-            )}
-          </motion.button>
-        ))}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                <Icon className="h-5 w-5" />
+              </motion.div>
+              <span className="text-[10px] mt-0.5">{label}</span>
+              {activeView === id && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, #8b5cf6, #3b82f6)",
+                    boxShadow: "0 0 8px rgba(139, 92, 246, 0.5)",
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+            </motion.button>
+          ))}
         </div>
       </div>
     </motion.nav>
