@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  
+  --color-background: #0a0a0f;
+  --color-surface: #12121a;
+  --color-surface-hover: #1a1a24;
+  --color-border: #2a2a3a;
+  
+  --color-primary: #22c55e;
+  --color-primary-dim: #16a34a;
+  
+  --color-expense: #ef4444;
+  --color-income: #22c55e;
+  
+  --color-text: #f4f4f5;
+  --color-text-muted: #71717a;
+}
