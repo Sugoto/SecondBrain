@@ -1,0 +1,161 @@
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import type { Transaction } from "@/lib/supabase";
+import type { ReactNode } from "react";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
+      retry: 2,
+    },
+  },
+});
+
+const expenseKeys = {
+  all: ["transactions"] as const,
+  lists: () => [...expenseKeys.all, "list"] as const,
+};
+
+async function fetchTransactions(): Promise<Transaction[]> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("*")
+    .order("date", { ascending: false })
+    .order("time", { ascending: false })
+    .limit(500);
+
+  if (error) throw error;
+  return data || [];
+}
+
+export function ExpenseDataProvider({ children }: { children: ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
+
+export function useExpenseData() {
+  const queryClient = useQueryClient();
+
+  const {
+    data: transactions = [],
+    isLoading: loading,
+    isRefetching: refreshing,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: expenseKeys.lists(),
+    queryFn: fetchTransactions,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (
+      newTransaction: Omit<Transaction, "id" | "created_at">
+    ) => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .insert(newTransaction)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (newTransaction) => {
+      queryClient.setQueryData<Transaction[]>(expenseKeys.lists(), (old) =>
+        old ? [newTransaction, ...old] : [newTransaction]
+      );
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (transaction: Transaction) => {
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          amount: transaction.amount,
+          merchant: transaction.merchant,
+          date: transaction.date,
+          time: transaction.time,
+          category: transaction.category,
+          excluded_from_budget: transaction.excluded_from_budget,
+          details: transaction.details,
+          prorate_months: transaction.prorate_months,
+        })
+        .eq("id", transaction.id);
+
+      if (error) throw error;
+      return transaction;
+    },
+    onSuccess: (updatedTransaction) => {
+      queryClient.setQueryData<Transaction[]>(expenseKeys.lists(), (old) =>
+        old?.map((t) =>
+          t.id === updatedTransaction.id ? updatedTransaction : t
+        )
+      );
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("transactions")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: (deletedId) => {
+      queryClient.setQueryData<Transaction[]>(expenseKeys.lists(), (old) =>
+        old?.filter((t) => t.id !== deletedId)
+      );
+    },
+  });
+
+  return {
+    transactions,
+    loading,
+    refreshing,
+    error: error ? (error as Error).message : null,
+
+    fetchTransactions: (isRefresh = false) => {
+      if (isRefresh) {
+        return refetch();
+      }
+      return refetch();
+    },
+
+    addTransaction: addMutation.mutateAsync,
+    updateTransaction: updateMutation.mutateAsync,
+    deleteTransaction: deleteMutation.mutateAsync,
+
+    addToCache: (transaction: Transaction) => {
+      queryClient.setQueryData<Transaction[]>(expenseKeys.lists(), (old) =>
+        old ? [transaction, ...old] : [transaction]
+      );
+    },
+    updateInCache: (transaction: Transaction) => {
+      queryClient.setQueryData<Transaction[]>(expenseKeys.lists(), (old) =>
+        old?.map((t) => (t.id === transaction.id ? transaction : t))
+      );
+    },
+    removeFromCache: (id: string) => {
+      queryClient.setQueryData<Transaction[]>(expenseKeys.lists(), (old) =>
+        old?.filter((t) => t.id !== id)
+      );
+    },
+
+    invalidate: () =>
+      queryClient.invalidateQueries({ queryKey: expenseKeys.all }),
+  };
+}

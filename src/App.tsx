@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./hooks/useTheme";
+import { ExpenseDataProvider } from "./hooks/useExpenseData";
 import { ExpenseTracker } from "./components/expense-tracker";
 import { HomePage } from "./components/home/HomePage";
 import { FitnessTracker, FITNESS_NAV_ITEMS } from "./components/fitness/FitnessTracker";
-import { DynamicBottomNav, HOME_NAV_ITEMS } from "./components/navigation/DynamicBottomNav";
+import { DynamicBottomNav } from "./components/navigation/DynamicBottomNav";
+import { HOME_NAV_ITEMS } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
 import type { AppSection, FitnessView } from "./types/navigation";
 
@@ -104,7 +106,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <ExpenseDataProvider>
+        <AppContent />
+      </ExpenseDataProvider>
     </ThemeProvider>
   );
 }

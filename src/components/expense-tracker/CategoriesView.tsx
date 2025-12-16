@@ -54,6 +54,30 @@ export function CategoriesView({
 
   const total = pieData.reduce((sum, d) => sum + d.value, 0);
 
+  // Check if there are any categories with transactions
+  const hasCategories = EXPENSE_CATEGORIES.some(
+    (cat) => categoryTotals[cat.name]?.count > 0
+  ) || categoryTotals["Uncategorized"]?.count > 0;
+
+  if (!hasCategories) {
+    return (
+      <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground">
+              No transactions for this period
+            </p>
+          </Card>
+        </motion.div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
       {/* Pie Chart */}

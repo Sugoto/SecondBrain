@@ -1,7 +1,8 @@
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
 import { useTheme } from "@/hooks/useTheme";
+import { useExpenseData } from "@/hooks/useExpenseData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
@@ -9,8 +10,8 @@ import { toast } from "sonner";
 
 // Local components
 import { Header } from "./Header";
-import { FilterBar } from "./FilterBar";
-import { BottomNav } from "./BottomNav";
+import { DynamicBottomNav } from "@/components/navigation/DynamicBottomNav";
+import { EXPENSE_NAV_ITEMS } from "@/components/navigation/constants";
 import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
 import { CategoriesView } from "./CategoriesView";
@@ -48,11 +49,9 @@ interface ExpenseTrackerProps {
 }
 
 export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
-  // Data state
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Data from React Query cache
+  const { transactions, loading, error, addToCache, updateInCache } =
+    useExpenseData();
 
   // Filter state
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
@@ -68,28 +67,6 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
   const [saving, setSaving] = useState(false);
 
   const { theme, toggle: toggleTheme } = useTheme();
-
-  // Scroll-to-hide for mobile UI
-  const [uiHidden, setUiHidden] = useState(false);
-  const lastScrollY = useRef(0);
-  const scrollThreshold = 10;
-
-  const handleScroll = useCallback((e: React.UIEvent<HTMLElement>) => {
-    const currentScrollY = e.currentTarget.scrollTop;
-    const delta = currentScrollY - lastScrollY.current;
-    
-    // Only trigger if scrolled past threshold
-    if (Math.abs(delta) > scrollThreshold) {
-      if (delta > 0 && currentScrollY > 50) {
-        // Scrolling down & past header
-        setUiHidden(true);
-      } else if (delta < 0) {
-        // Scrolling up
-        setUiHidden(false);
-      }
-      lastScrollY.current = currentScrollY;
-    }
-  }, []);
 
   // Swipe navigation for mobile
   const touchStartX = useRef<number | null>(null);
@@ -123,40 +100,6 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
     touchEndX.current = null;
   }, [activeView]);
 
-  // Fetch transactions - wrapped in useCallback
-  const fetchTransactions = useCallback(async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("date", { ascending: false })
-        .order("time", { ascending: false })
-        .limit(500);
-
-      if (error) throw error;
-      setTransactions(data || []);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch transactions"
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  // Fetch transactions on mount
-  useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
-
   async function saveTransaction(updated: Transaction) {
     if (!dialogState) return;
 
@@ -165,7 +108,7 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
 
     try {
       if (isNew) {
-        const { data, error } = await supabase
+        const { data, error: insertError } = await supabase
           .from("transactions")
           .insert({
             amount: updated.amount,
@@ -181,13 +124,13 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
           .select()
           .single();
 
-        if (error) throw error;
+        if (insertError) throw insertError;
         if (data) {
-          setTransactions((prev) => [data, ...prev]);
+          addToCache(data);
         }
         toast.success("Expense added successfully");
       } else {
-        const { error } = await supabase
+        const { error: updateError } = await supabase
           .from("transactions")
           .update({
             amount: updated.amount,
@@ -201,10 +144,8 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
           })
           .eq("id", updated.id);
 
-        if (error) throw error;
-        setTransactions((prev) =>
-          prev.map((t) => (t.id === updated.id ? updated : t))
-        );
+        if (updateError) throw updateError;
+        updateInCache(updated);
         toast.success("Transaction updated");
       }
       setDialogState(null);
@@ -293,44 +234,28 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
       {/* Header - Fixed on mobile */}
-      <motion.header 
-        className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background border-b border-border z-20"
-        initial={false}
-        animate={{ 
-          y: uiHidden ? "-100%" : 0,
-        }}
-        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-4">
+      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background border-b border-border z-20">
+        <div className="max-w-6xl mx-auto p-4 md:p-6">
           <Header
             totalExpenses={monthlyBudgetExpenses}
             theme={theme}
             error={error}
-            refreshing={refreshing}
+            activeView={activeView}
+            timeFilter={timeFilter}
+            chartMode={chartMode}
+            customDateRange={customDateRange}
             onToggleTheme={toggleTheme}
-            onRefresh={() => fetchTransactions(true)}
             onAddExpense={openAddExpense}
+            onTimeFilterChange={setTimeFilter}
+            onChartModeChange={setChartMode}
+            onCustomDateRangeChange={setCustomDateRange}
           />
-
-          {/* Filters */}
-          <div className="flex items-center gap-2">
-            <FilterBar
-              activeView={activeView}
-              timeFilter={timeFilter}
-              chartMode={chartMode}
-              customDateRange={customDateRange}
-              onTimeFilterChange={setTimeFilter}
-              onChartModeChange={setChartMode}
-              onCustomDateRangeChange={setCustomDateRange}
-            />
-          </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Main Content - with top padding for fixed header on mobile */}
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[180px] md:pt-0"
-        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[120px] md:pt-0"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -345,8 +270,6 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
             <motion.div key="expenses" {...VIEW_ANIMATION}>
               <ExpensesView
                 transactions={filteredTransactions}
-                summaryCategoryTotals={summaryCategoryTotals}
-                timeFilter={timeFilter}
                 onTransactionClick={handleEditTransaction}
               />
             </motion.div>
@@ -379,12 +302,8 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
-            initial={{ scale: 0, opacity: 0, y: 0 }}
-            animate={{ 
-              scale: uiHidden ? 0.8 : 1, 
-              opacity: uiHidden ? 0 : 1,
-              y: uiHidden ? 100 : 0,
-            }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             whileTap={{ scale: 0.9 }}
@@ -394,14 +313,18 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
             style={{
               background:
                 theme === "dark"
-                  ? "linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%)"
-                  : "linear-gradient(135deg, rgba(139, 92, 246, 1) 0%, rgba(59, 130, 246, 1) 100%)",
+                  ? "rgba(24, 24, 27, 0.6)"
+                  : "rgba(255, 255, 255, 0.6)",
               boxShadow:
                 theme === "dark"
-                  ? "0 8px 32px rgba(139, 92, 246, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset"
-                  : "0 8px 32px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
+                  ? "0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(139, 92, 246, 0.3)"
+                  : "0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(139, 92, 246, 0.2)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              border:
+                theme === "dark"
+                  ? "1px solid rgba(139, 92, 246, 0.4)"
+                  : "1px solid rgba(139, 92, 246, 0.3)",
             }}
             aria-label="Add expense"
           >
@@ -410,7 +333,9 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 60%)",
+                  theme === "dark"
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)"
+                    : "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%)",
               }}
             />
             {/* Animated ring */}
@@ -424,13 +349,18 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
               }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
             />
-            <Plus className="h-6 w-6 text-white relative z-10 drop-shadow-sm" />
+            <Plus className="h-6 w-6 text-primary relative z-10" />
           </motion.button>
         )}
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <BottomNav activeView={activeView} onViewChange={setActiveView} hidden={uiHidden} onGoHome={onGoHome} />
+      <DynamicBottomNav
+        activeView={activeView}
+        navItems={EXPENSE_NAV_ITEMS}
+        onViewChange={(view) => setActiveView(view as ActiveView)}
+        onGoHome={onGoHome}
+      />
     </div>
   );
 }

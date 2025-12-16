@@ -1,29 +1,23 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Home, Wallet, Dumbbell } from "lucide-react";
+import { Home } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import type { AppSection } from "@/types/navigation";
 
-interface NavItem {
+export interface NavItem {
   id: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
 }
 
 interface DynamicBottomNavProps {
-  currentSection: AppSection;
+  currentSection?: AppSection;
   activeView: string;
   navItems: NavItem[];
   onViewChange: (view: string) => void;
-  onGoHome: () => void;
+  onGoHome?: () => void;
   hidden?: boolean;
 }
-
-// Home page nav items
-export const HOME_NAV_ITEMS: NavItem[] = [
-  { id: "expenses", icon: Wallet, label: "Expenses" },
-  { id: "fitness", icon: Dumbbell, label: "Fitness" },
-];
 
 export function DynamicBottomNav({
   currentSection,
@@ -35,7 +29,7 @@ export function DynamicBottomNav({
 }: DynamicBottomNavProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const isHome = currentSection === "home";
+  const showHomeButton = onGoHome && currentSection !== "home";
 
   return (
     <motion.nav
@@ -71,8 +65,8 @@ export function DynamicBottomNav({
       />
 
       <div className="flex items-center h-14 relative">
-        {/* Home button - only shown when not on home page */}
-        {!isHome && (
+        {/* Home button - only shown when onGoHome is provided and not on home page */}
+        {showHomeButton && (
           <motion.button
             initial={{ scale: 0, x: -20 }}
             animate={{ scale: 1, x: 0 }}
@@ -131,7 +125,7 @@ export function DynamicBottomNav({
         <div
           className="flex items-center justify-around flex-1 h-full"
           style={{
-            marginLeft: isHome ? 0 : 44,
+            marginLeft: showHomeButton ? 44 : 0,
           }}
         >
           {navItems.map(({ id, icon: Icon, label }) => (
@@ -184,4 +178,3 @@ export function DynamicBottomNav({
     </motion.nav>
   );
 }
-
