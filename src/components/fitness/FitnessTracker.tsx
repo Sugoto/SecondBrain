@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dumbbell, Apple, LayoutDashboard } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -80,8 +79,7 @@ function NutritionView() {
   );
 }
 
-export function FitnessTracker({ activeView, onViewChange }: FitnessTrackerProps) {
-  const { theme } = useTheme();
+export function FitnessTracker({ activeView }: FitnessTrackerProps) {
 
   return (
     <div className="h-full flex flex-col">

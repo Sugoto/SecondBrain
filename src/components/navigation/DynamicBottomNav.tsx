@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { Home, Wallet, Dumbbell } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
