@@ -15,6 +15,7 @@ import { useTheme } from "@/hooks/useTheme";
 
 interface CategoriesViewProps {
   categoryTotals: Record<string, CategoryTotal>;
+  chartCategoryTotals: Record<string, CategoryTotal>; // Excludes budget-excluded for pie chart
   expandedCategory: string | null;
   onToggleCategory: (name: string | null) => void;
   onTransactionClick: (txn: Transaction) => void;
@@ -22,6 +23,7 @@ interface CategoriesViewProps {
 
 export function CategoriesView({
   categoryTotals,
+  chartCategoryTotals,
   expandedCategory,
   onToggleCategory,
   onTransactionClick,
@@ -29,25 +31,26 @@ export function CategoriesView({
   const { theme } = useTheme();
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
+  // Pie chart uses chartCategoryTotals which excludes budget-excluded transactions
   const pieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
-      (cat) => categoryTotals[cat.name]?.count > 0
+      (cat) => chartCategoryTotals[cat.name]?.count > 0
     ).map((cat) => ({
       name: cat.name,
-      value: categoryTotals[cat.name].total,
+      value: chartCategoryTotals[cat.name].total,
       color: getCategoryColor(cat.name),
     }));
 
-    if (categoryTotals["Uncategorized"]?.count > 0) {
+    if (chartCategoryTotals["Uncategorized"]?.count > 0) {
       data.push({
         name: "Other",
-        value: categoryTotals["Uncategorized"].total,
+        value: chartCategoryTotals["Uncategorized"].total,
         color: "#94a3b8",
       });
     }
 
     return data;
-  }, [categoryTotals]);
+  }, [chartCategoryTotals]);
 
   const total = pieData.reduce((sum, d) => sum + d.value, 0);
 

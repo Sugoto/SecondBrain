@@ -355,6 +355,7 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
             <motion.div key="categories" {...VIEW_ANIMATION}>
               <CategoriesView
                 categoryTotals={categoryTotals}
+                chartCategoryTotals={summaryCategoryTotals}
                 expandedCategory={expandedCategory}
                 onToggleCategory={setExpandedCategory}
                 onTransactionClick={handleEditTransaction}

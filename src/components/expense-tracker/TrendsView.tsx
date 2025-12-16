@@ -42,7 +42,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
     () => transactions.some((t) => t.type === "expense"),
     [transactions]
   );
-  // Daily spending data for the last 14 days
+  // Daily spending data for the last 14 days (excludes budget-excluded transactions)
   const dailyData = useMemo(() => {
     const days: { date: string; label: string; total: number }[] = [];
     const now = new Date();
@@ -57,7 +57,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
       });
 
       const dayTotal = transactions
-        .filter((t) => t.date === dateStr && t.type === "expense")
+        .filter((t) => t.date === dateStr && t.type === "expense" && !t.excluded_from_budget)
         .reduce((sum, t) => sum + t.amount, 0);
 
       days.push({ date: dateStr, label: dayLabel, total: dayTotal });
@@ -65,7 +65,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
     return days;
   }, [transactions]);
 
-  // Monthly spending data for the last 6 months
+  // Monthly spending data for the last 6 months (excludes budget-excluded transactions)
   const monthlyData = useMemo(() => {
     const months: { month: string; label: string; total: number }[] = [];
     const now = new Date();
@@ -76,7 +76,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
 
       const monthTotal = transactions
         .filter((t) => {
-          if (t.type !== "expense") return false;
+          if (t.type !== "expense" || t.excluded_from_budget) return false;
           
           // For prorated transactions, check if this month is in the proration window
           if (t.prorate_months && t.prorate_months > 1) {
@@ -99,7 +99,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
     return months;
   }, [transactions]);
 
-  // Category breakdown based on chart mode period
+  // Category breakdown based on chart mode period (excludes budget-excluded transactions)
   const categoryBreakdown = useMemo(() => {
     const now = new Date();
     const cutoffDate = new Date(now);
@@ -111,6 +111,7 @@ export function TrendsView({ transactions, chartMode }: TrendsViewProps) {
     }
 
     const filtered = transactions.filter((txn) => {
+      if (txn.excluded_from_budget) return false;
       const txnDate = new Date(txn.date);
       return txnDate >= cutoffDate;
     });
