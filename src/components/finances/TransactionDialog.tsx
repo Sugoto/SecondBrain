@@ -276,7 +276,11 @@ export function TransactionDialog({
             )}
 
             {/* Title - centered in remaining space */}
-            <div className={`flex-1 text-center ${transaction.category || !isNew ? "pr-10" : ""}`}>
+            <div
+              className={`flex-1 text-center ${
+                transaction.category || !isNew ? "pr-10" : ""
+              }`}
+            >
               <DialogTitle
                 className="text-base font-bold"
                 style={{
@@ -300,99 +304,76 @@ export function TransactionDialog({
         </DialogHeader>
 
         <div className="space-y-4 px-5 py-4 overflow-y-auto flex-1">
-          {/* Category Selection - Compact chips */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Category
-            </Label>
-            <div className="flex flex-wrap gap-1.5">
-              {EXPENSE_CATEGORIES.map((cat) => {
-                const IconComp = cat.icon;
-                const isSelected = transaction.category === cat.name;
-                const isExcludedCategory = EXCLUDED_CATEGORIES.includes(
-                  cat.name
-                );
-                const catColor = getCategoryColor(cat.name);
+          {/* Category Selection - Compact Icon Grid */}
+          <div className="grid grid-cols-5 gap-1">
+            {EXPENSE_CATEGORIES.map((cat) => {
+              const IconComp = cat.icon;
+              const isSelected = transaction.category === cat.name;
+              const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
+              const catColor = getCategoryColor(cat.name);
 
-                return (
-                  <motion.button
-                    key={cat.name}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => {
-                      if (saving) return;
-                      const newCategory = isSelected ? null : cat.name;
-                      // Check if the CURRENT category is an excluded one
-                      const currentIsExcluded = EXCLUDED_CATEGORIES.includes(
-                        transaction.category ?? ""
-                      );
-                      // Determine new excluded_from_budget value
-                      let newExcludedFromBudget =
-                        transaction.excluded_from_budget;
-                      if (isExcludedCategory && !isSelected) {
-                        // Selecting an excluded category -> enable
-                        newExcludedFromBudget = true;
-                      } else if (
-                        currentIsExcluded &&
-                        (isSelected || !isExcludedCategory)
-                      ) {
-                        // Deselecting an excluded category OR switching away from it -> disable
-                        newExcludedFromBudget = false;
-                      }
-                      onChange({
-                        ...transaction,
-                        category: newCategory,
-                        excluded_from_budget: newExcludedFromBudget,
-                      });
-                    }}
-                    disabled={saving}
-                    className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all ${
-                      saving ? "pointer-events-none opacity-50" : ""
-                    }`}
+              return (
+                <button
+                  key={cat.name}
+                  onClick={() => {
+                    if (saving) return;
+                    const newCategory = isSelected ? null : cat.name;
+                    const currentIsExcluded = EXCLUDED_CATEGORIES.includes(
+                      transaction.category ?? ""
+                    );
+                    let newExcludedFromBudget =
+                      transaction.excluded_from_budget;
+                    if (isExcludedCategory && !isSelected) {
+                      newExcludedFromBudget = true;
+                    } else if (
+                      currentIsExcluded &&
+                      (isSelected || !isExcludedCategory)
+                    ) {
+                      newExcludedFromBudget = false;
+                    }
+                    onChange({
+                      ...transaction,
+                      category: newCategory,
+                      excluded_from_budget: newExcludedFromBudget,
+                    });
+                  }}
+                  disabled={saving}
+                  className={`h-9 rounded-md flex items-center justify-center border transition-all duration-100 ${
+                    saving
+                      ? "pointer-events-none opacity-50"
+                      : "active:scale-95"
+                  }`}
+                  style={{
+                    background: isSelected
+                      ? isDark
+                        ? `linear-gradient(135deg, ${catColor}45 0%, ${catColor}25 100%)`
+                        : `linear-gradient(135deg, ${catColor}30 0%, ${catColor}15 100%)`
+                      : isDark
+                      ? "hsl(var(--muted) / 0.3)"
+                      : "hsl(var(--muted) / 0.5)",
+                    borderColor: isSelected
+                      ? catColor
+                      : isDark
+                      ? `${catColor}25`
+                      : `${catColor}20`,
+                    boxShadow: isSelected ? `0 2px 8px ${catColor}30` : "none",
+                  }}
+                >
+                  <IconComp
+                    className="h-4 w-4"
                     style={{
-                      background: isSelected
+                      color: isSelected
                         ? isDark
-                          ? `linear-gradient(135deg, ${catColor}35 0%, ${catColor}20 100%)`
-                          : `linear-gradient(135deg, ${catColor}25 0%, ${catColor}12 100%)`
-                        : "transparent",
-                      borderColor: isSelected
-                        ? catColor
+                          ? "#fff"
+                          : `color-mix(in srgb, ${catColor} 90%, black)`
                         : isDark
-                        ? `${catColor}30`
-                        : `${catColor}25`,
-                      boxShadow: isSelected
-                        ? `0 2px 8px ${catColor}25`
-                        : "none",
+                        ? catColor
+                        : `color-mix(in srgb, ${catColor} 65%, black)`,
                     }}
-                  >
-                    <IconComp
-                      className="h-3.5 w-3.5"
-                      style={{
-                        color: isSelected
-                          ? isDark
-                            ? catColor
-                            : `color-mix(in srgb, ${catColor} 85%, black)`
-                          : isDark
-                          ? `${catColor}90`
-                          : `color-mix(in srgb, ${catColor} 60%, black)`,
-                      }}
-                    />
-                    <span
-                      className="text-xs font-medium"
-                      style={{
-                        color: isSelected
-                          ? isDark
-                            ? catColor
-                            : `color-mix(in srgb, ${catColor} 85%, black)`
-                          : undefined,
-                      }}
-                    >
-                      {cat.name}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
+                  />
+                </button>
+              );
+            })}
           </div>
 
           {/* Amount with Calculator */}
@@ -745,4 +726,3 @@ export function TransactionDialog({
     </Dialog>
   );
 }
-

@@ -10,6 +10,8 @@ interface PageHeaderProps {
   iconShadow: string;
   /** Primary color for the background gradient (hex format, e.g. "#8b5cf6") */
   accentColor?: string;
+  /** If true, removes the background gradient */
+  noBackground?: boolean;
   children?: React.ReactNode;
 }
 
@@ -19,6 +21,7 @@ export function PageHeader({
   iconGradient,
   iconShadow,
   accentColor = "#8b5cf6",
+  noBackground = false,
   children,
 }: PageHeaderProps) {
   const { theme, toggle: toggleTheme } = useTheme();
@@ -38,25 +41,31 @@ export function PageHeader({
 
   return (
     <div
-      className="relative px-4 py-4 -mx-4 -mt-4 -mb-4 overflow-hidden"
-      style={{
-        background: isDark
-          ? `linear-gradient(135deg, ${accentColor}20 0%, ${accentColor}0d 100%)`
-          : `linear-gradient(135deg, ${accentColor}14 0%, ${accentColor}08 100%)`,
-      }}
+      className={`relative overflow-hidden ${noBackground ? "" : "px-4 py-4 -mx-4 -mt-4 -mb-4"}`}
+      style={
+        noBackground
+          ? undefined
+          : {
+              background: isDark
+                ? `linear-gradient(135deg, ${accentColor}20 0%, ${accentColor}0d 100%)`
+                : `linear-gradient(135deg, ${accentColor}14 0%, ${accentColor}08 100%)`,
+            }
+      }
     >
       {/* Animated background glow */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{
-          background: [
-            `radial-gradient(circle at 20% 50%, ${accentColor}${isDark ? '18' : '12'} 0%, transparent 50%)`,
-            `radial-gradient(circle at 80% 50%, ${accentColor}${isDark ? '18' : '12'} 0%, transparent 50%)`,
-            `radial-gradient(circle at 20% 50%, ${accentColor}${isDark ? '18' : '12'} 0%, transparent 50%)`,
-          ],
-        }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {!noBackground && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{
+            background: [
+              `radial-gradient(circle at 20% 50%, ${accentColor}${isDark ? "18" : "12"} 0%, transparent 50%)`,
+              `radial-gradient(circle at 80% 50%, ${accentColor}${isDark ? "18" : "12"} 0%, transparent 50%)`,
+              `radial-gradient(circle at 20% 50%, ${accentColor}${isDark ? "18" : "12"} 0%, transparent 50%)`,
+            ],
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
 
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-3">

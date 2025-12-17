@@ -1,11 +1,7 @@
 import type { Transaction } from "@/lib/supabase";
 import { ChevronRight, Receipt, type LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  formatDate,
-  formatCurrency,
-  getCategoryStyle,
-} from "./constants";
+import { formatDate, formatCurrency, getCategoryStyle } from "./constants";
 
 interface CategoryCardProps {
   name: string;
@@ -37,44 +33,49 @@ export function CategoryCard({
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.3, 
+      transition={{
+        duration: 0.3,
         delay: index * 0.05,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="bg-card border border-border rounded-xl overflow-hidden"
+      className="bg-card border border-border rounded-lg overflow-hidden"
     >
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.99 }}
-        className={`w-full flex items-center gap-3 p-3.5 transition-colors hover:bg-accent/50 ${
+        className={`w-full flex items-center gap-2.5 p-2.5 transition-colors hover:bg-accent/50 ${
           isUncategorized ? "" : getCategoryStyle(name)
         }`}
       >
         <motion.div
           animate={{ scale: isExpanded ? 1.05 : 1 }}
           transition={{ duration: 0.2 }}
-          className={`h-10 w-10 rounded-xl flex items-center justify-center relative overflow-hidden ${
+          className={`h-8 w-8 rounded-lg flex items-center justify-center relative overflow-hidden ${
             isUncategorized ? "bg-muted" : getCategoryStyle(name)
           }`}
           style={{
-            boxShadow: isUncategorized ? "none" : "0 2px 8px rgba(0, 0, 0, 0.1)",
+            boxShadow: isUncategorized
+              ? "none"
+              : "0 2px 6px rgba(0, 0, 0, 0.08)",
           }}
         >
           {/* Shine effect */}
           <div
-            className="absolute inset-0 rounded-xl pointer-events-none"
+            className="absolute inset-0 rounded-lg pointer-events-none"
             style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
             }}
           />
           <IconComp
-            className={`h-5 w-5 relative z-10 ${isUncategorized ? "text-muted-foreground" : ""}`}
+            className={`h-4 w-4 relative z-10 ${
+              isUncategorized ? "text-muted-foreground" : ""
+            }`}
           />
         </motion.div>
-        <div className="flex-1 text-left">
-          <p className="font-medium text-sm text-foreground">{name}</p>
-          <p className="text-xs text-muted-foreground">
+        <div className="flex-1 text-left min-w-0">
+          <p className="font-medium text-sm text-foreground truncate">{name}</p>
+          <p className="text-[10px] text-muted-foreground">
             {count} transaction{count !== 1 ? "s" : ""}
           </p>
         </div>
@@ -107,7 +108,7 @@ export function CategoryCard({
                   transition={{ delay: i * 0.03, duration: 0.2 }}
                   whileTap={{ backgroundColor: "var(--accent)" }}
                   onClick={() => onTransactionClick(txn)}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-accent/50 text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 hover:bg-accent/50 text-left"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium truncate">
@@ -129,4 +130,3 @@ export function CategoryCard({
     </motion.div>
   );
 }
-

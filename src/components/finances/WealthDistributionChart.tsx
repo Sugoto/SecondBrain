@@ -136,9 +136,7 @@ export function WealthDistributionChart({
       transition={{ duration: 0.3, delay: 0.15 }}
     >
       <Card className="p-4">
-        <h3 className="text-sm font-medium text-center">
-          Wealth Distribution
-        </h3>
+        <h3 className="text-sm font-medium text-center">Portfolio</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

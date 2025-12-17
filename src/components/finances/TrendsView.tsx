@@ -135,15 +135,18 @@ export function TrendsView({
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
   // Theme-aware colors for SVG elements (CSS variables don't work reliably in SVG)
-  const chartColors = useMemo(() => ({
-    text: theme === "dark" ? "#a1a1aa" : "#71717a",
-    grid: theme === "dark" ? "#3f3f46" : "#e4e4e7",
-    axis: theme === "dark" ? "#52525b" : "#d4d4d8",
-    tooltip: {
-      bg: theme === "dark" ? "#18181b" : "#ffffff",
-      border: theme === "dark" ? "#3f3f46" : "#e4e4e7",
-    },
-  }), [theme]);
+  const chartColors = useMemo(
+    () => ({
+      text: theme === "dark" ? "#a1a1aa" : "#71717a",
+      grid: theme === "dark" ? "#3f3f46" : "#e4e4e7",
+      axis: theme === "dark" ? "#52525b" : "#d4d4d8",
+      tooltip: {
+        bg: theme === "dark" ? "#18181b" : "#ffffff",
+        border: theme === "dark" ? "#3f3f46" : "#e4e4e7",
+      },
+    }),
+    [theme]
+  );
 
   // Daily spending data for the last 14 days (excludes budget-excluded transactions)
   const dailyData = useMemo(() => {
@@ -160,7 +163,12 @@ export function TrendsView({
       });
 
       const dayTotal = transactions
-        .filter((t) => t.date === dateStr && t.type === "expense" && !t.excluded_from_budget)
+        .filter(
+          (t) =>
+            t.date === dateStr &&
+            t.type === "expense" &&
+            !t.excluded_from_budget
+        )
         .reduce((sum, t) => sum + t.amount, 0);
 
       days.push({ date: dateStr, label: dayLabel, total: dayTotal });
@@ -180,12 +188,12 @@ export function TrendsView({
       const monthTotal = transactions
         .filter((t) => {
           if (t.type !== "expense" || t.excluded_from_budget) return false;
-          
+
           // For prorated transactions, check if this month is in the proration window
           if (t.prorate_months && t.prorate_months > 1) {
             return isProratedInMonth(t, monthStart);
           }
-          
+
           // Regular transactions - check if date falls in month
           const txnDate = new Date(t.date);
           return txnDate >= monthStart && txnDate <= monthEnd;
@@ -228,9 +236,9 @@ export function TrendsView({
   const total = pieData.reduce((sum, d) => sum + d.value, 0);
 
   // Check if there are any categories with transactions
-  const hasCategories = EXPENSE_CATEGORIES.some(
-    (cat) => categoryTotals[cat.name]?.count > 0
-  ) || categoryTotals["Uncategorized"]?.count > 0;
+  const hasCategories =
+    EXPENSE_CATEGORIES.some((cat) => categoryTotals[cat.name]?.count > 0) ||
+    categoryTotals["Uncategorized"]?.count > 0;
 
   // Check if we have any expense transactions at all
   const hasExpenses = useMemo(
@@ -278,18 +286,40 @@ export function TrendsView({
                 >
                   {/* Gradient definitions */}
                   <defs>
-                    <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="colorSpending"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
-                      <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.15} />
+                      <stop
+                        offset="50%"
+                        stopColor="#3b82f6"
+                        stopOpacity={0.15}
+                      />
                       <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                    <linearGradient
+                      id="lineGradient"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
                       <stop offset="0%" stopColor="#60a5fa" />
                       <stop offset="50%" stopColor="#3b82f6" />
                       <stop offset="100%" stopColor="#2563eb" />
                     </linearGradient>
                     {/* Glow filter for the line */}
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <filter
+                      id="glow"
+                      x="-50%"
+                      y="-50%"
+                      width="200%"
+                      height="200%"
+                    >
                       <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                       <feMerge>
                         <feMergeNode in="coloredBlur" />
@@ -321,10 +351,14 @@ export function TrendsView({
                         const day = parseInt(parts[1], 10);
                         if (isNaN(day)) return label;
                         // Get ordinal suffix
-                        const suffix = 
-                          day % 10 === 1 && day !== 11 ? "st" :
-                          day % 10 === 2 && day !== 12 ? "nd" :
-                          day % 10 === 3 && day !== 13 ? "rd" : "th";
+                        const suffix =
+                          day % 10 === 1 && day !== 11
+                            ? "st"
+                            : day % 10 === 2 && day !== 12
+                            ? "nd"
+                            : day % 10 === 3 && day !== 13
+                            ? "rd"
+                            : "th";
                         return `${day}${suffix}`;
                       }
                       return label;
@@ -339,7 +373,8 @@ export function TrendsView({
                     axisLine={{ stroke: chartColors.axis }}
                     tickFormatter={(value) => {
                       if (value === 0) return "₹0";
-                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}k`;
+                      if (value >= 1000)
+                        return `₹${(value / 1000).toFixed(0)}k`;
                       return `₹${value}`;
                     }}
                     domain={[0, "dataMax"]}
@@ -358,15 +393,26 @@ export function TrendsView({
                         <div
                           className="px-3 py-2 rounded-xl border text-xs"
                           style={{
-                            backgroundColor: theme === "dark" ? "rgba(24, 24, 27, 0.75)" : "rgba(255, 255, 255, 0.75)",
-                            borderColor: theme === "dark" ? "rgba(63, 63, 70, 0.5)" : "rgba(228, 228, 231, 0.8)",
+                            backgroundColor:
+                              theme === "dark"
+                                ? "rgba(24, 24, 27, 0.75)"
+                                : "rgba(255, 255, 255, 0.75)",
+                            borderColor:
+                              theme === "dark"
+                                ? "rgba(63, 63, 70, 0.5)"
+                                : "rgba(228, 228, 231, 0.8)",
                             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
                             backdropFilter: "blur(16px)",
                             WebkitBackdropFilter: "blur(16px)",
                           }}
                         >
                           <p className="text-muted-foreground mb-1">{label}</p>
-                          <p className="font-mono font-semibold" style={{ color: theme === "dark" ? "#fafafa" : "#18181b" }}>
+                          <p
+                            className="font-mono font-semibold"
+                            style={{
+                              color: theme === "dark" ? "#fafafa" : "#18181b",
+                            }}
+                          >
                             Spent: {formatCurrency(payload[0].value as number)}
                           </p>
                         </div>
@@ -411,7 +457,10 @@ export function TrendsView({
         >
           <Card className="p-4">
             <h3 className="text-sm font-medium text-center">
-              Spending by Category
+              Spending by Category{" "}
+              <span className="text-[10px] font-normal text-muted-foreground">
+                (excluding bills)
+              </span>
             </h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
@@ -597,10 +646,13 @@ export function TrendsView({
       )}
 
       {/* Category Cards - sorted by total descending */}
-      <div className="space-y-2">
-        {EXPENSE_CATEGORIES
-          .filter((cat) => categoryTotals[cat.name]?.count > 0)
-          .sort((a, b) => (categoryTotals[b.name]?.total ?? 0) - (categoryTotals[a.name]?.total ?? 0))
+      <div className="space-y-1.5">
+        {EXPENSE_CATEGORIES.filter((cat) => categoryTotals[cat.name]?.count > 0)
+          .sort(
+            (a, b) =>
+              (categoryTotals[b.name]?.total ?? 0) -
+              (categoryTotals[a.name]?.total ?? 0)
+          )
           .map((cat, index) => {
             const data = categoryTotals[cat.name];
             return (

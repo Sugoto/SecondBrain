@@ -315,8 +315,9 @@ const TIME_PERIOD_LABELS: Record<TimeFilter, { past: string; period: string }> =
 
 // More natural phrases for categories
 const CATEGORY_PHRASES: Record<string, { action: string; noun: string }> = {
-  "Eating Out": { action: "eating out", noun: "food outside" },
-  "Food Delivery": { action: "ordering in", noun: "food delivery" },
+  "Snacks": { action: "snacking", noun: "snacks" },
+  "Restaurants": { action: "dining out", noun: "restaurant meals" },
+  "Meals": { action: "eating", noun: "meals" },
   "Shopping": { action: "shopping", noun: "shopping" },
   "Entertainment": { action: "entertainment", noun: "fun stuff" },
   "Bills": { action: "bills", noun: "bills" },

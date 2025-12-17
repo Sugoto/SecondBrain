@@ -6,8 +6,9 @@ import type { AppSection } from "@/types/navigation";
 
 export interface NavItem {
   id: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
+  color?: string;
 }
 
 interface DynamicBottomNavProps {
@@ -128,51 +129,81 @@ export function DynamicBottomNav({
             marginLeft: showHomeButton ? 44 : 0,
           }}
         >
-          {navItems.map(({ id, icon: Icon, label }) => (
-            <motion.button
-              key={id}
-              onClick={() => onViewChange(id)}
-              whileTap={{ scale: 0.9 }}
-              className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                activeView === id ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              {/* Active background glow */}
-              {activeView === id && (
-                <motion.div
-                  layoutId="activeGlow"
-                  className="absolute inset-x-4 -top-1 bottom-2 rounded-xl -z-10"
-                  style={{
-                    background: isDark
-                      ? "radial-gradient(ellipse at center top, rgba(139, 92, 246, 0.15) 0%, transparent 70%)"
-                      : "radial-gradient(ellipse at center top, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
-                  }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <motion.div
-                animate={{
-                  scale: activeView === id ? 1.1 : 1,
-                  y: activeView === id ? -2 : 0,
+          {navItems.map(({ id, icon: Icon, label, color }) => {
+            const isActive = activeView === id;
+            const itemColor = color || "#8b5cf6";
+            
+            return (
+              <motion.button
+                key={id}
+                onClick={() => onViewChange(id)}
+                whileTap={{ scale: 0.9 }}
+                className="relative flex flex-col items-center justify-center flex-1 h-full transition-colors"
+                style={{
+                  color: color
+                    ? isActive
+                      ? itemColor
+                      : undefined
+                    : isActive
+                    ? "var(--primary)"
+                    : undefined,
                 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
-                <Icon className="h-5 w-5" />
-              </motion.div>
-              <span className="text-[10px] mt-0.5">{label}</span>
-              {activeView === id && (
+                {/* Active background glow */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeGlow"
+                    className="absolute inset-x-4 -top-1 bottom-2 rounded-xl -z-10"
+                    style={{
+                      background: isDark
+                        ? `radial-gradient(ellipse at center top, ${itemColor}26 0%, transparent 70%)`
+                        : `radial-gradient(ellipse at center top, ${itemColor}1a 0%, transparent 70%)`,
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
                 <motion.div
-                  layoutId="activeTab"
-                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                  style={{
-                    background: "linear-gradient(90deg, #8b5cf6, #3b82f6)",
-                    boxShadow: "0 0 8px rgba(139, 92, 246, 0.5)",
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                    y: isActive ? -2 : 0,
                   }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-            </motion.button>
-          ))}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                >
+                  <Icon
+                    className="h-5 w-5"
+                    style={{ color: color ? itemColor : undefined }}
+                  />
+                </motion.div>
+                <span
+                  className="text-[10px] mt-0.5"
+                  style={{
+                    color: color
+                      ? isActive
+                        ? itemColor
+                        : "var(--muted-foreground)"
+                      : isActive
+                      ? "var(--primary)"
+                      : "var(--muted-foreground)",
+                  }}
+                >
+                  {label}
+                </span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                    style={{
+                      background: color
+                        ? itemColor
+                        : "linear-gradient(90deg, #8b5cf6, #3b82f6)",
+                      boxShadow: `0 0 8px ${itemColor}80`,
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
     </motion.nav>
