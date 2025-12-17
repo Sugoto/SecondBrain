@@ -118,3 +118,4 @@ export const getCategoryStyle = (category: string | null): string => {
 export const getCategoryColor = (category: string): string => {
   return CATEGORY_THEMES[category]?.color ?? "#94a3b8";
 };
+

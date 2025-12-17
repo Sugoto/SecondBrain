@@ -2,7 +2,18 @@ import { useMemo, useState } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 import {
   EXPENSE_CATEGORIES,
   formatCurrency,
@@ -11,9 +22,13 @@ import {
 import { CategoryCard } from "./CategoryCard";
 import { Footer } from "./Footer";
 import type { CategoryTotal } from "./utils";
+import { getMonthlyAmount, isProratedInMonth } from "./utils";
+import type { ChartMode } from "./types";
 import { useTheme } from "@/hooks/useTheme";
 
-interface CategoriesViewProps {
+interface TrendsViewProps {
+  transactions: Transaction[];
+  chartMode: ChartMode;
   categoryTotals: Record<string, CategoryTotal>;
   chartCategoryTotals: Record<string, CategoryTotal>; // Excludes budget-excluded for pie chart
   expandedCategory: string | null;
@@ -21,15 +36,87 @@ interface CategoriesViewProps {
   onTransactionClick: (txn: Transaction) => void;
 }
 
-export function CategoriesView({
+export function TrendsView({
+  transactions,
+  chartMode,
   categoryTotals,
   chartCategoryTotals,
   expandedCategory,
   onToggleCategory,
   onTransactionClick,
-}: CategoriesViewProps) {
+}: TrendsViewProps) {
   const { theme } = useTheme();
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+
+  // Theme-aware colors for SVG elements (CSS variables don't work reliably in SVG)
+  const chartColors = useMemo(() => ({
+    text: theme === "dark" ? "#a1a1aa" : "#71717a",
+    grid: theme === "dark" ? "#3f3f46" : "#e4e4e7",
+    axis: theme === "dark" ? "#52525b" : "#d4d4d8",
+    tooltip: {
+      bg: theme === "dark" ? "#18181b" : "#ffffff",
+      border: theme === "dark" ? "#3f3f46" : "#e4e4e7",
+    },
+  }), [theme]);
+
+  // Daily spending data for the last 14 days (excludes budget-excluded transactions)
+  const dailyData = useMemo(() => {
+    const days: { date: string; label: string; total: number }[] = [];
+    const now = new Date();
+
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
+      const dayLabel = date.toLocaleDateString("en-IN", {
+        weekday: "short",
+        day: "numeric",
+      });
+
+      const dayTotal = transactions
+        .filter((t) => t.date === dateStr && t.type === "expense" && !t.excluded_from_budget)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      days.push({ date: dateStr, label: dayLabel, total: dayTotal });
+    }
+    return days;
+  }, [transactions]);
+
+  // Monthly spending data for the last 6 months (excludes budget-excluded transactions)
+  const monthlyData = useMemo(() => {
+    const months: { month: string; label: string; total: number }[] = [];
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+
+      const monthTotal = transactions
+        .filter((t) => {
+          if (t.type !== "expense" || t.excluded_from_budget) return false;
+          
+          // For prorated transactions, check if this month is in the proration window
+          if (t.prorate_months && t.prorate_months > 1) {
+            return isProratedInMonth(t, monthStart);
+          }
+          
+          // Regular transactions - check if date falls in month
+          const txnDate = new Date(t.date);
+          return txnDate >= monthStart && txnDate <= monthEnd;
+        })
+        .reduce((sum, t) => sum + getMonthlyAmount(t), 0);
+
+      const label = monthStart.toLocaleDateString("en-IN", { month: "short" });
+      months.push({
+        month: monthStart.toISOString().split("T")[0],
+        label,
+        total: monthTotal,
+      });
+    }
+    return months;
+  }, [transactions]);
+
+  const lineChartData = chartMode === "daily" ? dailyData : monthlyData;
 
   // Pie chart uses chartCategoryTotals which excludes budget-excluded transactions
   const pieData = useMemo(() => {
@@ -59,7 +146,13 @@ export function CategoriesView({
     (cat) => categoryTotals[cat.name]?.count > 0
   ) || categoryTotals["Uncategorized"]?.count > 0;
 
-  if (!hasCategories) {
+  // Check if we have any expense transactions at all
+  const hasExpenses = useMemo(
+    () => transactions.some((t) => t.type === "expense"),
+    [transactions]
+  );
+
+  if (!hasCategories && !hasExpenses) {
     return (
       <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
         <motion.div
@@ -80,12 +173,155 @@ export function CategoriesView({
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
+      {/* Spending Area Chart */}
+      {hasExpenses && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <Card className="p-4 overflow-hidden">
+            <h3 className="text-sm font-medium mb-3">
+              {chartMode === "daily" ? "Last 14 Days" : "Last 6 Months"}
+            </h3>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={lineChartData}
+                  margin={{ top: 10, right: 16, left: 0, bottom: 4 }}
+                >
+                  {/* Gradient definitions */}
+                  <defs>
+                    <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+                      <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#60a5fa" />
+                      <stop offset="50%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#2563eb" />
+                    </linearGradient>
+                    {/* Glow filter for the line */}
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  {/* Grid lines */}
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke={chartColors.grid}
+                    strokeOpacity={0.8}
+                  />
+                  <XAxis
+                    dataKey="label"
+                    tick={{
+                      fontSize: 11,
+                      fill: chartColors.text,
+                    }}
+                    tickLine={{ stroke: chartColors.axis }}
+                    axisLine={{ stroke: chartColors.axis }}
+                    interval={chartMode === "daily" ? 2 : 0}
+                    tickMargin={8}
+                    tickFormatter={(label) => {
+                      // Extract day number and add ordinal suffix for daily view
+                      if (chartMode === "daily") {
+                        const parts = label.split(" ");
+                        const day = parseInt(parts[1], 10);
+                        if (isNaN(day)) return label;
+                        // Get ordinal suffix
+                        const suffix = 
+                          day % 10 === 1 && day !== 11 ? "st" :
+                          day % 10 === 2 && day !== 12 ? "nd" :
+                          day % 10 === 3 && day !== 13 ? "rd" : "th";
+                        return `${day}${suffix}`;
+                      }
+                      return label;
+                    }}
+                  />
+                  <YAxis
+                    tick={{
+                      fontSize: 11,
+                      fill: chartColors.text,
+                    }}
+                    tickLine={{ stroke: chartColors.axis }}
+                    axisLine={{ stroke: chartColors.axis }}
+                    tickFormatter={(value) => {
+                      if (value === 0) return "₹0";
+                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}k`;
+                      return `₹${value}`;
+                    }}
+                    domain={[0, "dataMax"]}
+                    tickCount={4}
+                    width={44}
+                  />
+                  <Tooltip
+                    cursor={{
+                      stroke: chartColors.text,
+                      strokeWidth: 1,
+                      strokeDasharray: "4 4",
+                    }}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      return (
+                        <div
+                          className="px-3 py-2 rounded-xl border text-xs"
+                          style={{
+                            backgroundColor: theme === "dark" ? "rgba(24, 24, 27, 0.75)" : "rgba(255, 255, 255, 0.75)",
+                            borderColor: theme === "dark" ? "rgba(63, 63, 70, 0.5)" : "rgba(228, 228, 231, 0.8)",
+                            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+                            backdropFilter: "blur(16px)",
+                            WebkitBackdropFilter: "blur(16px)",
+                          }}
+                        >
+                          <p className="text-muted-foreground mb-1">{label}</p>
+                          <p className="font-mono font-semibold" style={{ color: theme === "dark" ? "#fafafa" : "#18181b" }}>
+                            Spent: {formatCurrency(payload[0].value as number)}
+                          </p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Area
+                    type="monotoneX"
+                    dataKey="total"
+                    stroke="url(#lineGradient)"
+                    strokeWidth={2.5}
+                    fill="url(#colorSpending)"
+                    animationDuration={1200}
+                    animationEasing="ease-out"
+                    dot={{
+                      fill: "#3b82f6",
+                      strokeWidth: 2,
+                      stroke: "hsl(var(--card))",
+                      r: 4,
+                    }}
+                    activeDot={{
+                      fill: "#3b82f6",
+                      strokeWidth: 3,
+                      stroke: "hsl(var(--card))",
+                      r: 6,
+                      filter: "url(#glow)",
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Pie Chart */}
       {pieData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Card className="p-4">
             <h3 className="text-sm font-medium mb-2 text-center">

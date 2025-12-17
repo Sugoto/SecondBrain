@@ -7,7 +7,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Plus, CalendarDays } from "lucide-react";
 import {
   format,
@@ -18,12 +17,9 @@ import {
   isSameMonth,
   subMonths,
 } from "date-fns";
-import { formatCurrency, MONTHLY_BUDGET } from "./constants";
-import { calculateBudgetInfo } from "./utils";
 import type { TimeFilter, ChartMode, ActiveView, DateRange } from "./types";
 
 interface HeaderProps {
-  totalExpenses: number;
   theme: "light" | "dark";
   error: string | null;
   activeView: ActiveView;
@@ -58,7 +54,6 @@ function getRecentMonths() {
 }
 
 export function Header({
-  totalExpenses,
   theme,
   error,
   activeView,
@@ -71,21 +66,12 @@ export function Header({
   onChartModeChange,
   onCustomDateRangeChange,
 }: HeaderProps) {
-  const [showDailySpent, setShowDailySpent] = useState(false);
-  const [showDailyRemaining, setShowDailyRemaining] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [pendingRange, setPendingRange] = useState<{ from?: Date; to?: Date }>(
     {}
   );
 
   const isDark = theme === "dark";
-  const { dailyBudget, totalRemaining, percentUsed } = calculateBudgetInfo(
-    totalExpenses,
-    MONTHLY_BUDGET
-  );
-
-  const currentDay = new Date().getDate();
-  const dailySpent = currentDay > 0 ? totalExpenses / currentDay : 0;
   const recentMonths = getRecentMonths();
 
   const handleMonthSelect = (monthDate: Date) => {
@@ -183,7 +169,7 @@ export function Header({
       {/* Title Row */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-bold tracking-tight">
-          Expense Tracker
+          Finances
         </h1>
         <div className="flex items-center gap-2">
           {/* Filter Popover */}
@@ -334,98 +320,7 @@ export function Header({
           </Button>
         </div>
       </div>
-
-      {/* Budget Progress */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <button
-            onClick={() => setShowDailySpent((prev) => !prev)}
-            className="flex items-center hover:opacity-80 transition-opacity active:scale-95"
-            title="Tap to toggle daily/total"
-          >
-            <span className="text-muted-foreground">Spent</span>
-            <div className="relative overflow-hidden min-w-[70px]">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={showDailySpent ? "daily-spent" : "total-spent"}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="font-mono font-bold text-expense block"
-                >
-                  {showDailySpent
-                    ? `${formatCurrency(dailySpent)}/day`
-                    : formatCurrency(totalExpenses)}
-                </motion.span>
-              </AnimatePresence>
-            </div>
-          </button>
-          <button
-            onClick={() => setShowDailyRemaining((prev) => !prev)}
-            className="flex items-center gap-1 hover:opacity-80 transition-opacity active:scale-95"
-            title="Tap to toggle daily/total"
-          >
-            <div className="relative overflow-hidden min-w-[70px] text-right">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={
-                    showDailyRemaining ? "daily-remaining" : "total-remaining"
-                  }
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className={`font-mono font-bold block ${
-                    totalRemaining <= 0 ? "text-red-500" : "text-income"
-                  }`}
-                >
-                  {showDailyRemaining
-                    ? `${formatCurrency(dailyBudget)}/day`
-                    : formatCurrency(totalRemaining)}
-                </motion.span>
-              </AnimatePresence>
-            </div>
-            <span className="text-muted-foreground">remaining</span>
-          </button>
-        </div>
-        <div className="relative h-3.5 bg-muted/50 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(100, percentUsed)}%` }}
-            transition={{
-              duration: 1,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              delay: 0.2,
-            }}
-            className="h-full rounded-full relative overflow-hidden"
-            style={{
-              background:
-                percentUsed > 90
-                  ? "linear-gradient(90deg, #dc2626 0%, #f87171 100%)"
-                  : percentUsed > 75
-                  ? "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)"
-                  : "linear-gradient(90deg, #22c55e 0%, #4ade80 100%)",
-            }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
-              }}
-            />
-          </motion.div>
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-foreground/70"
-          >
-            {percentUsed.toFixed(0)}%
-          </motion.span>
-        </div>
-      </div>
     </div>
   );
 }
+

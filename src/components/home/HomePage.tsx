@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { Wallet, Dumbbell, Brain, Sparkles } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData } from "@/hooks/useExpenseData";
-import { formatCurrency } from "@/components/expense-tracker/constants";
+import { formatCurrency } from "@/components/finances/constants";
 import {
   getCategoryTotals,
   generateSpendingSummary,
-} from "@/components/expense-tracker/utils";
+} from "@/components/finances/utils";
 import type { AppSection } from "@/types/navigation";
 
 interface HomePageProps {
@@ -142,8 +142,8 @@ function SpendingSummaryCard() {
 
 const APP_CARDS = [
   {
-    id: "expenses" as const,
-    title: "Expense Tracker",
+    id: "finances" as const,
+    title: "Finances",
     description: "Track spending, manage budgets, analyze trends",
     icon: Wallet,
     gradient: "from-violet-500 to-purple-600",
@@ -286,4 +286,3 @@ export function HomePage({ onNavigate }: HomePageProps) {
     </div>
   );
 }
-

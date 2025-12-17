@@ -2,9 +2,12 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./hooks/useTheme";
 import { ExpenseDataProvider } from "./hooks/useExpenseData";
-import { ExpenseTracker } from "./components/expense-tracker";
+import { FinanceTracker } from "./components/finances";
 import { HomePage } from "./components/home/HomePage";
-import { FitnessTracker, FITNESS_NAV_ITEMS } from "./components/fitness/FitnessTracker";
+import {
+  FitnessTracker,
+  FITNESS_NAV_ITEMS,
+} from "./components/fitness/FitnessTracker";
 import { DynamicBottomNav } from "./components/navigation/DynamicBottomNav";
 import { HOME_NAV_ITEMS } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
@@ -21,11 +24,9 @@ function AppContent() {
   const [currentSection, setCurrentSection] = useState<AppSection>("home");
   const [fitnessView, setFitnessView] = useState<FitnessView>("dashboard");
 
-  // Get the appropriate nav items based on current section
   const getNavItems = () => {
     switch (currentSection) {
-      case "expenses":
-        // Return expense nav items - but ExpenseTracker has its own internal nav
+      case "finances":
         return [];
       case "fitness":
         return FITNESS_NAV_ITEMS;
@@ -34,7 +35,6 @@ function AppContent() {
     }
   };
 
-  // Get the active view for the current section
   const getActiveView = () => {
     switch (currentSection) {
       case "fitness":
@@ -44,7 +44,6 @@ function AppContent() {
     }
   };
 
-  // Handle view change based on current section
   const handleViewChange = (view: string) => {
     if (currentSection === "home") {
       // Navigate to sub-section
@@ -71,9 +70,9 @@ function AppContent() {
           </motion.div>
         )}
 
-        {currentSection === "expenses" && (
-          <motion.div key="expenses" className="h-full" {...PAGE_ANIMATION}>
-            <ExpenseTracker onGoHome={handleGoHome} />
+        {currentSection === "finances" && (
+          <motion.div key="finances" className="h-full" {...PAGE_ANIMATION}>
+            <FinanceTracker onGoHome={handleGoHome} />
           </motion.div>
         )}
 
@@ -87,8 +86,7 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {/* Dynamic Bottom Nav - show on home and fitness, expenses has its own */}
-      {currentSection !== "expenses" && (
+      {currentSection !== "finances" && (
         <DynamicBottomNav
           currentSection={currentSection}
           activeView={getActiveView()}

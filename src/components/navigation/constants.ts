@@ -3,14 +3,13 @@ import type { NavItem } from "./DynamicBottomNav";
 
 // Home page nav items
 export const HOME_NAV_ITEMS: NavItem[] = [
-  { id: "expenses", icon: Wallet, label: "Expenses" },
+  { id: "finances", icon: Wallet, label: "Finances" },
   { id: "fitness", icon: Dumbbell, label: "Fitness" },
 ];
 
-// Expense tracker nav items
-export const EXPENSE_NAV_ITEMS: NavItem[] = [
-  { id: "trends", icon: TrendingUp, label: "Trends" },
+// Finance tracker nav items
+export const FINANCE_NAV_ITEMS: NavItem[] = [
+  { id: "investments", icon: TrendingUp, label: "Investments" },
   { id: "expenses", icon: Wallet, label: "Expenses" },
-  { id: "categories", icon: LayoutGrid, label: "Categories" },
+  { id: "trends", icon: LayoutGrid, label: "Trends" },
 ];
-

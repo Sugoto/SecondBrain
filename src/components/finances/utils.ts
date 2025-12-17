@@ -1,6 +1,18 @@
-import type { Transaction } from "@/lib/supabase";
+import type { Transaction, UserStats } from "@/lib/supabase";
 import { EXPENSE_CATEGORIES } from "./constants";
 import type { TimeFilter, DateRange } from "./types";
+
+// Net worth calculation
+export function calculateNetWorth(stats: UserStats | null): number {
+  if (!stats) return 0;
+  return (
+    (stats.bank_savings || 0) +
+    (stats.fixed_deposits || 0) +
+    (stats.mutual_funds || 0) +
+    (stats.ppf || 0) +
+    (stats.epf || 0)
+  );
+}
 
 // Proration helpers
 /**
@@ -327,3 +339,4 @@ export function generateSpendingSummary(
 
   return parts.join(" ");
 }
+

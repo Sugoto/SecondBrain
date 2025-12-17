@@ -18,6 +18,15 @@ export type Transaction = {
   excluded_from_budget: boolean;
   details: string | null;
   created_at: string;
-  /** Number of months to spread this expense over (null = no proration) */
   prorate_months: number | null;
+};
+
+export type UserStats = {
+  id: string;
+  bank_savings: number;
+  fixed_deposits: number;
+  mutual_funds: number;
+  ppf: number;
+  epf: number;
+  monthly_income: number | null;
 };

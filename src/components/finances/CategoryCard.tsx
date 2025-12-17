@@ -129,3 +129,4 @@ export function CategoryCard({
     </motion.div>
   );
 }
+

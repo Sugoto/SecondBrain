@@ -7,17 +7,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { formatCurrency, MONTHLY_BUDGET } from "./constants";
+import { calculateBudgetInfo } from "./utils";
 
-// Local components
 import { Header } from "./Header";
 import { DynamicBottomNav } from "@/components/navigation/DynamicBottomNav";
-import { EXPENSE_NAV_ITEMS } from "@/components/navigation/constants";
+import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
 import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
-import { CategoriesView } from "./CategoriesView";
 import { TrendsView } from "./TrendsView";
+import { InvestmentsView } from "./InvestmentsView";
 
-// Utils and types
 import type { TimeFilter, ActiveView, ChartMode, DateRange } from "./types";
 import {
   filterByTimeRange,
@@ -27,8 +27,140 @@ import {
   getMonthlyAmount,
 } from "./utils";
 
+function BudgetProgressBar({
+  monthlyBudgetExpenses,
+  theme,
+}: {
+  monthlyBudgetExpenses: number;
+  theme: "light" | "dark";
+}) {
+  const [showDailySpent, setShowDailySpent] = useState(false);
+  const [showDailyRemaining, setShowDailyRemaining] = useState(false);
+
+  const { dailyBudget, totalRemaining, percentUsed } = calculateBudgetInfo(
+    monthlyBudgetExpenses,
+    MONTHLY_BUDGET
+  );
+
+  const currentDay = new Date().getDate();
+  const dailySpent = currentDay > 0 ? monthlyBudgetExpenses / currentDay : 0;
+
+  return (
+    <div className="sticky top-0 z-30 px-4 md:px-6 pt-3">
+      <div
+        className="max-w-6xl mx-auto px-4 py-3 rounded-2xl space-y-2"
+        style={{
+          backgroundColor:
+            theme === "dark"
+              ? "rgba(24, 24, 27, 0.7)"
+              : "rgba(255, 255, 255, 0.7)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          boxShadow:
+            theme === "dark"
+              ? "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
+              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5)",
+          border:
+            theme === "dark"
+              ? "1px solid rgba(255, 255, 255, 0.08)"
+              : "1px solid rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        <div className="flex items-center justify-between text-xs">
+          <button
+            onClick={() => setShowDailySpent((prev) => !prev)}
+            className="flex items-center hover:opacity-80 transition-opacity active:scale-95"
+            title="Tap to toggle daily/total"
+          >
+            <span className="text-muted-foreground">Spent</span>
+            <div className="relative overflow-hidden min-w-[70px]">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={showDailySpent ? "daily-spent" : "total-spent"}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="font-mono font-bold text-expense block"
+                >
+                  {showDailySpent
+                    ? `${formatCurrency(dailySpent)}/day`
+                    : formatCurrency(monthlyBudgetExpenses)}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+          </button>
+          <button
+            onClick={() => setShowDailyRemaining((prev) => !prev)}
+            className="flex items-center gap-1 hover:opacity-80 transition-opacity active:scale-95"
+            title="Tap to toggle daily/total"
+          >
+            <div className="relative overflow-hidden min-w-[70px] text-right">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={
+                    showDailyRemaining ? "daily-remaining" : "total-remaining"
+                  }
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className={`font-mono font-bold block ${
+                    totalRemaining <= 0 ? "text-red-500" : "text-income"
+                  }`}
+                >
+                  {showDailyRemaining
+                    ? `${formatCurrency(dailyBudget)}/day`
+                    : formatCurrency(totalRemaining)}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+            <span className="text-muted-foreground">remaining</span>
+          </button>
+        </div>
+        <div className="relative h-3.5 bg-muted/50 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(100, percentUsed)}%` }}
+            transition={{
+              duration: 1,
+              ease: [0.25, 0.46, 0.45, 0.94],
+              delay: 0.2,
+            }}
+            className="h-full rounded-full relative overflow-hidden"
+            style={{
+              background:
+                percentUsed > 90
+                  ? "linear-gradient(90deg, #dc2626 0%, #f87171 100%)"
+                  : percentUsed > 75
+                  ? "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)"
+                  : "linear-gradient(90deg, #22c55e 0%, #4ade80 100%)",
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
+              }}
+            />
+          </motion.div>
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.3 }}
+            className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-foreground/70"
+          >
+            {percentUsed.toFixed(0)}%
+          </motion.span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Constants outside component to avoid recreation
-const VIEWS: ActiveView[] = ["trends", "expenses", "categories"];
+const VIEWS: ActiveView[] = ["investments", "expenses", "trends"];
 const MIN_SWIPE_DISTANCE = 100;
 
 const VIEW_ANIMATION = {
@@ -44,11 +176,11 @@ type DialogState = {
   mode: "new" | "edit";
 } | null;
 
-interface ExpenseTrackerProps {
+interface FinanceTrackerProps {
   onGoHome?: () => void;
 }
 
-export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
+export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   // Data from React Query cache
   const { transactions, loading, error, addToCache, updateInCache } =
     useExpenseData();
@@ -237,7 +369,6 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
       <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background border-b border-border z-20">
         <div className="max-w-6xl mx-auto p-4 md:p-6">
           <Header
-            totalExpenses={monthlyBudgetExpenses}
             theme={theme}
             error={error}
             activeView={activeView}
@@ -255,15 +386,23 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
 
       {/* Main Content - with top padding for fixed header on mobile */}
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[120px] md:pt-0"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[72px] md:pt-0"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Sticky Budget Progress Bar - only on expenses view */}
+        {activeView === "expenses" && (
+          <BudgetProgressBar
+            monthlyBudgetExpenses={monthlyBudgetExpenses}
+            theme={theme}
+          />
+        )}
+
         <AnimatePresence mode="wait">
-          {activeView === "trends" && (
-            <motion.div key="trends" {...VIEW_ANIMATION}>
-              <TrendsView transactions={transactions} chartMode={chartMode} />
+          {activeView === "investments" && (
+            <motion.div key="investments" {...VIEW_ANIMATION}>
+              <InvestmentsView />
             </motion.div>
           )}
           {activeView === "expenses" && (
@@ -274,9 +413,11 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
               />
             </motion.div>
           )}
-          {activeView === "categories" && (
-            <motion.div key="categories" {...VIEW_ANIMATION}>
-              <CategoriesView
+          {activeView === "trends" && (
+            <motion.div key="trends" {...VIEW_ANIMATION}>
+              <TrendsView
+                transactions={transactions}
+                chartMode={chartMode}
                 categoryTotals={categoryTotals}
                 chartCategoryTotals={summaryCategoryTotals}
                 expandedCategory={expandedCategory}
@@ -357,7 +498,7 @@ export function ExpenseTracker({ onGoHome }: ExpenseTrackerProps) {
       {/* Mobile Bottom Nav */}
       <DynamicBottomNav
         activeView={activeView}
-        navItems={EXPENSE_NAV_ITEMS}
+        navItems={FINANCE_NAV_ITEMS}
         onViewChange={(view) => setActiveView(view as ActiveView)}
         onGoHome={onGoHome}
       />
