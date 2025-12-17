@@ -192,9 +192,9 @@ function BudgetCard() {
 
   if (loading) {
     return (
-      <div className="animate-pulse">
+      <div className="animate-pulse flex-1">
         <div
-          className="aspect-square rounded-2xl p-4"
+          className="aspect-square rounded-2xl p-3"
           style={{
             background: isDark
               ? "rgba(139, 92, 246, 0.1)"
@@ -229,7 +229,7 @@ function BudgetCard() {
       className="flex-1"
     >
       <div
-        className="aspect-square rounded-2xl p-4 relative overflow-hidden"
+        className="aspect-square rounded-2xl p-3 relative overflow-hidden flex flex-col"
         style={{
           background: isDark
             ? "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)"
@@ -240,7 +240,7 @@ function BudgetCard() {
         }}
       >
         {/* Header */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2">
           <div
             className="h-6 w-6 rounded-lg flex items-center justify-center"
             style={{
@@ -277,7 +277,7 @@ function BudgetCard() {
         </div>
 
         {/* Footer stats */}
-        <div className="mt-2 grid grid-cols-2 gap-2 text-center">
+        <div className="grid grid-cols-2 gap-2 text-center">
           <div>
             <p className="text-[10px] text-muted-foreground">Left</p>
             <p
