@@ -20,6 +20,9 @@ const queryClient = new QueryClient({
   },
 });
 
+// Export for prefetching
+export { queryClient };
+
 const expenseKeys = {
   all: ["transactions"] as const,
   lists: () => [...expenseKeys.all, "list"] as const,
@@ -176,6 +179,23 @@ export function useExpenseData() {
 
     invalidate: () =>
       queryClient.invalidateQueries({ queryKey: expenseKeys.all }),
+  };
+}
+
+/**
+ * Prefetch transactions data - call this on home page to warm the cache
+ */
+export function usePrefetchTransactions() {
+  const qc = useQueryClient();
+  
+  return {
+    prefetch: () => {
+      qc.prefetchQuery({
+        queryKey: expenseKeys.lists(),
+        queryFn: fetchTransactions,
+        staleTime: 5 * 60 * 1000,
+      });
+    },
   };
 }
 

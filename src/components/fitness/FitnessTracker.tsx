@@ -1,8 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Dumbbell,
-  Apple,
   Heart,
   Flame,
   Droplet,
@@ -285,7 +283,3 @@ export function HealthTracker({ activeView }: HealthTrackerProps) {
   );
 }
 
-export const HEALTH_NAV_ITEMS = [
-  { id: "nutrition" as const, icon: Apple, label: "Nutrition" },
-  { id: "workouts" as const, icon: Dumbbell, label: "Workouts" },
-];

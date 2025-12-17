@@ -9,6 +9,7 @@ export interface NavItem {
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   color?: string;
+  onPrefetch?: () => void;
 }
 
 interface DynamicBottomNavProps {
@@ -18,6 +19,7 @@ interface DynamicBottomNavProps {
   onViewChange: (view: string) => void;
   onGoHome?: () => void;
   hidden?: boolean;
+  onPrefetch?: (id: string) => void;
 }
 
 export function DynamicBottomNav({
@@ -27,6 +29,7 @@ export function DynamicBottomNav({
   onViewChange,
   onGoHome,
   hidden = false,
+  onPrefetch,
 }: DynamicBottomNavProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -137,6 +140,7 @@ export function DynamicBottomNav({
               <motion.button
                 key={id}
                 onClick={() => onViewChange(id)}
+                onPointerEnter={() => onPrefetch?.(id)}
                 whileTap={{ scale: 0.9 }}
                 className="relative flex flex-col items-center justify-center flex-1 h-full transition-colors"
                 style={{

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { ChevronRight, Info, CalendarRange } from "lucide-react";
 import { getMonthlyAmount } from "./utils";
@@ -18,7 +19,7 @@ interface TransactionCardProps {
   index?: number;
 }
 
-export function TransactionCard({
+export const TransactionCard = memo(function TransactionCard({
   transaction: txn,
   onClick,
   index = 0,
@@ -185,5 +186,5 @@ export function TransactionCard({
       />
     </motion.button>
   );
-}
+});
 

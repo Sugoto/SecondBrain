@@ -1,4 +1,5 @@
-export { HealthTracker, HEALTH_NAV_ITEMS } from "./FitnessTracker";
+export { HealthTracker } from "./FitnessTracker";
+export { HEALTH_NAV_ITEMS } from "../navigation/constants";
 export { HealthStatsEditDialog } from "./HealthStatsCard";
 export { WorkoutCalendar } from "./WorkoutCalendar";
 export { calculateTDEE, calculateBMI, getBMICategory, formatNumber, calculateActivityLevel, getActivityLevelInfo } from "./utils";
