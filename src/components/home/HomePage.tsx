@@ -119,27 +119,29 @@ function DateWidget() {
   );
 }
 
-// Circular progress component
+// Circular progress component - responsive sizing
 function CircularProgress({
   percentage,
-  size = 100,
-  strokeWidth = 8,
   color,
   bgColor,
 }: {
   percentage: number;
-  size?: number;
-  strokeWidth?: number;
   color: string;
   bgColor: string;
 }) {
+  // Use percentage-based sizing for responsiveness
+  const size = 80;
+  const strokeWidth = 7;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset =
     circumference - (Math.min(percentage, 100) / 100) * circumference;
 
   return (
-    <svg width={size} height={size} className="transform -rotate-90">
+    <svg 
+      viewBox={`0 0 ${size} ${size}`} 
+      className="w-[70%] max-w-[80px] aspect-square transform -rotate-90"
+    >
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -192,9 +194,9 @@ function BudgetCard() {
 
   if (loading) {
     return (
-      <div className="animate-pulse flex-1">
+      <div className="animate-pulse flex-1 min-w-0">
         <div
-          className="aspect-square rounded-2xl p-3"
+          className="aspect-square rounded-2xl p-2.5 sm:p-3"
           style={{
             background: isDark
               ? "rgba(139, 92, 246, 0.1)"
@@ -202,7 +204,7 @@ function BudgetCard() {
           }}
         >
           <div className="h-full flex items-center justify-center">
-            <div className="h-24 w-24 rounded-full bg-muted/50" />
+            <div className="w-[60%] aspect-square rounded-full bg-muted/50" />
           </div>
         </div>
       </div>
@@ -226,10 +228,10 @@ function BudgetCard() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="flex-1"
+      className="flex-1 min-w-0"
     >
       <div
-        className="aspect-square rounded-2xl p-3 relative overflow-hidden flex flex-col"
+        className="aspect-square rounded-2xl p-2.5 sm:p-3 relative overflow-hidden flex flex-col"
         style={{
           background: isDark
             ? "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)"
@@ -240,56 +242,54 @@ function BudgetCard() {
         }}
       >
         {/* Header */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div
-            className="h-6 w-6 rounded-lg flex items-center justify-center"
+            className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
             style={{
               background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
             }}
           >
-            <Wallet className="h-3 w-3 text-white" />
+            <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
           </div>
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             Budget
           </span>
         </div>
 
         {/* Circular Progress */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="relative">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0 py-1">
+          <div className="relative w-full flex items-center justify-center">
             <CircularProgress
               percentage={percentUsed}
-              size={90}
-              strokeWidth={8}
               color={progressColor}
               bgColor={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span
-                className="text-lg font-bold font-mono"
+                className="text-base sm:text-lg font-bold font-mono"
                 style={{ color: progressColor }}
               >
                 {Math.round(percentUsed)}%
               </span>
-              <span className="text-[8px] text-muted-foreground">used</span>
+              <span className="text-[7px] sm:text-[8px] text-muted-foreground">used</span>
             </div>
           </div>
         </div>
 
         {/* Footer stats */}
-        <div className="grid grid-cols-2 gap-2 text-center">
+        <div className="grid grid-cols-2 gap-1 sm:gap-2 text-center">
           <div>
-            <p className="text-[10px] text-muted-foreground">Left</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Left</p>
             <p
-              className="text-xs font-bold font-mono"
+              className="text-[11px] sm:text-xs font-bold font-mono"
               style={{ color: progressColor }}
             >
               {formatCurrencyCompact(totalRemaining)}
             </p>
           </div>
           <div>
-            <p className="text-[10px] text-muted-foreground">Daily</p>
-            <p className="text-xs font-bold font-mono text-foreground">
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Daily</p>
+            <p className="text-[11px] sm:text-xs font-bold font-mono text-foreground">
               {formatCurrencyCompact(dailyBudget)}
             </p>
           </div>
@@ -322,9 +322,9 @@ function TDEECard() {
 
   if (loading) {
     return (
-      <div className="animate-pulse">
+      <div className="animate-pulse flex-1 min-w-0">
         <div
-          className="aspect-square rounded-2xl p-4"
+          className="aspect-square rounded-2xl p-2.5 sm:p-4"
           style={{
             background: isDark
               ? "rgba(16, 185, 129, 0.1)"
@@ -332,7 +332,7 @@ function TDEECard() {
           }}
         >
           <div className="h-full flex items-center justify-center">
-            <div className="h-16 w-20 rounded-lg bg-muted/50" />
+            <div className="w-[50%] aspect-[5/4] rounded-lg bg-muted/50" />
           </div>
         </div>
       </div>
@@ -349,10 +349,10 @@ function TDEECard() {
           delay: 0.1,
           ease: [0.25, 0.46, 0.45, 0.94],
         }}
-        className="flex-1"
+        className="flex-1 min-w-0"
       >
         <div
-          className="aspect-square rounded-2xl p-4 flex flex-col items-center justify-center"
+          className="aspect-square rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-center"
           style={{
             background: isDark
               ? "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)"
@@ -362,8 +362,8 @@ function TDEECard() {
               : "1px solid rgba(16, 185, 129, 0.15)",
           }}
         >
-          <Flame className="h-8 w-8 text-emerald-500/50 mb-2" />
-          <p className="text-[10px] text-muted-foreground text-center">
+          <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500/50 mb-2" />
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center">
             Add health data to see TDEE
           </p>
         </div>
@@ -376,10 +376,10 @@ function TDEECard() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="flex-1"
+      className="flex-1 min-w-0"
     >
       <div
-        className="aspect-square rounded-2xl p-4 relative overflow-hidden flex flex-col"
+        className="aspect-square rounded-2xl p-2.5 sm:p-4 relative overflow-hidden flex flex-col"
         style={{
           background: isDark
             ? "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)"
@@ -390,44 +390,44 @@ function TDEECard() {
         }}
       >
         {/* Header */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div
-            className="h-6 w-6 rounded-lg flex items-center justify-center"
+            className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
             style={{
               background: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
             }}
           >
-            <Flame className="h-3 w-3 text-white" />
+            <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
           </div>
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             Nutrition
           </span>
         </div>
 
         {/* Stats - centered in available space */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-3">
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-0">
           {/* Calories */}
           <div className="text-center">
-            <span className="text-2xl font-bold font-mono text-emerald-500">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-emerald-500">
               {formatNumber(tdee.targetCalories)}
             </span>
-            <span className="text-[10px] text-muted-foreground ml-1">kcal</span>
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground ml-1">kcal</span>
           </div>
 
           {/* Protein */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg"
             style={{
               background: isDark
                 ? "rgba(245, 158, 11, 0.15)"
                 : "rgba(245, 158, 11, 0.1)",
             }}
           >
-            <Beef className="h-3 w-3 text-amber-500" />
-            <span className="text-sm font-bold font-mono text-amber-500">
+            <Beef className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500" />
+            <span className="text-xs sm:text-sm font-bold font-mono text-amber-500">
               {tdee.protein}g
             </span>
-            <span className="text-[9px] text-muted-foreground">protein</span>
+            <span className="text-[8px] sm:text-[9px] text-muted-foreground">protein</span>
           </div>
         </div>
       </div>

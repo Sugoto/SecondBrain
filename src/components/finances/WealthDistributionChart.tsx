@@ -140,22 +140,8 @@ export function WealthDistributionChart({
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              {/* SVG definitions for glow effects */}
+              {/* Gradient definitions for each slice */}
               <defs>
-                <filter
-                  id="wealthPieGlow"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                {/* Gradient definitions for each slice */}
                 {pieData.map((entry, index) => (
                   <linearGradient
                     key={`wealth-gradient-${index}`}
@@ -254,7 +240,6 @@ export function WealthDistributionChart({
                         }
                             Z`}
                         fill={fill}
-                        style={{ filter: "url(#wealthPieGlow)" }}
                       />
                     </g>
                   );
@@ -265,7 +250,6 @@ export function WealthDistributionChart({
                     key={index}
                     fill={`url(#wealthPieGradient-${index})`}
                     style={{
-                      filter: "url(#wealthPieGlow)",
                       cursor: "pointer",
                       outline: "none",
                     }}

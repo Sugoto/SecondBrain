@@ -312,20 +312,6 @@ export function TrendsView({
                       <stop offset="50%" stopColor="#3b82f6" />
                       <stop offset="100%" stopColor="#2563eb" />
                     </linearGradient>
-                    {/* Glow filter for the line */}
-                    <filter
-                      id="glow"
-                      x="-50%"
-                      y="-50%"
-                      width="200%"
-                      height="200%"
-                    >
-                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                      <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
                   </defs>
                   {/* Grid lines */}
                   <CartesianGrid
@@ -438,7 +424,6 @@ export function TrendsView({
                       strokeWidth: 3,
                       stroke: "hsl(var(--card))",
                       r: 6,
-                      filter: "url(#glow)",
                     }}
                   />
                 </AreaChart>
@@ -465,22 +450,8 @@ export function TrendsView({
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  {/* SVG definitions for glow effects */}
+                  {/* Gradient definitions for each slice */}
                   <defs>
-                    <filter
-                      id="pieGlow"
-                      x="-50%"
-                      y="-50%"
-                      width="200%"
-                      height="200%"
-                    >
-                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                      <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                    {/* Gradient definitions for each slice */}
                     {pieData.map((entry, index) => (
                       <linearGradient
                         key={`gradient-${index}`}
@@ -583,7 +554,6 @@ export function TrendsView({
                             }
                                 Z`}
                             fill={fill}
-                            style={{ filter: "url(#pieGlow)" }}
                           />
                         </g>
                       );
@@ -594,7 +564,6 @@ export function TrendsView({
                         key={index}
                         fill={`url(#pieGradient-${index})`}
                         style={{
-                          filter: "url(#pieGlow)",
                           cursor: "pointer",
                           outline: "none",
                         }}
