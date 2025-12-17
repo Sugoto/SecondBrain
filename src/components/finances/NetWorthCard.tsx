@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +16,28 @@ import {
   Banknote,
   PiggyBank,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
 import { formatCurrency } from "./constants";
 import { supabase, type UserStats } from "@/lib/supabase";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { toast } from "sonner";
+
+// Type for goal progress data
+type GoalProgress = {
+  monthlySavings: number;
+  timeToGoal: {
+    months: number;
+    years: number;
+    remainingMonths: number;
+    targetDate: Date;
+  } | null;
+};
+
+// Target net worth: 1 Crore (₹1,00,00,000)
+const TARGET_NET_WORTH = 10000000;
 
 // Asset categories with their display info
 const ASSET_CATEGORIES = [
@@ -77,6 +93,15 @@ interface NetWorthCardProps {
   theme: "light" | "dark";
   loading: boolean;
   onEdit: () => void;
+  goalProgress?: GoalProgress;
+}
+
+// Format duration as years and months
+function formatDuration(years: number, months: number): string {
+  if (years === 0 && months === 0) return "Done!";
+  if (years === 0) return `${months}m`;
+  if (months === 0) return `${years}y`;
+  return `${years}y ${months}m`;
 }
 
 export function NetWorthCard({
@@ -84,12 +109,29 @@ export function NetWorthCard({
   theme,
   loading,
   onEdit,
+  goalProgress,
 }: NetWorthCardProps) {
+  const percentToTarget = Math.min(100, (netWorth / TARGET_NET_WORTH) * 100);
+
+  // Color scheme based on progress
+  const getProgressGradient = () => {
+    if (percentToTarget >= 90) {
+      return "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)";
+    } else if (percentToTarget >= 50) {
+      return "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)";
+    } else {
+      return "linear-gradient(90deg, #14b8a6 0%, #5eead4 100%)";
+    }
+  };
+
+  const hasGoalData = goalProgress?.timeToGoal != null;
+  const goalReached = hasGoalData && goalProgress.timeToGoal!.months === 0;
+
   return (
     <div className="sticky top-0 z-30 px-4 md:px-6 pt-3">
       <button
         onClick={onEdit}
-        className="w-full max-w-6xl mx-auto px-3 py-2.5 rounded-xl flex items-center justify-between gap-2 text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
+        className="w-full max-w-6xl mx-auto px-3 py-2.5 rounded-2xl text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
         style={{
           backgroundColor:
             theme === "dark"
@@ -99,48 +141,92 @@ export function NetWorthCard({
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
           boxShadow:
             theme === "dark"
-              ? "0 4px 20px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
-              : "0 4px 20px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5)",
+              ? "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
+              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5)",
           border:
             theme === "dark"
               ? "1px solid rgba(255, 255, 255, 0.08)"
               : "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
-        <div className="flex items-center gap-2.5">
-          <div
-            className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{
-              background:
-                theme === "dark"
-                  ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 100%)"
-                  : "linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%)",
-            }}
-          >
-            <Wallet className="h-4 w-4 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] text-muted-foreground font-medium">
-              Net Worth
-            </p>
-            {loading ? (
-              <div className="h-5 w-24 bg-muted/50 rounded animate-pulse" />
-            ) : (
-              <p
-                className="text-sm font-bold font-mono text-income truncate"
-                style={{
-                  textShadow:
-                    theme === "dark"
-                      ? "0 0 12px rgba(139, 92, 246, 0.4)"
-                      : "none",
-                }}
-              >
-                <AnimatedNumber value={netWorth} formatFn={formatCurrency} />
+        {/* Top row: Net worth + projected date */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background:
+                  theme === "dark"
+                    ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 100%)"
+                    : "linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%)",
+              }}
+            >
+              <Wallet className="h-4 w-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted-foreground font-medium">
+                Net Worth
               </p>
-            )}
+              {loading ? (
+                <div className="h-5 w-24 bg-muted/50 rounded animate-pulse" />
+              ) : (
+                <p
+                  className="text-sm font-bold font-mono text-income truncate"
+                  style={{
+                    textShadow:
+                      theme === "dark"
+                        ? "0 0 12px rgba(139, 92, 246, 0.4)"
+                        : "none",
+                  }}
+                >
+                  <AnimatedNumber value={netWorth} formatFn={formatCurrency} />
+                </p>
+              )}
+            </div>
           </div>
+          
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
         </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+
+        {/* Progress bar with goal info inside */}
+        <div className="relative h-3.5 bg-muted/50 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${percentToTarget}%` }}
+            transition={{
+              duration: 1,
+              ease: [0.25, 0.46, 0.45, 0.94],
+              delay: 0.2,
+            }}
+            className="h-full rounded-full relative overflow-hidden"
+            style={{ background: getProgressGradient() }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
+              }}
+            />
+          </motion.div>
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.3 }}
+            className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-foreground/70"
+          >
+            {goalReached ? (
+              <span className="flex items-center gap-1">
+                <Sparkles className="h-2.5 w-2.5 text-amber-500" />
+                <span className="text-amber-500">₹1Cr reached!</span>
+              </span>
+            ) : hasGoalData ? (
+              <span>₹1Cr in {formatDuration(goalProgress.timeToGoal!.years, goalProgress.timeToGoal!.remainingMonths)}</span>
+            ) : (
+              <span>{percentToTarget.toFixed(1)}%</span>
+            )}
+          </motion.span>
+        </div>
       </button>
     </div>
   );
@@ -182,13 +268,6 @@ export function NetWorthEditDialog({
       setMonthlyIncome((userStats.monthly_income || 0).toString());
     }
   }, [open, userStats]);
-
-  const totalNetWorth = useMemo(() => {
-    return ASSET_CATEGORIES.reduce(
-      (sum, cat) => sum + (parseFloat(values[cat.key]) || 0),
-      0
-    );
-  }, [values]);
 
   async function handleSave() {
     if (!userStats?.id) {
@@ -237,7 +316,10 @@ export function NetWorthEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm max-h-[85vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-sm max-h-[85vh] overflow-y-auto"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader className="pb-2">
           <DialogTitle className="flex items-center gap-2 text-sm">
             <Wallet className="h-4 w-4 text-primary" />
@@ -246,24 +328,6 @@ export function NetWorthEditDialog({
         </DialogHeader>
 
         <div className="space-y-3">
-          {/* Total Net Worth Display */}
-          <div
-            className="p-3 rounded-lg"
-            style={{
-              background:
-                theme === "dark"
-                  ? "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%)"
-                  : "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%)",
-            }}
-          >
-            <p className="text-[10px] text-muted-foreground mb-0.5">
-              Calculated Net Worth
-            </p>
-            <p className="text-lg font-bold font-mono text-income">
-              <AnimatedNumber value={totalNetWorth} formatFn={formatCurrency} />
-            </p>
-          </div>
-
           {/* Asset Fields */}
           <div className="space-y-2">
             {ASSET_CATEGORIES.map((cat) => {
@@ -272,7 +336,7 @@ export function NetWorthEditDialog({
               return (
                 <div key={cat.key} className="flex items-center gap-2">
                   <div
-                    className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${colors.bg}`}
+                    className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 mt-7 ${colors.bg}`}
                   >
                     <Icon className={`h-3.5 w-3.5 ${colors.text}`} />
                   </div>

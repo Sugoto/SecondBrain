@@ -10,6 +10,7 @@ import {
   RefreshCw,
   PiggyBank,
   Target,
+  ChevronDown,
 } from "lucide-react";
 import { formatCurrency } from "./constants";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
@@ -22,6 +23,7 @@ interface InvestmentCalculatorProps {
 
 export function InvestmentCalculator({ theme }: InvestmentCalculatorProps) {
   const [mode, setMode] = useState<CalculatorMode>("sip");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // SIP inputs
   const [sipAmount, setSipAmount] = useState<string>("10000");
@@ -73,9 +75,12 @@ export function InvestmentCalculator({ theme }: InvestmentCalculatorProps) {
       transition={{ duration: 0.3, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <Card className="p-0 overflow-hidden">
-        {/* Header with mode toggle */}
-        <div className="p-3 border-b border-border">
-          <div className="flex items-center gap-2.5 mb-3">
+        {/* Collapsible Header */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+        >
+          <div className="flex items-center gap-2.5">
             <div
               className="h-8 w-8 rounded-lg flex items-center justify-center"
               style={{
@@ -86,47 +91,64 @@ export function InvestmentCalculator({ theme }: InvestmentCalculatorProps) {
             >
               <Calculator className="h-4 w-4 text-primary" />
             </div>
-            <div>
+            <div className="text-left">
               <h3 className="text-sm font-semibold">Investment Calculator</h3>
               <p className="text-[10px] text-muted-foreground">Plan your investments</p>
             </div>
           </div>
-
-          {/* Mode Toggle */}
-          <div
-            className="flex p-0.5 rounded-lg"
-            style={{
-              backgroundColor: theme === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
-            }}
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <button
-              onClick={() => setMode("sip")}
-              className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200 ${
-                mode === "sip"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </motion.div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="overflow-hidden"
             >
-              <span className="flex items-center justify-center gap-1.5">
-                <RefreshCw className="h-3 w-3" />
-                SIP
-              </span>
-            </button>
-            <button
-              onClick={() => setMode("lumpsum")}
-              className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200 ${
-                mode === "lumpsum"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <span className="flex items-center justify-center gap-1.5">
-                <PiggyBank className="h-3 w-3" />
-                Lumpsum
-              </span>
-            </button>
-          </div>
-        </div>
+              {/* Mode Toggle */}
+              <div className="px-3 pb-3 border-t border-border pt-3">
+                <div
+                  className="flex p-0.5 rounded-lg"
+                  style={{
+                    backgroundColor: theme === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                  }}
+                >
+                  <button
+                    onClick={() => setMode("sip")}
+                    className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200 ${
+                      mode === "sip"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <RefreshCw className="h-3 w-3" />
+                      SIP
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setMode("lumpsum")}
+                    className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200 ${
+                      mode === "lumpsum"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span className="flex items-center justify-center gap-1.5">
+                      <PiggyBank className="h-3 w-3" />
+                      Lumpsum
+                    </span>
+                  </button>
+                </div>
+              </div>
 
         {/* Calculator Inputs */}
         <div className="p-3 space-y-3">
@@ -270,6 +292,9 @@ export function InvestmentCalculator({ theme }: InvestmentCalculatorProps) {
             </span>
           </div>
         </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
     </motion.div>
   );

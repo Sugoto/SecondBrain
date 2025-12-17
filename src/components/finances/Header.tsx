@@ -42,6 +42,7 @@ export function Header({
         icon={Wallet}
         iconGradient="linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)"
         iconShadow="0 4px 12px rgba(139, 92, 246, 0.3)"
+        accentColor="#8b5cf6"
       >
         <DateFilter
           activeView={activeView}

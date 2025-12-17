@@ -1,5 +1,5 @@
 import type { HealthStats, TDEEResult } from "./types";
-import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT } from "./types";
+import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT, WORKOUT_INTENSITY_FACTOR } from "./types";
 import type { ActivityLevel } from "@/lib/supabase";
 
 /**
@@ -19,8 +19,10 @@ export function calculateBMR(
 
 /**
  * Calculate TDEE and macro recommendations
+ * @param stats - Health stats including height, weight, age, gender
+ * @param multiplierOverride - Optional custom multiplier (e.g. intensity-adjusted)
  */
-export function calculateTDEE(stats: HealthStats): TDEEResult | null {
+export function calculateTDEE(stats: HealthStats, multiplierOverride?: number): TDEEResult | null {
   const { height_cm, weight_kg, age, gender, activity_level } = stats;
 
   // Check all required fields
@@ -30,9 +32,14 @@ export function calculateTDEE(stats: HealthStats): TDEEResult | null {
 
   const bmr = calculateBMR(weight_kg, height_cm, age, gender);
 
-  // Get activity multiplier
-  const activityData = ACTIVITY_LEVELS.find((a) => a.value === activity_level);
-  const multiplier = activityData?.multiplier ?? 1.2; // Default to sedentary
+  // Use override multiplier if provided, otherwise look up from activity level
+  let multiplier: number;
+  if (multiplierOverride !== undefined) {
+    multiplier = multiplierOverride;
+  } else {
+    const activityData = ACTIVITY_LEVELS.find((a) => a.value === activity_level);
+    multiplier = activityData?.multiplier ?? 1.2; // Default to sedentary
+  }
 
   const tdee = bmr * multiplier;
 
@@ -123,6 +130,7 @@ export function calculateActivityLevel(workoutDates: Set<string> | string[]): Ac
 
 /**
  * Get activity level info with workout frequency
+ * Applies intensity factor to account for workouts being at 75% of expected intensity
  */
 export function getActivityLevelInfo(workoutDates: Set<string> | string[]): {
   level: ActivityLevel;
@@ -150,12 +158,18 @@ export function getActivityLevelInfo(workoutDates: Set<string> | string[]): {
   const level = calculateActivityLevel(dates);
   const levelInfo = ACTIVITY_LEVELS.find(a => a.value === level) ?? ACTIVITY_LEVELS[0];
   
+  // Apply intensity factor: scale the additional activity above sedentary baseline
+  // Sedentary multiplier is the baseline (1.2)
+  const sedentaryMultiplier = ACTIVITY_LEVELS[0].multiplier; // 1.2
+  const extraActivity = levelInfo.multiplier - sedentaryMultiplier;
+  const adjustedMultiplier = sedentaryMultiplier + (extraActivity * WORKOUT_INTENSITY_FACTOR);
+  
   return {
     level,
     workoutsPerWeek: Math.round(avgPerWeek * 10) / 10,
     label: levelInfo.label,
     description: levelInfo.description,
-    multiplier: levelInfo.multiplier,
+    multiplier: Math.round(adjustedMultiplier * 1000) / 1000, // Round to 3 decimal places
   };
 }
 

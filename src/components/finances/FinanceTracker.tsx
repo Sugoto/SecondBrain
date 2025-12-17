@@ -366,7 +366,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
       {/* Header - Fixed on mobile */}
-      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background border-b border-border z-20">
+      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background z-20">
         <div className="max-w-6xl mx-auto p-4 md:p-6">
           <Header
             error={error}

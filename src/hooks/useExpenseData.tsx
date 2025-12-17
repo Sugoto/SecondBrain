@@ -6,7 +6,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import type { Transaction } from "@/lib/supabase";
+import type { Transaction, UserStats } from "@/lib/supabase";
 import type { ReactNode } from "react";
 
 const queryClient = new QueryClient({
@@ -25,6 +25,11 @@ const expenseKeys = {
   lists: () => [...expenseKeys.all, "list"] as const,
 };
 
+const userStatsKeys = {
+  all: ["userStats"] as const,
+  detail: () => [...userStatsKeys.all, "detail"] as const,
+};
+
 async function fetchTransactions(): Promise<Transaction[]> {
   const { data, error } = await supabase
     .from("transactions")
@@ -35,6 +40,20 @@ async function fetchTransactions(): Promise<Transaction[]> {
 
   if (error) throw error;
   return data || [];
+}
+
+async function fetchUserStats(): Promise<UserStats | null> {
+  const { data, error } = await supabase
+    .from("user_stats")
+    .select("*")
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user stats:", error);
+    return null;
+  }
+  return data;
 }
 
 export function ExpenseDataProvider({ children }: { children: ReactNode }) {
@@ -157,5 +176,34 @@ export function useExpenseData() {
 
     invalidate: () =>
       queryClient.invalidateQueries({ queryKey: expenseKeys.all }),
+  };
+}
+
+export function useUserStats() {
+  const queryClient = useQueryClient();
+
+  const {
+    data: userStats = null,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: userStatsKeys.detail(),
+    queryFn: fetchUserStats,
+    staleTime: 10 * 60 * 1000, // 10 minutes - user stats change less frequently
+  });
+
+  const updateUserStats = (updated: UserStats) => {
+    queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
+  };
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: userStatsKeys.all });
+
+  return {
+    userStats,
+    loading,
+    error: error ? (error as Error).message : null,
+    updateUserStats,
+    invalidate,
   };
 }

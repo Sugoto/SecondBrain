@@ -26,6 +26,92 @@ import { getMonthlyAmount, isProratedInMonth } from "./utils";
 import type { ChartMode } from "./types";
 import { useTheme } from "@/hooks/useTheme";
 
+// Custom label renderer with connecting lines for pie chart
+interface LabelProps {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+  name: string;
+  color: string;
+  theme: "light" | "dark";
+}
+
+const RADIAN = Math.PI / 180;
+
+function renderCustomLabel({
+  cx,
+  cy,
+  midAngle,
+  outerRadius,
+  percent,
+  name,
+  color,
+  theme,
+}: LabelProps) {
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+
+  // Start point on the arc edge
+  const sx = cx + (outerRadius + 4) * cos;
+  const sy = cy + (outerRadius + 4) * sin;
+
+  // Elbow point
+  const mx = cx + (outerRadius + 18) * cos;
+  const my = cy + (outerRadius + 18) * sin;
+
+  // End point (horizontal extension)
+  const ex = mx + (cos >= 0 ? 1 : -1) * 16;
+  const ey = my;
+
+  // Text anchor based on which side
+  const textAnchor = cos >= 0 ? "start" : "end";
+
+  const textColor = theme === "dark" ? "#a1a1aa" : "#71717a";
+  const percentage = (percent * 100).toFixed(0);
+
+  return (
+    <g>
+      {/* Connecting line */}
+      <path
+        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
+        stroke={color}
+        strokeWidth={1.5}
+        fill="none"
+        strokeOpacity={0.6}
+      />
+      {/* Small circle at the end */}
+      <circle cx={ex} cy={ey} r={2} fill={color} />
+      {/* Label text */}
+      <text
+        x={ex + (cos >= 0 ? 4 : -4)}
+        y={ey}
+        textAnchor={textAnchor}
+        fill={textColor}
+        fontSize={9}
+        fontWeight={500}
+        dominantBaseline="central"
+      >
+        {name}
+      </text>
+      {/* Percentage below */}
+      <text
+        x={ex + (cos >= 0 ? 4 : -4)}
+        y={ey + 10}
+        textAnchor={textAnchor}
+        fill={color}
+        fontSize={8}
+        fontWeight={600}
+        dominantBaseline="central"
+      >
+        {percentage}%
+      </text>
+    </g>
+  );
+}
+
 interface TrendsViewProps {
   transactions: Transaction[];
   chartMode: ChartMode;
@@ -324,10 +410,10 @@ export function TrendsView({
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Card className="p-4">
-            <h3 className="text-sm font-medium mb-2 text-center">
+            <h3 className="text-sm font-medium text-center">
               Spending by Category
             </h3>
-            <div className="h-52">
+            <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   {/* SVG definitions for glow effects */}
@@ -372,8 +458,8 @@ export function TrendsView({
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={80}
+                    innerRadius={45}
+                    outerRadius={65}
                     paddingAngle={3}
                     dataKey="value"
                     animationBegin={0}
@@ -384,6 +470,7 @@ export function TrendsView({
                     activeIndex={activeIndex}
                     onMouseEnter={(_, index) => setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(undefined)}
+                    label={(props) => renderCustomLabel({ ...props, theme })}
                     activeShape={(props: unknown) => {
                       const {
                         cx,
@@ -504,20 +591,6 @@ export function TrendsView({
                   />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 mt-2">
-              {pieData.map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center gap-1 text-[10px]"
-                >
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-muted-foreground">{item.name}</span>
-                </div>
-              ))}
             </div>
           </Card>
         </motion.div>

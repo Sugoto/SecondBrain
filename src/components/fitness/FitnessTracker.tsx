@@ -50,14 +50,17 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
 
   const tdee = useMemo(() => {
     if (!userStats) return null;
-    return calculateTDEE({
-      height_cm: userStats.height_cm,
-      weight_kg: userStats.weight_kg,
-      age: userStats.age,
-      gender: userStats.gender,
-      activity_level: activityInfo.level, // Use dynamic activity level
-    });
-  }, [userStats, activityInfo.level]);
+    return calculateTDEE(
+      {
+        height_cm: userStats.height_cm,
+        weight_kg: userStats.weight_kg,
+        age: userStats.age,
+        gender: userStats.gender,
+        activity_level: activityInfo.level,
+      },
+      activityInfo.multiplier // Use intensity-adjusted multiplier
+    );
+  }, [userStats, activityInfo.level, activityInfo.multiplier]);
 
   // Calculate water intake
   const waterLiters = userStats?.weight_kg ? userStats.weight_kg * 0.033 : 0;
@@ -245,12 +248,13 @@ export function HealthTracker({ activeView }: HealthTrackerProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <header className="shrink-0 bg-background border-b border-border p-4">
+      <header className="shrink-0 bg-background p-4">
         <PageHeader
           title="Health"
           icon={Heart}
           iconGradient="linear-gradient(135deg, #ef4444 0%, #f97316 100%)"
           iconShadow="0 4px 12px rgba(239, 68, 68, 0.3)"
+          accentColor="#ef4444"
         />
       </header>
 
@@ -281,7 +285,6 @@ export function HealthTracker({ activeView }: HealthTrackerProps) {
   );
 }
 
-// Export the nav items for the health section
 export const HEALTH_NAV_ITEMS = [
   { id: "nutrition" as const, icon: Apple, label: "Nutrition" },
   { id: "workouts" as const, icon: Dumbbell, label: "Workouts" },

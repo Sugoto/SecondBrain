@@ -14,6 +14,111 @@ export function calculateNetWorth(stats: UserStats | null): number {
   );
 }
 
+// Calculate average monthly savings from transaction history and income
+export function calculateMonthlySavings(
+  transactions: Transaction[],
+  monthlyIncome: number | null
+): { monthlySavings: number } {
+  // Use monthly income as the base
+  const income = monthlyIncome || 0;
+  
+  if (!transactions.length || income === 0) {
+    // No data - assume 30% savings rate
+    return { monthlySavings: income * 0.3 };
+  }
+
+  // Get transactions from last 3 months for expense average
+  const now = new Date();
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  
+  const recentTransactions = transactions.filter((txn) => {
+    const txnDate = new Date(txn.date);
+    return txnDate >= threeMonthsAgo && txn.type === "expense";
+  });
+
+  if (!recentTransactions.length) {
+    return { monthlySavings: income * 0.3 };
+  }
+
+  // Group expenses by month (excluding investments - they're savings, not expenses)
+  const monthlyExpenses: Record<string, number> = {};
+  
+  recentTransactions.forEach((txn) => {
+    if (txn.category === "Investments") return; // Investments are savings
+    
+    const date = new Date(txn.date);
+    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+    monthlyExpenses[monthKey] = (monthlyExpenses[monthKey] || 0) + txn.amount;
+  });
+
+  const months = Object.values(monthlyExpenses);
+  if (months.length === 0) {
+    return { monthlySavings: income * 0.3 };
+  }
+
+  const avgExpenses = months.reduce((sum, exp) => sum + exp, 0) / months.length;
+  const monthlySavings = Math.max(0, income - avgExpenses);
+
+  return { monthlySavings };
+}
+
+// Calculate time to reach target net worth using compound growth with monthly contributions
+export function calculateTimeToGoal(
+  currentNetWorth: number,
+  monthlySavings: number,
+  targetNetWorth: number = 10000000, // 1 Crore default
+  annualReturnRate: number = 0.12 // 12% default
+): { months: number; years: number; remainingMonths: number; targetDate: Date } | null {
+  // Already at or above target
+  if (currentNetWorth >= targetNetWorth) {
+    return { months: 0, years: 0, remainingMonths: 0, targetDate: new Date() };
+  }
+
+  // No savings means we can't reach the goal through investing
+  if (monthlySavings <= 0) {
+    return null;
+  }
+
+  const monthlyRate = annualReturnRate / 12;
+  const target = targetNetWorth;
+  const principal = currentNetWorth;
+  const pmt = monthlySavings;
+
+  // Binary search for n (months) where:
+  // FV = P(1+r)^n + PMT × ((1+r)^n - 1) / r >= target
+  let low = 1;
+  let high = 600; // Max 50 years
+  
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    const growthFactor = Math.pow(1 + monthlyRate, mid);
+    const futureValue = principal * growthFactor + pmt * ((growthFactor - 1) / monthlyRate);
+    
+    if (futureValue >= target) {
+      high = mid;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  // Verify the result
+  const months = low;
+  const growthFactor = Math.pow(1 + monthlyRate, months);
+  const finalValue = principal * growthFactor + pmt * ((growthFactor - 1) / monthlyRate);
+  
+  if (finalValue < target) {
+    return null; // Can't reach goal within 50 years
+  }
+
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  
+  const targetDate = new Date();
+  targetDate.setMonth(targetDate.getMonth() + months);
+
+  return { months, years, remainingMonths, targetDate };
+}
+
 // Proration helpers
 /**
  * Get the monthly amount for a transaction (handles proration)

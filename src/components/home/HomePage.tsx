@@ -151,6 +151,7 @@ export function HomePage() {
             icon={Brain}
             iconGradient="linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)"
             iconShadow="0 4px 12px rgba(139, 92, 246, 0.3)"
+            accentColor="#8b5cf6"
           />
         </motion.div>
       </header>
