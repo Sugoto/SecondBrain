@@ -1,7 +1,7 @@
 export type AppSection = "home" | "finances" | "fitness";
 
 export type ExpenseView = "trends" | "expenses" | "categories";
-export type FitnessView = "dashboard" | "workouts" | "nutrition";
+export type HealthView = "nutrition" | "workouts";
 
 export interface NavItem {
   id: string;

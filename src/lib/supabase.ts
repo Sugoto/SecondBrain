@@ -29,4 +29,12 @@ export type UserStats = {
   ppf: number;
   epf: number;
   monthly_income: number | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  age: number | null;
+  gender: "male" | "female" | null;
+  activity_level: "sedentary" | "light" | "moderate" | "active" | null;
+  workout_dates: string[] | null;
 };
+
+export type ActivityLevel = "sedentary" | "light" | "moderate" | "active";

@@ -198,7 +198,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
 
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   // Swipe navigation for mobile
   const touchStartX = useRef<number | null>(null);
@@ -369,13 +369,11 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
       <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background border-b border-border z-20">
         <div className="max-w-6xl mx-auto p-4 md:p-6">
           <Header
-            theme={theme}
             error={error}
             activeView={activeView}
             timeFilter={timeFilter}
             chartMode={chartMode}
             customDateRange={customDateRange}
-            onToggleTheme={toggleTheme}
             onAddExpense={openAddExpense}
             onTimeFilterChange={setTimeFilter}
             onChartModeChange={setChartMode}

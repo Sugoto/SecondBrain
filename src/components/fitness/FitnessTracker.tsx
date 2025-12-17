@@ -1,12 +1,30 @@
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dumbbell, Apple, LayoutDashboard } from "lucide-react";
+import {
+  Dumbbell,
+  Apple,
+  Heart,
+  Flame,
+  Droplet,
+  GlassWater,
+  ChevronRight,
+  Beef,
+  Wheat,
+  Activity,
+} from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { Card } from "@/components/ui/card";
-import type { FitnessView } from "@/types/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/PageHeader";
+import type { HealthView } from "@/types/navigation";
+import { useHealthData } from "@/hooks/useHealthData";
+import { HealthStatsEditDialog } from "./HealthStatsCard";
+import { WorkoutCalendar } from "./WorkoutCalendar";
+import { calculateTDEE, formatNumber, getActivityLevelInfo } from "./utils";
 
-interface FitnessTrackerProps {
-  activeView: FitnessView;
-  onViewChange: (view: FitnessView) => void;
+interface HealthTrackerProps {
+  activeView: HealthView;
+  onViewChange: (view: HealthView) => void;
 }
 
 const VIEW_ANIMATION = {
@@ -16,98 +34,232 @@ const VIEW_ANIMATION = {
   transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] as const },
 };
 
-function DashboardView() {
+interface NutritionViewProps {
+  onEditHealth: () => void;
+}
+
+function NutritionView({ onEditHealth }: NutritionViewProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { userStats, loading, workoutDates } = useHealthData();
+
+  // Calculate dynamic activity level based on workout frequency
+  const activityInfo = useMemo(() => {
+    return getActivityLevelInfo(workoutDates);
+  }, [workoutDates]);
+
+  const tdee = useMemo(() => {
+    if (!userStats) return null;
+    return calculateTDEE({
+      height_cm: userStats.height_cm,
+      weight_kg: userStats.weight_kg,
+      age: userStats.age,
+      gender: userStats.gender,
+      activity_level: activityInfo.level, // Use dynamic activity level
+    });
+  }, [userStats, activityInfo.level]);
+
+  // Calculate water intake
+  const waterLiters = userStats?.weight_kg ? userStats.weight_kg * 0.033 : 0;
+
+  if (loading) {
+    return (
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  const hasHealthData =
+    userStats?.height_cm &&
+    userStats?.weight_kg &&
+    userStats?.age &&
+    userStats?.gender;
+
+  // Only show if user has health data
+  if (!hasHealthData || !tdee) {
+    return null;
+  }
 
   return (
     <div className="p-4 space-y-4">
-      <Card
-        className="p-6"
-        style={{
-          background: isDark
-            ? "rgba(30, 30, 35, 0.8)"
-            : "rgba(255, 255, 255, 0.9)",
-          backdropFilter: "blur(16px)",
-        }}
+      {/* Main TDEE Card - Clickable */}
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        onClick={onEditHealth}
+        className="w-full text-left"
       >
-        <h2 className="text-lg font-semibold mb-4">Today's Summary</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-muted/50 rounded-xl">
-            <p className="text-2xl font-bold text-emerald-500">0</p>
-            <p className="text-xs text-muted-foreground">Workouts</p>
-          </div>
-          <div className="text-center p-4 bg-muted/50 rounded-xl">
-            <p className="text-2xl font-bold text-orange-500">0</p>
-            <p className="text-xs text-muted-foreground">Calories</p>
-          </div>
-        </div>
-      </Card>
+        <Card
+          className="p-5 overflow-hidden relative"
+          style={{
+            background: isDark
+              ? "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%)"
+              : "linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(20, 184, 166, 0.03) 100%)",
+            border: isDark
+              ? "1px solid rgba(16, 185, 129, 0.2)"
+              : "1px solid rgba(16, 185, 129, 0.15)",
+          }}
+        >
+          {/* Decorative gradient */}
+          <div
+            className="absolute top-0 right-0 w-40 h-40 -mr-12 -mt-12 opacity-20 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, transparent 70%)",
+            }}
+          />
 
-      <Card className="p-6 text-center text-muted-foreground">
-        <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">Start tracking your fitness journey</p>
-        <p className="text-xs mt-1">Coming soon...</p>
-      </Card>
+          <div className="relative z-10">
+            {/* Header with Daily Target */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Flame className="h-5 w-5 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Daily Target
+                  </p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs font-mono text-muted-foreground line-through">
+                      {formatNumber(tdee.tdee)}
+                    </span>
+                    <span className="text-2xl font-bold font-mono text-emerald-500">
+                      {formatNumber(tdee.targetCalories)}
+                    </span>
+                    <span className="text-sm font-normal text-muted-foreground">
+                      kcal
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+
+            {/* Activity Level Badge */}
+            <div
+              className="flex items-center justify-between gap-2 mb-3 px-3 py-2 rounded-lg w-full"
+              style={{
+                background: isDark
+                  ? "rgba(139, 92, 246, 0.15)"
+                  : "rgba(139, 92, 246, 0.1)",
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5 text-violet-500" />
+                <span className="text-[10px] font-medium text-violet-500">
+                  {activityInfo.label} Activity
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-medium text-violet-500">
+                {activityInfo.workoutsPerWeek}/week · ×{activityInfo.multiplier}
+              </span>
+            </div>
+
+            {/* Macros + Water Grid */}
+            <div className="grid grid-cols-4 gap-2">
+              <div
+                className="p-2 rounded-xl text-center"
+                style={{
+                  background: isDark
+                    ? "rgba(245, 158, 11, 0.1)"
+                    : "rgba(245, 158, 11, 0.08)",
+                }}
+              >
+                <Beef className="h-3.5 w-3.5 text-amber-500 mx-auto mb-0.5" />
+                <p className="text-sm font-bold font-mono text-amber-500">
+                  {tdee.protein}g
+                </p>
+                <p className="text-[8px] text-muted-foreground">Protein</p>
+              </div>
+              <div
+                className="p-2 rounded-xl text-center"
+                style={{
+                  background: isDark
+                    ? "rgba(59, 130, 246, 0.1)"
+                    : "rgba(59, 130, 246, 0.08)",
+                }}
+              >
+                <Wheat className="h-3.5 w-3.5 text-blue-500 mx-auto mb-0.5" />
+                <p className="text-sm font-bold font-mono text-blue-500">
+                  {tdee.carbs}g
+                </p>
+                <p className="text-[8px] text-muted-foreground">Carbs</p>
+              </div>
+              <div
+                className="p-2 rounded-xl text-center"
+                style={{
+                  background: isDark
+                    ? "rgba(244, 63, 94, 0.1)"
+                    : "rgba(244, 63, 94, 0.08)",
+                }}
+              >
+                <Droplet className="h-3.5 w-3.5 text-rose-500 mx-auto mb-0.5" />
+                <p className="text-sm font-bold font-mono text-rose-500">
+                  {tdee.fat}g
+                </p>
+                <p className="text-[8px] text-muted-foreground">Fat</p>
+              </div>
+              <div
+                className="p-2 rounded-xl text-center"
+                style={{
+                  background: isDark
+                    ? "rgba(6, 182, 212, 0.1)"
+                    : "rgba(6, 182, 212, 0.08)",
+                }}
+              >
+                <GlassWater className="h-3.5 w-3.5 text-cyan-500 mx-auto mb-0.5" />
+                <p className="text-sm font-bold font-mono text-cyan-500">
+                  {waterLiters.toFixed(1)}L
+                </p>
+                <p className="text-[8px] text-muted-foreground">Water</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </motion.button>
     </div>
   );
 }
 
 function WorkoutsView() {
   return (
-    <div className="p-4">
-      <Card className="p-6 text-center text-muted-foreground">
-        <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-30" />
-        <h2 className="font-semibold mb-1">Workouts</h2>
-        <p className="text-sm">Log and track your exercises</p>
-        <p className="text-xs mt-2">Coming soon...</p>
-      </Card>
+    <div className="p-4 space-y-4">
+      <WorkoutCalendar />
     </div>
   );
 }
 
-function NutritionView() {
-  return (
-    <div className="p-4">
-      <Card className="p-6 text-center text-muted-foreground">
-        <Apple className="h-12 w-12 mx-auto mb-3 opacity-30" />
-        <h2 className="font-semibold mb-1">Nutrition</h2>
-        <p className="text-sm">Track meals and macros</p>
-        <p className="text-xs mt-2">Coming soon...</p>
-      </Card>
-    </div>
-  );
-}
-
-export function FitnessTracker({ activeView }: FitnessTrackerProps) {
+export function HealthTracker({ activeView }: HealthTrackerProps) {
+  const { userStats, updateInCache } = useHealthData();
+  const [showHealthDialog, setShowHealthDialog] = useState(false);
 
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <header className="shrink-0 bg-background border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <div
-            className="h-10 w-10 rounded-xl flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
-              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
-            }}
-          >
-            <Dumbbell className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">Fitness & Nutrition</h1>
-            <p className="text-xs text-muted-foreground">Track your health</p>
-          </div>
-        </div>
+        <PageHeader
+          title="Health"
+          icon={Heart}
+          iconGradient="linear-gradient(135deg, #ef4444 0%, #f97316 100%)"
+          iconShadow="0 4px 12px rgba(239, 68, 68, 0.3)"
+        />
       </header>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-20">
         <AnimatePresence mode="wait">
-          {activeView === "dashboard" && (
-            <motion.div key="dashboard" {...VIEW_ANIMATION}>
-              <DashboardView />
+          {activeView === "nutrition" && (
+            <motion.div key="nutrition" {...VIEW_ANIMATION}>
+              <NutritionView onEditHealth={() => setShowHealthDialog(true)} />
             </motion.div>
           )}
           {activeView === "workouts" && (
@@ -115,21 +267,22 @@ export function FitnessTracker({ activeView }: FitnessTrackerProps) {
               <WorkoutsView />
             </motion.div>
           )}
-          {activeView === "nutrition" && (
-            <motion.div key="nutrition" {...VIEW_ANIMATION}>
-              <NutritionView />
-            </motion.div>
-          )}
         </AnimatePresence>
       </main>
+
+      {/* Health Stats Edit Dialog */}
+      <HealthStatsEditDialog
+        open={showHealthDialog}
+        onOpenChange={setShowHealthDialog}
+        userStats={userStats ?? null}
+        onUpdate={updateInCache}
+      />
     </div>
   );
 }
 
-// Export the nav items for the fitness section
-export const FITNESS_NAV_ITEMS = [
-  { id: "dashboard" as const, icon: LayoutDashboard, label: "Dashboard" },
-  { id: "workouts" as const, icon: Dumbbell, label: "Workouts" },
+// Export the nav items for the health section
+export const HEALTH_NAV_ITEMS = [
   { id: "nutrition" as const, icon: Apple, label: "Nutrition" },
+  { id: "workouts" as const, icon: Dumbbell, label: "Workouts" },
 ];
-

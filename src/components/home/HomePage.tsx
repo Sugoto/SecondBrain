@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Wallet, Dumbbell, Brain, Sparkles } from "lucide-react";
+import { Brain, Sparkles } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData } from "@/hooks/useExpenseData";
 import { formatCurrency } from "@/components/finances/constants";
@@ -8,11 +8,7 @@ import {
   getCategoryTotals,
   generateSpendingSummary,
 } from "@/components/finances/utils";
-import type { AppSection } from "@/types/navigation";
-
-interface HomePageProps {
-  onNavigate: (section: AppSection) => void;
-}
+import { PageHeader } from "@/components/shared/PageHeader";
 
 function SummaryText({ text }: { text: string }) {
   const parts = text.split(/(₹[\d,.]+k?)/g);
@@ -77,7 +73,7 @@ function SpendingSummaryCard() {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.3, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div
         className="p-3.5 rounded-xl overflow-hidden relative"
@@ -140,130 +136,28 @@ function SpendingSummaryCard() {
   );
 }
 
-const APP_CARDS = [
-  {
-    id: "finances" as const,
-    title: "Finances",
-    description: "Track spending, manage budgets, analyze trends",
-    icon: Wallet,
-    gradient: "from-violet-500 to-purple-600",
-    shadowColor: "rgba(139, 92, 246, 0.4)",
-  },
-  {
-    id: "fitness" as const,
-    title: "Fitness & Nutrition",
-    description: "Workouts, meals, and health tracking",
-    icon: Dumbbell,
-    gradient: "from-emerald-500 to-teal-600",
-    shadowColor: "rgba(16, 185, 129, 0.4)",
-  },
-];
-
-export function HomePage({ onNavigate }: HomePageProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
+export function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="pt-12 pb-8 px-6">
+      <header className="pt-8 pb-6 px-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-3"
         >
-          <div
-            className="h-12 w-12 rounded-2xl flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
-              boxShadow: "0 8px 24px rgba(139, 92, 246, 0.4)",
-            }}
-          >
-            <Brain className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Sugoto's Second Brain</h1>
-            <p className="text-sm text-muted-foreground">A personal hub</p>
-          </div>
+          <PageHeader
+            title="Second Brain"
+            icon={Brain}
+            iconGradient="linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)"
+            iconShadow="0 4px 12px rgba(139, 92, 246, 0.3)"
+          />
         </motion.div>
       </header>
 
-      {/* App Cards */}
+      {/* Main Content */}
       <main className="px-6 space-y-4">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-sm text-muted-foreground"
-        >
-          What would you like to manage today?
-        </motion.p>
-
-        <div className="space-y-4">
-          {APP_CARDS.map((card, index) => {
-            const Icon = card.icon;
-            return (
-              <motion.button
-                key={card.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => onNavigate(card.id)}
-                className="w-full text-left"
-              >
-                <div
-                  className="relative p-5 rounded-2xl overflow-hidden"
-                  style={{
-                    background: isDark
-                      ? "rgba(30, 30, 35, 0.8)"
-                      : "rgba(255, 255, 255, 0.9)",
-                    backdropFilter: "blur(16px)",
-                    WebkitBackdropFilter: "blur(16px)",
-                    border: isDark
-                      ? "1px solid rgba(63, 63, 70, 0.5)"
-                      : "1px solid rgba(228, 228, 231, 0.8)",
-                    boxShadow: `0 8px 32px ${card.shadowColor}`,
-                  }}
-                >
-                  {/* Gradient accent */}
-                  <div
-                    className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${card.gradient}`}
-                  />
-
-                  {/* Glass shine */}
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: isDark
-                        ? "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%)"
-                        : "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%)",
-                    }}
-                  />
-
-                  <div className="relative flex items-start gap-4">
-                    <div
-                      className={`h-12 w-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${card.gradient}`}
-                    >
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-lg font-semibold">{card.title}</h2>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        {card.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.button>
-            );
-          })}
-
-          {/* Spending Summary Card - below the cards */}
-          <SpendingSummaryCard />
-        </div>
+        <SpendingSummaryCard />
       </main>
 
       {/* Footer */}

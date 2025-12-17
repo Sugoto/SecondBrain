@@ -5,13 +5,13 @@ import { ExpenseDataProvider } from "./hooks/useExpenseData";
 import { FinanceTracker } from "./components/finances";
 import { HomePage } from "./components/home/HomePage";
 import {
-  FitnessTracker,
-  FITNESS_NAV_ITEMS,
+  HealthTracker,
+  HEALTH_NAV_ITEMS,
 } from "./components/fitness/FitnessTracker";
 import { DynamicBottomNav } from "./components/navigation/DynamicBottomNav";
 import { HOME_NAV_ITEMS } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
-import type { AppSection, FitnessView } from "./types/navigation";
+import type { AppSection, HealthView } from "./types/navigation";
 
 const PAGE_ANIMATION = {
   initial: { opacity: 0, x: 50 },
@@ -22,14 +22,14 @@ const PAGE_ANIMATION = {
 
 function AppContent() {
   const [currentSection, setCurrentSection] = useState<AppSection>("home");
-  const [fitnessView, setFitnessView] = useState<FitnessView>("dashboard");
+  const [healthView, setHealthView] = useState<HealthView>("nutrition");
 
   const getNavItems = () => {
     switch (currentSection) {
       case "finances":
         return [];
       case "fitness":
-        return FITNESS_NAV_ITEMS;
+        return HEALTH_NAV_ITEMS;
       default:
         return HOME_NAV_ITEMS;
     }
@@ -38,7 +38,7 @@ function AppContent() {
   const getActiveView = () => {
     switch (currentSection) {
       case "fitness":
-        return fitnessView;
+        return healthView;
       default:
         return currentSection;
     }
@@ -49,7 +49,7 @@ function AppContent() {
       // Navigate to sub-section
       setCurrentSection(view as AppSection);
     } else if (currentSection === "fitness") {
-      setFitnessView(view as FitnessView);
+      setHealthView(view as HealthView);
     }
   };
 
@@ -66,7 +66,7 @@ function AppContent() {
       <AnimatePresence mode="wait">
         {currentSection === "home" && (
           <motion.div key="home" className="h-full" {...PAGE_ANIMATION}>
-            <HomePage onNavigate={handleNavigate} />
+            <HomePage />
           </motion.div>
         )}
 
@@ -78,9 +78,9 @@ function AppContent() {
 
         {currentSection === "fitness" && (
           <motion.div key="fitness" className="h-full" {...PAGE_ANIMATION}>
-            <FitnessTracker
-              activeView={fitnessView}
-              onViewChange={(view) => setFitnessView(view)}
+            <HealthTracker
+              activeView={healthView}
+              onViewChange={(view) => setHealthView(view)}
             />
           </motion.div>
         )}
