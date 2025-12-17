@@ -57,10 +57,6 @@ function AppContent() {
     setCurrentSection("home");
   };
 
-  const handleNavigate = (section: AppSection) => {
-    setCurrentSection(section);
-  };
-
   return (
     <div className="h-[100dvh] bg-background overflow-hidden">
       <AnimatePresence mode="wait">
