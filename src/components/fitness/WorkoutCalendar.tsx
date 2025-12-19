@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Dumbbell, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useHealthData } from "@/hooks/useHealthData";
 import { Card } from "@/components/ui/card";
@@ -97,7 +97,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
   };
 
   // Stats for current month
-  const monthStats = useMemo(() => {
+  const workoutCount = useMemo(() => {
     let count = 0;
     days.forEach((date) => {
       if (
@@ -107,41 +107,8 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
         count++;
       }
     });
-
-    // Calculate current streak
-    let streak = 0;
-    const checkDate = new Date(today);
-
-    // First check if today has a workout
-    const todayHasWorkout = workoutDates.has(formatDateKey(checkDate));
-
-    if (todayHasWorkout) {
-      // Count from today backwards
-      while (true) {
-        const key = formatDateKey(checkDate);
-        if (workoutDates.has(key)) {
-          streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-    } else {
-      // Start checking from yesterday
-      checkDate.setDate(checkDate.getDate() - 1);
-      while (true) {
-        const key = formatDateKey(checkDate);
-        if (workoutDates.has(key)) {
-          streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-    }
-
-    return { workoutCount: count, currentStreak: streak };
-  }, [days, currentMonth.month, workoutDates, today]);
+    return count;
+  }, [days, currentMonth.month, workoutDates]);
 
   const isToday = (date: Date) => formatDateKey(date) === todayKey;
 
@@ -179,7 +146,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
             variant="ghost"
             size="icon"
             onClick={goToPreviousMonth}
-            className="h-8 w-8 rounded-lg hover:bg-violet-500/10"
+            className="h-8 w-8 rounded-lg hover:bg-orange-500/10"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -198,7 +165,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
             variant="ghost"
             size="icon"
             onClick={goToNextMonth}
-            className="h-8 w-8 rounded-lg hover:bg-violet-500/10"
+            className="h-8 w-8 rounded-lg hover:bg-orange-500/10"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -258,7 +225,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                     }
                     ${
                       todayDate && !workout
-                        ? "ring-2 ring-violet-500/50 ring-offset-1 ring-offset-background"
+                        ? "ring-2 ring-orange-500/50 ring-offset-1 ring-offset-background"
                         : ""
                     }
                   `}
@@ -266,14 +233,14 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                     workout && inMonth
                       ? {
                           background: isDark
-                            ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(124, 58, 237, 0.2) 100%)"
-                            : "linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(124, 58, 237, 0.15) 100%)",
+                            ? "linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(234, 88, 12, 0.2) 100%)"
+                            : "linear-gradient(135deg, rgba(249, 115, 22, 0.25) 0%, rgba(234, 88, 12, 0.15) 100%)",
                           boxShadow: isDark
-                            ? "0 0 20px rgba(139, 92, 246, 0.3), inset 0 0 20px rgba(139, 92, 246, 0.1)"
-                            : "0 0 16px rgba(139, 92, 246, 0.25)",
+                            ? "0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1)"
+                            : "0 0 16px rgba(249, 115, 22, 0.25)",
                           border: isDark
-                            ? "1px solid rgba(139, 92, 246, 0.4)"
-                            : "1px solid rgba(139, 92, 246, 0.3)",
+                            ? "1px solid rgba(249, 115, 22, 0.4)"
+                            : "1px solid rgba(249, 115, 22, 0.3)",
                         }
                       : inMonth && !future
                       ? {
@@ -286,8 +253,8 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                 >
                   <span
                     className={`
-                      ${workout && inMonth ? "text-violet-500 font-bold" : ""}
-                      ${todayDate ? "text-violet-500" : ""}
+                      ${workout && inMonth ? "text-orange-500 font-bold" : ""}
+                      ${todayDate ? "text-orange-500" : ""}
                     `}
                   >
                     {date.getDate()}
@@ -306,10 +273,10 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                       className="absolute -top-0.5 -right-0.5"
                     >
                       <Dumbbell
-                        className="h-2.5 w-2.5 text-violet-500"
+                        className="h-2.5 w-2.5 text-orange-500"
                         style={{
                           filter:
-                            "drop-shadow(0 0 3px rgba(139, 92, 246, 0.6))",
+                            "drop-shadow(0 0 3px rgba(249, 115, 22, 0.6))",
                         }}
                       />
                     </motion.div>
@@ -325,7 +292,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.3 }}
-          className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t"
+          className="mt-4 pt-4 border-t"
           style={{
             borderColor: isDark
               ? "rgba(255, 255, 255, 0.06)"
@@ -337,53 +304,25 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
             className="p-3 rounded-xl text-center"
             style={{
               background: isDark
-                ? "rgba(139, 92, 246, 0.1)"
-                : "rgba(139, 92, 246, 0.08)",
+                ? "rgba(249, 115, 22, 0.1)"
+                : "rgba(249, 115, 22, 0.08)",
             }}
           >
             <div className="flex items-center justify-center gap-1.5 mb-1">
-              <Dumbbell className="h-3.5 w-3.5 text-violet-500" />
+              <Dumbbell className="h-3.5 w-3.5 text-orange-500" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                 This Month
               </span>
             </div>
             <motion.p
-              key={monthStats.workoutCount}
+              key={workoutCount}
               initial={{ scale: 1.2, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-2xl font-bold font-mono text-violet-500"
+              className="text-2xl font-bold font-mono text-orange-500"
             >
-              {monthStats.workoutCount}
+              {workoutCount}
             </motion.p>
             <p className="text-[10px] text-muted-foreground">workouts</p>
-          </div>
-
-          {/* Current Streak */}
-          <div
-            className="p-3 rounded-xl text-center"
-            style={{
-              background: isDark
-                ? "rgba(99, 102, 241, 0.1)"
-                : "rgba(99, 102, 241, 0.08)",
-            }}
-          >
-            <div className="flex items-center justify-center gap-1.5 mb-1">
-              <Zap className="h-3.5 w-3.5 text-indigo-500" />
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                Streak
-              </span>
-            </div>
-            <motion.p
-              key={monthStats.currentStreak}
-              initial={{ scale: 1.2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-2xl font-bold font-mono text-indigo-500"
-            >
-              {monthStats.currentStreak}
-            </motion.p>
-            <p className="text-[10px] text-muted-foreground">
-              {monthStats.currentStreak === 1 ? "day" : "days"}
-            </p>
           </div>
         </motion.div>
       </Card>

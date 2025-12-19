@@ -442,10 +442,7 @@ export function TrendsView({
         >
           <Card className="p-4">
             <h3 className="text-sm font-medium text-center">
-              Spending by Category{" "}
-              <span className="text-[10px] font-normal text-muted-foreground">
-                (excluding bills)
-              </span>
+              Spending by Category
             </h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">

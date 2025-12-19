@@ -389,7 +389,7 @@ export function TransactionDialog({
               <Input
                 id="amount"
                 type="text"
-                inputMode="decimal"
+                inputMode="text"
                 placeholder="e.g. 100 or 100+50"
                 className="h-12 text-xl font-semibold font-mono pr-20 placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground/50"
                 style={{
