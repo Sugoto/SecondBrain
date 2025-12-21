@@ -182,8 +182,14 @@ interface FinanceTrackerProps {
 
 export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   // Data from React Query cache
-  const { transactions, loading, error, addToCache, updateInCache } =
-    useExpenseData();
+  const {
+    transactions,
+    loading,
+    error,
+    addToCache,
+    updateInCache,
+    removeFromCache,
+  } = useExpenseData();
 
   // Filter state
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
@@ -197,6 +203,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   // Dialog state - consolidated
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { theme } = useTheme();
 
@@ -289,6 +296,26 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
       // Don't close dialog on error - let user retry
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function deleteTransaction(txn: Transaction) {
+    setDeleting(true);
+    try {
+      const { error: deleteError } = await supabase
+        .from("transactions")
+        .delete()
+        .eq("id", txn.id);
+
+      if (deleteError) throw deleteError;
+      removeFromCache(txn.id);
+      toast.success("Transaction deleted");
+      setDialogState(null);
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      toast.error("Failed to delete transaction");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -432,9 +459,11 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
         transaction={dialogState?.transaction ?? null}
         isNew={dialogState?.mode === "new"}
         saving={saving}
+        deleting={deleting}
         onClose={() => setDialogState(null)}
         onSave={saveTransaction}
         onChange={handleDialogChange}
+        onDelete={deleteTransaction}
       />
 
       {/* Mobile FAB - only on expenses view */}

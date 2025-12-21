@@ -15,18 +15,36 @@ import {
   formatCurrency,
   getCategoryColor,
 } from "./constants";
-import { CalendarRange, Loader2, Calculator, ChevronDown } from "lucide-react";
+import {
+  CalendarRange,
+  Loader2,
+  Calculator,
+  ChevronDown,
+  Trash2,
+} from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TransactionDialogProps {
   transaction: Transaction | null;
   isNew: boolean;
   saving?: boolean;
+  deleting?: boolean;
   onClose: () => void;
   onSave: (transaction: Transaction) => void;
   onChange: (transaction: Transaction) => void;
+  onDelete?: (transaction: Transaction) => void;
 }
 
 // Safe math expression evaluator (no eval)
@@ -117,15 +135,18 @@ export function TransactionDialog({
   transaction,
   isNew,
   saving = false,
+  deleting = false,
   onClose,
   onSave,
   onChange,
+  onDelete,
 }: TransactionDialogProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [amountInput, setAmountInput] = useState<string>("");
   const [showDatetime, setShowDatetime] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [lastTransactionId, setLastTransactionId] = useState<string | null>(
     null
   );
@@ -674,6 +695,25 @@ export function TransactionDialog({
                         className="scale-75"
                       />
                     </div>
+
+                    {/* Delete button - only show for existing transactions */}
+                    {!isNew && onDelete && (
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        disabled={saving || deleting}
+                        className="w-full mt-4 h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
+                          boxShadow:
+                            "0 4px 14px rgba(220, 38, 38, 0.4), 0 0 0 1px rgba(220, 38, 38, 0.1)",
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Transaction
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -695,7 +735,7 @@ export function TransactionDialog({
             variant="outline"
             className="flex-1 h-11"
             onClick={onClose}
-            disabled={saving}
+            disabled={saving || deleting}
           >
             Cancel
           </Button>
@@ -710,7 +750,7 @@ export function TransactionDialog({
                 : undefined,
             }}
             onClick={() => onSave(transaction)}
-            disabled={saving}
+            disabled={saving || deleting}
           >
             {saving ? (
               <>
@@ -723,6 +763,52 @@ export function TransactionDialog({
           </Button>
         </div>
       </DialogContent>
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="max-w-sm rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </div>
+              Delete Transaction
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this transaction
+              {transaction.merchant && (
+                <span className="font-medium">
+                  {" "}
+                  from {transaction.merchant}
+                </span>
+              )}
+              ? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (onDelete) {
+                  onDelete(transaction);
+                }
+                setShowDeleteConfirm(false);
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

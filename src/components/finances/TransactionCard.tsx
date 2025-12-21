@@ -38,7 +38,9 @@ export const TransactionCard = memo(function TransactionCard({
         background: isDark
           ? "linear-gradient(135deg, hsl(var(--muted)/0.3) 0%, hsl(var(--muted)/0.15) 100%)"
           : "linear-gradient(135deg, hsl(var(--muted)/0.5) 0%, hsl(var(--muted)/0.25) 100%)",
-        borderColor: isDark ? "hsl(var(--muted-foreground)/0.2)" : "hsl(var(--muted-foreground)/0.15)",
+        borderColor: isDark
+          ? "hsl(var(--muted-foreground)/0.2)"
+          : "hsl(var(--muted-foreground)/0.15)",
       }
     : {
         background: isDark
@@ -61,8 +63,8 @@ export const TransactionCard = memo(function TransactionCard({
         boxShadow: isExcluded
           ? undefined
           : isDark
-            ? `0 8px 24px -4px ${categoryColor}20, 0 0 0 1px ${categoryColor}30`
-            : `0 8px 24px -4px ${categoryColor}15, 0 0 0 1px ${categoryColor}25`,
+          ? `0 8px 24px -4px ${categoryColor}20, 0 0 0 1px ${categoryColor}30`
+          : `0 8px 24px -4px ${categoryColor}15, 0 0 0 1px ${categoryColor}25`,
       }}
       whileTap={{ scale: isExcluded ? 0.995 : 0.98 }}
       onClick={onClick}
@@ -86,7 +88,9 @@ export const TransactionCard = memo(function TransactionCard({
       {/* Category Icon */}
       {CategoryIcon && (
         <div
-          className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center relative ${isExcluded ? "opacity-60" : ""}`}
+          className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center relative ${
+            isExcluded ? "opacity-60" : ""
+          }`}
           style={
             isExcluded
               ? {
@@ -108,8 +112,8 @@ export const TransactionCard = memo(function TransactionCard({
               color: isExcluded
                 ? "hsl(var(--muted-foreground))"
                 : isDark
-                  ? categoryColor
-                  : `color-mix(in srgb, ${categoryColor} 80%, black)`,
+                ? categoryColor
+                : `color-mix(in srgb, ${categoryColor} 80%, black)`,
             }}
           />
         </div>
@@ -118,7 +122,9 @@ export const TransactionCard = memo(function TransactionCard({
       {/* Main content - Category as primary, Merchant as subtitle */}
       <div className="min-w-0 flex-1 relative z-10">
         <p
-          className={`font-semibold truncate text-xs flex items-center gap-1 ${isExcluded ? "text-muted-foreground/70" : ""}`}
+          className={`font-semibold truncate text-xs flex items-center gap-1 ${
+            isExcluded ? "text-muted-foreground/70" : ""
+          }`}
           style={
             isExcluded
               ? undefined
@@ -151,7 +157,11 @@ export const TransactionCard = memo(function TransactionCard({
             </span>
           )}
         </p>
-        <p className={`text-[10px] truncate ${isExcluded ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
+        <p
+          className={`text-[10px] truncate ${
+            isExcluded ? "text-muted-foreground/50" : "text-muted-foreground"
+          }`}
+        >
           {txn.merchant || "Unknown"} • {formatDate(txn.date)}
           {txn.time && ` • ${formatTime(txn.time)}`}
         </p>
@@ -163,10 +173,10 @@ export const TransactionCard = memo(function TransactionCard({
           isExcluded
             ? "text-muted-foreground/50"
             : txn.type === "expense"
-              ? getMonthlyAmount(txn) >= 500
-                ? "text-red-500"
-                : "text-foreground"
-              : "text-income"
+            ? getMonthlyAmount(txn) >= 500
+              ? "text-red-500"
+              : "text-foreground"
+            : "text-income"
         }`}
       >
         {txn.type === "expense" ? "-" : "+"}
@@ -175,16 +185,17 @@ export const TransactionCard = memo(function TransactionCard({
 
       {/* Chevron */}
       <ChevronRight
-        className={`h-3.5 w-3.5 shrink-0 transition-transform relative z-10 ${isExcluded ? "" : "group-hover:translate-x-0.5"}`}
+        className={`h-3.5 w-3.5 shrink-0 transition-transform relative z-10 ${
+          isExcluded ? "" : "group-hover:translate-x-0.5"
+        }`}
         style={{
           color: isExcluded
             ? "hsl(var(--muted-foreground)/0.3)"
             : isDark
-              ? `${categoryColor}60`
-              : `${categoryColor}50`,
+            ? `${categoryColor}60`
+            : `${categoryColor}50`,
         }}
       />
     </motion.button>
   );
 });
-

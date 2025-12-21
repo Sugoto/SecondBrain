@@ -98,7 +98,8 @@ function DateWidget() {
               <span className="text-foreground">{greeting}, </span>
               <span
                 style={{
-                  background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  background:
+                    "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -138,8 +139,8 @@ function CircularProgress({
     circumference - (Math.min(percentage, 100) / 100) * circumference;
 
   return (
-    <svg 
-      viewBox={`0 0 ${size} ${size}`} 
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
       className="w-[70%] max-w-[80px] aspect-square transform -rotate-90"
     >
       <circle
@@ -271,7 +272,9 @@ function BudgetCard() {
               >
                 {Math.round(percentUsed)}%
               </span>
-              <span className="text-[7px] sm:text-[8px] text-muted-foreground">used</span>
+              <span className="text-[7px] sm:text-[8px] text-muted-foreground">
+                used
+              </span>
             </div>
           </div>
         </div>
@@ -279,7 +282,9 @@ function BudgetCard() {
         {/* Footer stats */}
         <div className="grid grid-cols-2 gap-1 sm:gap-2 text-center">
           <div>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Left</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground">
+              Left
+            </p>
             <p
               className="text-[11px] sm:text-xs font-bold font-mono"
               style={{ color: progressColor }}
@@ -288,7 +293,9 @@ function BudgetCard() {
             </p>
           </div>
           <div>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Daily</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground">
+              Daily
+            </p>
             <p className="text-[11px] sm:text-xs font-bold font-mono text-foreground">
               {formatCurrencyCompact(dailyBudget)}
             </p>
@@ -411,7 +418,9 @@ function TDEECard() {
             <span className="text-xl sm:text-2xl font-bold font-mono text-emerald-500">
               {formatNumber(tdee.targetCalories)}
             </span>
-            <span className="text-[9px] sm:text-[10px] text-muted-foreground ml-1">kcal</span>
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground ml-1">
+              kcal
+            </span>
           </div>
 
           {/* Protein */}
@@ -427,7 +436,9 @@ function TDEECard() {
             <span className="text-xs sm:text-sm font-bold font-mono text-amber-500">
               {tdee.protein}g
             </span>
-            <span className="text-[8px] sm:text-[9px] text-muted-foreground">protein</span>
+            <span className="text-[8px] sm:text-[9px] text-muted-foreground">
+              protein
+            </span>
           </div>
         </div>
       </div>
