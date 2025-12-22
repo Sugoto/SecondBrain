@@ -30,6 +30,7 @@ import {
 } from "@/components/fitness/utils";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TransactionDialog } from "@/components/finances/TransactionDialog";
+import { MutualFundWidget } from "@/components/finances/MutualFundWidget";
 import type { Transaction } from "@/lib/supabase";
 
 function getGreeting(): string {
@@ -628,6 +629,12 @@ export function HomePage() {
         <div className="flex gap-3">
           <BudgetCard />
           <TDEECard />
+        </div>
+
+        {/* Second Row */}
+        <div className="flex gap-3 mt-3">
+          <MutualFundWidget />
+          <div className="flex-1 min-w-0" /> {/* Spacer to maintain two-column grid */}
         </div>
       </main>
 

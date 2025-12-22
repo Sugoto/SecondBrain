@@ -61,7 +61,7 @@ function MutualFundCard({
   const previousValue = totalUnits * fund.previousNav;
   const dailyChangeAmount = currentValue - previousValue;
   const isPositiveDay = dailyChangeAmount >= 0;
-  const dayColor = isNetUp ? "#22c55e" : "#ef4444";
+  const dayColor = isPositiveDay ? "#22c55e" : "#ef4444";
 
   // Sparkline
   const sparklinePoints = fund.navHistory.map((d, i) => {
@@ -221,28 +221,33 @@ function MutualFundCard({
                   </svg>
 
                   {/* Period Returns */}
-                  <div className="flex items-center gap-1 mb-3">
+                  <div className="flex items-center mb-3">
                     {[
                       { label: "1D", value: fund.dailyChangePercent },
                       { label: "1M", value: fund.monthChangePercent },
                       { label: "1Y", value: fund.yearChangePercent },
                       { label: "3Y", value: fund.threeYearChangePercent },
                       { label: "5Y", value: fund.fiveYearChangePercent },
-                    ].map((period) => (
-                      <div key={period.label} className="flex-1 text-center">
-                        <p className="text-[10px] text-muted-foreground">
-                          {period.label}
-                        </p>
-                        <p
-                          className={`text-xs font-mono font-medium ${
-                            period.value >= 0
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {period.value >= 0 ? "+" : ""}
-                          {period.value.toFixed(1)}%
-                        </p>
+                    ].map((period, index) => (
+                      <div key={period.label} className="flex items-center flex-1">
+                        <div className="flex-1 text-center">
+                          <p className="text-[10px] text-muted-foreground">
+                            {period.label}
+                          </p>
+                          <p
+                            className={`text-xs font-mono font-medium ${
+                              period.value >= 0
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {period.value >= 0 ? "+" : ""}
+                            {period.value.toFixed(1)}%
+                          </p>
+                        </div>
+                        {index < 4 && (
+                          <div className="w-px h-6 bg-border/50" />
+                        )}
                       </div>
                     ))}
                   </div>
