@@ -2,12 +2,11 @@ import path from "path"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
+import compression from 'vite-plugin-compression'
 
 // React Compiler configuration
 const ReactCompilerConfig = {
-  // Compilation mode - 'all' compiles all components
-  // 'annotation' only compiles components with "use memo" directive
-  // 'infer' automatically determines what to compile
   target: '19' // Target React 19
 };
 
@@ -21,7 +20,94 @@ export default defineConfig({
         ],
       },
     }),
-    tailwindcss()
+    tailwindcss(),
+    
+    // PWA configuration for offline support and app-like experience
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'robots.txt'],
+      manifest: {
+        name: 'Second Brain',
+        short_name: 'SecondBrain',
+        description: 'Personal finance and health tracker',
+        theme_color: '#18181b',
+        background_color: '#18181b',
+        display: 'standalone',
+        orientation: 'portrait',
+        start_url: '/',
+        icons: [
+          {
+            src: 'pwa-192x192.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml'
+          },
+          {
+            src: 'pwa-512x512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml'
+          },
+          {
+            src: 'pwa-512x512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
+          }
+        ]
+      },
+      workbox: {
+        // Cache strategies for different resource types
+        runtimeCaching: [
+          {
+            // Cache API responses for mutual funds (stale-while-revalidate)
+            urlPattern: /^https:\/\/api\.mfapi\.in\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'mf-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 30 // 30 minutes
+              }
+            }
+          },
+          {
+            // Cache Google Fonts
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
+            }
+          }
+        ]
+      }
+    }),
+    
+    // Brotli compression for smaller bundle sizes
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024 // Only compress files > 1KB
+    }),
+    // Also generate gzip for broader compatibility
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024
+    })
   ],
   resolve: {
     alias: {

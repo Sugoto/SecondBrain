@@ -2,6 +2,7 @@ import React, { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Home } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { hapticSelection } from "@/hooks/useHaptics";
 import type { AppSection } from "@/types/navigation";
 
 export interface NavItem {
@@ -142,7 +143,10 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
             return (
               <motion.button
                 key={id}
-                onClick={() => onViewChange(id)}
+                onClick={() => {
+                  hapticSelection();
+                  onViewChange(id);
+                }}
                 onPointerEnter={() => onPrefetch?.(id)}
                 whileTap={{ scale: 0.9 }}
                 className="relative flex flex-col items-center justify-center flex-1 h-full transition-colors"

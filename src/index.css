@@ -127,4 +127,45 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  
+  /* Optimized scroll containers for mobile */
+  .scroll-optimized {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    contain: content;
+  }
+  
+  /* GPU-accelerated animations */
+  .will-animate {
+    will-change: transform, opacity;
+    contain: layout style paint;
+  }
+  
+  /* Skeleton shimmer animation */
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  /* Pull-to-refresh indicator */
+  .pull-indicator {
+    transition: transform 0.2s ease-out;
+  }
+  
+  /* Touch feedback optimization */
+  .touch-feedback {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
 }

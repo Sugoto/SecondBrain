@@ -1,9 +1,10 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { ChevronRight, Info, CalendarRange } from "lucide-react";
 import { getMonthlyAmount } from "./utils";
 import { motion } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
+import { hapticFeedback } from "@/hooks/useHaptics";
 import {
   formatDate,
   formatTime,
@@ -31,6 +32,12 @@ export const TransactionCard = memo(function TransactionCard({
   const CategoryIcon = cat?.icon;
 
   const isExcluded = txn.excluded_from_budget;
+  
+  // Handle click with haptic feedback
+  const handleClick = useCallback(() => {
+    hapticFeedback('light');
+    onClick(txn);
+  }, [onClick, txn]);
 
   // Card background styling based on category (muted for excluded)
   const cardStyle = isExcluded
@@ -67,7 +74,7 @@ export const TransactionCard = memo(function TransactionCard({
           : `0 8px 24px -4px ${categoryColor}15, 0 0 0 1px ${categoryColor}25`,
       }}
       whileTap={{ scale: isExcluded ? 0.995 : 0.98 }}
-      onClick={() => onClick(txn)}
+      onClick={handleClick}
       style={cardStyle}
       className={`group w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 border text-left cursor-pointer relative overflow-hidden ${
         isExcluded
