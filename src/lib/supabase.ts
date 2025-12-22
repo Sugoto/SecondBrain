@@ -48,3 +48,13 @@ export type UserStats = {
 };
 
 export type ActivityLevel = "sedentary" | "light" | "moderate" | "active";
+
+export type ShoppingItem = {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  cost: number;
+  checked: boolean;
+  created_at: string;
+};

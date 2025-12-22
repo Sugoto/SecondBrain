@@ -20,7 +20,7 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold">Provident Fund</h3>
+      <h3 className="text-sm font-semibold">Provident Funds</h3>
       
       <Card 
         className="px-3 py-2 relative overflow-hidden"

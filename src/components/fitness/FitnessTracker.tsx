@@ -18,6 +18,7 @@ import type { HealthView } from "@/types/navigation";
 import { useHealthData } from "@/hooks/useHealthData";
 import { HealthStatsEditDialog } from "./HealthStatsCard";
 import { WorkoutCalendar } from "./WorkoutCalendar";
+import { ShoppingList } from "./ShoppingList";
 import { calculateTDEE, formatNumber, getActivityLevelInfo } from "./utils";
 
 interface HealthTrackerProps {
@@ -227,6 +228,9 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
           </div>
         </Card>
       </motion.button>
+
+      {/* Shopping List */}
+      <ShoppingList />
     </div>
   );
 }

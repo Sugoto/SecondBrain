@@ -21,10 +21,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-interface MutualFundCardProps {
+interface FundSectionProps {
   fund: FundWithStats;
   index: number;
-  theme: "light" | "dark";
   isExpanded: boolean;
   onToggle: () => void;
   investments: Investment[];
@@ -32,17 +31,15 @@ interface MutualFundCardProps {
   onDeleteInvestment: (id: string) => Promise<void>;
 }
 
-function MutualFundCard({
+function FundSection({
   fund,
   index,
-  theme,
   isExpanded,
   onToggle,
   investments,
   onAddInvestment,
   onDeleteInvestment,
-}: MutualFundCardProps) {
-  const isDark = theme === "dark";
+}: FundSectionProps) {
   const [investAmount, setInvestAmount] = useState("");
   const [investDate, setInvestDate] = useState("");
   const [adding, setAdding] = useState(false);
@@ -92,236 +89,217 @@ function MutualFundCard({
   };
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.3,
-          delay: index * 0.08,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.2,
+        delay: index * 0.05,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
+      className="border-t border-border/50 first:border-t-0"
+    >
+      {/* Fund Header */}
+      <button
+        onClick={onToggle}
+        className="w-full py-2.5 flex items-center gap-2 text-left hover:bg-accent/20 transition-colors"
       >
-        <Card
-          className="overflow-hidden relative py-2"
-          style={{
-            background: isDark
-              ? `linear-gradient(135deg, ${dayColor}08 0%, transparent 50%)`
-              : `linear-gradient(135deg, ${dayColor}05 0%, transparent 50%)`,
-            borderColor: isDark ? `${dayColor}20` : `${dayColor}15`,
-          }}
-        >
-          {/* Collapsed View */}
-          <button
-            onClick={onToggle}
-            className="w-full relative z-10 px-3 flex items-center gap-2 text-left hover:bg-accent/30 transition-colors"
+        {/* Trend indicator */}
+        <div
+          className="h-1.5 w-1.5 rounded-full shrink-0"
+          style={{ backgroundColor: dayColor }}
+        />
+
+        {/* Fund Name */}
+        <div className="min-w-0 flex-1">
+          <h4 className="font-medium text-xs truncate">{fund.shortName}</h4>
+        </div>
+
+        {/* Current Value + Changes */}
+        {hasInvestments && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-sm font-bold font-mono">
+              ₹
+              {currentValue.toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}
+            </span>
+            <span
+              className="text-[10px] font-mono font-medium"
+              style={{ color: isNetUp ? "#22c55e" : "#ef4444" }}
+            >
+              {isNetUp ? "+" : "-"}₹
+              {Math.abs(netChange).toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}
+            </span>
+            <span
+              className="text-[10px] font-mono"
+              style={{ color: isPositiveDay ? "#22c55e" : "#ef4444" }}
+            >
+              ({isPositiveDay ? "+" : "-"}₹
+              {Math.abs(dailyChangeAmount).toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}
+              )
+            </span>
+          </div>
+        )}
+
+        {/* Expand Icon */}
+        <ChevronDown
+          className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {/* Expanded View */}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="overflow-hidden"
           >
-            {/* Fund Name */}
-            <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-xs truncate">
-                {fund.shortName}
-              </h3>
-            </div>
+            <div className="pb-3">
+              {/* Full Name */}
+              <p className="text-[10px] text-muted-foreground truncate mb-2">
+                {fund.fullName}
+              </p>
 
-            {/* Current Value + Changes */}
-            {hasInvestments && (
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-sm font-bold font-mono">
-                  ₹
-                  {currentValue.toLocaleString("en-IN", {
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
-                <span
-                  className="text-[10px] font-mono font-medium"
-                  style={{ color: isNetUp ? "#22c55e" : "#ef4444" }}
-                >
-                  {isNetUp ? "+" : "-"}₹
-                  {Math.abs(netChange).toLocaleString("en-IN", {
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
-                <span
-                  className="text-[10px] font-mono"
-                  style={{ color: isPositiveDay ? "#22c55e" : "#ef4444" }}
-                >
-                  ({isPositiveDay ? "+" : "-"}₹
-                  {Math.abs(dailyChangeAmount).toLocaleString("en-IN", {
-                    maximumFractionDigits: 0,
-                  })}
-                  )
-                </span>
-              </div>
-            )}
-
-            {/* Expand Icon */}
-            <ChevronDown
-              className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform ${
-                isExpanded ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {/* Expanded View */}
-          <AnimatePresence initial={false}>
-            {isExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="overflow-hidden"
+              {/* Sparkline */}
+              <svg
+                width="100%"
+                height="28"
+                className="mb-3"
+                viewBox="0 0 100 28"
+                preserveAspectRatio="none"
               >
-                <div className="relative z-10 px-3 pb-3">
-                  {/* Full Name */}
-                  <p className="text-[10px] text-muted-foreground truncate mb-2">
-                    {fund.fullName}
-                  </p>
-
-                  {/* Sparkline */}
-                  <svg
-                    width="100%"
-                    height="28"
-                    className="mb-3"
-                    viewBox="0 0 100 28"
-                    preserveAspectRatio="none"
+                <defs>
+                  <linearGradient
+                    id={`spark-gradient-${fund.schemeCode}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
                   >
-                    <defs>
-                      <linearGradient
-                        id={`spark-gradient-${fund.schemeCode}`}
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
+                    <stop offset="0%" stopColor={dayColor} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={dayColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <path
+                  d={`${sparklinePath} L 100,28 L 0,28 Z`}
+                  fill={`url(#spark-gradient-${fund.schemeCode})`}
+                />
+                <path
+                  d={sparklinePath}
+                  fill="none"
+                  stroke={dayColor}
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+
+              {/* Period Returns */}
+              <div className="flex items-center mb-3">
+                {[
+                  { label: "1D", value: fund.dailyChangePercent },
+                  { label: "1M", value: fund.monthChangePercent },
+                  { label: "1Y", value: fund.yearChangePercent },
+                  { label: "3Y", value: fund.threeYearChangePercent },
+                  { label: "5Y", value: fund.fiveYearChangePercent },
+                ].map((period, idx) => (
+                  <div key={period.label} className="flex items-center flex-1">
+                    <div className="flex-1 text-center">
+                      <p className="text-[10px] text-muted-foreground">
+                        {period.label}
+                      </p>
+                      <p
+                        className={`text-xs font-mono font-medium ${
+                          period.value >= 0 ? "text-green-500" : "text-red-500"
+                        }`}
                       >
-                        <stop
-                          offset="0%"
-                          stopColor={dayColor}
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor={dayColor}
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d={`${sparklinePath} L 100,28 L 0,28 Z`}
-                      fill={`url(#spark-gradient-${fund.schemeCode})`}
-                    />
-                    <path
-                      d={sparklinePath}
-                      fill="none"
-                      stroke={dayColor}
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-
-                  {/* Period Returns */}
-                  <div className="flex items-center mb-3">
-                    {[
-                      { label: "1D", value: fund.dailyChangePercent },
-                      { label: "1M", value: fund.monthChangePercent },
-                      { label: "1Y", value: fund.yearChangePercent },
-                      { label: "3Y", value: fund.threeYearChangePercent },
-                      { label: "5Y", value: fund.fiveYearChangePercent },
-                    ].map((period, index) => (
-                      <div key={period.label} className="flex items-center flex-1">
-                        <div className="flex-1 text-center">
-                          <p className="text-[10px] text-muted-foreground">
-                            {period.label}
-                          </p>
-                          <p
-                            className={`text-xs font-mono font-medium ${
-                              period.value >= 0
-                                ? "text-green-500"
-                                : "text-red-500"
-                            }`}
-                          >
-                            {period.value >= 0 ? "+" : ""}
-                            {period.value.toFixed(1)}%
-                          </p>
-                        </div>
-                        {index < 4 && (
-                          <div className="w-px h-6 bg-border/50" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Existing Investments */}
-                  {hasInvestments && (
-                    <div className="space-y-1.5 mb-3">
-                      {investments.map((inv) => (
-                        <div
-                          key={inv.id}
-                          className="flex items-center justify-between py-1 px-2 rounded bg-muted/30"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono">
-                              ₹{inv.amount.toLocaleString("en-IN")}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(inv.date).toLocaleDateString("en-IN", {
-                                day: "numeric",
-                                month: "short",
-                                year: "2-digit",
-                              })}
-                            </span>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeleteInvestment(inv.id);
-                            }}
-                            className="p-1 hover:bg-red-500/10 rounded text-red-500/50 hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
+                        {period.value >= 0 ? "+" : ""}
+                        {period.value.toFixed(1)}%
+                      </p>
                     </div>
-                  )}
-
-                  {/* Add Investment Form */}
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      value={investAmount}
-                      onChange={(e) => setInvestAmount(e.target.value)}
-                      placeholder="₹"
-                      className="h-7 text-xs font-mono flex-1"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <Input
-                      type="date"
-                      value={investDate}
-                      onChange={(e) => setInvestDate(e.target.value)}
-                      className="h-7 text-xs w-28"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInvest();
-                      }}
-                      disabled={adding}
-                      size="sm"
-                      className="h-7 text-xs px-3"
-                    >
-                      {adding ? "..." : <Plus className="h-3.5 w-3.5" />}
-                    </Button>
+                    {idx < 4 && <div className="w-px h-6 bg-border/50" />}
                   </div>
+                ))}
+              </div>
+
+              {/* Existing Investments */}
+              {hasInvestments && (
+                <div className="space-y-1.5 mb-3">
+                  {investments.map((inv) => (
+                    <div
+                      key={inv.id}
+                      className="flex items-center justify-between py-1 px-2 rounded bg-muted/30"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono">
+                          ₹{inv.amount.toLocaleString("en-IN")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(inv.date).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteInvestment(inv.id);
+                        }}
+                        className="p-1 hover:bg-red-500/10 rounded text-red-500/50 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Card>
-      </motion.div>
-    </>
+              )}
+
+              {/* Add Investment Form */}
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={investAmount}
+                  onChange={(e) => setInvestAmount(e.target.value)}
+                  placeholder="₹"
+                  className="h-7 text-xs font-mono flex-1"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <Input
+                  type="date"
+                  value={investDate}
+                  onChange={(e) => setInvestDate(e.target.value)}
+                  className="h-7 text-xs w-28"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleInvest();
+                  }}
+                  disabled={adding}
+                  size="sm"
+                  className="h-7 text-xs px-3"
+                >
+                  {adding ? "..." : <Plus className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -333,8 +311,10 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   const { funds, loading, error, isRefetching, refresh, lastUpdated } =
     useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
+  const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
+  const isDark = theme === "dark";
   const investments = userStats?.investments || [];
 
   const handleToggle = (schemeCode: number) => {
@@ -408,6 +388,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   const netChange = portfolioTotals.current - portfolioTotals.invested;
   const isNetUp = netChange >= 0;
   const isPortfolioUp = portfolioTotals.dailyChange >= 0;
+  const trendColor = isPortfolioUp ? "#22c55e" : "#ef4444";
 
   if (loading) {
     return (
@@ -416,33 +397,37 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-6 w-6 rounded-full" />
         </div>
-        <Skeleton className="h-14 w-full rounded-lg" />
-        <Skeleton className="h-14 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <Card className="p-3">
-        <div className="text-center py-2">
-          <p className="text-xs text-muted-foreground mb-1">
-            Failed to load mutual fund data
-          </p>
-          <button
-            onClick={refresh}
-            className="text-xs text-primary hover:underline"
-          >
-            Try again
-          </button>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Mutual Funds</h3>
         </div>
-      </Card>
+        <Card className="p-3">
+          <div className="text-center py-2">
+            <p className="text-xs text-muted-foreground mb-1">
+              Failed to load mutual fund data
+            </p>
+            <button
+              onClick={refresh}
+              className="text-xs text-primary hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        </Card>
+      </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      {/* Header */}
+      {/* Header - Outside the card */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Mutual Funds</h3>
         <div className="flex items-center gap-2">
@@ -470,72 +455,122 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
         </div>
       </div>
 
-      {/* Portfolio Total */}
-      {hasPortfolio && (
-        <Card className="px-3 py-2">
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              {isNetUp ? (
+      {/* Single Collapsible Card */}
+      <Card
+        className="overflow-hidden relative"
+        style={{
+          background: hasPortfolio
+            ? isDark
+              ? `linear-gradient(135deg, ${trendColor}08 0%, transparent 50%)`
+              : `linear-gradient(135deg, ${trendColor}05 0%, transparent 50%)`
+            : undefined,
+          borderColor: hasPortfolio
+            ? isDark
+              ? `${trendColor}20`
+              : `${trendColor}15`
+            : undefined,
+        }}
+      >
+        {/* Summary Header - Clickable to expand */}
+        <button
+          onClick={() => setIsCardExpanded(!isCardExpanded)}
+          className="w-full px-3 py-2.5 flex items-center justify-between text-left hover:bg-accent/20 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            {hasPortfolio ? (
+              isPortfolioUp ? (
                 <TrendingUp className="h-4 w-4 text-green-500" />
               ) : (
                 <TrendingDown className="h-4 w-4 text-red-500" />
-              )}
-              <span className="text-sm font-bold font-mono">
-                ₹
-                {portfolioTotals.current.toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="text-xs font-mono font-medium"
-                style={{ color: isNetUp ? "#22c55e" : "#ef4444" }}
-              >
-                {isNetUp ? "+" : "-"}₹
-                {Math.abs(netChange).toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-              <span
-                className="text-[10px] font-mono"
-                style={{ color: isPortfolioUp ? "#22c55e" : "#ef4444" }}
-              >
-                ({isPortfolioUp ? "+" : "-"}₹
-                {Math.abs(portfolioTotals.dailyChange).toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-                )
-              </span>
-            </div>
+              )
+            ) : null}
+            <span className="text-sm font-bold font-mono">
+              ₹
+              {portfolioTotals.current.toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}
+            </span>
           </div>
-        </Card>
-      )}
 
-      {/* Fund Cards */}
-      <div className="space-y-1.5">
-        {funds.map((fund, index) => (
-          <MutualFundCard
-            key={fund.schemeCode}
-            fund={fund}
-            index={index}
-            theme={theme}
-            isExpanded={expandedFunds.has(fund.schemeCode)}
-            onToggle={() => handleToggle(fund.schemeCode)}
-            investments={getInvestmentsForFund(fund.schemeCode)}
-            onAddInvestment={(amount, date) =>
-              handleAddInvestment(fund.schemeCode, amount, date)
-            }
-            onDeleteInvestment={handleDeleteInvestment}
-          />
-        ))}
-      </div>
+          <div className="flex items-center gap-2">
+            {hasPortfolio && (
+              <>
+                <span
+                  className="text-xs font-mono font-medium"
+                  style={{ color: isNetUp ? "#22c55e" : "#ef4444" }}
+                >
+                  {isNetUp ? "+" : "-"}₹
+                  {Math.abs(netChange).toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+                <span
+                  className="text-[10px] font-mono"
+                  style={{ color: isPortfolioUp ? "#22c55e" : "#ef4444" }}
+                >
+                  ({isPortfolioUp ? "+" : "-"}₹
+                  {Math.abs(portfolioTotals.dailyChange).toLocaleString(
+                    "en-IN",
+                    {
+                      maximumFractionDigits: 0,
+                    }
+                  )}
+                  )
+                </span>
+              </>
+            )}
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                isCardExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+        </button>
 
-      {funds.length === 0 && !loading && (
-        <Card className="p-4 text-center">
-          <p className="text-xs text-muted-foreground">No funds in watchlist</p>
-        </Card>
-      )}
+        {/* Expanded Content */}
+        <AnimatePresence initial={false}>
+          {isCardExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="overflow-hidden"
+            >
+              <div className="px-3 pb-3">
+                {/* Divider */}
+                <div className="h-px bg-border/50 mb-2" />
+
+                {/* Fund List */}
+                {funds.length > 0 ? (
+                  <div>
+                    {funds.map((fund, index) => (
+                      <FundSection
+                        key={fund.schemeCode}
+                        fund={fund}
+                        index={index}
+                        isExpanded={expandedFunds.has(fund.schemeCode)}
+                        onToggle={() => handleToggle(fund.schemeCode)}
+                        investments={getInvestmentsForFund(fund.schemeCode)}
+                        onAddInvestment={(amount, date) =>
+                          handleAddInvestment(fund.schemeCode, amount, date)
+                        }
+                        onDeleteInvestment={handleDeleteInvestment}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-4 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      No funds in watchlist
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
     </div>
   );
 }

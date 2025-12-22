@@ -335,8 +335,8 @@ function TDEECard() {
           className="aspect-square rounded-2xl p-2.5 sm:p-4"
           style={{
             background: isDark
-              ? "rgba(16, 185, 129, 0.1)"
-              : "rgba(16, 185, 129, 0.05)",
+              ? "rgba(249, 115, 22, 0.1)"
+              : "rgba(249, 115, 22, 0.05)",
           }}
         >
           <div className="h-full flex items-center justify-center">
@@ -363,14 +363,14 @@ function TDEECard() {
           className="aspect-square rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-center"
           style={{
             background: isDark
-              ? "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)"
-              : "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.03) 100%)",
+              ? "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%)"
+              : "linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.03) 100%)",
             border: isDark
-              ? "1px solid rgba(16, 185, 129, 0.3)"
-              : "1px solid rgba(16, 185, 129, 0.15)",
+              ? "1px solid rgba(249, 115, 22, 0.3)"
+              : "1px solid rgba(249, 115, 22, 0.15)",
           }}
         >
-          <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500/50 mb-2" />
+          <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500/50 mb-2" />
           <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center">
             Add health data to see TDEE
           </p>
@@ -390,11 +390,11 @@ function TDEECard() {
         className="aspect-square rounded-2xl p-2.5 sm:p-4 relative overflow-hidden flex flex-col"
         style={{
           background: isDark
-            ? "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)"
-            : "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.03) 100%)",
+            ? "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%)"
+            : "linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.03) 100%)",
           border: isDark
-            ? "1px solid rgba(16, 185, 129, 0.3)"
-            : "1px solid rgba(16, 185, 129, 0.15)",
+            ? "1px solid rgba(249, 115, 22, 0.3)"
+            : "1px solid rgba(249, 115, 22, 0.15)",
         }}
       >
         {/* Header */}
@@ -402,7 +402,7 @@ function TDEECard() {
           <div
             className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
             style={{
-              background: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
+              background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
             }}
           >
             <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
@@ -416,7 +416,7 @@ function TDEECard() {
         <div className="flex-1 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-0">
           {/* Calories */}
           <div className="text-center">
-            <span className="text-xl sm:text-2xl font-bold font-mono text-emerald-500">
+            <span className="text-xl sm:text-2xl font-bold font-mono text-orange-500">
               {formatNumber(tdee.targetCalories)}
             </span>
             <span className="text-[9px] sm:text-[10px] text-muted-foreground ml-1">
@@ -460,7 +460,9 @@ function QuickActions() {
   );
   const [saving, setSaving] = useState(false);
 
-  const today = new Date().toISOString().split("T")[0];
+  // Use local timezone for date key
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const isTodayWorkedOut = workoutDates.has(today);
 
   const handleAddExpense = () => {
@@ -628,13 +630,14 @@ export function HomePage() {
         {/* Stats Cards Row */}
         <div className="flex gap-3">
           <BudgetCard />
-          <TDEECard />
+          <MutualFundWidget />
         </div>
 
         {/* Second Row */}
         <div className="flex gap-3 mt-3">
-          <MutualFundWidget />
-          <div className="flex-1 min-w-0" /> {/* Spacer to maintain two-column grid */}
+          <TDEECard />
+          <div className="flex-1 min-w-0" />{" "}
+          {/* Spacer to maintain two-column grid */}
         </div>
       </main>
 

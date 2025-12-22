@@ -3,6 +3,17 @@ import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT, WORKOUT_INTENSITY_FACTOR } 
 import type { ActivityLevel } from "@/lib/supabase";
 
 /**
+ * Format date to YYYY-MM-DD string in local timezone
+ * (Avoids UTC conversion issues with toISOString)
+ */
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Calculate BMR using the Mifflin-St Jeor equation (more accurate than Harris-Benedict)
  * Men: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) + 5
  * Women: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) - 161
@@ -113,7 +124,7 @@ export function calculateActivityLevel(workoutDates: Set<string> | string[]): Ac
   for (let i = 0; i < 28; i++) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
-    const dateKey = date.toISOString().split("T")[0];
+    const dateKey = formatLocalDate(date);
     if (dates.has(dateKey)) {
       count++;
     }
@@ -148,7 +159,7 @@ export function getActivityLevelInfo(workoutDates: Set<string> | string[]): {
   for (let i = 0; i < 28; i++) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
-    const dateKey = date.toISOString().split("T")[0];
+    const dateKey = formatLocalDate(date);
     if (dates.has(dateKey)) {
       count++;
     }

@@ -8,6 +8,11 @@ export const WATCHLIST_FUNDS = [
     fullName: "Parag Parikh Flexi Cap Fund - Direct Plan - Growth",
   },
   {
+    schemeCode: 119788,
+    shortName: "SBI Gold",
+    fullName: "SBI Gold Fund - Direct Plan - Growth",
+  },
+  {
     schemeCode: 120716,
     shortName: "UTI Nifty 50",
     fullName: "UTI Nifty 50 Index Fund - Direct Plan - Growth",
@@ -16,11 +21,6 @@ export const WATCHLIST_FUNDS = [
     schemeCode: 143341,
     shortName: "UTI Nifty Next 50",
     fullName: "UTI Nifty Next 50 Index Fund - Direct Plan - Growth",
-  },
-  {
-    schemeCode: 119788,
-    shortName: "SBI Gold",
-    fullName: "SBI Gold Fund - Direct Plan - Growth",
   },
 ] as const;
 
@@ -74,7 +74,7 @@ export async function fetchNavForDate(
 ): Promise<number | null> {
   const data = await fetchMutualFund(schemeCode);
   const target = new Date(targetDate);
-  
+
   for (const entry of data.data) {
     const entryDate = parseNavDate(entry.date);
     if (entryDate <= target) {
@@ -114,17 +114,17 @@ function calculateFundStats(
   const previousNav = parseFloat(navData[1]?.nav || "0");
 
   const now = new Date();
-  
+
   // Calculate target dates
   const oneMonthAgo = new Date(now);
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  
+
   const oneYearAgo = new Date(now);
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  
+
   const threeYearsAgo = new Date(now);
   threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
-  
+
   const fiveYearsAgo = new Date(now);
   fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
 
