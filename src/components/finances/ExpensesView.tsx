@@ -1,16 +1,14 @@
-import { useMemo, useCallback, memo, useState } from "react";
+import { useMemo, useCallback, memo, useRef } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { TransactionCard } from "./TransactionCard";
 import { Footer } from "./Footer";
 import { formatCurrency } from "./constants";
-import { ChevronDown } from "lucide-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
-// Batch size for progressive loading - reduces initial render cost
-const INITIAL_BATCH_SIZE = 20;
-const LOAD_MORE_SIZE = 20;
+const ROW_HEIGHT = 56;
+const OVERSCAN = 5;
 
 interface ExpensesViewProps {
   transactions: Transaction[];
@@ -21,30 +19,27 @@ export const ExpensesView = memo(function ExpensesView({
   transactions,
   onTransactionClick,
 }: ExpensesViewProps) {
-  const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH_SIZE);
-  
+  const parentRef = useRef<HTMLDivElement>(null);
+
   const totalExpenses = useMemo(() => {
     return transactions
       .filter((t) => t.type === "expense")
       .reduce((sum, t) => sum + t.amount, 0);
   }, [transactions]);
-  
-  // Memoize click handler factory to avoid recreating functions
-  const handleTransactionClick = useCallback((txn: Transaction) => {
-    onTransactionClick(txn);
-  }, [onTransactionClick]);
-  
-  // Progressive loading - only render visible transactions
-  const visibleTransactions = useMemo(() => 
-    transactions.slice(0, visibleCount), 
-    [transactions, visibleCount]
+
+  const handleTransactionClick = useCallback(
+    (txn: Transaction) => {
+      onTransactionClick(txn);
+    },
+    [onTransactionClick]
   );
-  
-  const hasMore = transactions.length > visibleCount;
-  
-  const loadMore = useCallback(() => {
-    setVisibleCount(prev => prev + LOAD_MORE_SIZE);
-  }, []);
+
+  const virtualizer = useVirtualizer({
+    count: transactions.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: OVERSCAN,
+  });
 
   if (transactions.length === 0) {
     return (
@@ -67,36 +62,42 @@ export const ExpensesView = memo(function ExpensesView({
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
-      {/* Transaction Grid - Progressive Loading */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
-        {visibleTransactions.map((txn, index) => (
-          <TransactionCard
-            key={txn.id}
-            transaction={txn}
-            onClick={handleTransactionClick}
-            index={index}
-          />
-        ))}
-      </div>
-      
-      {/* Load More Button */}
-      {hasMore && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex justify-center pt-2"
+      <div
+        ref={parentRef}
+        className="h-[60vh] overflow-auto scrollbar-hide"
+        style={{ contain: "strict" }}
+      >
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={loadMore}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            <ChevronDown className="h-4 w-4 mr-1" />
-            Show More ({transactions.length - visibleCount} remaining)
-          </Button>
-        </motion.div>
-      )}
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const txn = transactions[virtualRow.index];
+            return (
+              <div
+                key={txn.id}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <TransactionCard
+                  transaction={txn}
+                  onClick={handleTransactionClick}
+                  index={virtualRow.index}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Total Expenses Card */}
       <div className="border-t border-border" />
@@ -147,4 +148,3 @@ export const ExpensesView = memo(function ExpensesView({
     </div>
   );
 });
-

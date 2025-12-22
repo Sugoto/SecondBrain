@@ -8,6 +8,12 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { Transaction, UserStats, Investment } from "@/lib/supabase";
 import type { ReactNode } from "react";
+import {
+  getCachedTransactions,
+  cacheTransactions,
+  getCachedUserStats,
+  cacheUserStats,
+} from "@/lib/db";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +39,15 @@ const userStatsKeys = {
   detail: () => [...userStatsKeys.all, "detail"] as const,
 };
 
+/**
+ * Fetch transactions with IndexedDB cache-first strategy
+ * Returns cached data instantly, then fetches fresh data in background
+ */
 async function fetchTransactions(): Promise<Transaction[]> {
+  // Try cache first for instant load
+  const cached = await getCachedTransactions();
+  
+  // Fetch fresh data
   const { data, error } = await supabase
     .from("transactions")
     .select("*")
@@ -41,11 +55,27 @@ async function fetchTransactions(): Promise<Transaction[]> {
     .order("time", { ascending: false })
     .limit(500);
 
-  if (error) throw error;
-  return data || [];
+  if (error) {
+    // If network fails, return cache if available
+    if (cached) return cached;
+    throw error;
+  }
+  
+  // Cache the fresh data for next time
+  if (data) {
+    cacheTransactions(data); // Fire and forget
+  }
+  
+  return data || cached || [];
 }
 
+/**
+ * Fetch user stats with IndexedDB cache
+ */
 async function fetchUserStats(): Promise<UserStats | null> {
+  // Try cache first
+  const cached = await getCachedUserStats();
+  
   const { data, error } = await supabase
     .from("user_stats")
     .select("*")
@@ -54,9 +84,15 @@ async function fetchUserStats(): Promise<UserStats | null> {
 
   if (error) {
     console.error("Error fetching user stats:", error);
-    return null;
+    return cached; // Return cache on error
   }
-  return data;
+  
+  // Cache fresh data
+  if (data) {
+    cacheUserStats(data);
+  }
+  
+  return data || cached;
 }
 
 export function ExpenseDataProvider({ children }: { children: ReactNode }) {

@@ -121,6 +121,7 @@ function DateWidget() {
   );
 }
 
+// million-ignore - SVG elements not compatible with Million.js
 // Circular progress component - responsive sizing
 function CircularProgress({
   percentage,

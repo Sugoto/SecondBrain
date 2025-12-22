@@ -35,5 +35,26 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Speculation Rules API for instant navigation (Chrome 109+) -->
+    <!-- Prefetches resources when user hovers, prerenders on interaction -->
+    <script type="speculationrules">
+    {
+      "prefetch": [
+        {
+          "source": "document",
+          "where": { "href_matches": "/*" },
+          "eagerness": "moderate"
+        }
+      ],
+      "prerender": [
+        {
+          "source": "document",
+          "where": { "href_matches": "/*" },
+          "eagerness": "conservative"
+        }
+      ]
+    }
+    </script>
   </body>
 </html>

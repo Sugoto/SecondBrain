@@ -48,7 +48,7 @@ export function InvestmentsView() {
         
         <MutualFundWatchlist theme={theme} />
         
-        <div className="h-px bg-border" />
+        <div className="h-px bg-border mt-7" />
         
         <FixedDepositsSection userStats={userStats} theme={theme} />
         

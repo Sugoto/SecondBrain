@@ -76,7 +76,7 @@ export const TransactionCard = memo(function TransactionCard({
       whileTap={{ scale: isExcluded ? 0.995 : 0.98 }}
       onClick={handleClick}
       style={cardStyle}
-      className={`group w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 border text-left cursor-pointer relative overflow-hidden ${
+      className={`group w-full flex items-center gap-2 rounded-xl px-3 py-2 border text-left cursor-pointer relative overflow-hidden ${
         isExcluded
           ? "border-dashed border-muted/30 opacity-40 grayscale-[60%] saturate-50"
           : "hover:border-primary/30"

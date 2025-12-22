@@ -31,6 +31,7 @@ interface FundSectionProps {
   onDeleteInvestment: (id: string) => Promise<void>;
 }
 
+// million-ignore - SVG sparkline not compatible with Million.js
 const FundSection = memo(function FundSection({
   fund,
   index,

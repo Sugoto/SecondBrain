@@ -1,19 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, memo } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
 import {
   EXPENSE_CATEGORIES,
   formatCurrency,
@@ -26,103 +14,316 @@ import { getMonthlyAmount, isProratedInMonth } from "./utils";
 import type { ChartMode } from "./types";
 import { useTheme } from "@/hooks/useTheme";
 
-// Custom label renderer with connecting lines for pie chart
-interface LabelProps {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-  name: string;
-  color: string;
-  theme: "light" | "dark";
-}
-
-const RADIAN = Math.PI / 180;
-
-function renderCustomLabel({
-  cx,
-  cy,
-  midAngle,
-  outerRadius,
-  percent,
-  name,
-  color,
-  theme,
-}: LabelProps) {
-  const sin = Math.sin(-RADIAN * midAngle);
-  const cos = Math.cos(-RADIAN * midAngle);
-
-  // Start point on the arc edge
-  const sx = cx + (outerRadius + 4) * cos;
-  const sy = cy + (outerRadius + 4) * sin;
-
-  // Elbow point
-  const mx = cx + (outerRadius + 18) * cos;
-  const my = cy + (outerRadius + 18) * sin;
-
-  // End point (horizontal extension)
-  const ex = mx + (cos >= 0 ? 1 : -1) * 16;
-  const ey = my;
-
-  // Text anchor based on which side
-  const textAnchor = cos >= 0 ? "start" : "end";
-
-  const textColor = theme === "dark" ? "#a1a1aa" : "#71717a";
-  const percentage = (percent * 100).toFixed(0);
-
-  return (
-    <g>
-      {/* Connecting line */}
-      <path
-        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-        stroke={color}
-        strokeWidth={1.5}
-        fill="none"
-        strokeOpacity={0.6}
-      />
-      {/* Small circle at the end */}
-      <circle cx={ex} cy={ey} r={2} fill={color} />
-      {/* Label text */}
-      <text
-        x={ex + (cos >= 0 ? 4 : -4)}
-        y={ey}
-        textAnchor={textAnchor}
-        fill={textColor}
-        fontSize={9}
-        fontWeight={500}
-        dominantBaseline="central"
-      >
-        {name}
-      </text>
-      {/* Percentage below */}
-      <text
-        x={ex + (cos >= 0 ? 4 : -4)}
-        y={ey + 10}
-        textAnchor={textAnchor}
-        fill={color}
-        fontSize={8}
-        fontWeight={600}
-        dominantBaseline="central"
-      >
-        {percentage}%
-      </text>
-    </g>
-  );
-}
-
 interface TrendsViewProps {
   transactions: Transaction[];
   chartMode: ChartMode;
   categoryTotals: Record<string, CategoryTotal>;
-  chartCategoryTotals: Record<string, CategoryTotal>; // Excludes budget-excluded for pie chart
+  chartCategoryTotals: Record<string, CategoryTotal>;
   expandedCategory: string | null;
   onToggleCategory: (name: string | null) => void;
   onTransactionClick: (txn: Transaction) => void;
 }
 
-export function TrendsView({
+// million-ignore - SVG elements not compatible with Million.js
+// Pure SVG Area Chart - lightweight and works with any data format
+const AreaChart = memo(function AreaChart({
+  data,
+  theme,
+}: {
+  data: { label: string; total: number }[];
+  theme: "light" | "dark";
+}) {
+  const width = 320;
+  const height = 180;
+  const padding = { top: 20, right: 50, bottom: 30, left: 10 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxValue = Math.max(...data.map((d) => d.total), 1);
+
+  // Create points for the area
+  const points = data.map((d, i) => {
+    const x = padding.left + (i / (data.length - 1)) * chartWidth;
+    const y = padding.top + chartHeight - (d.total / maxValue) * chartHeight;
+    return { x, y, label: d.label, value: d.total };
+  });
+
+  // Create SVG path for the line
+  const linePath = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+    .join(" ");
+
+  // Create area path (line + bottom)
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${padding.left} ${padding.top + chartHeight} Z`;
+
+  const isDark = theme === "dark";
+  const gridColor = isDark ? "#3f3f46" : "#e4e4e7";
+  const textColor = isDark ? "#a1a1aa" : "#71717a";
+
+  // Y-axis ticks
+  const yTicks = [0, maxValue * 0.5, maxValue];
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+      <defs>
+        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#60a5fa" />
+          <stop offset="50%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#2563eb" />
+        </linearGradient>
+      </defs>
+
+      {/* Horizontal grid lines */}
+      {yTicks.map((tick, i) => {
+        const y = padding.top + chartHeight - (tick / maxValue) * chartHeight;
+        return (
+          <g key={i}>
+            <line
+              x1={padding.left}
+              y1={y}
+              x2={width - padding.right}
+              y2={y}
+              stroke={gridColor}
+              strokeDasharray="3,3"
+              strokeOpacity={0.6}
+            />
+            <text
+              x={width - padding.right + 5}
+              y={y + 4}
+              fontSize={10}
+              fill={textColor}
+            >
+              {tick >= 1000 ? `₹${(tick / 1000).toFixed(0)}k` : `₹${Math.round(tick)}`}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Area fill */}
+      <path d={areaPath} fill="url(#areaGradient)" />
+
+      {/* Line */}
+      <path
+        d={linePath}
+        fill="none"
+        stroke="url(#lineGradient)"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Dots */}
+      {points.map((p, i) => (
+        <circle
+          key={i}
+          cx={p.x}
+          cy={p.y}
+          r={3}
+          fill="#3b82f6"
+          stroke={isDark ? "#18181b" : "#ffffff"}
+          strokeWidth={2}
+        >
+          <title>{`${p.label}: ₹${p.value.toLocaleString()}`}</title>
+        </circle>
+      ))}
+
+      {/* X-axis labels */}
+      {points
+        .filter((_, i) => i % Math.ceil(points.length / 7) === 0 || i === points.length - 1)
+        .map((p, i) => (
+          <text
+            key={i}
+            x={p.x}
+            y={height - 8}
+            textAnchor="middle"
+            fontSize={10}
+            fill={textColor}
+          >
+            {p.label.split(" ")[1] || p.label}
+          </text>
+        ))}
+    </svg>
+  );
+});
+
+// million-ignore - SVG elements not compatible with Million.js
+// Pure SVG Pie Chart with connecting lines
+const PieChart = memo(function PieChart({
+  data,
+  theme,
+}: {
+  data: { name: string; value: number; color: string }[];
+  theme: "light" | "dark";
+}) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) return null;
+
+  const size = 240;
+  const radius = 60;
+  const innerRadius = 42;
+  const cx = size / 2;
+  const cy = size / 2;
+
+  let currentAngle = -90;
+
+  const slices = data.map((item) => {
+    const percentage = item.value / total;
+    const angle = percentage * 360;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + angle;
+    currentAngle = endAngle;
+
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+
+    const x1 = cx + radius * Math.cos(startRad);
+    const y1 = cy + radius * Math.sin(startRad);
+    const x2 = cx + radius * Math.cos(endRad);
+    const y2 = cy + radius * Math.sin(endRad);
+
+    const x1Inner = cx + innerRadius * Math.cos(startRad);
+    const y1Inner = cy + innerRadius * Math.sin(startRad);
+    const x2Inner = cx + innerRadius * Math.cos(endRad);
+    const y2Inner = cy + innerRadius * Math.sin(endRad);
+
+    const largeArc = angle > 180 ? 1 : 0;
+
+    const path = `
+      M ${x1Inner} ${y1Inner}
+      L ${x1} ${y1}
+      A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}
+      L ${x2Inner} ${y2Inner}
+      A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x1Inner} ${y1Inner}
+      Z
+    `;
+
+    // Calculate label line positions
+    const midAngle = (startAngle + endAngle) / 2;
+    const midRad = (midAngle * Math.PI) / 180;
+    
+    // Start point on arc edge
+    const lineStartX = cx + (radius + 4) * Math.cos(midRad);
+    const lineStartY = cy + (radius + 4) * Math.sin(midRad);
+    
+    // Elbow point
+    const elbowX = cx + (radius + 18) * Math.cos(midRad);
+    const elbowY = cy + (radius + 18) * Math.sin(midRad);
+    
+    // End point (horizontal extension)
+    const isRightSide = Math.cos(midRad) >= 0;
+    const lineEndX = elbowX + (isRightSide ? 16 : -16);
+    const lineEndY = elbowY;
+
+    return {
+      ...item,
+      path,
+      percentage,
+      lineStartX,
+      lineStartY,
+      elbowX,
+      elbowY,
+      lineEndX,
+      lineEndY,
+      isRightSide,
+    };
+  });
+
+  const textColor = theme === "dark" ? "#a1a1aa" : "#71717a";
+
+  return (
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      className="w-full h-full"
+      style={{ maxHeight: 220 }}
+    >
+      <defs>
+        {slices.map((slice, i) => (
+          <linearGradient
+            key={`grad-${i}`}
+            id={`pieGrad-${i}`}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor={slice.color} stopOpacity={1} />
+            <stop offset="100%" stopColor={slice.color} stopOpacity={0.7} />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {/* Pie slices */}
+      {slices.map((slice, i) => (
+        <path
+          key={i}
+          d={slice.path}
+          fill={`url(#pieGrad-${i})`}
+          stroke={theme === "dark" ? "#27272a" : "#ffffff"}
+          strokeWidth={2}
+          className="transition-all duration-200 hover:opacity-80"
+          style={{ cursor: "pointer" }}
+        >
+          <title>
+            {slice.name}: {formatCurrency(slice.value)} ({(slice.percentage * 100).toFixed(0)}%)
+          </title>
+        </path>
+      ))}
+      
+      {/* Labels with connecting lines */}
+      {slices.map((slice, i) => 
+        slice.percentage > 0.04 ? (
+          <g key={`label-${i}`}>
+            {/* Connecting line */}
+            <path
+              d={`M ${slice.lineStartX} ${slice.lineStartY} L ${slice.elbowX} ${slice.elbowY} L ${slice.lineEndX} ${slice.lineEndY}`}
+              fill="none"
+              stroke={slice.color}
+              strokeWidth={1.5}
+              strokeOpacity={0.6}
+            />
+            {/* Dot at end of line */}
+            <circle
+              cx={slice.lineEndX}
+              cy={slice.lineEndY}
+              r={2}
+              fill={slice.color}
+            />
+            {/* Category name */}
+            <text
+              x={slice.lineEndX + (slice.isRightSide ? 4 : -4)}
+              y={slice.lineEndY}
+              textAnchor={slice.isRightSide ? "start" : "end"}
+              fontSize={9}
+              fill={textColor}
+              fontWeight={500}
+              dominantBaseline="central"
+            >
+              {slice.name}
+            </text>
+            {/* Percentage */}
+            <text
+              x={slice.lineEndX + (slice.isRightSide ? 4 : -4)}
+              y={slice.lineEndY + 10}
+              textAnchor={slice.isRightSide ? "start" : "end"}
+              fontSize={8}
+              fill={slice.color}
+              fontWeight={600}
+              dominantBaseline="central"
+            >
+              {(slice.percentage * 100).toFixed(0)}%
+            </text>
+          </g>
+        ) : null
+      )}
+    </svg>
+  );
+});
+
+export const TrendsView = memo(function TrendsView({
   transactions,
   chartMode,
   categoryTotals,
@@ -132,23 +333,8 @@ export function TrendsView({
   onTransactionClick,
 }: TrendsViewProps) {
   const { theme } = useTheme();
-  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
-  // Theme-aware colors for SVG elements (CSS variables don't work reliably in SVG)
-  const chartColors = useMemo(
-    () => ({
-      text: theme === "dark" ? "#a1a1aa" : "#71717a",
-      grid: theme === "dark" ? "#3f3f46" : "#e4e4e7",
-      axis: theme === "dark" ? "#52525b" : "#d4d4d8",
-      tooltip: {
-        bg: theme === "dark" ? "#18181b" : "#ffffff",
-        border: theme === "dark" ? "#3f3f46" : "#e4e4e7",
-      },
-    }),
-    [theme]
-  );
-
-  // Daily spending data for the last 14 days (excludes budget-excluded transactions)
+  // Daily spending data for the last 14 days
   const dailyData = useMemo(() => {
     const days: { date: string; label: string; total: number }[] = [];
     const now = new Date();
@@ -176,7 +362,7 @@ export function TrendsView({
     return days;
   }, [transactions]);
 
-  // Monthly spending data for the last 6 months (excludes budget-excluded transactions)
+  // Monthly spending data for the last 6 months
   const monthlyData = useMemo(() => {
     const months: { month: string; label: string; total: number }[] = [];
     const now = new Date();
@@ -189,12 +375,10 @@ export function TrendsView({
         .filter((t) => {
           if (t.type !== "expense" || t.excluded_from_budget) return false;
 
-          // For prorated transactions, check if this month is in the proration window
           if (t.prorate_months && t.prorate_months > 1) {
             return isProratedInMonth(t, monthStart);
           }
 
-          // Regular transactions - check if date falls in month
           const txnDate = new Date(t.date);
           return txnDate >= monthStart && txnDate <= monthEnd;
         })
@@ -210,9 +394,9 @@ export function TrendsView({
     return months;
   }, [transactions]);
 
-  const lineChartData = chartMode === "daily" ? dailyData : monthlyData;
+  const chartData = chartMode === "daily" ? dailyData : monthlyData;
 
-  // Pie chart uses chartCategoryTotals which excludes budget-excluded transactions
+  // Pie chart data
   const pieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
       (cat) => chartCategoryTotals[cat.name]?.count > 0
@@ -233,14 +417,10 @@ export function TrendsView({
     return data;
   }, [chartCategoryTotals]);
 
-  const total = pieData.reduce((sum, d) => sum + d.value, 0);
-
-  // Check if there are any categories with transactions
   const hasCategories =
     EXPENSE_CATEGORIES.some((cat) => categoryTotals[cat.name]?.count > 0) ||
     categoryTotals["Uncategorized"]?.count > 0;
 
-  // Check if we have any expense transactions at all
   const hasExpenses = useMemo(
     () => transactions.some((t) => t.type === "expense"),
     [transactions]
@@ -267,7 +447,7 @@ export function TrendsView({
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
-      {/* Spending Area Chart */}
+      {/* Spending Area Chart - Pure SVG */}
       {hasExpenses && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -278,162 +458,14 @@ export function TrendsView({
             <h3 className="text-sm font-medium mb-3">
               {chartMode === "daily" ? "Last 14 Days" : "Last 6 Months"}
             </h3>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={lineChartData}
-                  margin={{ top: 10, right: 16, left: 0, bottom: 4 }}
-                >
-                  {/* Gradient definitions */}
-                  <defs>
-                    <linearGradient
-                      id="colorSpending"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
-                      <stop
-                        offset="50%"
-                        stopColor="#3b82f6"
-                        stopOpacity={0.15}
-                      />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient
-                      id="lineGradient"
-                      x1="0"
-                      y1="0"
-                      x2="1"
-                      y2="0"
-                    >
-                      <stop offset="0%" stopColor="#60a5fa" />
-                      <stop offset="50%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#2563eb" />
-                    </linearGradient>
-                  </defs>
-                  {/* Grid lines */}
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke={chartColors.grid}
-                    strokeOpacity={0.8}
-                  />
-                  <XAxis
-                    dataKey="label"
-                    tick={{
-                      fontSize: 11,
-                      fill: chartColors.text,
-                    }}
-                    tickLine={{ stroke: chartColors.axis }}
-                    axisLine={{ stroke: chartColors.axis }}
-                    interval={chartMode === "daily" ? 2 : 0}
-                    tickMargin={8}
-                    tickFormatter={(label) => {
-                      // Extract day number and add ordinal suffix for daily view
-                      if (chartMode === "daily") {
-                        const parts = label.split(" ");
-                        const day = parseInt(parts[1], 10);
-                        if (isNaN(day)) return label;
-                        // Get ordinal suffix
-                        const suffix =
-                          day % 10 === 1 && day !== 11
-                            ? "st"
-                            : day % 10 === 2 && day !== 12
-                            ? "nd"
-                            : day % 10 === 3 && day !== 13
-                            ? "rd"
-                            : "th";
-                        return `${day}${suffix}`;
-                      }
-                      return label;
-                    }}
-                  />
-                  <YAxis
-                    tick={{
-                      fontSize: 11,
-                      fill: chartColors.text,
-                    }}
-                    tickLine={{ stroke: chartColors.axis }}
-                    axisLine={{ stroke: chartColors.axis }}
-                    tickFormatter={(value) => {
-                      if (value === 0) return "₹0";
-                      if (value >= 1000)
-                        return `₹${(value / 1000).toFixed(0)}k`;
-                      return `₹${value}`;
-                    }}
-                    domain={[0, "dataMax"]}
-                    tickCount={4}
-                    width={44}
-                  />
-                  <Tooltip
-                    cursor={{
-                      stroke: chartColors.text,
-                      strokeWidth: 1,
-                      strokeDasharray: "4 4",
-                    }}
-                    content={({ active, payload, label }) => {
-                      if (!active || !payload?.length) return null;
-                      return (
-                        <div
-                          className="px-3 py-2 rounded-xl border text-xs"
-                          style={{
-                            backgroundColor:
-                              theme === "dark"
-                                ? "rgba(24, 24, 27, 0.75)"
-                                : "rgba(255, 255, 255, 0.75)",
-                            borderColor:
-                              theme === "dark"
-                                ? "rgba(63, 63, 70, 0.5)"
-                                : "rgba(228, 228, 231, 0.8)",
-                            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                            backdropFilter: "blur(16px)",
-                            WebkitBackdropFilter: "blur(16px)",
-                          }}
-                        >
-                          <p className="text-muted-foreground mb-1">{label}</p>
-                          <p
-                            className="font-mono font-semibold"
-                            style={{
-                              color: theme === "dark" ? "#fafafa" : "#18181b",
-                            }}
-                          >
-                            Spent: {formatCurrency(payload[0].value as number)}
-                          </p>
-                        </div>
-                      );
-                    }}
-                  />
-                  <Area
-                    type="monotoneX"
-                    dataKey="total"
-                    stroke="url(#lineGradient)"
-                    strokeWidth={2.5}
-                    fill="url(#colorSpending)"
-                    animationDuration={1200}
-                    animationEasing="ease-out"
-                    dot={{
-                      fill: "#3b82f6",
-                      strokeWidth: 2,
-                      stroke: "hsl(var(--card))",
-                      r: 4,
-                    }}
-                    activeDot={{
-                      fill: "#3b82f6",
-                      strokeWidth: 3,
-                      stroke: "hsl(var(--card))",
-                      r: 6,
-                    }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="h-48">
+              <AreaChart data={chartData} theme={theme} />
             </div>
           </Card>
         </motion.div>
       )}
 
-      {/* Pie Chart */}
+      {/* Pie Chart - Pure SVG with connecting lines */}
       {pieData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -441,177 +473,17 @@ export function TrendsView({
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Card className="p-4">
-            <h3 className="text-sm font-medium text-center">
+            <h3 className="text-sm font-medium text-center mb-2">
               Spending by Category
             </h3>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  {/* Gradient definitions for each slice */}
-                  <defs>
-                    {pieData.map((entry, index) => (
-                      <linearGradient
-                        key={`gradient-${index}`}
-                        id={`pieGradient-${index}`}
-                        x1="0"
-                        y1="0"
-                        x2="1"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor={entry.color}
-                          stopOpacity={1}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor={entry.color}
-                          stopOpacity={0.7}
-                        />
-                      </linearGradient>
-                    ))}
-                  </defs>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={65}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={1000}
-                    animationEasing="ease-out"
-                    stroke={theme === "dark" ? "#27272a" : "#ffffff"}
-                    strokeWidth={2}
-                    activeIndex={activeIndex}
-                    onMouseEnter={(_, index) => setActiveIndex(index)}
-                    onMouseLeave={() => setActiveIndex(undefined)}
-                    label={(props) => renderCustomLabel({ ...props, theme })}
-                    activeShape={(props: unknown) => {
-                      const {
-                        cx,
-                        cy,
-                        innerRadius,
-                        outerRadius,
-                        startAngle,
-                        endAngle,
-                        fill,
-                      } = props as {
-                        cx: number;
-                        cy: number;
-                        innerRadius: number;
-                        outerRadius: number;
-                        startAngle: number;
-                        endAngle: number;
-                        fill: string;
-                      };
-                      return (
-                        <g>
-                          <path
-                            d={`M ${
-                              cx +
-                              (innerRadius + 2) *
-                                Math.cos((-startAngle * Math.PI) / 180)
-                            },${
-                              cy +
-                              (innerRadius + 2) *
-                                Math.sin((-startAngle * Math.PI) / 180)
-                            }
-                                A ${innerRadius + 2},${innerRadius + 2} 0 ${
-                              endAngle - startAngle > 180 ? 1 : 0
-                            },0 ${
-                              cx +
-                              (innerRadius + 2) *
-                                Math.cos((-endAngle * Math.PI) / 180)
-                            },${
-                              cy +
-                              (innerRadius + 2) *
-                                Math.sin((-endAngle * Math.PI) / 180)
-                            }
-                                L ${
-                                  cx +
-                                  (outerRadius + 6) *
-                                    Math.cos((-endAngle * Math.PI) / 180)
-                                },${
-                              cy +
-                              (outerRadius + 6) *
-                                Math.sin((-endAngle * Math.PI) / 180)
-                            }
-                                A ${outerRadius + 6},${outerRadius + 6} 0 ${
-                              endAngle - startAngle > 180 ? 1 : 0
-                            },1 ${
-                              cx +
-                              (outerRadius + 6) *
-                                Math.cos((-startAngle * Math.PI) / 180)
-                            },${
-                              cy +
-                              (outerRadius + 6) *
-                                Math.sin((-startAngle * Math.PI) / 180)
-                            }
-                                Z`}
-                            fill={fill}
-                          />
-                        </g>
-                      );
-                    }}
-                  >
-                    {pieData.map((_, index) => (
-                      <Cell
-                        key={index}
-                        fill={`url(#pieGradient-${index})`}
-                        style={{
-                          cursor: "pointer",
-                          outline: "none",
-                        }}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const data = payload[0];
-                      const value = data.value as number;
-                      const name = data.name as string;
-                      const percentage = ((value / total) * 100).toFixed(0);
-                      return (
-                        <div
-                          className="px-3 py-2 rounded-xl border text-xs"
-                          style={{
-                            backgroundColor:
-                              theme === "dark"
-                                ? "rgba(24, 24, 27, 0.75)"
-                                : "rgba(255, 255, 255, 0.75)",
-                            borderColor:
-                              theme === "dark"
-                                ? "rgba(63, 63, 70, 0.5)"
-                                : "rgba(228, 228, 231, 0.8)",
-                            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-                            backdropFilter: "blur(16px)",
-                            WebkitBackdropFilter: "blur(16px)",
-                          }}
-                        >
-                          <p className="text-muted-foreground mb-1">{name}</p>
-                          <p
-                            className="font-mono font-semibold"
-                            style={{
-                              color: theme === "dark" ? "#fafafa" : "#18181b",
-                            }}
-                          >
-                            {formatCurrency(value)} ({percentage}%)
-                          </p>
-                        </div>
-                      );
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+            <div className="h-56 flex items-center justify-center">
+              <PieChart data={pieData} theme={theme} />
             </div>
           </Card>
         </motion.div>
       )}
 
-      {/* Category Cards - sorted by total descending */}
+      {/* Category Cards */}
       <div className="space-y-1.5">
         {EXPENSE_CATEGORIES.filter((cat) => categoryTotals[cat.name]?.count > 0)
           .sort(
@@ -662,4 +534,4 @@ export function TrendsView({
       <Footer />
     </div>
   );
-}
+});

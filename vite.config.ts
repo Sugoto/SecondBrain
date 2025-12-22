@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import compression from 'vite-plugin-compression'
+import million from 'million/compiler'
 
 // React Compiler configuration
 const ReactCompilerConfig = {
@@ -13,6 +14,15 @@ const ReactCompilerConfig = {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    // Million.js - 70% faster React rendering via compilation
+    million.vite({ 
+      auto: {
+        // Automatically optimize all components
+        threshold: 0.05,
+        // Skip components that use unsupported features
+        skip: ['framer-motion', 'recharts']
+      }
+    }),
     react({
       babel: {
         plugins: [
@@ -135,10 +145,12 @@ export default defineConfig({
           ],
           // Data fetching
           'vendor-query': ['@tanstack/react-query'],
-          // Charts
-          'vendor-charts': ['recharts'],
           // Supabase
           'vendor-supabase': ['@supabase/supabase-js'],
+          // Virtualization
+          'vendor-virtual': ['@tanstack/react-virtual'],
+          // Local caching
+          'vendor-dexie': ['dexie'],
         },
       },
     },

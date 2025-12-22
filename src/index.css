@@ -169,3 +169,64 @@
     touch-action: manipulation;
   }
 }
+
+/* ========================================
+   View Transitions API Animations
+   Native browser transitions (Chrome 111+, Safari 18+)
+   ======================================== */
+
+/* Page transition animations */
+::view-transition-old(page-content) {
+  animation: slide-out-left 0.25s ease-out forwards;
+}
+
+::view-transition-new(page-content) {
+  animation: slide-in-right 0.25s ease-out forwards;
+}
+
+@keyframes slide-out-left {
+  from { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+  to { 
+    opacity: 0; 
+    transform: translateX(-30px); 
+  }
+}
+
+@keyframes slide-in-right {
+  from { 
+    opacity: 0; 
+    transform: translateX(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+/* Fade transitions for smaller elements */
+::view-transition-old(card) {
+  animation: fade-out 0.15s ease-out forwards;
+}
+
+::view-transition-new(card) {
+  animation: fade-in 0.15s ease-out forwards;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* GPU-accelerated page transition class */
+.page-transition {
+  will-change: transform, opacity;
+  contain: layout style paint;
+}
