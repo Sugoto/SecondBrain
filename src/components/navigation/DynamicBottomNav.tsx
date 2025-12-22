@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Home } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -22,7 +22,7 @@ interface DynamicBottomNavProps {
   onPrefetch?: (id: string) => void;
 }
 
-export function DynamicBottomNav({
+export const DynamicBottomNav = memo(function DynamicBottomNav({
   currentSection,
   activeView,
   navItems,
@@ -34,6 +34,21 @@ export function DynamicBottomNav({
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const showHomeButton = onGoHome && currentSection !== "home";
+  
+  // Memoize style objects to prevent recreation every render
+  const containerStyle = useMemo(() => ({
+    background: isDark
+      ? "rgba(24, 24, 27, 0.85)"
+      : "rgba(255, 255, 255, 0.85)",
+    backdropFilter: "blur(20px) saturate(180%)",
+    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+    borderTop: isDark
+      ? "1px solid rgba(63, 63, 70, 0.5)"
+      : "1px solid rgba(228, 228, 231, 0.8)",
+    boxShadow: isDark
+      ? "0 -4px 24px rgba(0, 0, 0, 0.3)"
+      : "0 -4px 24px rgba(0, 0, 0, 0.08)",
+  }), [isDark]);
 
   return (
     <motion.nav
@@ -44,19 +59,7 @@ export function DynamicBottomNav({
         opacity: hidden ? 0 : 1,
       }}
       transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-      style={{
-        background: isDark
-          ? "rgba(24, 24, 27, 0.85)"
-          : "rgba(255, 255, 255, 0.85)",
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        borderTop: isDark
-          ? "1px solid rgba(63, 63, 70, 0.5)"
-          : "1px solid rgba(228, 228, 231, 0.8)",
-        boxShadow: isDark
-          ? "0 -4px 24px rgba(0, 0, 0, 0.3)"
-          : "0 -4px 24px rgba(0, 0, 0, 0.08)",
-      }}
+      style={containerStyle}
     >
       {/* Top shine effect */}
       <div
@@ -212,4 +215,4 @@ export function DynamicBottomNav({
       </div>
     </motion.nav>
   );
-}
+});

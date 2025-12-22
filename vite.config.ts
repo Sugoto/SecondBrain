@@ -3,9 +3,26 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+// React Compiler configuration
+const ReactCompilerConfig = {
+  // Compilation mode - 'all' compiles all components
+  // 'annotation' only compiles components with "use memo" directive
+  // 'infer' automatically determines what to compile
+  target: '19' // Target React 19
+};
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          ['babel-plugin-react-compiler', ReactCompilerConfig],
+        ],
+      },
+    }),
+    tailwindcss()
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

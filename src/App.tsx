@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useCallback } from "react";
+import { useState, lazy, Suspense, useCallback, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./hooks/useTheme";
 import { ExpenseDataProvider, usePrefetchTransactions } from "./hooks/useExpenseData";
@@ -53,7 +53,8 @@ function AppContent() {
     [prefetchTransactions]
   );
 
-  const getNavItems = () => {
+  // Memoize nav items to avoid recreation every render
+  const navItems = useMemo(() => {
     switch (currentSection) {
       case "finances":
         return [];
@@ -62,29 +63,29 @@ function AppContent() {
       default:
         return HOME_NAV_ITEMS;
     }
-  };
+  }, [currentSection]);
 
-  const getActiveView = () => {
+  const activeView = useMemo(() => {
     switch (currentSection) {
       case "fitness":
         return healthView;
       default:
         return currentSection;
     }
-  };
+  }, [currentSection, healthView]);
 
-  const handleViewChange = (view: string) => {
+  const handleViewChange = useCallback((view: string) => {
     if (currentSection === "home") {
       // Navigate to sub-section
       setCurrentSection(view as AppSection);
     } else if (currentSection === "fitness") {
       setHealthView(view as HealthView);
     }
-  };
+  }, [currentSection]);
 
-  const handleGoHome = () => {
+  const handleGoHome = useCallback(() => {
     setCurrentSection("home");
-  };
+  }, []);
 
   return (
     <div className="h-[100dvh] bg-background overflow-hidden">
@@ -116,8 +117,8 @@ function AppContent() {
       {currentSection !== "finances" && (
         <DynamicBottomNav
           currentSection={currentSection}
-          activeView={getActiveView()}
-          navItems={getNavItems()}
+          activeView={activeView}
+          navItems={navItems}
           onViewChange={handleViewChange}
           onGoHome={handleGoHome}
           onPrefetch={handlePrefetch}

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Transaction } from "@/lib/supabase";
 import {
   ChevronRight,
@@ -27,7 +28,7 @@ interface CategoryCardProps {
   index?: number;
 }
 
-export function CategoryCard({
+export const CategoryCard = memo(function CategoryCard({
   name,
   icon,
   total,
@@ -199,4 +200,4 @@ export function CategoryCard({
       </AnimatePresence>
     </motion.div>
   );
-}
+});

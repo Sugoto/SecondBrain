@@ -477,7 +477,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={openAddExpense}
-            className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-full overflow-hidden"
+            className="group md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-full overflow-hidden"
             style={{
               background:
                 theme === "dark"
@@ -506,16 +506,9 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
                     : "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%)",
               }}
             />
-            {/* Animated ring */}
-            <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none"
-              animate={{
-                boxShadow: [
-                  "0 0 0 0px rgba(139, 92, 246, 0.4)",
-                  "0 0 0 8px rgba(139, 92, 246, 0)",
-                ],
-              }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+            {/* Static ring - hover effect instead of infinite animation */}
+            <div
+              className="absolute inset-0 rounded-full pointer-events-none transition-shadow duration-300 group-hover:shadow-[0_0_0_4px_rgba(139,92,246,0.2)]"
             />
             <Plus className="h-6 w-6 text-primary relative z-10" />
           </motion.button>

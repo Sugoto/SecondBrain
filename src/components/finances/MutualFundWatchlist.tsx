@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useMemo, useCallback } from "react";
 import {
   useMutualFundWatchlist,
   fetchNavForDate,
@@ -31,7 +31,7 @@ interface FundSectionProps {
   onDeleteInvestment: (id: string) => Promise<void>;
 }
 
-function FundSection({
+const FundSection = memo(function FundSection({
   fund,
   index,
   isExpanded,
@@ -44,32 +44,52 @@ function FundSection({
   const [investDate, setInvestDate] = useState("");
   const [adding, setAdding] = useState(false);
 
-  // Calculate investment stats
-  const totalUnits = investments.reduce((sum, i) => sum + i.units, 0);
-  const totalInvested = investments.reduce((sum, i) => sum + i.amount, 0);
-  const currentValue = totalUnits * fund.currentNav;
-  const hasInvestments = investments.length > 0;
+  // Memoize investment stats to avoid recalculation
+  const investmentStats = useMemo(() => {
+    const totalUnits = investments.reduce((sum, i) => sum + i.units, 0);
+    const totalInvested = investments.reduce((sum, i) => sum + i.amount, 0);
+    const currentValue = totalUnits * fund.currentNav;
+    const previousValue = totalUnits * fund.previousNav;
+    const netChange = currentValue - totalInvested;
+    const dailyChangeAmount = currentValue - previousValue;
+    
+    return {
+      totalUnits,
+      totalInvested,
+      currentValue,
+      previousValue,
+      netChange,
+      dailyChangeAmount,
+      hasInvestments: investments.length > 0,
+      isNetUp: netChange >= 0,
+      isPositiveDay: dailyChangeAmount >= 0,
+    };
+  }, [investments, fund.currentNav, fund.previousNav]);
 
-  // Net change (total return)
-  const netChange = currentValue - totalInvested;
-  const isNetUp = netChange >= 0;
-
-  // Daily change - calculate amount change based on previous day's value
-  const previousValue = totalUnits * fund.previousNav;
-  const dailyChangeAmount = currentValue - previousValue;
-  const isPositiveDay = dailyChangeAmount >= 0;
+  const { currentValue, netChange, dailyChangeAmount, hasInvestments, isNetUp, isPositiveDay } = investmentStats;
   const dayColor = isPositiveDay ? "#22c55e" : "#ef4444";
 
-  // Sparkline
-  const sparklinePoints = fund.navHistory.map((d, i) => {
-    const minNav = Math.min(...fund.navHistory.map((h) => h.nav));
-    const maxNav = Math.max(...fund.navHistory.map((h) => h.nav));
+  // Memoize sparkline calculation - O(n) instead of O(n²)
+  const sparklinePath = useMemo(() => {
+    const history = fund.navHistory;
+    if (history.length === 0) return "";
+    
+    let minNav = history[0].nav;
+    let maxNav = history[0].nav;
+    for (const h of history) {
+      if (h.nav < minNav) minNav = h.nav;
+      if (h.nav > maxNav) maxNav = h.nav;
+    }
+    
     const range = maxNav - minNav || 1;
-    const x = (i / (fund.navHistory.length - 1)) * 100;
-    const y = 24 - ((d.nav - minNav) / range) * 20;
-    return `${x},${y}`;
-  });
-  const sparklinePath = `M ${sparklinePoints.join(" L ")}`;
+    const points = history.map((d, i) => {
+      const x = (i / (history.length - 1)) * 100;
+      const y = 24 - ((d.nav - minNav) / range) * 20;
+      return `${x},${y}`;
+    });
+    
+    return `M ${points.join(" L ")}`;
+  }, [fund.navHistory]);
 
   const handleInvest = async () => {
     if (!investAmount || !investDate) {
@@ -301,7 +321,7 @@ function FundSection({
       </AnimatePresence>
     </motion.div>
   );
-}
+});
 
 interface MutualFundWatchlistProps {
   theme: "light" | "dark";
@@ -315,9 +335,11 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
   const isDark = theme === "dark";
-  const investments = userStats?.investments || [];
+  
+  // Memoize investments to prevent dependency array changes
+  const investments = useMemo(() => userStats?.investments || [], [userStats?.investments]);
 
-  const handleToggle = (schemeCode: number) => {
+  const handleToggle = useCallback((schemeCode: number) => {
     setExpandedFunds((prev) => {
       const next = new Set(prev);
       if (next.has(schemeCode)) {
@@ -327,9 +349,9 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
       }
       return next;
     });
-  };
+  }, []);
 
-  const handleAddInvestment = async (
+  const handleAddInvestment = useCallback(async (
     schemeCode: number,
     amount: number,
     date: string
@@ -351,39 +373,58 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
     });
 
     toast.success(`Added ₹${amount.toLocaleString("en-IN")} investment`);
-  };
+  }, [addInvestment]);
 
-  const handleDeleteInvestment = async (id: string) => {
+  const handleDeleteInvestment = useCallback(async (id: string) => {
     try {
       await deleteInvestment(id);
       toast.success("Investment removed");
     } catch {
       toast.error("Failed to remove investment");
     }
-  };
+  }, [deleteInvestment]);
 
-  const getInvestmentsForFund = (schemeCode: number) =>
-    investments.filter((i) => i.schemeCode === schemeCode);
+  // Memoize investments lookup by fund to avoid array recreation
+  const investmentsByFund = useMemo(() => {
+    const map = new Map<number, Investment[]>();
+    for (const inv of investments) {
+      const existing = map.get(inv.schemeCode) || [];
+      existing.push(inv);
+      map.set(inv.schemeCode, existing);
+    }
+    return map;
+  }, [investments]);
 
-  // Calculate portfolio totals
-  const portfolioTotals = funds.reduce(
-    (acc, fund) => {
-      const fundInvestments = getInvestmentsForFund(fund.schemeCode);
-      const totalUnits = fundInvestments.reduce((sum, i) => sum + i.units, 0);
-      const totalInvested = fundInvestments.reduce(
-        (sum, i) => sum + i.amount,
-        0
-      );
+  const getInvestmentsForFund = useCallback((schemeCode: number) =>
+    investmentsByFund.get(schemeCode) || [], [investmentsByFund]);
+
+  // Memoize portfolio totals calculation
+  const portfolioTotals = useMemo(() => {
+    let invested = 0;
+    let current = 0;
+    let dailyChange = 0;
+    
+    for (const fund of funds) {
+      const fundInvestments = investmentsByFund.get(fund.schemeCode) || [];
+      let totalUnits = 0;
+      let totalInvested = 0;
+      
+      for (const inv of fundInvestments) {
+        totalUnits += inv.units;
+        totalInvested += inv.amount;
+      }
+      
       const currentValue = totalUnits * fund.currentNav;
       const previousValue = totalUnits * fund.previousNav;
-      return {
-        invested: acc.invested + totalInvested,
-        current: acc.current + currentValue,
-        dailyChange: acc.dailyChange + (currentValue - previousValue),
-      };
-    },
-    { invested: 0, current: 0, dailyChange: 0 }
-  );
+      
+      invested += totalInvested;
+      current += currentValue;
+      dailyChange += currentValue - previousValue;
+    }
+    
+    return { invested, current, dailyChange };
+  }, [funds, investmentsByFund]);
+
   const hasPortfolio = portfolioTotals.current > 0;
   const netChange = portfolioTotals.current - portfolioTotals.invested;
   const isNetUp = netChange >= 0;
@@ -457,7 +498,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
 
       {/* Single Collapsible Card */}
       <Card
-        className="overflow-hidden relative"
+        className="overflow-hidden relative py-0"
         style={{
           background: hasPortfolio
             ? isDark

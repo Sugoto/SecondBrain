@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -147,19 +147,17 @@ export function TransactionDialog({
   const [showDatetime, setShowDatetime] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [lastTransactionId, setLastTransactionId] = useState<string | null>(
-    null
-  );
 
-  // Reset state when transaction changes (derived state pattern)
-  if (transaction && transaction.id !== lastTransactionId) {
-    setLastTransactionId(transaction.id);
-    setAmountInput(
-      transaction.amount === 0 ? "" : transaction.amount.toString()
-    );
-    setShowDatetime(false);
-    setShowAdvanced(false);
-  }
+  // Reset state when transaction changes using useEffect (proper pattern)
+  useEffect(() => {
+    if (transaction) {
+      setAmountInput(
+        transaction.amount === 0 ? "" : transaction.amount.toString()
+      );
+      setShowDatetime(false);
+      setShowAdvanced(false);
+    }
+  }, [transaction?.id]); // Only reset when transaction ID changes
 
   if (!transaction) return null;
 
@@ -249,17 +247,12 @@ export function TransactionDialog({
             boxShadow: `0 8px 24px -8px ${categoryColor}40`,
           }}
         >
-          {/* Animated background glow */}
-          <motion.div
+          {/* Static background glow - avoids infinite animation GPU drain */}
+          <div
             className="absolute inset-0 pointer-events-none"
-            animate={{
-              background: [
-                `radial-gradient(circle at 30% 50%, ${categoryColor}15 0%, transparent 50%)`,
-                `radial-gradient(circle at 70% 50%, ${categoryColor}15 0%, transparent 50%)`,
-                `radial-gradient(circle at 30% 50%, ${categoryColor}15 0%, transparent 50%)`,
-              ],
+            style={{
+              background: `radial-gradient(circle at 50% 50%, ${categoryColor}12 0%, transparent 60%)`,
             }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           />
 
           <div className="flex items-center relative z-10 min-h-[40px]">

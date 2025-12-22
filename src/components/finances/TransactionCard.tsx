@@ -15,7 +15,7 @@ import {
 
 interface TransactionCardProps {
   transaction: Transaction;
-  onClick: () => void;
+  onClick: (transaction: Transaction) => void;
   index?: number;
 }
 
@@ -67,7 +67,7 @@ export const TransactionCard = memo(function TransactionCard({
           : `0 8px 24px -4px ${categoryColor}15, 0 0 0 1px ${categoryColor}25`,
       }}
       whileTap={{ scale: isExcluded ? 0.995 : 0.98 }}
-      onClick={onClick}
+      onClick={() => onClick(txn)}
       style={cardStyle}
       className={`group w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 border text-left cursor-pointer relative overflow-hidden ${
         isExcluded
