@@ -256,7 +256,6 @@ export function ShoppingList() {
     items,
     loading,
     totals,
-    checkedCount,
     addItem,
     toggleChecked,
     updateItem,
