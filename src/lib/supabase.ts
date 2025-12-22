@@ -21,6 +21,15 @@ export type Transaction = {
   prorate_months: number | null;
 };
 
+export type Investment = {
+  id: string;
+  schemeCode: number;
+  amount: number;
+  date: string;
+  nav: number;
+  units: number;
+};
+
 export type UserStats = {
   id: string;
   bank_savings: number;
@@ -35,6 +44,7 @@ export type UserStats = {
   gender: "male" | "female" | null;
   activity_level: "sedentary" | "light" | "moderate" | "active" | null;
   workout_dates: string[] | null;
+  investments: Investment[] | null;
 };
 
 export type ActivityLevel = "sedentary" | "light" | "moderate" | "active";

@@ -6,7 +6,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import type { Transaction, UserStats } from "@/lib/supabase";
+import type { Transaction, UserStats, Investment } from "@/lib/supabase";
 import type { ReactNode } from "react";
 
 const queryClient = new QueryClient({
@@ -219,11 +219,54 @@ export function useUserStats() {
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: userStatsKeys.all });
 
+  // Investment management
+  const addInvestment = async (investment: Omit<Investment, "id">) => {
+    if (!userStats?.id) throw new Error("No user stats");
+    
+    const newInvestment: Investment = {
+      ...investment,
+      id: crypto.randomUUID(),
+    };
+    
+    const currentInvestments = userStats.investments || [];
+    const updatedInvestments = [...currentInvestments, newInvestment];
+    
+    const { error } = await supabase
+      .from("user_stats")
+      .update({ investments: updatedInvestments })
+      .eq("id", userStats.id);
+    
+    if (error) throw error;
+    
+    const updated = { ...userStats, investments: updatedInvestments };
+    queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
+    return newInvestment;
+  };
+
+  const deleteInvestment = async (investmentId: string) => {
+    if (!userStats?.id) throw new Error("No user stats");
+    
+    const currentInvestments = userStats.investments || [];
+    const updatedInvestments = currentInvestments.filter(i => i.id !== investmentId);
+    
+    const { error } = await supabase
+      .from("user_stats")
+      .update({ investments: updatedInvestments })
+      .eq("id", userStats.id);
+    
+    if (error) throw error;
+    
+    const updated = { ...userStats, investments: updatedInvestments };
+    queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
+  };
+
   return {
     userStats,
     loading,
     error: error ? (error as Error).message : null,
     updateUserStats,
     invalidate,
+    addInvestment,
+    deleteInvestment,
   };
 }

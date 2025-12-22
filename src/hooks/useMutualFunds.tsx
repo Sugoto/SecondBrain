@@ -67,6 +67,23 @@ async function fetchMutualFund(schemeCode: number): Promise<MutualFundData> {
   return response.json();
 }
 
+// Fetch NAV for a specific date (for recording investments)
+export async function fetchNavForDate(
+  schemeCode: number,
+  targetDate: string // YYYY-MM-DD
+): Promise<number | null> {
+  const data = await fetchMutualFund(schemeCode);
+  const target = new Date(targetDate);
+  
+  for (const entry of data.data) {
+    const entryDate = parseNavDate(entry.date);
+    if (entryDate <= target) {
+      return parseFloat(entry.nav);
+    }
+  }
+  return null;
+}
+
 // Parse date from "DD-MM-YYYY" format
 function parseNavDate(dateStr: string): Date {
   const [day, month, year] = dateStr.split("-").map(Number);
@@ -168,7 +185,7 @@ function calculateFundStats(
     fiveYearChangePercent,
     lastUpdated: navData[0]?.date || "",
     navHistory: navData
-      .slice(0, 14)
+      .slice(0, 30)
       .reverse()
       .map((d) => ({
         date: d.date,
