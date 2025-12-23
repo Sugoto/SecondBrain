@@ -8,11 +8,11 @@ import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
 export function MutualFundWidget() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { funds, loading } = useMutualFundWatchlist();
+  const { funds } = useMutualFundWatchlist();
   const { userStats } = useUserStats();
 
   const portfolioData = useMemo(() => {
-    if (loading || funds.length === 0) return null;
+    if (funds.length === 0) return null;
 
     const investments = userStats?.investments || [];
 
@@ -42,26 +42,7 @@ export function MutualFundWidget() {
       netChange: current - invested,
       dailyChange,
     };
-  }, [funds, userStats?.investments, loading]);
-
-  if (loading) {
-    return (
-      <div className="animate-pulse flex-1 min-w-0">
-        <div
-          className="aspect-square rounded-2xl p-2.5 sm:p-3"
-          style={{
-            background: isDark
-              ? "rgba(34, 197, 94, 0.1)"
-              : "rgba(34, 197, 94, 0.05)",
-          }}
-        >
-          <div className="h-full flex items-center justify-center">
-            <div className="w-[60%] aspect-square rounded-full bg-muted/50" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, [funds, userStats?.investments]);
 
   if (!portfolioData) return null;
 

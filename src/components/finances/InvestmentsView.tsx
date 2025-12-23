@@ -11,7 +11,7 @@ import { calculateNetWorth, calculateMonthlySavings, calculateTimeToGoal } from 
 
 export function InvestmentsView() {
   const { theme } = useTheme();
-  const { userStats, loading, updateUserStats } = useUserStats();
+  const { userStats, updateUserStats } = useUserStats();
   const { transactions } = useExpenseData();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -31,7 +31,6 @@ export function InvestmentsView() {
       <NetWorthCard
         netWorth={netWorth}
         theme={theme}
-        loading={loading}
         onEdit={() => setEditDialogOpen(true)}
         goalProgress={goalProgress}
       />

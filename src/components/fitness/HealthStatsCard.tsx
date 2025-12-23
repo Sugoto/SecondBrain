@@ -30,13 +30,11 @@ import { useHealthData } from "@/hooks/useHealthData";
 
 interface HealthStatsCardProps {
   userStats: UserStats | null;
-  loading: boolean;
   onEdit: () => void;
 }
 
 export function HealthStatsCard({
   userStats,
-  loading,
   onEdit,
 }: HealthStatsCardProps) {
   const { theme } = useTheme();
@@ -105,9 +103,7 @@ export function HealthStatsCard({
             <p className="text-[10px] text-muted-foreground font-medium">
               Daily Calories
             </p>
-            {loading ? (
-              <div className="h-5 w-24 bg-muted/50 rounded animate-pulse" />
-            ) : tdee ? (
+            {tdee ? (
               <p
                 className="text-sm font-bold font-mono text-emerald-500 truncate"
                 style={{

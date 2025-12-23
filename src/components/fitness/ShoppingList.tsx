@@ -16,7 +16,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import type { ShoppingItem } from "@/lib/supabase";
 
@@ -254,7 +253,6 @@ export function ShoppingList() {
 
   const {
     items,
-    loading,
     totals,
     addItem,
     toggleChecked,
@@ -274,16 +272,6 @@ export function ShoppingList() {
     await updateItem(editingItem.id, values);
     setEditingItem(null);
   };
-
-  if (loading) {
-    return (
-      <Card className="p-4 space-y-3">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-      </Card>
-    );
-  }
 
   return (
     <motion.div

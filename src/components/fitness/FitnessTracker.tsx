@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import type { HealthView } from "@/types/navigation";
 import { useHealthData } from "@/hooks/useHealthData";
@@ -40,7 +39,7 @@ interface NutritionViewProps {
 function NutritionView({ onEditHealth }: NutritionViewProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { userStats, loading, workoutDates } = useHealthData();
+  const { userStats, workoutDates } = useHealthData();
 
   // Calculate dynamic activity level based on workout frequency
   const activityInfo = useMemo(() => {
@@ -63,18 +62,6 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
 
   // Calculate water intake
   const waterLiters = userStats?.weight_kg ? userStats.weight_kg * 0.033 : 0;
-
-  if (loading) {
-    return (
-      <div className="p-4 space-y-4">
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <div className="grid grid-cols-2 gap-3">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-24 rounded-xl" />
-        </div>
-      </div>
-    );
-  }
 
   const hasHealthData =
     userStats?.height_cm &&

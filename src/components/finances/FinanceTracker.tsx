@@ -3,7 +3,6 @@ import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData } from "@/hooks/useExpenseData";
-import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -22,20 +21,6 @@ const TrendsView = lazy(() =>
   import("./TrendsView").then(m => ({ default: m.TrendsView }))
 );
 
-// Loading skeleton for lazy-loaded views
-function ViewSkeleton() {
-  return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
-      <Skeleton className="h-56 w-full rounded-lg skeleton-shimmer" />
-      <Skeleton className="h-48 w-full rounded-lg skeleton-shimmer" />
-      <div className="space-y-2">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full rounded-lg" />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 import type { TimeFilter, ActiveView, ChartMode, DateRange } from "./types";
 import {
@@ -203,7 +188,6 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   // Data from React Query cache
   const {
     transactions,
-    loading,
     error,
     addToCache,
     updateInCache,
@@ -391,24 +375,6 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
       .reduce((sum, t) => sum + getMonthlyAmount(t), 0);
   }, [transactions]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-4 md:p-6">
-        <div className="max-w-6xl mx-auto space-y-4">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-16" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
       {/* Header - Fixed on mobile */}
@@ -459,7 +425,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
           )}
           {activeView === "trends" && (
             <motion.div key="trends" {...VIEW_ANIMATION}>
-              <Suspense fallback={<ViewSkeleton />}>
+              <Suspense fallback={null}>
                 <TrendsView
                   transactions={transactions}
                   chartMode={chartMode}

@@ -7,7 +7,6 @@ import {
 import { useUserStats } from "@/hooks/useExpenseData";
 import type { Investment } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -329,7 +328,7 @@ interface MutualFundWatchlistProps {
 }
 
 export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
-  const { funds, loading, error, isRefetching, refresh, lastUpdated } =
+  const { funds, error, isRefetching, refresh, lastUpdated } =
     useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
   const [isCardExpanded, setIsCardExpanded] = useState(false);
@@ -432,19 +431,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   const isPortfolioUp = portfolioTotals.dailyChange >= 0;
   const trendColor = isPortfolioUp ? "#22c55e" : "#ef4444";
 
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-6 w-6 rounded-full" />
-        </div>
-        <Skeleton className="h-16 w-full rounded-lg" />
-      </div>
-    );
-  }
-
-  if (error) {
+  if (error && funds.length === 0) {
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between">

@@ -91,7 +91,6 @@ const COLOR_CLASSES: Record<string, { bg: string; text: string }> = {
 interface NetWorthCardProps {
   netWorth: number;
   theme: "light" | "dark";
-  loading: boolean;
   onEdit: () => void;
   goalProgress?: GoalProgress;
 }
@@ -107,7 +106,6 @@ function formatDuration(years: number, months: number): string {
 export function NetWorthCard({
   netWorth,
   theme,
-  loading,
   onEdit,
   goalProgress,
 }: NetWorthCardProps) {
@@ -167,21 +165,17 @@ export function NetWorthCard({
               <p className="text-[10px] text-muted-foreground font-medium">
                 Net Worth
               </p>
-              {loading ? (
-                <div className="h-5 w-24 bg-muted/50 rounded animate-pulse" />
-              ) : (
-                <p
-                  className="text-sm font-bold font-mono text-income truncate"
-                  style={{
-                    textShadow:
-                      theme === "dark"
-                        ? "0 0 12px rgba(139, 92, 246, 0.4)"
-                        : "none",
-                  }}
-                >
-                  <AnimatedNumber value={netWorth} formatFn={formatCurrency} />
-                </p>
-              )}
+              <p
+                className="text-sm font-bold font-mono text-income truncate"
+                style={{
+                  textShadow:
+                    theme === "dark"
+                      ? "0 0 12px rgba(139, 92, 246, 0.4)"
+                      : "none",
+                }}
+              >
+                <AnimatedNumber value={netWorth} formatFn={formatCurrency} />
+              </p>
             </div>
           </div>
           

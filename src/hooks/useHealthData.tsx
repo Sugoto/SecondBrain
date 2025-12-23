@@ -1,10 +1,18 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase, type UserStats } from "@/lib/supabase";
+import { getCachedUserStats, cacheUserStats } from "@/lib/db";
 
 const healthKeys = {
   all: ["health"] as const,
   stats: () => [...healthKeys.all, "stats"] as const,
 };
+
+// Pre-load cache on module initialization for instant display
+let cachedHealthStatsPromise: Promise<UserStats | null> | null = null;
+if (typeof window !== 'undefined') {
+  cachedHealthStatsPromise = getCachedUserStats(true); // allowStale=true
+}
 
 async function fetchUserStats(): Promise<UserStats | null> {
   const { data, error } = await supabase
@@ -15,8 +23,15 @@ async function fetchUserStats(): Promise<UserStats | null> {
 
   if (error) {
     console.error("Error fetching user stats:", error);
-    return null;
+    // Return stale cache on network error
+    return getCachedUserStats(true);
   }
+  
+  // Cache fresh data for next time
+  if (data) {
+    cacheUserStats(data);
+  }
+  
   return data;
 }
 
@@ -35,16 +50,34 @@ async function updateWorkoutDates(
 
 export function useHealthData() {
   const queryClient = useQueryClient();
+  
+  // Get initial cached data for instant display
+  const [initialData, setInitialData] = useState<UserStats | undefined>(undefined);
+  
+  // Load initial data from IndexedDB on mount (only once)
+  useEffect(() => {
+    cachedHealthStatsPromise?.then((cached) => {
+      if (cached) {
+        // Prime the query cache with stale data for instant display
+        queryClient.setQueryData(healthKeys.stats(), cached);
+        setInitialData(cached);
+      }
+    });
+  }, [queryClient]);
 
   const {
     data: userStats,
-    isLoading: loading,
+    isLoading,
     error,
     refetch,
   } = useQuery({
     queryKey: healthKeys.stats(),
     queryFn: fetchUserStats,
+    placeholderData: initialData,
   });
+  
+  // Only show loading if we have no data at all
+  const loading = isLoading && !userStats && !initialData;
 
   const workoutMutation = useMutation({
     mutationFn: ({ userId, dates }: { userId: string; dates: string[] }) =>

@@ -28,19 +28,28 @@ db.version(1).stores({
 });
 
 const CACHE_TTL = 5 * 60 * 1000;
+const STALE_TTL = 24 * 60 * 60 * 1000;
 
-
-export async function getCachedTransactions(): Promise<Transaction[] | null> {
+/**
+ * Get cached transactions
+ * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
+ */
+export async function getCachedTransactions(
+  allowStale = false
+): Promise<Transaction[] | null> {
   try {
     const cached = await db.transactions.toArray();
     if (cached.length === 0) return null;
 
     const oldestCache = Math.min(...cached.map((t) => t._cachedAt));
-    if (Date.now() - oldestCache > CACHE_TTL) {
+    const age = Date.now() - oldestCache;
+
+    const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
+    if (age > maxAge) {
       return null;
     }
 
-    // Remove internal fields and return
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return cached.map(({ _cachedAt, ...t }) => t as Transaction);
   } catch {
     return null;
@@ -70,17 +79,25 @@ export async function cacheTransactions(
 
 /**
  * Get cached user stats
+ * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
-export async function getCachedUserStats(): Promise<UserStats | null> {
+export async function getCachedUserStats(
+  allowStale = false
+): Promise<UserStats | null> {
   try {
     const cached = await db.userStats.toArray();
     if (cached.length === 0) return null;
 
     const stats = cached[0];
-    if (Date.now() - stats._cachedAt > CACHE_TTL) {
+    const age = Date.now() - stats._cachedAt;
+
+    // Use extended TTL if stale data is allowed
+    const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
+    if (age > maxAge) {
       return null; // Cache expired
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _cachedAt, ...userStats } = stats;
     return userStats as UserStats;
   } catch {

@@ -4,7 +4,6 @@ import { ExpenseDataProvider, usePrefetchTransactions } from "./hooks/useExpense
 import { DynamicBottomNav } from "./components/navigation/DynamicBottomNav";
 import { HOME_NAV_ITEMS, HEALTH_NAV_ITEMS } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
-import { Spinner } from "./components/ui/spinner";
 import { useViewTransition } from "./hooks/useViewTransition";
 import type { AppSection, HealthView } from "./types/navigation";
 
@@ -20,15 +19,6 @@ const HealthTracker = lazy(() =>
     default: m.HealthTracker,
   }))
 );
-
-// Loading fallback component
-function PageLoader() {
-  return (
-    <div className="h-full flex items-center justify-center bg-background">
-      <Spinner className="h-8 w-8 text-primary" />
-    </div>
-  );
-}
 
 function AppContent() {
   const [currentSection, setCurrentSection] = useState<AppSection>("home");
@@ -86,7 +76,8 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] bg-background overflow-hidden">
-      <Suspense fallback={<PageLoader />}>
+      {/* No loading fallback - components render instantly with cached data */}
+      <Suspense fallback={null}>
         {/* Using CSS-based transitions with view-transition-name for native browser animation */}
         <div className="h-full page-transition" style={{ viewTransitionName: 'page-content' }}>
           {currentSection === "home" && <HomePage />}

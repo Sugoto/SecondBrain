@@ -170,13 +170,11 @@ function CircularProgress({
 }
 
 function BudgetCard() {
-  const { transactions, loading } = useExpenseData();
+  const { transactions } = useExpenseData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const budgetInfo = useMemo(() => {
-    if (loading) return null;
-
     // Get current month's expenses (excluding budget-excluded items)
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -193,28 +191,7 @@ function BudgetCard() {
       .reduce((sum, t) => sum + getMonthlyAmount(t), 0);
 
     return calculateBudgetInfo(monthlyExpenses, MONTHLY_BUDGET);
-  }, [transactions, loading]);
-
-  if (loading) {
-    return (
-      <div className="animate-pulse flex-1 min-w-0">
-        <div
-          className="aspect-square rounded-2xl p-2.5 sm:p-3"
-          style={{
-            background: isDark
-              ? "rgba(139, 92, 246, 0.1)"
-              : "rgba(139, 92, 246, 0.05)",
-          }}
-        >
-          <div className="h-full flex items-center justify-center">
-            <div className="w-[60%] aspect-square rounded-full bg-muted/50" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!budgetInfo) return null;
+  }, [transactions]);
 
   const { percentUsed, totalRemaining, dailyBudget } = budgetInfo;
   const isOverBudget = percentUsed > 100;
@@ -309,12 +286,12 @@ function BudgetCard() {
 }
 
 function TDEECard() {
-  const { userStats, loading, workoutDates } = useHealthData();
+  const { userStats, workoutDates } = useHealthData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const tdee = useMemo(() => {
-    if (loading || !userStats) return null;
+    if (!userStats) return null;
 
     const activityInfo = getActivityLevelInfo(workoutDates);
     return calculateTDEE(
@@ -327,26 +304,7 @@ function TDEECard() {
       },
       activityInfo.multiplier
     );
-  }, [userStats, loading, workoutDates]);
-
-  if (loading) {
-    return (
-      <div className="animate-pulse flex-1 min-w-0">
-        <div
-          className="aspect-square rounded-2xl p-2.5 sm:p-4"
-          style={{
-            background: isDark
-              ? "rgba(249, 115, 22, 0.1)"
-              : "rgba(249, 115, 22, 0.05)",
-          }}
-        >
-          <div className="h-full flex items-center justify-center">
-            <div className="w-[50%] aspect-[5/4] rounded-lg bg-muted/50" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, [userStats, workoutDates]);
 
   if (!tdee) {
     return (

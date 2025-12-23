@@ -1,60 +1,86 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#18181b" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="theme-color"
+      content="#18181b"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <title>Second Brain</title>
-    
+
     <!-- DNS prefetch for external services -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="dns-prefetch" href="https://api.mfapi.in" />
-    
+
     <!-- Preconnect to critical origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Mutual Fund API - preconnect for faster data fetching -->
     <link rel="preconnect" href="https://api.mfapi.in" crossorigin />
-    
+    <link
+      rel="preconnect"
+      href="https://rwgcabbudbdbzvqgxcda.supabase.co"
+      crossorigin
+    />
+    <link rel="dns-prefetch" href="https://rwgcabbudbdbzvqgxcda.supabase.co" />
+
     <!-- Preload critical fonts with font-display: swap -->
-    <link 
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" 
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
     </noscript>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
+
     <!-- Speculation Rules API for instant navigation (Chrome 109+) -->
     <!-- Prefetches resources when user hovers, prerenders on interaction -->
     <script type="speculationrules">
-    {
-      "prefetch": [
-        {
-          "source": "document",
-          "where": { "href_matches": "/*" },
-          "eagerness": "moderate"
-        }
-      ],
-      "prerender": [
-        {
-          "source": "document",
-          "where": { "href_matches": "/*" },
-          "eagerness": "conservative"
-        }
-      ]
-    }
+      {
+        "prefetch": [
+          {
+            "source": "document",
+            "where": { "href_matches": "/*" },
+            "eagerness": "moderate"
+          }
+        ],
+        "prerender": [
+          {
+            "source": "document",
+            "where": { "href_matches": "/*" },
+            "eagerness": "conservative"
+          }
+        ]
+      }
     </script>
   </body>
 </html>

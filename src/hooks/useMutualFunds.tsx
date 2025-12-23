@@ -1,4 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { getCacheMeta, setCacheMeta } from "@/lib/db";
 
 // Mutual fund scheme codes for the watchlist
 export const WATCHLIST_FUNDS = [
@@ -217,42 +219,91 @@ export function useMutualFund(schemeCode: number) {
   });
 }
 
+const MF_CACHE_KEY = "mutualFundWatchlist";
+
+// Pre-load cached data on module load
+let cachedMFPromise: Promise<FundWithStats[] | null> | null = null;
+if (typeof window !== 'undefined') {
+  cachedMFPromise = getCacheMeta(MF_CACHE_KEY).then((cached) => {
+    if (cached) {
+      try {
+        return JSON.parse(cached) as FundWithStats[];
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+}
+
 export function useMutualFundWatchlist() {
   const queryClient = useQueryClient();
+  
+  // Get initial cached data for instant display
+  const [initialData, setInitialData] = useState<FundWithStats[]>([]);
+  
+  // Load initial data from IndexedDB on mount
+  useEffect(() => {
+    cachedMFPromise?.then((cached) => {
+      if (cached && cached.length > 0) {
+        queryClient.setQueryData(mutualFundKeys.watchlist(), cached);
+        setInitialData(cached);
+      }
+    });
+  }, [queryClient]);
 
-  const query = useQuery({
+  const {
+    data,
+    isLoading,
+    isRefetching,
+    error,
+    dataUpdatedAt,
+  } = useQuery({
     queryKey: mutualFundKeys.watchlist(),
-    queryFn: async () => {
+    queryFn: async (): Promise<FundWithStats[]> => {
       const results = await Promise.allSettled(
         WATCHLIST_FUNDS.map(async (fund) => {
-          const data = await fetchMutualFund(fund.schemeCode);
-          return calculateFundStats(fund, data);
+          const fetchedData = await fetchMutualFund(fund.schemeCode);
+          return calculateFundStats(fund, fetchedData);
         })
       );
 
-      return results
+      const funds = results
         .filter(
           (r): r is PromiseFulfilledResult<FundWithStats> =>
             r.status === "fulfilled"
         )
         .map((r) => r.value);
+      
+      // Cache for next time
+      if (funds.length > 0) {
+        setCacheMeta(MF_CACHE_KEY, JSON.stringify(funds));
+      }
+      
+      return funds;
     },
     staleTime: 30 * 60 * 1000, // 30 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
     refetchOnWindowFocus: false,
     retry: 2,
   });
+  
+  // Use fetched data or cached initial data
+  const funds: FundWithStats[] = data || initialData;
+  
+  // Only show loading if we have no data at all (no cache, no fetched data)
+  const loading = isLoading && funds.length === 0;
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: mutualFundKeys.watchlist() });
   };
 
   return {
-    funds: query.data || [],
-    loading: query.isLoading,
-    error: query.error ? (query.error as Error).message : null,
-    isRefetching: query.isRefetching,
+    funds,
+    loading,
+    error: error ? (error as Error).message : null,
+    isRefetching,
     refresh,
-    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    lastUpdated: dataUpdatedAt ? new Date(dataUpdatedAt) : null,
   };
 }

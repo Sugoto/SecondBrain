@@ -7,13 +7,24 @@ import {
 } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { Transaction, UserStats, Investment } from "@/lib/supabase";
-import type { ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import {
   getCachedTransactions,
   cacheTransactions,
   getCachedUserStats,
   cacheUserStats,
 } from "@/lib/db";
+
+// Pre-load cache data before React Query kicks in
+// This allows instant display of cached data
+let cachedTransactionsPromise: Promise<Transaction[] | null> | null = null;
+let cachedUserStatsPromise: Promise<UserStats | null> | null = null;
+
+// Start loading cache immediately on module load
+if (typeof window !== 'undefined') {
+  cachedTransactionsPromise = getCachedTransactions(true); // allowStale=true for instant load
+  cachedUserStatsPromise = getCachedUserStats(true);
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,9 +33,41 @@ const queryClient = new QueryClient({
       gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: true,
       retry: 2,
+      // Always refetch but show stale data immediately
+      refetchOnMount: true,
     },
   },
 });
+
+/**
+ * Hook to get initial data from IndexedDB cache for instant load
+ * Returns cached data that can be used as initialData for React Query
+ */
+export function useInitialCachedData() {
+  const [transactionsCache, setTransactionsCache] = useState<Transaction[] | null>(null);
+  const [userStatsCache, setUserStatsCache] = useState<UserStats | null>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    async function loadCache() {
+      try {
+        const [txns, stats] = await Promise.all([
+          cachedTransactionsPromise,
+          cachedUserStatsPromise,
+        ]);
+        setTransactionsCache(txns);
+        setUserStatsCache(stats);
+      } catch {
+        // Ignore cache errors
+      } finally {
+        setIsReady(true);
+      }
+    }
+    loadCache();
+  }, []);
+
+  return { transactionsCache, userStatsCache, isReady };
+}
 
 // Export for prefetching
 export { queryClient };
@@ -103,17 +146,36 @@ export function ExpenseDataProvider({ children }: { children: ReactNode }) {
 
 export function useExpenseData() {
   const queryClient = useQueryClient();
+  
+  // Get initial cached data for instant display
+  const [initialData, setInitialData] = useState<Transaction[] | undefined>(undefined);
+  
+  // Load initial data from IndexedDB on mount (only once)
+  useEffect(() => {
+    cachedTransactionsPromise?.then((cached) => {
+      if (cached && cached.length > 0) {
+        // Prime the query cache with stale data for instant display
+        queryClient.setQueryData(expenseKeys.lists(), cached);
+        setInitialData(cached);
+      }
+    });
+  }, [queryClient]);
 
   const {
     data: transactions = [],
-    isLoading: loading,
+    isLoading,
     isRefetching: refreshing,
     error,
     refetch,
   } = useQuery({
     queryKey: expenseKeys.lists(),
     queryFn: fetchTransactions,
+    // Show cached data as placeholder while fetching
+    placeholderData: initialData,
   });
+  
+  // Consider "loading" only if no data at all (no cache, no fetched data)
+  const loading = isLoading && transactions.length === 0 && !initialData;
 
   const addMutation = useMutation({
     mutationFn: async (
