@@ -70,13 +70,13 @@ const AreaChart = memo(function AreaChart({
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
       <defs>
         <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
         </linearGradient>
         <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#60a5fa" />
-          <stop offset="50%" stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#2563eb" />
+          <stop offset="0%" stopColor="#a78bfa" />
+          <stop offset="50%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#7c3aed" />
         </linearGradient>
       </defs>
 
@@ -149,7 +149,7 @@ const AreaChart = memo(function AreaChart({
           cx={p.x}
           cy={p.y}
           r={3}
-          fill="#3b82f6"
+          fill="#8b5cf6"
           stroke={isDark ? "#18181b" : "#ffffff"}
           strokeWidth={2}
         >

@@ -39,22 +39,13 @@ export const TransactionCard = memo(function TransactionCard({
     onClick(txn);
   }, [onClick, txn]);
 
-  // Card background styling based on category (muted for excluded)
-  const cardStyle = isExcluded
-    ? {
-        background: isDark
-          ? "linear-gradient(135deg, hsl(var(--muted)/0.3) 0%, hsl(var(--muted)/0.15) 100%)"
-          : "linear-gradient(135deg, hsl(var(--muted)/0.5) 0%, hsl(var(--muted)/0.25) 100%)",
-        borderColor: isDark
-          ? "hsl(var(--muted-foreground)/0.2)"
-          : "hsl(var(--muted-foreground)/0.15)",
-      }
-    : {
-        background: isDark
-          ? `linear-gradient(135deg, ${categoryColor}12 0%, ${categoryColor}06 100%)`
-          : `linear-gradient(135deg, ${categoryColor}10 0%, ${categoryColor}05 100%)`,
-        borderColor: isDark ? `${categoryColor}25` : `${categoryColor}20`,
-      };
+  // Card background styling (neutral, subtle border)
+  const cardStyle = {
+    background: "transparent",
+    borderColor: isDark
+      ? "rgba(255, 255, 255, 0.06)"
+      : "rgba(0, 0, 0, 0.04)",
+  };
 
   return (
     <motion.button
@@ -66,12 +57,7 @@ export const TransactionCard = memo(function TransactionCard({
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       whileHover={{
-        y: isExcluded ? 0 : -2,
-        boxShadow: isExcluded
-          ? undefined
-          : isDark
-          ? `0 8px 24px -4px ${categoryColor}20, 0 0 0 1px ${categoryColor}30`
-          : `0 8px 24px -4px ${categoryColor}15, 0 0 0 1px ${categoryColor}25`,
+        y: isExcluded ? 0 : -1,
       }}
       whileTap={{ scale: isExcluded ? 0.995 : 0.98 }}
       onClick={handleClick}
@@ -82,16 +68,6 @@ export const TransactionCard = memo(function TransactionCard({
           : "hover:border-primary/30"
       }`}
     >
-      {/* Subtle glass shine effect */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: isDark
-            ? `linear-gradient(135deg, ${categoryColor}08 0%, transparent 40%)`
-            : `linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%)`,
-        }}
-      />
-
       {/* Category Icon */}
       {CategoryIcon && (
         <div

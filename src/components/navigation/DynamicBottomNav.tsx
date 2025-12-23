@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Home } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -43,111 +44,84 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   const containerStyle = useMemo(
     () => ({
       background: isDark
-        ? "rgba(24, 24, 27, 0.85)"
-        : "rgba(255, 255, 255, 0.85)",
-      backdropFilter: "blur(20px) saturate(180%)",
-      WebkitBackdropFilter: "blur(20px) saturate(180%)",
-      borderTop: isDark
-        ? "1px solid rgba(63, 63, 70, 0.5)"
-        : "1px solid rgba(228, 228, 231, 0.8)",
+        ? "rgba(24, 24, 27, 0.75)"
+        : "rgba(255, 255, 255, 0.7)",
+      backdropFilter: "blur(24px) saturate(180%)",
+      WebkitBackdropFilter: "blur(24px) saturate(180%)",
+      border: isDark
+        ? "1px solid rgba(255, 255, 255, 0.1)"
+        : "1px solid rgba(0, 0, 0, 0.06)",
       boxShadow: isDark
-        ? "0 -4px 24px rgba(0, 0, 0, 0.3)"
-        : "0 -4px 24px rgba(0, 0, 0, 0.08)",
+        ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 0 0.5px rgba(255, 255, 255, 0.05)"
+        : "0 8px 32px rgba(0, 0, 0, 0.12), inset 0 0 0 0.5px rgba(255, 255, 255, 0.5)",
+      borderRadius: "20px",
     }),
     [isDark]
   );
 
-  return (
-    <motion.nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-pb"
-      initial={false}
-      animate={{
-        y: hidden ? 100 : 0,
-        opacity: hidden ? 0 : 1,
-      }}
-      transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+  // Hide instantly - no transition
+  if (hidden) {
+    return null;
+  }
+
+  // Use portal to render navbar outside React tree - completely isolates from View Transitions
+  return createPortal(
+    <nav
+      className="md:hidden fixed bottom-4 left-4 right-4 z-[9999] no-view-transition"
       style={containerStyle}
     >
       {/* Top shine effect */}
       <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
+        className="absolute inset-x-0 top-0 h-px pointer-events-none rounded-t-[20px] overflow-hidden"
         style={{
           background: isDark
-            ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 50%, transparent)"
-            : "linear-gradient(90deg, transparent, rgba(255,255,255,0.8) 50%, transparent)",
+            ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 50%, transparent)"
+            : "linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 50%, transparent)",
         }}
       />
 
       <div className="flex items-center h-14 relative">
-        {/* Home button - only shown when onGoHome is provided and not on home page */}
+        {/* Home button */}
         {showHomeButton && (
-          <motion.button
-            initial={{ scale: 0, x: -20 }}
-            animate={{ scale: 1, x: 0 }}
-            exit={{ scale: 0, x: -20 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          <button
             onClick={onGoHome}
-            className="absolute left-0 z-10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+            className="flex items-center justify-center text-muted-foreground ml-2 active:scale-90"
             style={{
-              width: 40,
-              height: 40,
-              transform: "translateY(-50%)",
+              width: 36,
+              height: 36,
             }}
           >
-            {/* Curved background - matching navbar */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: isDark
-                  ? "rgba(24, 24, 27, 0.95)"
-                  : "rgba(255, 255, 255, 0.95)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                borderTopRightRadius: "50%",
-                borderBottomRightRadius: "50%",
-                borderTop: isDark
-                  ? "1px solid rgba(63, 63, 70, 0.5)"
-                  : "1px solid rgba(228, 228, 231, 0.8)",
-                borderRight: isDark
-                  ? "1px solid rgba(63, 63, 70, 0.5)"
-                  : "1px solid rgba(228, 228, 231, 0.8)",
-                borderBottom: isDark
-                  ? "1px solid rgba(63, 63, 70, 0.5)"
-                  : "1px solid rgba(228, 228, 231, 0.8)",
-                boxShadow: isDark
-                  ? "2px 0 12px rgba(0, 0, 0, 0.3)"
-                  : "2px 0 12px rgba(0, 0, 0, 0.08)",
-              }}
-            />
-            {/* Shine effect */}
-            <div
-              className="absolute inset-0 pointer-events-none overflow-hidden"
-              style={{
-                background: isDark
-                  ? "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%)"
-                  : "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%)",
-                borderTopRightRadius: "50%",
-                borderBottomRightRadius: "50%",
-              }}
-            />
-            <Home className="h-5 w-5 relative z-10" />
-          </motion.button>
+            <Home className="h-5 w-5" />
+          </button>
+        )}
+
+        {/* Divider when home button is shown */}
+        {showHomeButton && (
+          <div
+            className="h-6 w-px mx-1"
+            style={{
+              background: isDark
+                ? "rgba(255, 255, 255, 0.1)"
+                : "rgba(0, 0, 0, 0.08)",
+            }}
+          />
         )}
 
         {/* Nav items container */}
-        <div
-          className="flex items-center justify-around flex-1 h-full"
-          style={{
-            marginLeft: showHomeButton ? 44 : 0,
-          }}
-        >
+        <div className="flex items-center justify-around flex-1 h-full">
           {navItems.map(({ id, icon: Icon, label, color }) => {
             const isActive = activeView === id;
-            const itemColor = color || "#8b5cf6";
+            // Items with explicit colors (home page) use their defined color
+            // Otherwise use section-based theme: aqua for omscs, purple for finances, orange for health
+            const sectionColor = 
+              currentSection === "omscs" ? "#06b6d4" :
+              currentSection === "finances" ? "#8b5cf6" : 
+              "#f97316";
+            const itemColor = color || sectionColor;
+            const hasExplicitColor = !!color;
 
             return (
-              <motion.button
+              <button
                 key={id}
                 onClick={() => {
                   if (isActive) return;
@@ -155,31 +129,20 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
                   onViewChange(id);
                 }}
                 onPointerEnter={() => onPrefetch?.(id)}
-                whileTap={{ scale: 0.9 }}
-                className="relative flex flex-col items-center justify-center flex-1 h-full transition-colors"
-                style={{
-                  color: color
-                    ? isActive
-                      ? itemColor
-                      : undefined
-                    : isActive
-                    ? "var(--primary)"
-                    : undefined,
-                }}
+                className="relative flex flex-col items-center justify-center flex-1 h-full"
               >
                 {/* Active background glow */}
                 {isActive && (
-                  <motion.div
-                    layoutId="activeGlow"
+                  <div
                     className="absolute inset-x-4 -top-1 bottom-2 rounded-xl -z-10"
                     style={{
                       background: isDark
                         ? `radial-gradient(ellipse at center top, ${itemColor}26 0%, transparent 70%)`
                         : `radial-gradient(ellipse at center top, ${itemColor}1a 0%, transparent 70%)`,
                     }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
+                {/* Only the icon has animation */}
                 <motion.div
                   animate={{
                     scale: isActive ? 1.1 : 1,
@@ -189,41 +152,26 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
                 >
                   <Icon
                     className="h-5 w-5"
-                    style={{ color: color ? itemColor : undefined }}
+                    style={{
+                      // Home page: always show color. Subpages: only color when active
+                      color: hasExplicitColor ? itemColor : (isActive ? itemColor : undefined),
+                    }}
                   />
                 </motion.div>
                 <span
                   className="text-[10px] mt-0.5"
                   style={{
-                    color: color
-                      ? isActive
-                        ? itemColor
-                        : "var(--muted-foreground)"
-                      : isActive
-                      ? "var(--primary)"
-                      : "var(--muted-foreground)",
+                    color: isActive ? itemColor : "var(--muted-foreground)",
                   }}
                 >
                   {label}
                 </span>
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                    style={{
-                      background: color
-                        ? itemColor
-                        : "linear-gradient(90deg, #8b5cf6, #3b82f6)",
-                      boxShadow: `0 0 8px ${itemColor}80`,
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </motion.button>
+              </button>
             );
           })}
         </div>
       </div>
-    </motion.nav>
+    </nav>,
+    document.body
   );
 });

@@ -10,6 +10,8 @@ interface UseSwipeNavigationOptions<T extends string> {
   onViewChange: (view: T) => void;
   /** Minimum swipe distance in pixels (default: 80) */
   minDistance?: number;
+  /** Use View Transitions API for swipe navigation (default: true) */
+  useViewTransitions?: boolean;
 }
 
 interface SwipeHandlers {
@@ -23,6 +25,7 @@ export function useSwipeNavigation<T extends string>({
   currentView,
   onViewChange,
   minDistance = MIN_SWIPE_DISTANCE,
+  useViewTransitions = true,
 }: UseSwipeNavigationOptions<T>): SwipeHandlers {
   const { startTransition } = useViewTransition();
   
@@ -90,9 +93,17 @@ export function useSwipeNavigation<T extends string>({
     const currentIndex = views.indexOf(currentView);
 
     if (isLeftSwipe && currentIndex < views.length - 1) {
-      startTransition(() => onViewChange(views[currentIndex + 1]));
+      if (useViewTransitions) {
+        startTransition(() => onViewChange(views[currentIndex + 1]));
+      } else {
+        onViewChange(views[currentIndex + 1]);
+      }
     } else if (isRightSwipe && currentIndex > 0) {
-      startTransition(() => onViewChange(views[currentIndex - 1]));
+      if (useViewTransitions) {
+        startTransition(() => onViewChange(views[currentIndex - 1]));
+      } else {
+        onViewChange(views[currentIndex - 1]);
+      }
     }
 
     // Reset refs
@@ -101,7 +112,7 @@ export function useSwipeNavigation<T extends string>({
     touchEndX.current = null;
     touchStartTime.current = null;
     isHorizontalSwipe.current = null;
-  }, [views, currentView, onViewChange, startTransition, minDistance]);
+  }, [views, currentView, onViewChange, startTransition, minDistance, useViewTransitions]);
 
   return {
     onTouchStart: handleTouchStart,

@@ -175,6 +175,33 @@
    Native browser transitions (Chrome 111+, Safari 18+)
    ======================================== */
 
+/* Disable default root view transition (prevents whole-page fade) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Exclude elements from view transitions entirely */
+.no-view-transition {
+  view-transition-name: none !important;
+  /* Prevent being captured in view transition snapshots */
+  contain: layout style paint;
+  /* Ensure element stays visible during transitions */
+  isolation: isolate;
+}
+
+/* Portal navbar - completely excluded from any transitions */
+body > nav.no-view-transition {
+  view-transition-name: none !important;
+  /* Force element to stay in place during any DOM changes */
+  position: fixed !important;
+  transform: none !important;
+  opacity: 1 !important;
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Page transition animations */
 ::view-transition-old(page-content) {
   animation: slide-out-left 0.25s ease-out forwards;

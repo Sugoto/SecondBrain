@@ -4,16 +4,17 @@ import {
   Brain,
   Plus,
   Dumbbell,
-  Flame,
   Wallet,
   Check,
   Loader2,
-  Beef,
   Calendar,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import { useExpenseData } from "@/hooks/useExpenseData";
+import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
+import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
 import {
   MONTHLY_BUDGET,
   formatCurrencyCompact,
@@ -30,7 +31,6 @@ import {
 } from "@/components/fitness/utils";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TransactionDialog } from "@/components/finances/TransactionDialog";
-import { MutualFundWidget } from "@/components/finances/MutualFundWidget";
 import type { Transaction } from "@/lib/supabase";
 
 function getGreeting(): string {
@@ -169,7 +169,11 @@ function CircularProgress({
   );
 }
 
-function BudgetCard() {
+interface BudgetCardProps {
+  onAddExpense: () => void;
+}
+
+function BudgetCard({ onAddExpense }: BudgetCardProps) {
   const { transactions } = useExpenseData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -193,7 +197,7 @@ function BudgetCard() {
     return calculateBudgetInfo(monthlyExpenses, MONTHLY_BUDGET);
   }, [transactions]);
 
-  const { percentUsed, totalRemaining, dailyBudget } = budgetInfo;
+  const { percentUsed, totalRemaining } = budgetInfo;
   const isOverBudget = percentUsed > 100;
 
   // Colors based on budget status
@@ -210,30 +214,34 @@ function BudgetCard() {
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="flex-1 min-w-0"
     >
-      <div
-        className="aspect-square rounded-2xl p-2.5 sm:p-3 relative overflow-hidden flex flex-col"
+      <button
+        onClick={onAddExpense}
+        className="w-full aspect-square rounded-2xl p-2.5 sm:p-3 relative overflow-hidden flex flex-col text-left transition-transform active:scale-[0.98]"
         style={{
           background: isDark
-            ? "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)"
-            : "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.03) 100%)",
+            ? "rgba(255, 255, 255, 0.03)"
+            : "rgba(0, 0, 0, 0.02)",
           border: isDark
-            ? "1px solid rgba(139, 92, 246, 0.3)"
-            : "1px solid rgba(139, 92, 246, 0.15)",
+            ? "1px solid rgba(255, 255, 255, 0.08)"
+            : "1px solid rgba(0, 0, 0, 0.06)",
         }}
       >
         {/* Header */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div
-            className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
-            }}
-          >
-            <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div
+              className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+              }}
+            >
+              <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+            </div>
+            <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              Budget
+            </span>
           </div>
-          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-            Budget
-          </span>
+          <Plus className="h-3 w-3 text-muted-foreground/50" />
         </div>
 
         {/* Circular Progress */}
@@ -245,56 +253,112 @@ function BudgetCard() {
               bgColor={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span
-                className="text-base sm:text-lg font-bold font-mono"
-                style={{ color: progressColor }}
-              >
-                {Math.round(percentUsed)}%
+              <span className="text-sm sm:text-base font-bold font-mono text-foreground">
+                {formatCurrencyCompact(totalRemaining)}
               </span>
               <span className="text-[7px] sm:text-[8px] text-muted-foreground">
-                used
+                left
               </span>
             </div>
           </div>
         </div>
-
-        {/* Footer stats */}
-        <div className="grid grid-cols-2 gap-1 sm:gap-2 text-center">
-          <div>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground">
-              Left
-            </p>
-            <p
-              className="text-[11px] sm:text-xs font-bold font-mono"
-              style={{ color: progressColor }}
-            >
-              {formatCurrencyCompact(totalRemaining)}
-            </p>
-          </div>
-          <div>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground">
-              Daily
-            </p>
-            <p className="text-[11px] sm:text-xs font-bold font-mono text-foreground">
-              {formatCurrencyCompact(dailyBudget)}
-            </p>
-          </div>
-        </div>
-      </div>
+      </button>
     </motion.div>
   );
 }
 
-function TDEECard() {
-  const { userStats, workoutDates } = useHealthData();
+// Compact mini-widget for Mutual Funds (today's change only)
+function MiniMutualFundWidget() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const { funds } = useMutualFundWatchlist();
+  const { userStats } = useUserStats();
+
+  const dailyChange = useMemo(() => {
+    if (funds.length === 0) return null;
+    const investments = userStats?.investments || [];
+
+    let change = 0;
+    funds.forEach((fund) => {
+      const fundInvestments = investments.filter(
+        (i) => i.schemeCode === fund.schemeCode
+      );
+      const totalUnits = fundInvestments.reduce((sum, i) => sum + i.units, 0);
+      const currentValue = totalUnits * fund.currentNav;
+      const previousValue = totalUnits * fund.previousNav;
+      change += currentValue - previousValue;
+    });
+
+    return change;
+  }, [funds, userStats?.investments]);
+
+  if (dailyChange === null) return null;
+
+  const isUp = dailyChange >= 0;
+  const trendColor = isUp ? "#22c55e" : "#ef4444";
+
+  return (
+    <div
+      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2"
+      style={{
+        background: isDark
+          ? "rgba(255, 255, 255, 0.03)"
+          : "rgba(0, 0, 0, 0.02)",
+        border: isDark
+          ? "1px solid rgba(255, 255, 255, 0.08)"
+          : "1px solid rgba(0, 0, 0, 0.06)",
+      }}
+    >
+      <div
+        className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center shrink-0"
+        style={{
+          background: isUp
+            ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+            : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+        }}
+      >
+        {isUp ? (
+          <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+        ) : (
+          <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          Mutual Funds
+        </p>
+        <p
+          className="text-sm sm:text-base font-bold font-mono"
+          style={{ color: trendColor }}
+        >
+          {isUp ? "+" : "-"}₹
+          {Math.abs(dailyChange).toLocaleString("en-IN", {
+            maximumFractionDigits: 0,
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Compact mini-widget for Nutrition with workout toggle
+function MiniNutritionWidget() {
+  const { userStats, workoutDates, toggleWorkoutDate, isWorkoutSaving } = useHealthData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const tdee = useMemo(() => {
-    if (!userStats) return null;
+  // Use local timezone for date key
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(now.getDate()).padStart(2, "0")}`;
+  const isTodayWorkedOut = workoutDates.has(today);
 
+  const calories = useMemo(() => {
+    if (!userStats) return null;
     const activityInfo = getActivityLevelInfo(workoutDates);
-    return calculateTDEE(
+    const tdee = calculateTDEE(
       {
         height_cm: userStats.height_cm,
         weight_kg: userStats.weight_kg,
@@ -304,40 +368,58 @@ function TDEECard() {
       },
       activityInfo.multiplier
     );
+    return tdee?.targetCalories ?? null;
   }, [userStats, workoutDates]);
 
-  if (!tdee) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.4,
-          delay: 0.1,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-        className="flex-1 min-w-0"
-      >
-        <div
-          className="aspect-square rounded-2xl p-2.5 sm:p-4 flex flex-col items-center justify-center"
-          style={{
-            background: isDark
-              ? "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%)"
-              : "linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.03) 100%)",
-            border: isDark
-              ? "1px solid rgba(249, 115, 22, 0.3)"
-              : "1px solid rgba(249, 115, 22, 0.15)",
-          }}
-        >
-          <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500/50 mb-2" />
-          <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center">
-            Add health data to see TDEE
-          </p>
-        </div>
-      </motion.div>
-    );
-  }
+  const handleToggleWorkout = () => {
+    if (!userStats?.id) return;
+    toggleWorkoutDate(today);
+  };
 
+  if (!calories) return null;
+
+  return (
+    <button
+      onClick={handleToggleWorkout}
+      disabled={!userStats?.id || isWorkoutSaving}
+      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2 text-left transition-transform active:scale-[0.98] disabled:opacity-50"
+      style={{
+        background: isDark
+          ? "rgba(255, 255, 255, 0.03)"
+          : "rgba(0, 0, 0, 0.02)",
+        border: isDark
+          ? "1px solid rgba(255, 255, 255, 0.08)"
+          : "1px solid rgba(0, 0, 0, 0.06)",
+      }}
+    >
+      <div
+        className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center shrink-0"
+        style={{
+          background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+        }}
+      >
+        {isWorkoutSaving ? (
+          <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white animate-spin" />
+        ) : isTodayWorkedOut ? (
+          <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+        ) : (
+          <Dumbbell className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          {isTodayWorkedOut ? "Worked Out" : "Mark Workout"}
+        </p>
+        <p className="text-sm sm:text-base font-bold font-mono text-foreground">
+          {formatNumber(calories)} kcal
+        </p>
+      </div>
+    </button>
+  );
+}
+
+// Combined stacked widget for MF + Nutrition
+function StackedMiniWidgets() {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -345,84 +427,19 @@ function TDEECard() {
       transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="flex-1 min-w-0"
     >
-      <div
-        className="aspect-square rounded-2xl p-2.5 sm:p-4 relative overflow-hidden flex flex-col"
-        style={{
-          background: isDark
-            ? "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%)"
-            : "linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.03) 100%)",
-          border: isDark
-            ? "1px solid rgba(249, 115, 22, 0.3)"
-            : "1px solid rgba(249, 115, 22, 0.15)",
-        }}
-      >
-        {/* Header */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div
-            className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
-            }}
-          >
-            <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
-          </div>
-          <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-            Nutrition
-          </span>
-        </div>
-
-        {/* Stats - centered in available space */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 sm:gap-3 min-h-0">
-          {/* Calories */}
-          <div className="text-center">
-            <span className="text-xl sm:text-2xl font-bold font-mono text-orange-500">
-              {formatNumber(tdee.targetCalories)}
-            </span>
-            <span className="text-[9px] sm:text-[10px] text-muted-foreground ml-1">
-              kcal
-            </span>
-          </div>
-
-          {/* Protein */}
-          <div
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg"
-            style={{
-              background: isDark
-                ? "rgba(245, 158, 11, 0.15)"
-                : "rgba(245, 158, 11, 0.1)",
-            }}
-          >
-            <Beef className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500" />
-            <span className="text-xs sm:text-sm font-bold font-mono text-amber-500">
-              {tdee.protein}g
-            </span>
-            <span className="text-[8px] sm:text-[9px] text-muted-foreground">
-              protein
-            </span>
-          </div>
-        </div>
+      <div className="aspect-square flex flex-col gap-2">
+        <MiniMutualFundWidget />
+        <MiniNutritionWidget />
       </div>
     </motion.div>
   );
 }
 
-function QuickActions() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+export function HomePage() {
   const { addTransaction } = useExpenseData();
-  const { userStats, toggleWorkoutDate, isWorkoutSaving, workoutDates } =
-    useHealthData();
-
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [newTransaction, setNewTransaction] = useState<Transaction | null>(
-    null
-  );
+  const [newTransaction, setNewTransaction] = useState<Transaction | null>(null);
   const [saving, setSaving] = useState(false);
-
-  // Use local timezone for date key
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const isTodayWorkedOut = workoutDates.has(today);
 
   const handleAddExpense = () => {
     setNewTransaction(createEmptyTransaction());
@@ -444,129 +461,6 @@ function QuickActions() {
     }
   };
 
-  const handleToggleTodayWorkout = () => {
-    if (!userStats?.id) return;
-    toggleWorkoutDate(today);
-  };
-
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.4,
-          delay: 0.2,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-        className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-2.5 py-2 rounded-full"
-        style={{
-          background: isDark
-            ? "rgba(24, 24, 27, 0.9)"
-            : "rgba(255, 255, 255, 0.9)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          boxShadow: isDark
-            ? "0 6px 24px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
-            : "0 6px 24px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.5)",
-          border: isDark
-            ? "1px solid rgba(255, 255, 255, 0.08)"
-            : "1px solid rgba(0, 0, 0, 0.05)",
-        }}
-      >
-        {/* Add Expense Button */}
-        <button
-          onClick={handleAddExpense}
-          className="flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full transition-all active:scale-[0.97]"
-          style={{
-            background: isDark
-              ? "linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%)"
-              : "linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)",
-          }}
-        >
-          <div
-            className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
-              boxShadow: "0 2px 8px rgba(139, 92, 246, 0.35)",
-            }}
-          >
-            <Plus className="h-3 w-3 text-white" />
-          </div>
-          <span className="text-[11px] font-medium whitespace-nowrap">
-            Expense
-          </span>
-        </button>
-
-        {/* Divider */}
-        <div
-          className="h-4 w-px"
-          style={{
-            background: isDark
-              ? "rgba(255, 255, 255, 0.1)"
-              : "rgba(0, 0, 0, 0.1)",
-          }}
-        />
-
-        {/* Mark Workout Button */}
-        <button
-          onClick={handleToggleTodayWorkout}
-          disabled={!userStats?.id || isWorkoutSaving}
-          className="flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-full transition-all active:scale-[0.97] disabled:opacity-50"
-          style={{
-            background: isTodayWorkedOut
-              ? isDark
-                ? "linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.15) 100%)"
-                : "linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.1) 100%)"
-              : isDark
-              ? "linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.15) 100%)"
-              : "linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)",
-          }}
-        >
-          <div
-            className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
-            style={{
-              background: isTodayWorkedOut
-                ? "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)"
-                : "linear-gradient(135deg, #ef4444 0%, #f97316 100%)",
-              boxShadow: isTodayWorkedOut
-                ? "0 2px 8px rgba(16, 185, 129, 0.35)"
-                : "0 2px 8px rgba(239, 68, 68, 0.35)",
-            }}
-          >
-            {isWorkoutSaving ? (
-              <Loader2 className="h-3 w-3 text-white animate-spin" />
-            ) : isTodayWorkedOut ? (
-              <Check className="h-3 w-3 text-white" />
-            ) : (
-              <Dumbbell className="h-3 w-3 text-white" />
-            )}
-          </div>
-          <span className="text-[11px] font-medium whitespace-nowrap">
-            {isTodayWorkedOut ? "Worked Out" : "Mark Workout"}
-          </span>
-        </button>
-      </motion.div>
-
-      {/* Transaction Dialog */}
-      {showAddExpense && newTransaction && (
-        <TransactionDialog
-          transaction={newTransaction}
-          isNew
-          saving={saving}
-          onClose={() => {
-            setShowAddExpense(false);
-            setNewTransaction(null);
-          }}
-          onSave={handleSaveExpense}
-          onChange={setNewTransaction}
-        />
-      )}
-    </>
-  );
-}
-
-export function HomePage() {
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
@@ -587,21 +481,26 @@ export function HomePage() {
         <DateWidget />
 
         {/* Stats Cards Row */}
-        <div className="flex gap-3">
-          <BudgetCard />
-          <MutualFundWidget />
-        </div>
-
-        {/* Second Row */}
-        <div className="flex gap-3 mt-3">
-          <TDEECard />
-          <div className="flex-1 min-w-0" />{" "}
-          {/* Spacer to maintain two-column grid */}
+        <div className="flex gap-2">
+          <BudgetCard onAddExpense={handleAddExpense} />
+          <StackedMiniWidgets />
         </div>
       </main>
 
-      {/* Floating Quick Actions */}
-      <QuickActions />
+      {/* Transaction Dialog */}
+      {showAddExpense && newTransaction && (
+        <TransactionDialog
+          transaction={newTransaction}
+          isNew
+          saving={saving}
+          onClose={() => {
+            setShowAddExpense(false);
+            setNewTransaction(null);
+          }}
+          onSave={handleSaveExpense}
+          onChange={setNewTransaction}
+        />
+      )}
 
       {/* Footer */}
       <footer className="shrink-0 py-4 text-center">

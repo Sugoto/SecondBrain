@@ -111,15 +111,9 @@ export function NetWorthCard({
 }: NetWorthCardProps) {
   const percentToTarget = Math.min(100, (netWorth / TARGET_NET_WORTH) * 100);
 
-  // Color scheme based on progress
+  // Consistent purple color scheme
   const getProgressGradient = () => {
-    if (percentToTarget >= 90) {
-      return "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)";
-    } else if (percentToTarget >= 50) {
-      return "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)";
-    } else {
-      return "linear-gradient(90deg, #14b8a6 0%, #5eead4 100%)";
-    }
+    return "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)";
   };
 
   const hasGoalData = goalProgress?.timeToGoal != null;

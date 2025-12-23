@@ -11,8 +11,6 @@ import { formatCurrency, MONTHLY_BUDGET } from "./constants";
 import { calculateBudgetInfo } from "./utils";
 
 import { Header } from "./Header";
-import { DynamicBottomNav } from "@/components/navigation/DynamicBottomNav";
-import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
 import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
 import { InvestmentsView } from "./InvestmentsView";
@@ -134,12 +132,7 @@ function BudgetProgressBar({
             }}
             className="h-full rounded-full relative overflow-hidden"
             style={{
-              background:
-                percentUsed > 90
-                  ? "linear-gradient(90deg, #dc2626 0%, #f87171 100%)"
-                  : percentUsed > 75
-                  ? "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)"
-                  : "linear-gradient(90deg, #22c55e 0%, #4ade80 100%)",
+              background: "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)",
             }}
           >
             <div
@@ -181,10 +174,11 @@ type DialogState = {
 } | null;
 
 interface FinanceTrackerProps {
-  onGoHome?: () => void;
+  activeView: ActiveView;
+  onViewChange: (view: ActiveView) => void;
 }
 
-export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
+export function FinanceTracker({ activeView, onViewChange }: FinanceTrackerProps) {
   // Data from React Query cache
   const {
     transactions,
@@ -199,7 +193,6 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
 
   // UI state
-  const [activeView, setActiveView] = useState<ActiveView>("expenses");
   const [chartMode, setChartMode] = useState<ChartMode>("daily");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
@@ -210,16 +203,12 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
 
   const { theme } = useTheme();
 
-  // View change handler (used by both nav and swipe)
-  const handleViewChange = useCallback((view: ActiveView) => {
-    setActiveView(view);
-  }, []);
-
-  // Swipe navigation for mobile
+  // Swipe navigation for mobile (no View Transitions - Framer Motion handles animations)
   const swipeHandlers = useSwipeNavigation({
     views: VIEWS,
     currentView: activeView,
-    onViewChange: handleViewChange,
+    onViewChange,
+    useViewTransitions: false,
   });
 
   async function saveTransaction(updated: Transaction) {
@@ -480,13 +469,6 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
         )}
       </AnimatePresence>
 
-      {/* Mobile Bottom Nav */}
-      <DynamicBottomNav
-        activeView={activeView}
-        navItems={FINANCE_NAV_ITEMS}
-        onViewChange={(view) => handleViewChange(view as ActiveView)}
-        onGoHome={onGoHome}
-      />
     </div>
   );
 }

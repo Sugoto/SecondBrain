@@ -14,7 +14,6 @@ import {
   getCategoryColor,
 } from "./constants";
 import { getMonthlyAmount } from "./utils";
-import { useTheme } from "@/hooks/useTheme";
 
 interface CategoryCardProps {
   name: string;
@@ -39,8 +38,6 @@ export const CategoryCard = memo(function CategoryCard({
   onTransactionClick,
   index = 0,
 }: CategoryCardProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const IconComp = icon || Receipt;
   const isUncategorized = name === "Uncategorized";
   const categoryColor = getCategoryColor(name);
@@ -54,14 +51,13 @@ export const CategoryCard = memo(function CategoryCard({
         delay: index * 0.05,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="bg-card border border-border rounded-lg overflow-hidden"
+      className="bg-card border rounded-lg overflow-hidden"
+      style={{ borderColor: "rgba(128, 128, 128, 0.1)" }}
     >
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.99 }}
-        className={`w-full flex items-center gap-2.5 p-2.5 transition-colors hover:bg-accent/50 ${
-          isUncategorized ? "" : getCategoryStyle(name)
-        }`}
+        className="w-full flex items-center gap-2.5 p-2.5 transition-colors hover:bg-accent/50"
       >
         <motion.div
           animate={{ scale: isExpanded ? 1.05 : 1 }}
@@ -115,7 +111,7 @@ export const CategoryCard = memo(function CategoryCard({
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-border divide-y divide-border">
+            <div className="border-t border-border/10 divide-y divide-border/10">
               {transactions.map((txn, i) => {
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
@@ -131,18 +127,9 @@ export const CategoryCard = memo(function CategoryCard({
                     onClick={() => onTransactionClick(txn)}
                     className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-accent/50 text-left ${
                       isExcluded
-                        ? "opacity-40 grayscale-[60%] saturate-50 bg-muted/20"
+                        ? "opacity-40 grayscale-[60%] saturate-50"
                         : ""
                     }`}
-                    style={
-                      isExcluded
-                        ? undefined
-                        : {
-                            background: isDark
-                              ? `linear-gradient(90deg, ${categoryColor}08 0%, transparent 100%)`
-                              : `linear-gradient(90deg, ${categoryColor}05 0%, transparent 100%)`,
-                          }
-                    }
                   >
                     <div className="min-w-0 flex-1">
                       <p

@@ -276,24 +276,11 @@ export function ShoppingList() {
   return (
     <div>
       <Card
-        className="p-4 overflow-hidden relative"
+        className="p-4 overflow-hidden relative border"
         style={{
-          background: isDark
-            ? "linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%)"
-            : "linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(124, 58, 237, 0.02) 100%)",
-          border: isDark
-            ? "1px solid rgba(139, 92, 246, 0.15)"
-            : "1px solid rgba(139, 92, 246, 0.12)",
+          borderColor: "rgba(128, 128, 128, 0.1)",
         }}
       >
-        {/* Decorative gradient */}
-        <div
-          className="absolute top-0 right-0 w-32 h-32 -mr-10 -mt-10 opacity-20 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, transparent 70%)",
-          }}
-        />
 
         <div className="relative z-10 space-y-3">
           {/* Header */}

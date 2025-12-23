@@ -19,9 +19,10 @@ import { useHealthData } from "@/hooks/useHealthData";
 import { HealthStatsEditDialog } from "./HealthStatsCard";
 import { WorkoutCalendar } from "./WorkoutCalendar";
 import { ShoppingList } from "./ShoppingList";
+import { MedicationTracker } from "./MedicationTracker";
 import { calculateTDEE, formatNumber, getActivityLevelInfo } from "./utils";
 
-const HEALTH_VIEWS = ["nutrition", "workouts"] as const;
+const HEALTH_VIEWS = ["nutrition", "workouts", "medication"] as const;
 
 interface HealthTrackerProps {
   activeView: HealthView;
@@ -87,24 +88,11 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
         className="w-full text-left"
       >
         <Card
-          className="p-5 overflow-hidden relative"
+          className="p-5 overflow-hidden relative border"
           style={{
-            background: isDark
-              ? "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%)"
-              : "linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(20, 184, 166, 0.03) 100%)",
-            border: isDark
-              ? "1px solid rgba(16, 185, 129, 0.2)"
-              : "1px solid rgba(16, 185, 129, 0.15)",
+            borderColor: "rgba(128, 128, 128, 0.1)",
           }}
         >
-          {/* Decorative gradient */}
-          <div
-            className="absolute top-0 right-0 w-40 h-40 -mr-12 -mt-12 opacity-20 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(16, 185, 129, 0.5) 0%, transparent 70%)",
-            }}
-          />
 
           <div className="relative z-10">
             {/* Header with Daily Target */}
@@ -230,15 +218,19 @@ function WorkoutsView() {
   );
 }
 
-export function HealthTracker({ activeView, onViewChange }: HealthTrackerProps) {
+export function HealthTracker({
+  activeView,
+  onViewChange,
+}: HealthTrackerProps) {
   const { userStats, updateInCache } = useHealthData();
   const [showHealthDialog, setShowHealthDialog] = useState(false);
 
-  // Swipe navigation for mobile
+  // Swipe navigation for mobile (no View Transitions - Framer Motion handles animations)
   const swipeHandlers = useSwipeNavigation({
     views: HEALTH_VIEWS,
     currentView: activeView,
     onViewChange,
+    useViewTransitions: false,
   });
 
   return (
@@ -251,11 +243,15 @@ export function HealthTracker({ activeView, onViewChange }: HealthTrackerProps) 
           iconGradient="linear-gradient(135deg, #ef4444 0%, #f97316 100%)"
           iconShadow="0 4px 12px rgba(239, 68, 68, 0.3)"
           accentColor="#ef4444"
+          noBackground
         />
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20 overscroll-contain touch-pan-y" {...swipeHandlers}>
+      <main
+        className="flex-1 overflow-y-auto pb-20 overscroll-contain touch-pan-y"
+        {...swipeHandlers}
+      >
         <AnimatePresence mode="wait">
           {activeView === "nutrition" && (
             <motion.div key="nutrition" {...VIEW_ANIMATION}>
@@ -265,6 +261,11 @@ export function HealthTracker({ activeView, onViewChange }: HealthTrackerProps) 
           {activeView === "workouts" && (
             <motion.div key="workouts" {...VIEW_ANIMATION}>
               <WorkoutsView />
+            </motion.div>
+          )}
+          {activeView === "medication" && (
+            <motion.div key="medication" {...VIEW_ANIMATION}>
+              <MedicationTracker />
             </motion.div>
           )}
         </AnimatePresence>
@@ -280,4 +281,3 @@ export function HealthTracker({ activeView, onViewChange }: HealthTrackerProps) 
     </div>
   );
 }
-

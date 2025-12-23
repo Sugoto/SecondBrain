@@ -1,7 +1,7 @@
-export type AppSection = "home" | "finances" | "fitness";
+export type AppSection = "home" | "omscs" | "finances" | "fitness";
 
-export type ExpenseView = "trends" | "expenses" | "categories";
-export type HealthView = "nutrition" | "workouts";
+export type FinanceView = "investments" | "expenses" | "trends";
+export type HealthView = "nutrition" | "workouts" | "medication";
 
 export interface NavItem {
   id: string;

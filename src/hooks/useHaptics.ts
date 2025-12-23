@@ -2,19 +2,19 @@
  * Haptic feedback utility for native-feeling touch interactions
  */
 
-type HapticIntensity = 'light' | 'medium' | 'heavy';
+type HapticIntensity = "light" | "medium" | "heavy";
 
 const VIBRATION_DURATION: Record<HapticIntensity, number> = {
-  light: 10,
-  medium: 20,
+  light: 30,
+  medium: 30,
   heavy: 30,
 };
 
 /**
  * Trigger haptic feedback if supported
  */
-export function hapticFeedback(intensity: HapticIntensity = 'light'): void {
-  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+export function hapticFeedback(intensity: HapticIntensity = "light"): void {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate(VIBRATION_DURATION[intensity]);
   }
 }
@@ -23,7 +23,7 @@ export function hapticFeedback(intensity: HapticIntensity = 'light'): void {
  * Trigger a success pattern (two short pulses)
  */
 export function hapticSuccess(): void {
-  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate([10, 50, 10]);
   }
 }
@@ -32,7 +32,7 @@ export function hapticSuccess(): void {
  * Trigger an error pattern (one long pulse)
  */
 export function hapticError(): void {
-  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate(50);
   }
 }
@@ -41,7 +41,7 @@ export function hapticError(): void {
  * Trigger a selection change pattern
  */
 export function hapticSelection(): void {
-  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate(5);
   }
 }
@@ -50,7 +50,5 @@ export function hapticSelection(): void {
  * Check if haptic feedback is supported
  */
 export function isHapticSupported(): boolean {
-  return typeof navigator !== 'undefined' && 'vibrate' in navigator;
+  return typeof navigator !== "undefined" && "vibrate" in navigator;
 }
-
-

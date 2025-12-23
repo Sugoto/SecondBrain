@@ -15,16 +15,33 @@ interface CacheMeta {
   updatedAt: number;
 }
 
+// Medication log entry - tracks when a medication was taken
+export interface MedicationLog {
+  id: string; // Format: "medicationId-YYYY-MM-DD"
+  medicationId: string;
+  date: string; // YYYY-MM-DD
+  takenAt: string; // ISO timestamp
+}
+
 const db = new Dexie("SecondBrainCache") as Dexie & {
   transactions: EntityTable<CachedTransaction, "id">;
   userStats: EntityTable<CachedUserStats, "id">;
   meta: EntityTable<CacheMeta, "key">;
+  medicationLogs: EntityTable<MedicationLog, "id">;
 };
 
 db.version(1).stores({
   transactions: "id, date, category, type, _cachedAt",
   userStats: "id, _cachedAt",
   meta: "key, updatedAt",
+});
+
+// Version 2 adds medication logs
+db.version(2).stores({
+  transactions: "id, date, category, type, _cachedAt",
+  userStats: "id, _cachedAt",
+  meta: "key, updatedAt",
+  medicationLogs: "id, medicationId, date",
 });
 
 const CACHE_TTL = 5 * 60 * 1000;
@@ -151,7 +168,79 @@ export async function clearCache(): Promise<void> {
     db.transactions.clear(),
     db.userStats.clear(),
     db.meta.clear(),
+    db.medicationLogs.clear(),
   ]);
+}
+
+/**
+ * Get medication logs for a specific date
+ */
+export async function getMedicationLogsForDate(
+  date: string
+): Promise<MedicationLog[]> {
+  try {
+    return await db.medicationLogs.where("date").equals(date).toArray();
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get all medication logs (for history/stats)
+ */
+export async function getAllMedicationLogs(): Promise<MedicationLog[]> {
+  try {
+    return await db.medicationLogs.toArray();
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Toggle medication for a specific date
+ * If already taken, removes the log. If not taken, adds a new log.
+ */
+export async function toggleMedicationLog(
+  medicationId: string,
+  date: string
+): Promise<boolean> {
+  const id = `${medicationId}-${date}`;
+
+  try {
+    const existing = await db.medicationLogs.get(id);
+
+    if (existing) {
+      await db.medicationLogs.delete(id);
+      return false; // Now unmarked
+    } else {
+      await db.medicationLogs.put({
+        id,
+        medicationId,
+        date,
+        takenAt: new Date().toISOString(),
+      });
+      return true; // Now marked as taken
+    }
+  } catch (error) {
+    console.warn("Failed to toggle medication log:", error);
+    throw error;
+  }
+}
+
+/**
+ * Check if a medication was taken on a specific date
+ */
+export async function wasMedicationTaken(
+  medicationId: string,
+  date: string
+): Promise<boolean> {
+  const id = `${medicationId}-${date}`;
+  try {
+    const log = await db.medicationLogs.get(id);
+    return !!log;
+  } catch {
+    return false;
+  }
 }
 
 export { db };
