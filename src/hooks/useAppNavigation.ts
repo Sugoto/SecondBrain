@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { AppSection, HealthView, FinanceView } from "@/types/navigation";
+import type { AppSection, HealthView, FinanceView, OmscsView } from "@/types/navigation";
 
 interface NavigationState {
   section: AppSection;
   healthView: HealthView;
   financeView: FinanceView;
+  omscsView: OmscsView;
 }
 
 const DEFAULT_STATE: NavigationState = {
   section: "home",
   healthView: "nutrition",
   financeView: "expenses",
+  omscsView: "grades",
 };
 
 // Parse hash into navigation state
@@ -34,6 +36,10 @@ function parseHash(hash: string): NavigationState | null {
       section === "finances" && parts[1]
         ? (parts[1] as FinanceView)
         : DEFAULT_STATE.financeView,
+    omscsView:
+      section === "omscs" && parts[1]
+        ? (parts[1] as OmscsView)
+        : DEFAULT_STATE.omscsView,
   };
 }
 
@@ -42,6 +48,7 @@ function toHash(state: NavigationState): string {
   if (state.section === "home") return "#";
   if (state.section === "finances") return `#finances/${state.financeView}`;
   if (state.section === "fitness") return `#fitness/${state.healthView}`;
+  if (state.section === "omscs") return `#omscs/${state.omscsView}`;
   return `#${state.section}`;
 }
 
@@ -117,6 +124,16 @@ export function useAppNavigation() {
     });
   }, []);
 
+  const navigateOmscsView = useCallback((omscsView: OmscsView) => {
+    setState((prev) => {
+      const next = { ...prev, omscsView };
+      if (!isHandlingPopstate.current) {
+        window.history.replaceState(next, "", toHash(next));
+      }
+      return next;
+    });
+  }, []);
+
   // Go home - uses history.back() for native feel when possible
   const goHome = useCallback(() => {
     if (state.section === "home") return;
@@ -133,9 +150,11 @@ export function useAppNavigation() {
     currentSection: state.section,
     healthView: state.healthView,
     financeView: state.financeView,
+    omscsView: state.omscsView,
     navigateToSection,
     navigateHealthView,
     navigateFinanceView,
+    navigateOmscsView,
     goHome,
   };
 }

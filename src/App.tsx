@@ -9,6 +9,7 @@ import {
   HOME_NAV_ITEMS,
   HEALTH_NAV_ITEMS,
   FINANCE_NAV_ITEMS,
+  OMSCS_NAV_ITEMS,
 } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
 import { useSwipeNavigation } from "./hooks/useSwipeNavigation";
@@ -30,15 +31,22 @@ const HealthTracker = lazy(() =>
     default: m.HealthTracker,
   }))
 );
+const OmscsTracker = lazy(() =>
+  import("./components/omscs/OmscsTracker").then((m) => ({
+    default: m.OmscsTracker,
+  }))
+);
 
 function AppContent() {
   const {
     currentSection,
     healthView,
     financeView,
+    omscsView,
     navigateToSection,
     navigateHealthView,
     navigateFinanceView,
+    navigateOmscsView,
     goHome,
   } = useAppNavigation();
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
@@ -68,6 +76,8 @@ function AppContent() {
         return FINANCE_NAV_ITEMS;
       case "fitness":
         return HEALTH_NAV_ITEMS;
+      case "omscs":
+        return OMSCS_NAV_ITEMS;
       default:
         return HOME_NAV_ITEMS;
     }
@@ -79,10 +89,12 @@ function AppContent() {
         return financeView;
       case "fitness":
         return healthView;
+      case "omscs":
+        return omscsView;
       default:
         return currentSection;
     }
-  }, [currentSection, financeView, healthView]);
+  }, [currentSection, financeView, healthView, omscsView]);
 
   // Handle nav view changes
   const handleViewChange = useCallback(
@@ -93,9 +105,11 @@ function AppContent() {
         navigateFinanceView(view as import("./types/navigation").FinanceView);
       } else if (currentSection === "fitness") {
         navigateHealthView(view as import("./types/navigation").HealthView);
+      } else if (currentSection === "omscs") {
+        navigateOmscsView(view as import("./types/navigation").OmscsView);
       }
     },
-    [currentSection, navigateToSection, navigateFinanceView, navigateHealthView]
+    [currentSection, navigateToSection, navigateFinanceView, navigateHealthView, navigateOmscsView]
   );
 
   return (
@@ -112,12 +126,10 @@ function AppContent() {
             </div>
           )}
           {currentSection === "omscs" && (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <p className="text-lg font-medium">OMSCS</p>
-                <p className="text-sm">Coming soon...</p>
-              </div>
-            </div>
+            <OmscsTracker
+              activeView={omscsView}
+              onViewChange={navigateOmscsView}
+            />
           )}
           {currentSection === "finances" && (
             <FinanceTracker

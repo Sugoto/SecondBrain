@@ -1,4 +1,4 @@
-import { Wallet, Heart, TrendingUp, Receipt, PieChart, Apple, Dumbbell, Pill, GraduationCap } from "lucide-react";
+import { Wallet, Heart, TrendingUp, Receipt, PieChart, Apple, Dumbbell, Pill, GraduationCap, Calculator, BookOpen, CalendarDays } from "lucide-react";
 import type { NavItem } from "./DynamicBottomNav";
 
 // Home page nav items with their theme colors
@@ -20,4 +20,11 @@ export const HEALTH_NAV_ITEMS: NavItem[] = [
   { id: "nutrition", icon: Apple, label: "Nutrition" },
   { id: "medication", icon: Pill, label: "Medication" },
   { id: "workouts", icon: Dumbbell, label: "Workouts" },
+];
+
+// OMSCS tracker nav items
+export const OMSCS_NAV_ITEMS: NavItem[] = [
+  { id: "grades", icon: Calculator, label: "Grades" },
+  { id: "semester", icon: CalendarDays, label: "Semester" },
+  { id: "courses", icon: BookOpen, label: "Courses" },
 ];

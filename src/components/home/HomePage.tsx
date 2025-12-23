@@ -10,11 +10,13 @@ import {
   Calendar,
   TrendingUp,
   TrendingDown,
+  Pill,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
 import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
+import { useMedicationData } from "@/hooks/useMedicationData";
 import {
   MONTHLY_BUDGET,
   formatCurrencyCompact,
@@ -343,7 +345,8 @@ function MiniMutualFundWidget() {
 
 // Compact mini-widget for Nutrition with workout toggle
 function MiniNutritionWidget() {
-  const { userStats, workoutDates, toggleWorkoutDate, isWorkoutSaving } = useHealthData();
+  const { userStats, workoutDates, toggleWorkoutDate, isWorkoutSaving } =
+    useHealthData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -435,10 +438,163 @@ function StackedMiniWidgets() {
   );
 }
 
+// Minimal full-width supplements widget
+function SupplementsWidget() {
+  const { medications, toggling, toggleMedication, isTakenToday, loading } =
+    useMedicationData();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const takenCount = medications.filter((m) => isTakenToday(m.id)).length;
+  const allTaken = takenCount === medications.length;
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="w-full mt-3"
+      >
+        <div
+          className="rounded-2xl p-4"
+          style={{
+            background: isDark
+              ? "rgba(255, 255, 255, 0.03)"
+              : "rgba(0, 0, 0, 0.02)",
+            border: isDark
+              ? "1px solid rgba(255, 255, 255, 0.08)"
+              : "1px solid rgba(0, 0, 0, 0.06)",
+          }}
+        >
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+      className="w-full mt-3"
+    >
+      <div
+        className="rounded-2xl p-3 sm:p-4"
+        style={{
+          background: isDark
+            ? "rgba(255, 255, 255, 0.03)"
+            : "rgba(0, 0, 0, 0.02)",
+          border: isDark
+            ? "1px solid rgba(255, 255, 255, 0.08)"
+            : "1px solid rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div
+              className="h-6 w-6 rounded-lg flex items-center justify-center"
+              style={{
+                background: allTaken
+                  ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+                  : "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+              }}
+            >
+              {allTaken ? (
+                <Check className="h-3 w-3 text-white" />
+              ) : (
+                <Pill className="h-3 w-3 text-white" />
+              )}
+            </div>
+            <span className="text-xs font-medium text-foreground">
+              Supplements
+            </span>
+          </div>
+          <span className="text-[10px] font-medium text-muted-foreground">
+            {takenCount}/{medications.length}
+          </span>
+        </div>
+
+        {/* Pills Grid */}
+        <div className="grid grid-cols-4 gap-2">
+          {medications.map((med) => {
+            const isTaken = isTakenToday(med.id);
+            const isToggling = toggling === med.id;
+
+            return (
+              <button
+                key={med.id}
+                onClick={() => toggleMedication(med.id)}
+                disabled={isToggling}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 active:scale-95"
+                style={{
+                  background: isTaken
+                    ? isDark
+                      ? `${med.color}20`
+                      : `${med.color}15`
+                    : isDark
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.03)",
+                  border: isTaken
+                    ? `1px solid ${med.color}40`
+                    : "1px solid transparent",
+                }}
+              >
+                {/* Icon Circle */}
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: isTaken
+                      ? `linear-gradient(135deg, ${med.color} 0%, ${med.color}cc 100%)`
+                      : isDark
+                      ? `${med.color}25`
+                      : `${med.color}20`,
+                    boxShadow: isTaken ? `0 2px 8px ${med.color}40` : "none",
+                  }}
+                >
+                  {isToggling ? (
+                    <Loader2
+                      className="h-3.5 w-3.5 animate-spin"
+                      style={{ color: isTaken ? "white" : med.color }}
+                    />
+                  ) : isTaken ? (
+                    <Check className="h-3.5 w-3.5 text-white" />
+                  ) : (
+                    <Pill
+                      className="h-3.5 w-3.5"
+                      style={{ color: med.color }}
+                    />
+                  )}
+                </div>
+
+                {/* Label */}
+                <span
+                  className="text-[9px] font-medium text-center leading-tight line-clamp-2"
+                  style={{
+                    color: isTaken ? med.color : "var(--muted-foreground)",
+                  }}
+                >
+                  {med.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function HomePage() {
   const { addTransaction } = useExpenseData();
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [newTransaction, setNewTransaction] = useState<Transaction | null>(null);
+  const [newTransaction, setNewTransaction] = useState<Transaction | null>(
+    null
+  );
   const [saving, setSaving] = useState(false);
 
   const handleAddExpense = () => {
@@ -485,6 +641,9 @@ export function HomePage() {
           <BudgetCard onAddExpense={handleAddExpense} />
           <StackedMiniWidgets />
         </div>
+
+        {/* Supplements Widget */}
+        <SupplementsWidget />
       </main>
 
       {/* Transaction Dialog */}

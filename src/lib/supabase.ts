@@ -58,3 +58,20 @@ export type ShoppingItem = {
   checked: boolean;
   created_at: string;
 };
+
+export type OmscsCourseDetails = {
+  analysis?: string;
+  pros?: string[];
+  cons?: string[];
+  [key: string]: unknown;
+};
+
+export type OmscsCourse = {
+  id: string;
+  code: string;
+  name: string;
+  enrolled_semester: string | null;
+  final_grade: string | null;
+  details: OmscsCourseDetails | null;
+  created_at: string;
+};
