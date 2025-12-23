@@ -36,7 +36,7 @@ const AreaChart = memo(function AreaChart({
 }) {
   const width = 320;
   const height = 180;
-  const padding = { top: 20, right: 50, bottom: 30, left: 10 };
+  const padding = { top: 0, right: 10, bottom: 30, left: 30 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
@@ -55,7 +55,9 @@ const AreaChart = memo(function AreaChart({
     .join(" ");
 
   // Create area path (line + bottom)
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${padding.left} ${padding.top + chartHeight} Z`;
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${
+    padding.top + chartHeight
+  } L ${padding.left} ${padding.top + chartHeight} Z`;
 
   const isDark = theme === "dark";
   const gridColor = isDark ? "#3f3f46" : "#e4e4e7";
@@ -78,6 +80,26 @@ const AreaChart = memo(function AreaChart({
         </linearGradient>
       </defs>
 
+      {/* X-axis line */}
+      <line
+        x1={padding.left}
+        y1={padding.top + chartHeight}
+        x2={width - padding.right}
+        y2={padding.top + chartHeight}
+        stroke={gridColor}
+        strokeWidth={1}
+      />
+
+      {/* Y-axis line */}
+      <line
+        x1={padding.left}
+        y1={padding.top}
+        x2={padding.left}
+        y2={padding.top + chartHeight}
+        stroke={gridColor}
+        strokeWidth={1}
+      />
+
       {/* Horizontal grid lines */}
       {yTicks.map((tick, i) => {
         const y = padding.top + chartHeight - (tick / maxValue) * chartHeight;
@@ -93,12 +115,15 @@ const AreaChart = memo(function AreaChart({
               strokeOpacity={0.6}
             />
             <text
-              x={width - padding.right + 5}
+              x={padding.left - 5}
               y={y + 4}
+              textAnchor="end"
               fontSize={10}
               fill={textColor}
             >
-              {tick >= 1000 ? `₹${(tick / 1000).toFixed(0)}k` : `₹${Math.round(tick)}`}
+              {tick >= 1000
+                ? `₹${(tick / 1000).toFixed(0)}k`
+                : `₹${Math.round(tick)}`}
             </text>
           </g>
         );
@@ -134,7 +159,10 @@ const AreaChart = memo(function AreaChart({
 
       {/* X-axis labels */}
       {points
-        .filter((_, i) => i % Math.ceil(points.length / 7) === 0 || i === points.length - 1)
+        .filter(
+          (_, i) =>
+            i % Math.ceil(points.length / 7) === 0 || i === points.length - 1
+        )
         .map((p, i) => (
           <text
             key={i}
