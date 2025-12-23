@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
 import { useTheme } from "@/hooks/useTheme";
@@ -16,10 +16,9 @@ import { ExpensesView } from "./ExpensesView";
 import { InvestmentsView } from "./InvestmentsView";
 
 // Lazy load TrendsView since it imports heavy Recharts (~420KB)
-const TrendsView = lazy(() => 
-  import("./TrendsView").then(m => ({ default: m.TrendsView }))
+const TrendsView = lazy(() =>
+  import("./TrendsView").then((m) => ({ default: m.TrendsView }))
 );
-
 
 import type { TimeFilter, ActiveView, ChartMode, DateRange } from "./types";
 import {
@@ -178,15 +177,13 @@ interface FinanceTrackerProps {
   onViewChange: (view: ActiveView) => void;
 }
 
-export function FinanceTracker({ activeView, onViewChange }: FinanceTrackerProps) {
+export function FinanceTracker({
+  activeView,
+  onViewChange,
+}: FinanceTrackerProps) {
   // Data from React Query cache
-  const {
-    transactions,
-    error,
-    addToCache,
-    updateInCache,
-    removeFromCache,
-  } = useExpenseData();
+  const { transactions, error, addToCache, updateInCache, removeFromCache } =
+    useExpenseData();
 
   // Filter state
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
@@ -461,14 +458,11 @@ export function FinanceTracker({ activeView, onViewChange }: FinanceTrackerProps
               }}
             />
             {/* Static ring - hover effect instead of infinite animation */}
-            <div
-              className="absolute inset-0 rounded-full pointer-events-none transition-shadow duration-300 group-hover:shadow-[0_0_0_4px_rgba(139,92,246,0.2)]"
-            />
+            <div className="absolute inset-0 rounded-full pointer-events-none transition-shadow duration-300 group-hover:shadow-[0_0_0_4px_rgba(139,92,246,0.2)]" />
             <Plus className="h-6 w-6 text-primary relative z-10" />
           </motion.button>
         )}
       </AnimatePresence>
-
     </div>
   );
 }
