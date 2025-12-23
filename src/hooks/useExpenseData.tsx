@@ -299,19 +299,37 @@ export function usePrefetchTransactions() {
 
 export function useUserStats() {
   const queryClient = useQueryClient();
+  
+  // Get initial cached data for instant display (same pattern as useExpenseData)
+  const [initialData, setInitialData] = useState<UserStats | undefined>(undefined);
+  
+  // Load initial data from IndexedDB on mount
+  useEffect(() => {
+    cachedUserStatsPromise?.then((cached) => {
+      if (cached) {
+        queryClient.setQueryData(userStatsKeys.detail(), cached);
+        setInitialData(cached);
+      }
+    });
+  }, [queryClient]);
 
   const {
     data: userStats = null,
-    isLoading: loading,
+    isLoading,
     error,
   } = useQuery({
     queryKey: userStatsKeys.detail(),
     queryFn: fetchUserStats,
+    placeholderData: initialData,
     staleTime: 10 * 60 * 1000, // 10 minutes - user stats change less frequently
   });
+  
+  const loading = isLoading && !userStats && !initialData;
 
   const updateUserStats = (updated: UserStats) => {
     queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
+    // Also update IndexedDB cache
+    cacheUserStats(updated);
   };
 
   const invalidate = () =>
@@ -338,6 +356,7 @@ export function useUserStats() {
     
     const updated = { ...userStats, investments: updatedInvestments };
     queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
+    cacheUserStats(updated);
     return newInvestment;
   };
 
@@ -356,6 +375,7 @@ export function useUserStats() {
     
     const updated = { ...userStats, investments: updatedInvestments };
     queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
+    cacheUserStats(updated);
   };
 
   return {

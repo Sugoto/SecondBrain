@@ -123,12 +123,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
   const isWorkoutDay = (date: Date) => workoutDates.has(formatDateKey(date));
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={className}
-    >
+    <div className={className}>
       <Card
         className="p-4 overflow-hidden"
         style={{
@@ -292,10 +287,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
         </AnimatePresence>
 
         {/* Stats Row */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.3 }}
+        <div
           className="mt-4 pt-4 border-t"
           style={{
             borderColor: isDark
@@ -328,8 +320,8 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
             </motion.p>
             <p className="text-[10px] text-muted-foreground">workouts</p>
           </div>
-        </motion.div>
+        </div>
       </Card>
-    </motion.div>
+    </div>
   );
 }

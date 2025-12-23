@@ -7,7 +7,10 @@ import type { AppSection } from "@/types/navigation";
 
 export interface NavItem {
   id: string;
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  icon: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
   label: string;
   color?: string;
   onPrefetch?: () => void;
@@ -35,21 +38,24 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const showHomeButton = onGoHome && currentSection !== "home";
-  
+
   // Memoize style objects to prevent recreation every render
-  const containerStyle = useMemo(() => ({
-    background: isDark
-      ? "rgba(24, 24, 27, 0.85)"
-      : "rgba(255, 255, 255, 0.85)",
-    backdropFilter: "blur(20px) saturate(180%)",
-    WebkitBackdropFilter: "blur(20px) saturate(180%)",
-    borderTop: isDark
-      ? "1px solid rgba(63, 63, 70, 0.5)"
-      : "1px solid rgba(228, 228, 231, 0.8)",
-    boxShadow: isDark
-      ? "0 -4px 24px rgba(0, 0, 0, 0.3)"
-      : "0 -4px 24px rgba(0, 0, 0, 0.08)",
-  }), [isDark]);
+  const containerStyle = useMemo(
+    () => ({
+      background: isDark
+        ? "rgba(24, 24, 27, 0.85)"
+        : "rgba(255, 255, 255, 0.85)",
+      backdropFilter: "blur(20px) saturate(180%)",
+      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+      borderTop: isDark
+        ? "1px solid rgba(63, 63, 70, 0.5)"
+        : "1px solid rgba(228, 228, 231, 0.8)",
+      boxShadow: isDark
+        ? "0 -4px 24px rgba(0, 0, 0, 0.3)"
+        : "0 -4px 24px rgba(0, 0, 0, 0.08)",
+    }),
+    [isDark]
+  );
 
   return (
     <motion.nav
@@ -139,11 +145,12 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
           {navItems.map(({ id, icon: Icon, label, color }) => {
             const isActive = activeView === id;
             const itemColor = color || "#8b5cf6";
-            
+
             return (
               <motion.button
                 key={id}
                 onClick={() => {
+                  if (isActive) return;
                   hapticSelection();
                   onViewChange(id);
                 }}

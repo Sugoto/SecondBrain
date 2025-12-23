@@ -11,6 +11,7 @@ import {
   Activity,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/PageHeader";
 import type { HealthView } from "@/types/navigation";
@@ -19,6 +20,8 @@ import { HealthStatsEditDialog } from "./HealthStatsCard";
 import { WorkoutCalendar } from "./WorkoutCalendar";
 import { ShoppingList } from "./ShoppingList";
 import { calculateTDEE, formatNumber, getActivityLevelInfo } from "./utils";
+
+const HEALTH_VIEWS = ["nutrition", "workouts"] as const;
 
 interface HealthTrackerProps {
   activeView: HealthView;
@@ -78,9 +81,6 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
     <div className="p-4 space-y-4">
       {/* Main TDEE Card - Clickable */}
       <motion.button
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
         onClick={onEditHealth}
@@ -230,9 +230,16 @@ function WorkoutsView() {
   );
 }
 
-export function HealthTracker({ activeView }: HealthTrackerProps) {
+export function HealthTracker({ activeView, onViewChange }: HealthTrackerProps) {
   const { userStats, updateInCache } = useHealthData();
   const [showHealthDialog, setShowHealthDialog] = useState(false);
+
+  // Swipe navigation for mobile
+  const swipeHandlers = useSwipeNavigation({
+    views: HEALTH_VIEWS,
+    currentView: activeView,
+    onViewChange,
+  });
 
   return (
     <div className="h-full flex flex-col">
@@ -248,7 +255,7 @@ export function HealthTracker({ activeView }: HealthTrackerProps) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className="flex-1 overflow-y-auto pb-20 overscroll-contain touch-pan-y" {...swipeHandlers}>
         <AnimatePresence mode="wait">
           {activeView === "nutrition" && (
             <motion.div key="nutrition" {...VIEW_ANIMATION}>

@@ -1,11 +1,21 @@
 import { useState, lazy, Suspense, useCallback, useMemo } from "react";
 import { ThemeProvider } from "./hooks/useTheme";
-import { ExpenseDataProvider, usePrefetchTransactions } from "./hooks/useExpenseData";
+import {
+  ExpenseDataProvider,
+  usePrefetchTransactions,
+} from "./hooks/useExpenseData";
 import { DynamicBottomNav } from "./components/navigation/DynamicBottomNav";
-import { HOME_NAV_ITEMS, HEALTH_NAV_ITEMS } from "./components/navigation/constants";
+import {
+  HOME_NAV_ITEMS,
+  HEALTH_NAV_ITEMS,
+} from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
 import { useViewTransition } from "./hooks/useViewTransition";
+import { useSwipeNavigation } from "./hooks/useSwipeNavigation";
 import type { AppSection, HealthView } from "./types/navigation";
+
+// Main sections for swipe navigation
+const APP_SECTIONS = ["home", "finances", "fitness"] as const;
 
 // Lazy load page components for code splitting
 const HomePage = lazy(() =>
@@ -25,6 +35,13 @@ function AppContent() {
   const [healthView, setHealthView] = useState<HealthView>("nutrition");
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
   const { startTransition } = useViewTransition();
+
+  // Swipe navigation between main sections (hook handles View Transitions)
+  const sectionSwipeHandlers = useSwipeNavigation({
+    views: APP_SECTIONS,
+    currentView: currentSection,
+    onViewChange: setCurrentSection,
+  });
 
   // Prefetch data when hovering over nav items
   const handlePrefetch = useCallback(
@@ -57,16 +74,17 @@ function AppContent() {
     }
   }, [currentSection, healthView]);
 
-  // Use View Transitions API for native browser animations
-  const handleViewChange = useCallback((view: string) => {
-    startTransition(() => {
+  // Handle nav view changes (View Transitions handled by the hook/startTransition)
+  const handleViewChange = useCallback(
+    (view: string) => {
       if (currentSection === "home") {
-        setCurrentSection(view as AppSection);
+        startTransition(() => setCurrentSection(view as AppSection));
       } else if (currentSection === "fitness") {
-        setHealthView(view as HealthView);
+        startTransition(() => setHealthView(view as HealthView));
       }
-    });
-  }, [currentSection, startTransition]);
+    },
+    [currentSection, startTransition]
+  );
 
   const handleGoHome = useCallback(() => {
     startTransition(() => {
@@ -79,13 +97,27 @@ function AppContent() {
       {/* No loading fallback - components render instantly with cached data */}
       <Suspense fallback={null}>
         {/* Using CSS-based transitions with view-transition-name for native browser animation */}
-        <div className="h-full page-transition" style={{ viewTransitionName: 'page-content' }}>
-          {currentSection === "home" && <HomePage />}
-          {currentSection === "finances" && <FinanceTracker onGoHome={handleGoHome} />}
+        <div
+          className="h-full page-transition"
+          style={{ viewTransitionName: "page-content" }}
+        >
+          {currentSection === "home" && (
+            <div
+              className="h-full overscroll-contain touch-pan-y"
+              {...sectionSwipeHandlers}
+            >
+              <HomePage />
+            </div>
+          )}
+          {currentSection === "finances" && (
+            <FinanceTracker onGoHome={handleGoHome} />
+          )}
           {currentSection === "fitness" && (
             <HealthTracker
               activeView={healthView}
-              onViewChange={(view) => setHealthView(view)}
+              onViewChange={(view) => {
+                startTransition(() => setHealthView(view));
+              }}
             />
           )}
         </div>

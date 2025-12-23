@@ -1,8 +1,9 @@
-import { useState, useMemo, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData } from "@/hooks/useExpenseData";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -164,8 +165,7 @@ function BudgetProgressBar({
 }
 
 // Constants outside component to avoid recreation
-const VIEWS: ActiveView[] = ["investments", "expenses", "trends"];
-const MIN_SWIPE_DISTANCE = 100;
+const VIEWS = ["investments", "expenses", "trends"] as const;
 
 const VIEW_ANIMATION = {
   initial: { opacity: 0, x: -20 },
@@ -210,37 +210,17 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
 
   const { theme } = useTheme();
 
+  // View change handler (used by both nav and swipe)
+  const handleViewChange = useCallback((view: ActiveView) => {
+    setActiveView(view);
+  }, []);
+
   // Swipe navigation for mobile
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = null;
-    touchStartX.current = e.targetTouches[0].clientX;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (!touchStartX.current || !touchEndX.current) return;
-
-    const distance = touchStartX.current - touchEndX.current;
-    const isLeftSwipe = distance > MIN_SWIPE_DISTANCE;
-    const isRightSwipe = distance < -MIN_SWIPE_DISTANCE;
-
-    const currentIndex = VIEWS.indexOf(activeView);
-
-    if (isLeftSwipe && currentIndex < VIEWS.length - 1) {
-      setActiveView(VIEWS[currentIndex + 1]);
-    } else if (isRightSwipe && currentIndex > 0) {
-      setActiveView(VIEWS[currentIndex - 1]);
-    }
-
-    touchStartX.current = null;
-    touchEndX.current = null;
-  }, [activeView]);
+  const swipeHandlers = useSwipeNavigation({
+    views: VIEWS,
+    currentView: activeView,
+    onViewChange: handleViewChange,
+  });
 
   async function saveTransaction(updated: Transaction) {
     if (!dialogState) return;
@@ -397,9 +377,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
       {/* Main Content - with top padding for fixed header on mobile */}
       <main
         className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[72px] md:pt-0"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        {...swipeHandlers}
       >
         {/* Sticky Budget Progress Bar - only on expenses view */}
         {activeView === "expenses" && (
@@ -506,7 +484,7 @@ export function FinanceTracker({ onGoHome }: FinanceTrackerProps) {
       <DynamicBottomNav
         activeView={activeView}
         navItems={FINANCE_NAV_ITEMS}
-        onViewChange={(view) => setActiveView(view as ActiveView)}
+        onViewChange={(view) => handleViewChange(view as ActiveView)}
         onGoHome={onGoHome}
       />
     </div>

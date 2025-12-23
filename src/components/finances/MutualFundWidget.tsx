@@ -25,7 +25,10 @@ export function MutualFundWidget() {
         (i) => i.schemeCode === fund.schemeCode
       );
       const totalUnits = fundInvestments.reduce((sum, i) => sum + i.units, 0);
-      const totalInvested = fundInvestments.reduce((sum, i) => sum + i.amount, 0);
+      const totalInvested = fundInvestments.reduce(
+        (sum, i) => sum + i.amount,
+        0
+      );
       const currentValue = totalUnits * fund.currentNav;
       const previousValue = totalUnits * fund.previousNav;
 
@@ -148,4 +151,3 @@ export function MutualFundWidget() {
     </motion.div>
   );
 }
-
