@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useCallback, useMemo } from "react";
+import { lazy, Suspense, useCallback, useMemo } from "react";
 import { ThemeProvider } from "./hooks/useTheme";
 import {
   ExpenseDataProvider,
@@ -12,7 +12,8 @@ import {
 } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
 import { useSwipeNavigation } from "./hooks/useSwipeNavigation";
-import type { AppSection, HealthView, FinanceView } from "./types/navigation";
+import { useAppNavigation } from "./hooks/useAppNavigation";
+import type { AppSection } from "./types/navigation";
 
 // Main sections for swipe navigation
 const APP_SECTIONS = ["home", "omscs", "finances", "fitness"] as const;
@@ -31,16 +32,22 @@ const HealthTracker = lazy(() =>
 );
 
 function AppContent() {
-  const [currentSection, setCurrentSection] = useState<AppSection>("home");
-  const [healthView, setHealthView] = useState<HealthView>("nutrition");
-  const [financeView, setFinanceView] = useState<FinanceView>("expenses");
+  const {
+    currentSection,
+    healthView,
+    financeView,
+    navigateToSection,
+    navigateHealthView,
+    navigateFinanceView,
+    goHome,
+  } = useAppNavigation();
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
 
   // Swipe navigation between main sections
   const sectionSwipeHandlers = useSwipeNavigation({
     views: APP_SECTIONS,
     currentView: currentSection,
-    onViewChange: setCurrentSection,
+    onViewChange: navigateToSection,
     useViewTransitions: false,
   });
 
@@ -81,19 +88,15 @@ function AppContent() {
   const handleViewChange = useCallback(
     (view: string) => {
       if (currentSection === "home") {
-        setCurrentSection(view as AppSection);
+        navigateToSection(view as AppSection);
       } else if (currentSection === "finances") {
-        setFinanceView(view as FinanceView);
+        navigateFinanceView(view as import("./types/navigation").FinanceView);
       } else if (currentSection === "fitness") {
-        setHealthView(view as HealthView);
+        navigateHealthView(view as import("./types/navigation").HealthView);
       }
     },
-    [currentSection]
+    [currentSection, navigateToSection, navigateFinanceView, navigateHealthView]
   );
-
-  const handleGoHome = useCallback(() => {
-    setCurrentSection("home");
-  }, []);
 
   return (
     <div className="h-[100dvh] bg-background overflow-hidden">
@@ -119,13 +122,13 @@ function AppContent() {
           {currentSection === "finances" && (
             <FinanceTracker
               activeView={financeView}
-              onViewChange={setFinanceView}
+              onViewChange={navigateFinanceView}
             />
           )}
           {currentSection === "fitness" && (
             <HealthTracker
               activeView={healthView}
-              onViewChange={setHealthView}
+              onViewChange={navigateHealthView}
             />
           )}
         </div>
@@ -136,7 +139,7 @@ function AppContent() {
         activeView={activeView}
         navItems={navItems}
         onViewChange={handleViewChange}
-        onGoHome={handleGoHome}
+        onGoHome={goHome}
         onPrefetch={handlePrefetch}
       />
 
