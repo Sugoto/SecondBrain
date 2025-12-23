@@ -13,6 +13,7 @@ import type { CategoryTotal } from "./utils";
 import { getMonthlyAmount, isProratedInMonth } from "./utils";
 import type { ChartMode } from "./types";
 import { useTheme } from "@/hooks/useTheme";
+import { LabeledPieChart } from "@/components/shared";
 
 interface TrendsViewProps {
   transactions: Transaction[];
@@ -146,179 +147,6 @@ const AreaChart = memo(function AreaChart({
             {p.label.split(" ")[1] || p.label}
           </text>
         ))}
-    </svg>
-  );
-});
-
-// million-ignore - SVG elements not compatible with Million.js
-// Pure SVG Pie Chart with connecting lines
-const PieChart = memo(function PieChart({
-  data,
-  theme,
-}: {
-  data: { name: string; value: number; color: string }[];
-  theme: "light" | "dark";
-}) {
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  if (total === 0) return null;
-
-  const size = 240;
-  const radius = 60;
-  const innerRadius = 42;
-  const cx = size / 2;
-  const cy = size / 2;
-
-  let currentAngle = -90;
-
-  const slices = data.map((item) => {
-    const percentage = item.value / total;
-    const angle = percentage * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + angle;
-    currentAngle = endAngle;
-
-    const startRad = (startAngle * Math.PI) / 180;
-    const endRad = (endAngle * Math.PI) / 180;
-
-    const x1 = cx + radius * Math.cos(startRad);
-    const y1 = cy + radius * Math.sin(startRad);
-    const x2 = cx + radius * Math.cos(endRad);
-    const y2 = cy + radius * Math.sin(endRad);
-
-    const x1Inner = cx + innerRadius * Math.cos(startRad);
-    const y1Inner = cy + innerRadius * Math.sin(startRad);
-    const x2Inner = cx + innerRadius * Math.cos(endRad);
-    const y2Inner = cy + innerRadius * Math.sin(endRad);
-
-    const largeArc = angle > 180 ? 1 : 0;
-
-    const path = `
-      M ${x1Inner} ${y1Inner}
-      L ${x1} ${y1}
-      A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}
-      L ${x2Inner} ${y2Inner}
-      A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x1Inner} ${y1Inner}
-      Z
-    `;
-
-    // Calculate label line positions
-    const midAngle = (startAngle + endAngle) / 2;
-    const midRad = (midAngle * Math.PI) / 180;
-    
-    // Start point on arc edge
-    const lineStartX = cx + (radius + 4) * Math.cos(midRad);
-    const lineStartY = cy + (radius + 4) * Math.sin(midRad);
-    
-    // Elbow point
-    const elbowX = cx + (radius + 18) * Math.cos(midRad);
-    const elbowY = cy + (radius + 18) * Math.sin(midRad);
-    
-    // End point (horizontal extension)
-    const isRightSide = Math.cos(midRad) >= 0;
-    const lineEndX = elbowX + (isRightSide ? 16 : -16);
-    const lineEndY = elbowY;
-
-    return {
-      ...item,
-      path,
-      percentage,
-      lineStartX,
-      lineStartY,
-      elbowX,
-      elbowY,
-      lineEndX,
-      lineEndY,
-      isRightSide,
-    };
-  });
-
-  const textColor = theme === "dark" ? "#a1a1aa" : "#71717a";
-
-  return (
-    <svg
-      viewBox={`0 0 ${size} ${size}`}
-      className="w-full h-full"
-      style={{ maxHeight: 220 }}
-    >
-      <defs>
-        {slices.map((slice, i) => (
-          <linearGradient
-            key={`grad-${i}`}
-            id={`pieGrad-${i}`}
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="100%"
-          >
-            <stop offset="0%" stopColor={slice.color} stopOpacity={1} />
-            <stop offset="100%" stopColor={slice.color} stopOpacity={0.7} />
-          </linearGradient>
-        ))}
-      </defs>
-      
-      {/* Pie slices */}
-      {slices.map((slice, i) => (
-        <path
-          key={i}
-          d={slice.path}
-          fill={`url(#pieGrad-${i})`}
-          stroke={theme === "dark" ? "#27272a" : "#ffffff"}
-          strokeWidth={2}
-          className="transition-all duration-200 hover:opacity-80"
-          style={{ cursor: "pointer" }}
-        >
-          <title>
-            {slice.name}: {formatCurrency(slice.value)} ({(slice.percentage * 100).toFixed(0)}%)
-          </title>
-        </path>
-      ))}
-      
-      {/* Labels with connecting lines */}
-      {slices.map((slice, i) => 
-        slice.percentage > 0.04 ? (
-          <g key={`label-${i}`}>
-            {/* Connecting line */}
-            <path
-              d={`M ${slice.lineStartX} ${slice.lineStartY} L ${slice.elbowX} ${slice.elbowY} L ${slice.lineEndX} ${slice.lineEndY}`}
-              fill="none"
-              stroke={slice.color}
-              strokeWidth={1.5}
-              strokeOpacity={0.6}
-            />
-            {/* Dot at end of line */}
-            <circle
-              cx={slice.lineEndX}
-              cy={slice.lineEndY}
-              r={2}
-              fill={slice.color}
-            />
-            {/* Category name */}
-            <text
-              x={slice.lineEndX + (slice.isRightSide ? 4 : -4)}
-              y={slice.lineEndY}
-              textAnchor={slice.isRightSide ? "start" : "end"}
-              fontSize={9}
-              fill={textColor}
-              fontWeight={500}
-              dominantBaseline="central"
-            >
-              {slice.name}
-            </text>
-            {/* Percentage */}
-            <text
-              x={slice.lineEndX + (slice.isRightSide ? 4 : -4)}
-              y={slice.lineEndY + 10}
-              textAnchor={slice.isRightSide ? "start" : "end"}
-              fontSize={8}
-              fill={slice.color}
-              fontWeight={600}
-              dominantBaseline="central"
-            >
-              {(slice.percentage * 100).toFixed(0)}%
-            </text>
-          </g>
-        ) : null
-      )}
     </svg>
   );
 });
@@ -477,7 +305,11 @@ export const TrendsView = memo(function TrendsView({
               Spending by Category
             </h3>
             <div className="h-56 flex items-center justify-center">
-              <PieChart data={pieData} theme={theme} />
+              <LabeledPieChart
+                data={pieData}
+                theme={theme}
+                formatValue={formatCurrency}
+              />
             </div>
           </Card>
         </motion.div>
