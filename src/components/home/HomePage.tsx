@@ -8,9 +8,9 @@ import {
   TrendingUp,
   TrendingDown,
   Pill,
-  Flame,
   Loader2,
   Check,
+  Dumbbell,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
@@ -343,9 +343,9 @@ function MiniMutualFundWidget() {
   );
 }
 
-// Compact mini-widget for Nutrition with activity level
+// Compact mini-widget for Nutrition with activity level and workout toggle
 function MiniNutritionWidget() {
-  const { userStats, activityLog } = useHealthData();
+  const { userStats, activityLog, workoutDates, toggleWorkout } = useHealthData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -356,6 +356,7 @@ function MiniNutritionWidget() {
     "0"
   )}-${String(now.getDate()).padStart(2, "0")}`;
   const todayLevel = activityLog[today];
+  const isWorkoutToday = workoutDates.has(today);
 
   const { calories, activityInfo } = useMemo(() => {
     if (!userStats) return { calories: null, activityInfo: null };
@@ -387,17 +388,28 @@ function MiniNutritionWidget() {
           : "1px solid rgba(0, 0, 0, 0.06)",
       }}
     >
-      <div
-        className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center shrink-0"
+      {/* Workout toggle button */}
+      <button
+        onClick={() => toggleWorkout(today)}
+        className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 active:scale-95"
         style={{
-          background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+          background: isWorkoutToday
+            ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+            : "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+          boxShadow: isWorkoutToday 
+            ? "0 2px 8px rgba(34, 197, 94, 0.4)" 
+            : "0 2px 8px rgba(249, 115, 22, 0.3)",
         }}
       >
-        <Flame className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
-      </div>
+        {isWorkoutToday ? (
+          <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+        ) : (
+          <Dumbbell className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+        )}
+      </button>
       <div className="flex-1 min-w-0">
         <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-          {todayLevel ? `Today: ${todayLevel}` : activityInfo?.label ?? "Nutrition"}
+          {todayLevel ? `${todayLevel}` : activityInfo?.label ?? "Nutrition"}
         </p>
         <p className="text-sm sm:text-base font-bold font-mono text-foreground">
           {formatNumber(calories)} kcal

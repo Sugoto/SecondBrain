@@ -54,6 +54,7 @@ export type UserStats = {
   activity_log: ActivityLog | null;
   step_log: StepLog | null; // Raw step counts from Google Fit
   manual_activity_dates: string[] | null; // Dates with manual entries (priority over auto-sync)
+  workout_dates: string[] | null; // Dates with gym workouts marked
   investments: Investment[] | null;
 };
 

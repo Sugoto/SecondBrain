@@ -1,12 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Footprints, RefreshCw, Check, X } from "lucide-react";
+import { Footprints, RefreshCw, Check, X, Dumbbell } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useHealthData } from "@/hooks/useHealthData";
 import { useGoogleFit, stepsToActivityLevel } from "@/hooks/useGoogleFit";
 import { Card } from "@/components/ui/card";
 import { ACTIVITY_LEVELS } from "./types";
 import type { ActivityLevel, StepLog } from "@/lib/supabase";
+
+// Sync cooldown: 1 hour
+const SYNC_COOLDOWN_MS = 60 * 60 * 1000;
+const LAST_SYNC_KEY = "gfit_last_sync";
 
 function formatDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -47,15 +51,31 @@ function getLevelColor(steps: number): string {
 export function StepGraph() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { stepLog, mergeActivityLog } = useHealthData();
+  const { stepLog, mergeActivityLog, workoutDates, toggleWorkout } = useHealthData();
   const { syncSteps, isLoading: isSyncing, isConfigured } = useGoogleFit();
   const [selectedBar, setSelectedBar] = useState<string | null>(null);
   const [editingDate, setEditingDate] = useState<string | null>(null);
   const [stepInput, setStepInput] = useState("");
+  const hasAutoSynced = useRef(false);
+
+  // Auto-sync on mount if configured and cooldown has passed
+  useEffect(() => {
+    if (!isConfigured || hasAutoSynced.current) return;
+    
+    const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) ?? "0");
+    const timeSinceLastSync = Date.now() - lastSync;
+    
+    // Only auto-sync if we have consent and cooldown has passed
+    const hasConsent = localStorage.getItem("gfit_consented") === "true";
+    if (hasConsent && timeSinceLastSync > SYNC_COOLDOWN_MS) {
+      hasAutoSynced.current = true;
+      handleSync();
+    }
+  }, [isConfigured]);
 
   // Generate last 7 days data
   const weekData = useMemo(() => {
-    const days: { date: string; label: string; steps: number; color: string; isToday: boolean }[] = [];
+    const days: { date: string; label: string; steps: number; color: string; isToday: boolean; isWorkout: boolean }[] = [];
     const today = new Date();
     const todayKey = formatDateKey(today);
     
@@ -65,6 +85,7 @@ export function StepGraph() {
       const dateKey = formatDateKey(date);
       const steps = stepLog[dateKey] ?? 0;
       const isToday = dateKey === todayKey;
+      const isWorkout = workoutDates.has(dateKey);
       
       days.push({
         date: dateKey,
@@ -72,11 +93,12 @@ export function StepGraph() {
         steps,
         color: getLevelColor(steps),
         isToday,
+        isWorkout,
       });
     }
     
     return days;
-  }, [stepLog]);
+  }, [stepLog, workoutDates]);
 
   // Calculate max for scaling
   const { maxSteps, yAxisTicks } = useMemo(() => {
@@ -104,6 +126,8 @@ export function StepGraph() {
     const result = await syncSteps(30);
     if (result) {
       mergeActivityLog(result.activityLog, result.stepLog);
+      // Save last sync timestamp
+      localStorage.setItem(LAST_SYNC_KEY, String(Date.now()));
     }
   };
 
@@ -156,6 +180,7 @@ export function StepGraph() {
 
   const editingDayData = editingDate ? weekData.find(d => d.date === editingDate) : null;
   const previewColor = stepInput ? getLevelColor(parseInt(stepInput) || 0) : editingDayData?.color;
+  const isEditingWorkout = editingDate ? workoutDates.has(editingDate) : false;
 
   return (
     <Card
@@ -234,6 +259,22 @@ export function StepGraph() {
                   onClick={(e) => handleBarTap(day.date, e)}
                   className="flex-1 h-full flex items-end justify-center focus:outline-none relative"
                 >
+                  {/* Workout indicator - positioned above the bar */}
+                  {day.isWorkout && (
+                    <motion.div
+                      initial={{ bottom: 0 }}
+                      animate={{ bottom: `${heightPercent}%` }}
+                      transition={{
+                        duration: 0.5,
+                        delay: index * 0.05,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                      }}
+                      className="absolute left-1/2 -translate-x-1/2 z-10"
+                      style={{ marginBottom: 4 }}
+                    >
+                      <Dumbbell className="h-3 w-3 text-foreground" />
+                    </motion.div>
+                  )}
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${heightPercent}%` }}
@@ -320,6 +361,22 @@ export function StepGraph() {
                 <span className="text-xs text-muted-foreground shrink-0">
                   {formatDateShort(editingDate)}
                 </span>
+                <button
+                  onClick={() => editingDate && toggleWorkout(editingDate)}
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
+                    isEditingWorkout 
+                      ? "bg-orange-500 text-white" 
+                      : "border text-muted-foreground hover:bg-muted/50"
+                  }`}
+                  style={{
+                    borderColor: !isEditingWorkout 
+                      ? (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)") 
+                      : undefined,
+                  }}
+                  title={isEditingWorkout ? "Remove workout" : "Mark as workout"}
+                >
+                  <Dumbbell className="h-4 w-4" />
+                </button>
                 <div className="flex-1 relative">
                   <input
                     type="number"
