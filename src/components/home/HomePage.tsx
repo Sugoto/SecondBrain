@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 import {
   Brain,
   Plus,
-  Dumbbell,
   Wallet,
-  Check,
-  Loader2,
   Calendar,
   TrendingUp,
   TrendingDown,
   Pill,
+  Flame,
+  Loader2,
+  Check,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
@@ -343,10 +343,9 @@ function MiniMutualFundWidget() {
   );
 }
 
-// Compact mini-widget for Nutrition with workout toggle
+// Compact mini-widget for Nutrition with activity level
 function MiniNutritionWidget() {
-  const { userStats, workoutDates, toggleWorkoutDate, isWorkoutSaving } =
-    useHealthData();
+  const { userStats, activityLog } = useHealthData();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -356,36 +355,29 @@ function MiniNutritionWidget() {
     2,
     "0"
   )}-${String(now.getDate()).padStart(2, "0")}`;
-  const isTodayWorkedOut = workoutDates.has(today);
+  const todayLevel = activityLog[today];
 
-  const calories = useMemo(() => {
-    if (!userStats) return null;
-    const activityInfo = getActivityLevelInfo(workoutDates);
+  const { calories, activityInfo } = useMemo(() => {
+    if (!userStats) return { calories: null, activityInfo: null };
+    const info = getActivityLevelInfo(activityLog);
     const tdee = calculateTDEE(
       {
         height_cm: userStats.height_cm,
         weight_kg: userStats.weight_kg,
         age: userStats.age,
         gender: userStats.gender,
-        activity_level: activityInfo.level,
+        activity_level: info.level,
       },
-      activityInfo.multiplier
+      info.multiplier
     );
-    return tdee?.targetCalories ?? null;
-  }, [userStats, workoutDates]);
-
-  const handleToggleWorkout = () => {
-    if (!userStats?.id) return;
-    toggleWorkoutDate(today);
-  };
+    return { calories: tdee?.targetCalories ?? null, activityInfo: info };
+  }, [userStats, activityLog]);
 
   if (!calories) return null;
 
   return (
-    <button
-      onClick={handleToggleWorkout}
-      disabled={!userStats?.id || isWorkoutSaving}
-      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2 text-left transition-transform active:scale-[0.98] disabled:opacity-50"
+    <div
+      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2"
       style={{
         background: isDark
           ? "rgba(255, 255, 255, 0.03)"
@@ -401,23 +393,17 @@ function MiniNutritionWidget() {
           background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
         }}
       >
-        {isWorkoutSaving ? (
-          <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white animate-spin" />
-        ) : isTodayWorkedOut ? (
-          <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
-        ) : (
-          <Dumbbell className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
-        )}
+        <Flame className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-          {isTodayWorkedOut ? "Worked Out" : "Mark Workout"}
+          {todayLevel ? `Today: ${todayLevel}` : activityInfo?.label ?? "Nutrition"}
         </p>
         <p className="text-sm sm:text-base font-bold font-mono text-foreground">
           {formatNumber(calories)} kcal
         </p>
       </div>
-    </button>
+    </div>
   );
 }
 

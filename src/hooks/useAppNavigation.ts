@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { AppSection, HealthView, FinanceView, OmscsView } from "@/types/navigation";
+import type {
+  AppSection,
+  HealthView,
+  FinanceView,
+  OmscsView,
+} from "@/types/navigation";
 
 interface NavigationState {
   section: AppSection;
@@ -134,17 +139,13 @@ export function useAppNavigation() {
     });
   }, []);
 
-  // Go home - uses history.back() for native feel when possible
   const goHome = useCallback(() => {
     if (state.section === "home") return;
 
-    // If we came from home, use native back for smoother animation
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigateToSection("home");
-    }
-  }, [state.section, navigateToSection]);
+    const homeState = { ...DEFAULT_STATE, section: "home" as AppSection };
+    window.history.replaceState(homeState, "", "#");
+    setState(homeState);
+  }, [state.section]);
 
   return {
     currentSection: state.section,

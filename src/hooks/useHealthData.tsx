@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { supabase, type UserStats } from "@/lib/supabase";
+import { useState, useEffect, useCallback } from "react";
+import { supabase, type UserStats, type ActivityLevel, type ActivityLog, type StepLog } from "@/lib/supabase";
 import { getCachedUserStats, cacheUserStats } from "@/lib/db";
 
 const healthKeys = {
@@ -23,11 +23,9 @@ async function fetchUserStats(): Promise<UserStats | null> {
 
   if (error) {
     console.error("Error fetching user stats:", error);
-    // Return stale cache on network error
     return getCachedUserStats(true);
   }
   
-  // Cache fresh data for next time
   if (data) {
     cacheUserStats(data);
   }
@@ -35,30 +33,36 @@ async function fetchUserStats(): Promise<UserStats | null> {
   return data;
 }
 
-async function updateWorkoutDates(
-  userId: string,
-  workoutDates: string[]
-): Promise<string[]> {
+interface ActivityUpdate {
+  userId: string;
+  activityLog: ActivityLog;
+  stepLog: StepLog;
+  manualDates: string[];
+}
+
+async function updateActivityData(
+  { userId, activityLog, stepLog, manualDates }: ActivityUpdate
+): Promise<ActivityUpdate> {
   const { error } = await supabase
     .from("user_stats")
-    .update({ workout_dates: workoutDates })
+    .update({ 
+      activity_log: activityLog,
+      step_log: stepLog,
+      manual_activity_dates: manualDates,
+    })
     .eq("id", userId);
 
   if (error) throw error;
-  return workoutDates;
+  return { userId, activityLog, stepLog, manualDates };
 }
 
 export function useHealthData() {
   const queryClient = useQueryClient();
-  
-  // Get initial cached data for instant display
   const [initialData, setInitialData] = useState<UserStats | undefined>(undefined);
   
-  // Load initial data from IndexedDB on mount (only once)
   useEffect(() => {
     cachedHealthStatsPromise?.then((cached) => {
       if (cached) {
-        // Prime the query cache with stale data for instant display
         queryClient.setQueryData(healthKeys.stats(), cached);
         setInitialData(cached);
       }
@@ -76,25 +80,37 @@ export function useHealthData() {
     placeholderData: initialData,
   });
   
-  // Only show loading if we have no data at all
   const loading = isLoading && !userStats && !initialData;
 
-  const workoutMutation = useMutation({
-    mutationFn: ({ userId, dates }: { userId: string; dates: string[] }) =>
-      updateWorkoutDates(userId, dates),
-    onSuccess: (newDates) => {
-      // Update cache optimistically
-      queryClient.setQueryData<UserStats | null>(healthKeys.stats(), (old) =>
-        old ? { ...old, workout_dates: newDates } : null
-      );
+  const activityMutation = useMutation({
+    mutationFn: updateActivityData,
+    onSuccess: ({ activityLog, stepLog, manualDates }) => {
+      queryClient.setQueryData<UserStats | null>(healthKeys.stats(), (old) => {
+        if (!old) return null;
+        const updated = { ...old, activity_log: activityLog, step_log: stepLog, manual_activity_dates: manualDates };
+        cacheUserStats(updated);
+        return updated;
+      });
     },
   });
+
+  const activityLog: ActivityLog = userStats?.activity_log ?? {};
+  const stepLog: StepLog = userStats?.step_log ?? {};
+  const manualActivityDates = new Set(userStats?.manual_activity_dates ?? []);
+  
+  const updateCaches = useCallback((updates: Partial<UserStats>) => {
+    queryClient.setQueryData<UserStats | null>(healthKeys.stats(), (old) => {
+      if (!old) return null;
+      const updated = { ...old, ...updates };
+      cacheUserStats(updated);
+      return updated;
+    });
+  }, [queryClient]);
 
   return {
     userStats,
     loading,
     error: error ? (error as Error).message : null,
-
     refetch,
 
     updateInCache: (updated: UserStats) => {
@@ -104,31 +120,62 @@ export function useHealthData() {
     invalidate: () =>
       queryClient.invalidateQueries({ queryKey: healthKeys.all }),
 
-    // Workout dates helpers
-    workoutDates: new Set(userStats?.workout_dates ?? []),
+    // Activity & step log
+    activityLog,
+    stepLog,
+    manualActivityDates,
     
-    toggleWorkoutDate: (date: string) => {
+    // Set activity level manually
+    setActivityLevel: (date: string, level: ActivityLevel | null) => {
       if (!userStats?.id) return;
       
-      const currentDates = new Set(userStats.workout_dates ?? []);
-      if (currentDates.has(date)) {
-        currentDates.delete(date);
+      const newLog = { ...activityLog };
+      const newManualDates = new Set(manualActivityDates);
+      
+      if (level === null) {
+        delete newLog[date];
+        newManualDates.delete(date);
       } else {
-        currentDates.add(date);
+        newLog[date] = level;
+        newManualDates.add(date);
       }
       
-      const newDates = [...currentDates].sort();
+      const manualDatesArray = [...newManualDates].sort();
       
-      // Optimistic update
-      queryClient.setQueryData<UserStats | null>(healthKeys.stats(), (old) =>
-        old ? { ...old, workout_dates: newDates } : null
-      );
-      
-      // Persist to Supabase
-      workoutMutation.mutate({ userId: userStats.id, dates: newDates });
+      updateCaches({ activity_log: newLog, manual_activity_dates: manualDatesArray });
+      activityMutation.mutate({ 
+        userId: userStats.id, 
+        activityLog: newLog, 
+        stepLog,
+        manualDates: manualDatesArray 
+      });
     },
     
-    isWorkoutSaving: workoutMutation.isPending,
+    // Merge from Google Fit (respects manual entries)
+    mergeActivityLog: (newActivityEntries: ActivityLog, newStepEntries: StepLog) => {
+      if (!userStats?.id) return;
+      
+      const mergedActivityLog = { ...activityLog };
+      const mergedStepLog = { ...stepLog, ...newStepEntries }; // Always update steps
+      
+      // Only update activity for non-manual dates
+      for (const [date, level] of Object.entries(newActivityEntries)) {
+        if (!manualActivityDates.has(date)) {
+          mergedActivityLog[date] = level;
+        }
+      }
+      
+      const manualDatesArray = [...manualActivityDates].sort();
+      
+      updateCaches({ activity_log: mergedActivityLog, step_log: mergedStepLog });
+      activityMutation.mutate({ 
+        userId: userStats.id, 
+        activityLog: mergedActivityLog, 
+        stepLog: mergedStepLog,
+        manualDates: manualDatesArray 
+      });
+    },
+    
+    isActivitySaving: activityMutation.isPending,
   };
 }
-

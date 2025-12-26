@@ -22,33 +22,36 @@ export const ACTIVITY_LEVELS: {
   label: string;
   description: string;
   multiplier: number;
+  color: string;
 }[] = [
   {
     value: "sedentary",
     label: "Sedentary",
-    description: "Little or no exercise",
+    description: "<2k steps",
     multiplier: 1.2,
+    color: "#6b7280", // gray
   },
   {
     value: "light",
-    label: "Gentle",
-    description: "1-3 days/week",
+    label: "Light",
+    description: "<5k steps, no gym",
     multiplier: 1.375,
+    color: "#3b82f6", // blue
   },
   {
     value: "moderate",
-    label: "Light",
-    description: "3-5 days/week",
+    label: "Moderate",
+    description: "5-10k steps + gym",
     multiplier: 1.55,
+    color: "#f59e0b", // amber
   },
   {
-    value: "active",
-    label: "Moderate",
-    description: "6-7 days/week",
+    value: "heavy",
+    label: "Heavy",
+    description: "10k+ steps + intense gym",
     multiplier: 1.725,
+    color: "#ef4444", // red
   },
 ];
 
 export const RECOMP_CALORIE_ADJUSTMENT = -500;
-
-export const WORKOUT_INTENSITY_FACTOR = 0.75;

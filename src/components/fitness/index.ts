@@ -9,7 +9,6 @@ export {
   calculateBMI,
   getBMICategory,
   formatNumber,
-  calculateActivityLevel,
   getActivityLevelInfo,
 } from "./utils";
 export { ACTIVITY_LEVELS } from "./types";

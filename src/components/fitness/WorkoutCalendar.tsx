@@ -1,23 +1,49 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sofa, Footprints, Dumbbell, Flame, X, RefreshCw } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useHealthData } from "@/hooks/useHealthData";
+import { useGoogleFit } from "@/hooks/useGoogleFit";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { ACTIVITY_LEVELS } from "./types";
+import type { ActivityLevel } from "@/lib/supabase";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// Icons for each activity level
+const LEVEL_ICONS = {
+  sedentary: Sofa,
+  light: Footprints,
+  moderate: Dumbbell,
+  heavy: Flame,
+};
 
 interface WorkoutCalendarProps {
   className?: string;
 }
 
 function formatDateKey(date: Date): string {
-  // Use local timezone instead of UTC to avoid date shift issues
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function formatDateDisplay(dateKey: string): string {
+  const date = new Date(dateKey + "T12:00:00");
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function getDaysInMonth(year: number, month: number): Date[] {
@@ -25,20 +51,17 @@ function getDaysInMonth(year: number, month: number): Date[] {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
-  // Add padding days from previous month
   const startPadding = firstDay.getDay();
   for (let i = startPadding - 1; i >= 0; i--) {
     const date = new Date(year, month, -i);
     days.push(date);
   }
 
-  // Add days of current month
   for (let day = 1; day <= lastDay.getDate(); day++) {
     days.push(new Date(year, month, day));
   }
 
-  // Add padding days for next month to complete the grid
-  const endPadding = 42 - days.length; // 6 rows × 7 days
+  const endPadding = 42 - days.length;
   for (let i = 1; i <= endPadding; i++) {
     days.push(new Date(year, month + 1, i));
   }
@@ -46,20 +69,32 @@ function getDaysInMonth(year: number, month: number): Date[] {
   return days;
 }
 
+function getLevelInfo(level: ActivityLevel | undefined) {
+  return ACTIVITY_LEVELS.find((l) => l.value === level);
+}
+
 export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { workoutDates, toggleWorkoutDate } = useHealthData();
+  const { activityLog, setActivityLevel, mergeActivityLog } = useHealthData();
+  const { syncSteps, isLoading: isSyncing, isConfigured: isGoogleFitConfigured } = useGoogleFit();
 
-  // Memoize today's date to prevent unnecessary re-renders
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => formatDateKey(today), [today]);
+
+  const handleSyncGoogleFit = async () => {
+    const result = await syncSteps(30); // Sync last 30 days
+    if (result) {
+      mergeActivityLog(result.activityLog, result.stepLog);
+    }
+  };
 
   const [currentMonth, setCurrentMonth] = useState(() => ({
     year: today.getFullYear(),
     month: today.getMonth(),
   }));
   const [direction, setDirection] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const days = useMemo(
     () => getDaysInMonth(currentMonth.year, currentMonth.month),
@@ -71,11 +106,17 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
     currentMonth.month
   ).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
-  const handleToggleWorkoutDay = (date: Date) => {
+  const handleDateTap = (date: Date) => {
     const dateKey = formatDateKey(date);
-    // Don't allow future dates
     if (dateKey > todayKey) return;
-    toggleWorkoutDate(dateKey);
+    setSelectedDate(dateKey);
+  };
+
+  const handleSelectLevel = (level: ActivityLevel | null) => {
+    if (selectedDate) {
+      setActivityLevel(selectedDate, level);
+      setSelectedDate(null);
+    }
   };
 
   const goToPreviousMonth = () => {
@@ -101,26 +142,27 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
   };
 
   // Stats for current month
-  const workoutCount = useMemo(() => {
-    let count = 0;
+  const monthStats = useMemo(() => {
+    const counts: Record<ActivityLevel, number> = {
+      sedentary: 0,
+      light: 0,
+      moderate: 0,
+      heavy: 0,
+    };
     days.forEach((date) => {
-      if (
-        date.getMonth() === currentMonth.month &&
-        workoutDates.has(formatDateKey(date))
-      ) {
-        count++;
+      if (date.getMonth() === currentMonth.month) {
+        const level = activityLog[formatDateKey(date)];
+        if (level) counts[level]++;
       }
     });
-    return count;
-  }, [days, currentMonth.month, workoutDates]);
+    return counts;
+  }, [days, currentMonth.month, activityLog]);
 
   const isToday = (date: Date) => formatDateKey(date) === todayKey;
-
   const isCurrentMonth = (date: Date) => date.getMonth() === currentMonth.month;
-
   const isFuture = (date: Date) => formatDateKey(date) > todayKey;
 
-  const isWorkoutDay = (date: Date) => workoutDates.has(formatDateKey(date));
+  const selectedLevel = selectedDate ? activityLog[selectedDate] : undefined;
 
   return (
     <div className={className}>
@@ -139,7 +181,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
             : "0 8px 32px rgba(0, 0, 0, 0.08)",
         }}
       >
-        {/* Header with Month Navigation */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
@@ -197,7 +239,8 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
               const inMonth = isCurrentMonth(date);
               const todayDate = isToday(date);
               const future = isFuture(date);
-              const workout = isWorkoutDay(date);
+              const level = activityLog[dateKey];
+              const levelInfo = getLevelInfo(level);
 
               return (
                 <motion.button
@@ -210,7 +253,7 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                   }}
                   whileHover={!future && inMonth ? { scale: 1.1 } : undefined}
                   whileTap={!future && inMonth ? { scale: 0.95 } : undefined}
-                  onClick={() => inMonth && handleToggleWorkoutDay(date)}
+                  onClick={() => inMonth && handleDateTap(date)}
                   disabled={future || !inMonth}
                   className={`
                     relative aspect-square rounded-xl flex items-center justify-center
@@ -223,23 +266,21 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                         : "cursor-pointer"
                     }
                     ${
-                      todayDate && !workout
+                      todayDate && !level
                         ? "ring-2 ring-orange-500/50 ring-offset-1 ring-offset-background"
                         : ""
                     }
                   `}
                   style={
-                    workout && inMonth
+                    level && inMonth && levelInfo
                       ? {
                           background: isDark
-                            ? "linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(234, 88, 12, 0.2) 100%)"
-                            : "linear-gradient(135deg, rgba(249, 115, 22, 0.25) 0%, rgba(234, 88, 12, 0.15) 100%)",
+                            ? `${levelInfo.color}30`
+                            : `${levelInfo.color}20`,
                           boxShadow: isDark
-                            ? "0 0 20px rgba(249, 115, 22, 0.3), inset 0 0 20px rgba(249, 115, 22, 0.1)"
-                            : "0 0 16px rgba(249, 115, 22, 0.25)",
-                          border: isDark
-                            ? "1px solid rgba(249, 115, 22, 0.4)"
-                            : "1px solid rgba(249, 115, 22, 0.3)",
+                            ? `0 0 16px ${levelInfo.color}40`
+                            : `0 0 12px ${levelInfo.color}30`,
+                          border: `1px solid ${levelInfo.color}50`,
                         }
                       : inMonth && !future
                       ? {
@@ -251,42 +292,18 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
                   }
                 >
                   <span
-                    className={`
-                      ${workout && inMonth ? "text-orange-500 font-bold" : ""}
-                      ${todayDate ? "text-orange-500" : ""}
-                    `}
+                    className={`${todayDate ? "text-orange-500 font-bold" : ""}`}
+                    style={level && levelInfo ? { color: levelInfo.color, fontWeight: 600 } : undefined}
                   >
                     {date.getDate()}
                   </span>
-
-                  {/* Workout indicator - dumbbell icon */}
-                  {workout && inMonth && (
-                    <motion.div
-                      initial={{ scale: 0, rotate: -45 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 15,
-                      }}
-                      className="absolute -top-0.5 -right-0.5"
-                    >
-                      <Dumbbell
-                        className="h-2.5 w-2.5 text-orange-500"
-                        style={{
-                          filter:
-                            "drop-shadow(0 0 3px rgba(249, 115, 22, 0.6))",
-                        }}
-                      />
-                    </motion.div>
-                  )}
                 </motion.button>
               );
             })}
           </motion.div>
         </AnimatePresence>
 
-        {/* Stats Row */}
+        {/* Legend + Sync */}
         <div
           className="mt-4 pt-4 border-t"
           style={{
@@ -295,33 +312,122 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
               : "rgba(0, 0, 0, 0.06)",
           }}
         >
-          {/* Workouts This Month */}
-          <div
-            className="p-3 rounded-xl text-center"
-            style={{
-              background: isDark
-                ? "rgba(249, 115, 22, 0.1)"
-                : "rgba(249, 115, 22, 0.08)",
-            }}
-          >
-            <div className="flex items-center justify-center gap-1.5 mb-1">
-              <Dumbbell className="h-3.5 w-3.5 text-orange-500" />
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                This Month
-              </span>
-            </div>
-            <motion.p
-              key={workoutCount}
-              initial={{ scale: 1.2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-2xl font-bold font-mono text-orange-500"
-            >
-              {workoutCount}
-            </motion.p>
-            <p className="text-[10px] text-muted-foreground">workouts</p>
+          <div className="grid grid-cols-4 gap-2">
+            {ACTIVITY_LEVELS.map((level) => (
+              <div
+                key={level.value}
+                className="p-2 rounded-lg text-center"
+                style={{
+                  background: isDark
+                    ? `${level.color}15`
+                    : `${level.color}10`,
+                }}
+              >
+                <div
+                  className="w-3 h-3 rounded-full mx-auto mb-1"
+                  style={{ background: level.color }}
+                />
+                <p
+                  className="text-xs font-bold font-mono"
+                  style={{ color: level.color }}
+                >
+                  {monthStats[level.value]}
+                </p>
+                <p className="text-[8px] text-muted-foreground truncate">
+                  {level.label}
+                </p>
+              </div>
+            ))}
           </div>
+
+          {/* Google Fit Sync Button */}
+          {isGoogleFitConfigured && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncGoogleFit}
+              disabled={isSyncing}
+              className="w-full mt-3 text-xs gap-2"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+              {isSyncing ? "Syncing..." : "Sync from Google Fit"}
+            </Button>
+          )}
         </div>
       </Card>
+
+      {/* Activity Level Selection Drawer */}
+      <Drawer open={!!selectedDate} onOpenChange={(open) => !open && setSelectedDate(null)}>
+        <DrawerContent className="pb-24">
+          <DrawerHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <DrawerTitle className="text-lg">
+                {selectedDate && formatDateDisplay(selectedDate)}
+              </DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+
+          <div className="px-4 pb-4">
+            <div className="grid grid-cols-2 gap-3">
+              {ACTIVITY_LEVELS.map((level) => {
+                const Icon = LEVEL_ICONS[level.value];
+                const isSelected = selectedLevel === level.value;
+
+                return (
+                  <button
+                    key={level.value}
+                    onClick={() => handleSelectLevel(level.value)}
+                    className={`
+                      p-4 rounded-2xl text-left transition-all
+                      ${isSelected ? "ring-2 ring-offset-2 ring-offset-background" : ""}
+                    `}
+                    style={{
+                      background: isDark
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : "rgba(0, 0, 0, 0.02)",
+                      border: `1px solid ${isSelected ? level.color + "60" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+                      ["--tw-ring-color" as string]: level.color,
+                    }}
+                  >
+                    <div
+                      className="h-10 w-10 rounded-xl flex items-center justify-center mb-3"
+                      style={{ background: `${level.color}25` }}
+                    >
+                      <Icon className="h-5 w-5" style={{ color: level.color }} />
+                    </div>
+                    <p className="font-semibold text-sm">
+                      {level.label}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {level.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Clear button */}
+            {selectedLevel && (
+              <button
+                onClick={() => handleSelectLevel(null)}
+                className="w-full mt-3 py-3 rounded-xl text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50"
+                style={{
+                  background: isDark
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.03)",
+                }}
+              >
+                Clear Activity
+              </button>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

@@ -17,12 +17,12 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import type { HealthView } from "@/types/navigation";
 import { useHealthData } from "@/hooks/useHealthData";
 import { HealthStatsEditDialog } from "./HealthStatsCard";
-import { WorkoutCalendar } from "./WorkoutCalendar";
+import { StepGraph } from "./StepGraph";
 import { ShoppingList } from "./ShoppingList";
 import { MedicationTracker } from "./MedicationTracker";
 import { calculateTDEE, formatNumber, getActivityLevelInfo } from "./utils";
 
-const HEALTH_VIEWS = ["nutrition", "workouts", "medication"] as const;
+const HEALTH_VIEWS = ["nutrition", "activity", "medication"] as const;
 
 interface HealthTrackerProps {
   activeView: HealthView;
@@ -43,12 +43,12 @@ interface NutritionViewProps {
 function NutritionView({ onEditHealth }: NutritionViewProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { userStats, workoutDates } = useHealthData();
+  const { userStats, activityLog } = useHealthData();
 
-  // Calculate dynamic activity level based on workout frequency
+  // Calculate dynamic activity level based on activity log
   const activityInfo = useMemo(() => {
-    return getActivityLevelInfo(workoutDates);
-  }, [workoutDates]);
+    return getActivityLevelInfo(activityLog);
+  }, [activityLog]);
 
   const tdee = useMemo(() => {
     if (!userStats) return null;
@@ -137,7 +137,7 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
                 </span>
               </div>
               <span className="text-[10px] font-mono font-medium text-violet-500">
-                {activityInfo.workoutsPerWeek}/week · ×{activityInfo.multiplier}
+                {activityInfo.activeDays} days · ×{activityInfo.multiplier}
               </span>
             </div>
 
@@ -210,10 +210,10 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
   );
 }
 
-function WorkoutsView() {
+function ActivityView() {
   return (
     <div className="p-4 space-y-4">
-      <WorkoutCalendar />
+      <StepGraph />
     </div>
   );
 }
@@ -258,9 +258,9 @@ export function HealthTracker({
               <NutritionView onEditHealth={() => setShowHealthDialog(true)} />
             </motion.div>
           )}
-          {activeView === "workouts" && (
-            <motion.div key="workouts" {...VIEW_ANIMATION}>
-              <WorkoutsView />
+          {activeView === "activity" && (
+            <motion.div key="activity" {...VIEW_ANIMATION}>
+              <ActivityView />
             </motion.div>
           )}
           {activeView === "medication" && (

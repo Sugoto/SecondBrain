@@ -1,10 +1,9 @@
 import type { HealthStats, TDEEResult } from "./types";
-import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT, WORKOUT_INTENSITY_FACTOR } from "./types";
-import type { ActivityLevel } from "@/lib/supabase";
+import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT } from "./types";
+import type { ActivityLevel, ActivityLog } from "@/lib/supabase";
 
 /**
  * Format date to YYYY-MM-DD string in local timezone
- * (Avoids UTC conversion issues with toISOString)
  */
 function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
@@ -13,10 +12,16 @@ function formatLocalDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// Multiplier weights for each level
+const LEVEL_MULTIPLIERS: Record<ActivityLevel, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  heavy: 1.725,
+};
+
 /**
- * Calculate BMR using the Mifflin-St Jeor equation (more accurate than Harris-Benedict)
- * Men: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) + 5
- * Women: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) - 161
+ * Calculate BMR using the Mifflin-St Jeor equation
  */
 export function calculateBMR(
   weight_kg: number,
@@ -30,41 +35,31 @@ export function calculateBMR(
 
 /**
  * Calculate TDEE and macro recommendations
- * @param stats - Health stats including height, weight, age, gender
- * @param multiplierOverride - Optional custom multiplier (e.g. intensity-adjusted)
  */
 export function calculateTDEE(stats: HealthStats, multiplierOverride?: number): TDEEResult | null {
   const { height_cm, weight_kg, age, gender, activity_level } = stats;
 
-  // Check all required fields
   if (!height_cm || !weight_kg || !age || !gender) {
     return null;
   }
 
   const bmr = calculateBMR(weight_kg, height_cm, age, gender);
 
-  // Use override multiplier if provided, otherwise look up from activity level
   let multiplier: number;
   if (multiplierOverride !== undefined) {
     multiplier = multiplierOverride;
   } else {
     const activityData = ACTIVITY_LEVELS.find((a) => a.value === activity_level);
-    multiplier = activityData?.multiplier ?? 1.2; // Default to sedentary
+    multiplier = activityData?.multiplier ?? 1.2;
   }
 
   const tdee = bmr * multiplier;
-
-  // Body recomposition: slight deficit for fat loss while preserving muscle
   const targetCalories = Math.round(tdee + RECOMP_CALORIE_ADJUSTMENT);
 
-  // Calculate macros (moderate carb approach)
-  // Protein: 1.6-2.2g per kg bodyweight for muscle maintenance/building
-  // Fat: 25-30% of calories
-  // Carbs: remaining calories
-  const protein = Math.round(weight_kg * 1.8); // 1.8g per kg
+  const protein = Math.round(weight_kg * 1.8);
   const proteinCalories = protein * 4;
 
-  const fat = Math.round((targetCalories * 0.28) / 9); // 28% of calories from fat
+  const fat = Math.round((targetCalories * 0.28) / 9);
   const fatCalories = fat * 9;
 
   const carbs = Math.round((targetCalories - proteinCalories - fatCalories) / 4);
@@ -108,79 +103,51 @@ export function formatNumber(num: number): string {
 }
 
 /**
- * Calculate activity level based on workout frequency over the last 4 weeks
- * - 0-1 workouts/week → sedentary
- * - 1-3 workouts/week → light
- * - 3-5 workouts/week → moderate
- * - 6+ workouts/week → active
+ * Calculate average activity level based on activity log over the last 4 weeks
+ * Returns weighted average multiplier based on logged activity levels
  */
-export function calculateActivityLevel(workoutDates: Set<string> | string[]): ActivityLevel {
-  const dates = workoutDates instanceof Set ? workoutDates : new Set(workoutDates);
-  
-  // Count workouts in the last 4 weeks (28 days)
-  const now = new Date();
-  let count = 0;
-  
-  for (let i = 0; i < 28; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const dateKey = formatLocalDate(date);
-    if (dates.has(dateKey)) {
-      count++;
-    }
-  }
-  
-  // Calculate average workouts per week
-  const avgPerWeek = count / 4;
-  
-  if (avgPerWeek >= 6) return "active";
-  if (avgPerWeek >= 3) return "moderate";
-  if (avgPerWeek >= 1) return "light";
-  return "sedentary";
-}
-
-/**
- * Get activity level info with workout frequency
- * Applies intensity factor to account for workouts being at 75% of expected intensity
- */
-export function getActivityLevelInfo(workoutDates: Set<string> | string[]): {
+export function getActivityLevelInfo(activityLog: ActivityLog): {
   level: ActivityLevel;
-  workoutsPerWeek: number;
+  activeDays: number;
   label: string;
   description: string;
   multiplier: number;
 } {
-  const dates = workoutDates instanceof Set ? workoutDates : new Set(workoutDates);
-  
-  // Count workouts in the last 4 weeks
   const now = new Date();
-  let count = 0;
+  let totalMultiplier = 0;
+  let loggedDays = 0;
   
   for (let i = 0; i < 28; i++) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     const dateKey = formatLocalDate(date);
-    if (dates.has(dateKey)) {
-      count++;
+    const level = activityLog[dateKey];
+    
+    if (level) {
+      totalMultiplier += LEVEL_MULTIPLIERS[level];
+      loggedDays++;
+    } else {
+      // Default to light activity for unlogged days
+      totalMultiplier += LEVEL_MULTIPLIERS.light;
     }
   }
   
-  const avgPerWeek = count / 4;
-  const level = calculateActivityLevel(dates);
-  const levelInfo = ACTIVITY_LEVELS.find(a => a.value === level) ?? ACTIVITY_LEVELS[0];
+  const avgMultiplier = totalMultiplier / 28;
   
-  // Apply intensity factor: scale the additional activity above sedentary baseline
-  // Sedentary multiplier is the baseline (1.2)
-  const sedentaryMultiplier = ACTIVITY_LEVELS[0].multiplier; // 1.2
-  const extraActivity = levelInfo.multiplier - sedentaryMultiplier;
-  const adjustedMultiplier = sedentaryMultiplier + (extraActivity * WORKOUT_INTENSITY_FACTOR);
+  // Determine overall level based on average multiplier
+  let level: ActivityLevel = "sedentary";
+  if (avgMultiplier >= 1.65) level = "heavy";
+  else if (avgMultiplier >= 1.45) level = "moderate";
+  else if (avgMultiplier >= 1.3) level = "light";
+  
+  const levelInfo = ACTIVITY_LEVELS.find(a => a.value === level) ?? ACTIVITY_LEVELS[0];
   
   return {
     level,
-    workoutsPerWeek: Math.round(avgPerWeek * 10) / 10,
+    activeDays: loggedDays,
     label: levelInfo.label,
     description: levelInfo.description,
-    multiplier: Math.round(adjustedMultiplier * 1000) / 1000, // Round to 3 decimal places
+    multiplier: Math.round(avgMultiplier * 1000) / 1000,
   };
 }
 

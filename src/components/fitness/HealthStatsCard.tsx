@@ -39,12 +39,12 @@ export function HealthStatsCard({
 }: HealthStatsCardProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { workoutDates } = useHealthData();
+  const { activityLog } = useHealthData();
 
   // Calculate dynamic activity level based on workout frequency
   const activityInfo = useMemo(() => {
-    return getActivityLevelInfo(workoutDates);
-  }, [workoutDates]);
+    return getActivityLevelInfo(activityLog);
+  }, [activityLog]);
 
   const tdee = useMemo(() => {
     if (!userStats) return null;
