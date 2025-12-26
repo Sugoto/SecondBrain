@@ -43,8 +43,20 @@ function formatAxisLabel(value: number): string {
   return String(value);
 }
 
-function getLevelColor(steps: number): string {
-  const level = stepsToActivityLevel(steps);
+// Activity level priority for comparison
+const ACTIVITY_PRIORITY: Record<string, number> = {
+  sedentary: 0,
+  light: 1,
+  moderate: 2,
+  heavy: 3,
+};
+
+function getLevelColor(steps: number, isWorkout: boolean): string {
+  let level = stepsToActivityLevel(steps);
+  // Workout days are at least moderate
+  if (isWorkout && ACTIVITY_PRIORITY[level] < ACTIVITY_PRIORITY.moderate) {
+    level = "moderate";
+  }
   return ACTIVITY_LEVELS.find(l => l.value === level)?.color ?? "#6b7280";
 }
 
@@ -91,7 +103,7 @@ export function StepGraph() {
         date: dateKey,
         label: getDayLabel(date, isToday),
         steps,
-        color: getLevelColor(steps),
+        color: getLevelColor(steps, isWorkout),
         isToday,
         isWorkout,
       });
@@ -179,8 +191,8 @@ export function StepGraph() {
   };
 
   const editingDayData = editingDate ? weekData.find(d => d.date === editingDate) : null;
-  const previewColor = stepInput ? getLevelColor(parseInt(stepInput) || 0) : editingDayData?.color;
   const isEditingWorkout = editingDate ? workoutDates.has(editingDate) : false;
+  const previewColor = stepInput ? getLevelColor(parseInt(stepInput) || 0, isEditingWorkout) : editingDayData?.color;
 
   return (
     <Card

@@ -36,21 +36,21 @@ export const ACTIVITY_LEVELS: {
     label: "Light",
     description: "<5k steps, no gym",
     multiplier: 1.375,
-    color: "#3b82f6", // blue
+    color: "#eab308", // yellow
   },
   {
     value: "moderate",
     label: "Moderate",
     description: "5-10k steps + gym",
     multiplier: 1.55,
-    color: "#f59e0b", // amber
+    color: "#3b82f6", // blue
   },
   {
     value: "heavy",
     label: "Heavy",
     description: "10k+ steps + intense gym",
     multiplier: 1.725,
-    color: "#ef4444", // red
+    color: "#f97316", // fiery orange
   },
 ];
 
