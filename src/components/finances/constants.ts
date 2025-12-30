@@ -1,9 +1,7 @@
 import {
-  HandPlatter,
-  Hamburger,
-  Utensils,
+  UtensilsCrossed,
   ShoppingBag,
-  Gamepad2,
+  Clapperboard,
   Receipt,
   HeartPulse,
   ShoppingCart,
@@ -11,24 +9,69 @@ import {
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
+import type { BudgetType } from "@/lib/supabase";
 
-export const MONTHLY_BUDGET = 25000;
+// Default budget values (used when user hasn't set custom values)
+export const DEFAULT_NEEDS_BUDGET = 15000;
+export const DEFAULT_WANTS_BUDGET = 10000;
+export const MONTHLY_BUDGET = DEFAULT_NEEDS_BUDGET + DEFAULT_WANTS_BUDGET; // Legacy: total default budget
+
+// Category to budget type mapping (auto-assignment)
+// Food defaults to "want" but user can override individual transactions
+export const CATEGORY_BUDGET_TYPE: Record<string, BudgetType> = {
+  // NEEDS - Essential expenses
+  Groceries: "need",
+  Health: "need",
+  Bills: "need",
+  Investments: "need", // excluded from budget anyway
+  // WANTS - Discretionary spending
+  Food: "want", // Consolidated from Snacks, Meals, Restaurants
+  Shopping: "want",
+  Entertainment: "want",
+  Travel: "want",
+};
+
+// Budget type styling
+export const BUDGET_TYPE_CONFIG: Record<BudgetType, { 
+  label: string; 
+  color: string; 
+  bgLight: string;
+  bgDark: string;
+}> = {
+  need: {
+    label: "Need",
+    color: "#64748b", // Slate - monochromatic
+    bgLight: "rgba(100, 116, 139, 0.1)",
+    bgDark: "rgba(100, 116, 139, 0.2)",
+  },
+  want: {
+    label: "Want",
+    color: "#f97316", // Orange - colorful
+    bgLight: "rgba(249, 115, 22, 0.1)",
+    bgDark: "rgba(249, 115, 22, 0.2)",
+  },
+};
+
+/**
+ * Get the budget type for a transaction
+ * Returns explicit budget_type if set, otherwise auto-assigns based on category
+ */
+export function getTransactionBudgetType(
+  category: string | null,
+  explicitBudgetType: BudgetType | null
+): BudgetType {
+  // If explicitly set, use that
+  if (explicitBudgetType) return explicitBudgetType;
+  // Auto-assign based on category, default to "want" for uncategorized
+  return CATEGORY_BUDGET_TYPE[category ?? ""] ?? "want";
+}
 
 // Consolidated category theme data
 const CATEGORY_THEMES: Record<string, { color: string; style: string }> = {
-  Snacks: {
-    color: "#eab308",
-    style:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  },
-  Restaurants: {
+  Food: {
     color: "#f97316",
     style:
       "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  },
-  Meals: {
-    color: "#14b8a6",
-    style: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
   },
   Shopping: {
     color: "#ec4899",
@@ -65,16 +108,16 @@ const CATEGORY_THEMES: Record<string, { color: string; style: string }> = {
 };
 
 export const EXPENSE_CATEGORIES: { name: string; icon: LucideIcon }[] = [
-  { name: "Snacks", icon: Hamburger },
-  { name: "Restaurants", icon: HandPlatter },
-  { name: "Meals", icon: Utensils },
-  { name: "Shopping", icon: ShoppingBag },
-  { name: "Entertainment", icon: Gamepad2 },
-  { name: "Bills", icon: Receipt },
-  { name: "Health", icon: HeartPulse },
+  // Needs
   { name: "Groceries", icon: ShoppingCart },
-  { name: "Travel", icon: Car },
+  { name: "Health", icon: HeartPulse },
+  { name: "Bills", icon: Receipt },
   { name: "Investments", icon: TrendingUp },
+  // Wants
+  { name: "Food", icon: UtensilsCrossed },
+  { name: "Shopping", icon: ShoppingBag },
+  { name: "Entertainment", icon: Clapperboard },
+  { name: "Travel", icon: Car },
 ];
 
 // Categories that should auto-enable "exclude from budget"

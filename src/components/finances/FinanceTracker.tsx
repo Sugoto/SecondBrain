@@ -2,13 +2,18 @@ import { useState, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
 import { useTheme } from "@/hooks/useTheme";
-import { useExpenseData } from "@/hooks/useExpenseData";
+import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Check, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { formatCurrency, MONTHLY_BUDGET } from "./constants";
-import { calculateBudgetInfo } from "./utils";
+import {
+  formatCurrency,
+  BUDGET_TYPE_CONFIG,
+  getTransactionBudgetType,
+} from "./constants";
+import { Input } from "@/components/ui/input";
+import { calculateBudgetTypeInfo } from "./utils";
 
 import { Header } from "./Header";
 import { TransactionDialog } from "./TransactionDialog";
@@ -25,27 +30,77 @@ import {
   filterByTimeRange,
   sortTransactions,
   getCategoryTotals,
+  getCategoryTotalsByBudgetType,
   createEmptyTransaction,
-  getMonthlyAmount,
 } from "./utils";
 
-function BudgetProgressBar({
-  monthlyBudgetExpenses,
+function SegmentedBudgetBar({
+  budgetInfo,
   theme,
+  totalExpenses,
+  budgetTypeFilter,
+  onBudgetTypeFilterChange,
+  onUpdateBudgets,
 }: {
-  monthlyBudgetExpenses: number;
+  budgetInfo: ReturnType<typeof calculateBudgetTypeInfo>;
   theme: "light" | "dark";
+  totalExpenses: number;
+  budgetTypeFilter: "need" | "want" | null;
+  onBudgetTypeFilterChange: (filter: "need" | "want" | null) => void;
+  onUpdateBudgets: (needsBudget: number, wantsBudget: number) => Promise<void>;
 }) {
-  const [showDailySpent, setShowDailySpent] = useState(false);
-  const [showDailyRemaining, setShowDailyRemaining] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingNeeds, setEditingNeeds] = useState("");
+  const [editingWants, setEditingWants] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const { dailyBudget, totalRemaining, percentUsed } = calculateBudgetInfo(
-    monthlyBudgetExpenses,
-    MONTHLY_BUDGET
-  );
+  const needsConfig = BUDGET_TYPE_CONFIG.need;
 
-  const currentDay = new Date().getDate();
-  const dailySpent = currentDay > 0 ? monthlyBudgetExpenses / currentDay : 0;
+  // Wants progress
+  const wantsPercent =
+    budgetInfo.wantsBudget > 0
+      ? (budgetInfo.wantsSpent / budgetInfo.wantsBudget) * 100
+      : 0;
+
+  // Needs progress
+  const needsPercent =
+    budgetInfo.needsBudget > 0
+      ? (budgetInfo.needsSpent / budgetInfo.needsBudget) * 100
+      : 0;
+
+  const startEditing = () => {
+    setEditingNeeds(budgetInfo.needsBudget.toString());
+    setEditingWants(budgetInfo.wantsBudget.toString());
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditingNeeds("");
+    setEditingWants("");
+  };
+
+  const saveEditing = async () => {
+    const newNeeds = parseInt(editingNeeds, 10);
+    const newWants = parseInt(editingWants, 10);
+
+    if (isNaN(newNeeds) || isNaN(newWants) || newNeeds < 0 || newWants < 0) {
+      toast.error("Please enter valid budget amounts");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await onUpdateBudgets(newNeeds, newWants);
+      setIsEditing(false);
+      toast.success("Budget updated");
+    } catch {
+      toast.error("Failed to update budget");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="sticky top-0 z-30 px-4 md:px-6 pt-3">
@@ -68,89 +123,227 @@ function BudgetProgressBar({
               : "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
-        <div className="flex items-center justify-between text-xs">
+        {/* Both Needs and Wants progress bars - tappable to filter */}
+        <div className="space-y-2">
+          {/* Needs progress bar */}
           <button
-            onClick={() => setShowDailySpent((prev) => !prev)}
-            className="flex items-center hover:opacity-80 transition-opacity active:scale-95"
-            title="Tap to toggle daily/total"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBudgetTypeFilterChange(
+                budgetTypeFilter === "need" ? null : "need"
+              );
+            }}
+            className={`w-full space-y-1 transition-all duration-200 rounded-lg p-1 -m-1 ${
+              budgetTypeFilter === "want"
+                ? "opacity-40"
+                : "hover:opacity-80"
+            }`}
           >
-            <span className="text-muted-foreground">Spent</span>
-            <div className="relative overflow-hidden min-w-[70px]">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={showDailySpent ? "daily-spent" : "total-spent"}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="font-mono font-bold text-expense block"
+            <div className="flex items-center justify-between text-[11px]">
+              <span
+                className={`font-medium ${
+                  budgetTypeFilter === "need" ? "" : "text-muted-foreground"
+                }`}
+                style={{
+                  color:
+                    budgetTypeFilter === "need" ? needsConfig.color : undefined,
+                }}
+              >
+                Needs
+              </span>
+              <div className="flex items-center gap-1">
+                <span
+                  className="font-mono font-medium"
+                  style={{ color: needsConfig.color }}
                 >
-                  {showDailySpent
-                    ? `${formatCurrency(dailySpent)}/day`
-                    : formatCurrency(monthlyBudgetExpenses)}
-                </motion.span>
-              </AnimatePresence>
+                  {formatCurrency(budgetInfo.needsSpent)}
+                </span>
+                <span className="text-muted-foreground/50">/</span>
+                <span className="text-muted-foreground font-mono text-[10px]">
+                  {formatCurrency(budgetInfo.needsBudget)}
+                </span>
+              </div>
+            </div>
+            <div className="relative h-2.5 bg-muted/50 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(needsPercent, 100)}%` }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                  delay: 0.1,
+                }}
+                className="h-full relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(90deg, ${needsConfig.color} 0%, ${needsConfig.color}cc 100%)`,
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
+                  }}
+                />
+              </motion.div>
             </div>
           </button>
+
+          {/* Wants progress bar - Purple gradient */}
           <button
-            onClick={() => setShowDailyRemaining((prev) => !prev)}
-            className="flex items-center gap-1 hover:opacity-80 transition-opacity active:scale-95"
-            title="Tap to toggle daily/total"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBudgetTypeFilterChange(
+                budgetTypeFilter === "want" ? null : "want"
+              );
+            }}
+            className={`w-full space-y-1 transition-all duration-200 rounded-lg p-1 -m-1 ${
+              budgetTypeFilter === "need"
+                ? "opacity-40"
+                : "hover:opacity-80"
+            }`}
           >
-            <div className="relative overflow-hidden min-w-[70px] text-right">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={
-                    showDailyRemaining ? "daily-remaining" : "total-remaining"
-                  }
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className={`font-mono font-bold block ${
-                    totalRemaining <= 0 ? "text-red-500" : "text-income"
-                  }`}
-                >
-                  {showDailyRemaining
-                    ? `${formatCurrency(dailyBudget)}/day`
-                    : formatCurrency(totalRemaining)}
-                </motion.span>
-              </AnimatePresence>
+            <div className="flex items-center justify-between text-[11px]">
+              <span
+                className={`font-medium ${
+                  budgetTypeFilter === "want"
+                    ? "text-purple-500"
+                    : "text-muted-foreground"
+                }`}
+              >
+                Wants
+              </span>
+              <div className="flex items-center gap-1">
+                <span className="font-mono font-medium text-primary">
+                  {formatCurrency(budgetInfo.wantsSpent)}
+                </span>
+                <span className="text-muted-foreground/50">/</span>
+                <span className="text-muted-foreground font-mono text-[10px]">
+                  {formatCurrency(budgetInfo.wantsBudget)}
+                </span>
+              </div>
             </div>
-            <span className="text-muted-foreground">remaining</span>
+            <div className="relative h-2.5 bg-muted/50 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                  delay: 0.2,
+                }}
+                className="h-full relative overflow-hidden"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)",
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
+                  }}
+                />
+              </motion.div>
+            </div>
           </button>
         </div>
-        <div className="relative h-3.5 bg-muted/50 rounded-full overflow-hidden">
+
+        {/* Expand/collapse toggle for details */}
+        <button
+          onClick={() => setShowDetails((prev) => !prev)}
+          className="w-full flex justify-center text-muted-foreground hover:text-foreground transition-colors"
+        >
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(100, percentUsed)}%` }}
-            transition={{
-              duration: 1,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              delay: 0.2,
-            }}
-            className="h-full rounded-full relative overflow-hidden"
-            style={{
-              background: "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)",
-            }}
+            animate={{ rotate: showDetails ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
-              }}
-            />
+            <ChevronDown className="h-4 w-4" />
           </motion.div>
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-foreground/70"
-          >
-            {percentUsed.toFixed(0)}%
-          </motion.span>
-        </div>
+        </button>
+
+        {/* Expanded: Total expenses and edit budget */}
+        <AnimatePresence>
+          {showDetails && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-2 space-y-2 border-t border-border/30">
+                {/* Total Expenses */}
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-muted-foreground">Total Expenses</span>
+                  <span
+                    className="font-mono font-bold"
+                    style={{ color: "#ef4444" }}
+                  >
+                    {formatCurrency(totalExpenses)}
+                  </span>
+                </div>
+
+                {/* Edit Budget Section */}
+                {isEditing ? (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted-foreground">
+                        Needs Budget
+                      </span>
+                      <Input
+                        type="number"
+                        value={editingNeeds}
+                        onChange={(e) => setEditingNeeds(e.target.value)}
+                        className="h-6 w-24 text-xs font-mono text-right px-2"
+                        disabled={saving}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted-foreground">
+                        Wants Budget
+                      </span>
+                      <Input
+                        type="number"
+                        value={editingWants}
+                        onChange={(e) => setEditingWants(e.target.value)}
+                        className="h-6 w-24 text-xs font-mono text-right px-2"
+                        disabled={saving}
+                      />
+                    </div>
+                    <div className="flex justify-end gap-1 pt-1">
+                      <button
+                        onClick={cancelEditing}
+                        disabled={saving}
+                        className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={saveEditing}
+                        disabled={saving}
+                        className="p-1.5 rounded-md hover:bg-primary/10 text-primary transition-colors"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-end pt-1">
+                    <button
+                      onClick={startEditing}
+                      className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit Budget
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -185,9 +378,15 @@ export function FinanceTracker({
   const { transactions, error, addToCache, updateInCache, removeFromCache } =
     useExpenseData();
 
+  // User stats for budget values
+  const { userStats, updateUserStats } = useUserStats();
+
   // Filter state
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
+  const [budgetTypeFilter, setBudgetTypeFilter] = useState<
+    "need" | "want" | null
+  >(null);
 
   // UI state
   const [chartMode, setChartMode] = useState<ChartMode>("daily");
@@ -228,6 +427,7 @@ export function FinanceTracker({
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details || null,
             prorate_months: updated.prorate_months || null,
+            budget_type: updated.budget_type,
           })
           .select()
           .single();
@@ -249,6 +449,7 @@ export function FinanceTracker({
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details,
             prorate_months: updated.prorate_months || null,
+            budget_type: updated.budget_type,
           })
           .eq("id", updated.id);
 
@@ -310,9 +511,21 @@ export function FinanceTracker({
 
   // Derived data
   const filteredTransactions = useMemo(() => {
-    const result = filterByTimeRange(transactions, timeFilter, customDateRange);
+    let result = filterByTimeRange(transactions, timeFilter, customDateRange);
+
+    // Apply budget type filter if active
+    if (budgetTypeFilter) {
+      result = result.filter((t) => {
+        const txnBudgetType = getTransactionBudgetType(
+          t.category,
+          t.budget_type
+        );
+        return txnBudgetType === budgetTypeFilter;
+      });
+    }
+
     return sortTransactions(result, "date", "desc");
-  }, [transactions, timeFilter, customDateRange]);
+  }, [transactions, timeFilter, customDateRange, budgetTypeFilter]);
 
   // Category totals for display (includes all transactions)
   const categoryTotals = useMemo(
@@ -333,13 +546,52 @@ export function FinanceTracker({
     [transactions, timeFilter, customDateRange]
   );
 
-  // Monthly budget expenses - always uses "month" filter regardless of selected time filter
-  const monthlyBudgetExpenses = useMemo(() => {
-    const monthlyTransactions = filterByTimeRange(transactions, "month");
-    return monthlyTransactions
-      .filter((t) => t.type === "expense" && !t.excluded_from_budget)
-      .reduce((sum, t) => sum + getMonthlyAmount(t), 0);
-  }, [transactions]);
+  // Category totals grouped by budget type (considers manual overrides)
+  const categoryTotalsByBudgetType = useMemo(
+    () =>
+      getCategoryTotalsByBudgetType(transactions, timeFilter, {
+        customRange: customDateRange,
+      }),
+    [transactions, timeFilter, customDateRange]
+  );
+
+  // Budget type info - calculates needs vs wants spending for current month
+  const budgetTypeInfo = useMemo(() => {
+    return calculateBudgetTypeInfo(
+      transactions,
+      userStats?.needs_budget,
+      userStats?.wants_budget
+    );
+  }, [transactions, userStats?.needs_budget, userStats?.wants_budget]);
+
+  // Total expenses for current filter period (no prorations or exclusions)
+  const totalExpenses = useMemo(() => {
+    return filteredTransactions
+      .filter((t) => t.type === "expense")
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [filteredTransactions]);
+
+  // Handler to update budget values
+  const handleUpdateBudgets = async (
+    needsBudget: number,
+    wantsBudget: number
+  ) => {
+    if (!userStats?.id) throw new Error("No user stats");
+
+    const { error: updateError } = await supabase
+      .from("user_stats")
+      .update({ needs_budget: needsBudget, wants_budget: wantsBudget })
+      .eq("id", userStats.id);
+
+    if (updateError) throw updateError;
+
+    // Update local cache
+    updateUserStats({
+      ...userStats,
+      needs_budget: needsBudget,
+      wants_budget: wantsBudget,
+    });
+  };
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
@@ -365,11 +617,15 @@ export function FinanceTracker({
         className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[72px] md:pt-0"
         {...swipeHandlers}
       >
-        {/* Sticky Budget Progress Bar - only on expenses view */}
+        {/* Sticky Segmented Budget Bar - only on expenses view */}
         {activeView === "expenses" && (
-          <BudgetProgressBar
-            monthlyBudgetExpenses={monthlyBudgetExpenses}
+          <SegmentedBudgetBar
+            budgetInfo={budgetTypeInfo}
             theme={theme}
+            totalExpenses={totalExpenses}
+            budgetTypeFilter={budgetTypeFilter}
+            onBudgetTypeFilterChange={setBudgetTypeFilter}
+            onUpdateBudgets={handleUpdateBudgets}
           />
         )}
 
@@ -394,6 +650,7 @@ export function FinanceTracker({
                   transactions={transactions}
                   chartMode={chartMode}
                   categoryTotals={categoryTotals}
+                  categoryTotalsByBudgetType={categoryTotalsByBudgetType}
                   chartCategoryTotals={summaryCategoryTotals}
                   expandedCategory={expandedCategory}
                   onToggleCategory={setExpandedCategory}

@@ -210,6 +210,7 @@ export function useExpenseData() {
           excluded_from_budget: transaction.excluded_from_budget,
           details: transaction.details,
           prorate_months: transaction.prorate_months,
+          budget_type: transaction.budget_type,
         })
         .eq("id", transaction.id);
 

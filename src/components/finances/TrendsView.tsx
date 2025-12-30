@@ -9,7 +9,7 @@ import {
 } from "./constants";
 import { CategoryCard } from "./CategoryCard";
 import { Footer } from "./Footer";
-import type { CategoryTotal } from "./utils";
+import type { CategoryTotal, CategoryTotalsByBudgetType } from "./utils";
 import { getMonthlyAmount, isProratedInMonth } from "./utils";
 import type { ChartMode } from "./types";
 import { useTheme } from "@/hooks/useTheme";
@@ -19,6 +19,7 @@ interface TrendsViewProps {
   transactions: Transaction[];
   chartMode: ChartMode;
   categoryTotals: Record<string, CategoryTotal>;
+  categoryTotalsByBudgetType: CategoryTotalsByBudgetType;
   chartCategoryTotals: Record<string, CategoryTotal>;
   expandedCategory: string | null;
   onToggleCategory: (name: string | null) => void;
@@ -183,6 +184,7 @@ export const TrendsView = memo(function TrendsView({
   transactions,
   chartMode,
   categoryTotals,
+  categoryTotalsByBudgetType,
   chartCategoryTotals,
   expandedCategory,
   onToggleCategory,
@@ -343,53 +345,127 @@ export const TrendsView = memo(function TrendsView({
         </motion.div>
       )}
 
-      {/* Category Cards */}
-      <div className="space-y-1.5">
-        {EXPENSE_CATEGORIES.filter((cat) => categoryTotals[cat.name]?.count > 0)
-          .sort(
-            (a, b) =>
-              (categoryTotals[b.name]?.total ?? 0) -
-              (categoryTotals[a.name]?.total ?? 0)
+      {/* Needs Categories - uses actual budget type from transactions */}
+      {EXPENSE_CATEGORIES.filter(
+        (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
+      ).length > 0 && (
+        <div className="space-y-1.5">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+            Needs
+          </h3>
+          {EXPENSE_CATEGORIES.filter(
+            (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
           )
-          .map((cat, index) => {
-            const data = categoryTotals[cat.name];
-            return (
-              <CategoryCard
-                key={cat.name}
-                name={cat.name}
-                icon={cat.icon}
-                total={data.total}
-                count={data.count}
-                transactions={data.transactions}
-                isExpanded={expandedCategory === cat.name}
-                onToggle={() =>
-                  onToggleCategory(
-                    expandedCategory === cat.name ? null : cat.name
-                  )
-                }
-                onTransactionClick={onTransactionClick}
-                index={index}
-              />
-            );
-          })}
-        {categoryTotals["Uncategorized"]?.count > 0 && (
+            .sort(
+              (a, b) =>
+                (categoryTotalsByBudgetType.needs[b.name]?.total ?? 0) -
+                (categoryTotalsByBudgetType.needs[a.name]?.total ?? 0)
+            )
+            .map((cat, index) => {
+              const data = categoryTotalsByBudgetType.needs[cat.name];
+              return (
+                <CategoryCard
+                  key={`need-${cat.name}`}
+                  name={cat.name}
+                  icon={cat.icon}
+                  total={data.total}
+                  count={data.count}
+                  transactions={data.transactions}
+                  isExpanded={expandedCategory === `need-${cat.name}`}
+                  onToggle={() =>
+                    onToggleCategory(
+                      expandedCategory === `need-${cat.name}` ? null : `need-${cat.name}`
+                    )
+                  }
+                  onTransactionClick={onTransactionClick}
+                  index={index}
+                />
+              );
+            })}
+        </div>
+      )}
+
+      {/* Wants Categories - uses actual budget type from transactions */}
+      {EXPENSE_CATEGORIES.filter(
+        (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
+      ).length > 0 && (
+        <div className="space-y-1.5">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+            Wants
+          </h3>
+          {EXPENSE_CATEGORIES.filter(
+            (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
+          )
+            .sort(
+              (a, b) =>
+                (categoryTotalsByBudgetType.wants[b.name]?.total ?? 0) -
+                (categoryTotalsByBudgetType.wants[a.name]?.total ?? 0)
+            )
+            .map((cat, index) => {
+              const data = categoryTotalsByBudgetType.wants[cat.name];
+              return (
+                <CategoryCard
+                  key={`want-${cat.name}`}
+                  name={cat.name}
+                  icon={cat.icon}
+                  total={data.total}
+                  count={data.count}
+                  transactions={data.transactions}
+                  isExpanded={expandedCategory === `want-${cat.name}`}
+                  onToggle={() =>
+                    onToggleCategory(
+                      expandedCategory === `want-${cat.name}` ? null : `want-${cat.name}`
+                    )
+                  }
+                  onTransactionClick={onTransactionClick}
+                  index={index}
+                />
+              );
+            })}
+        </div>
+      )}
+
+      {/* Uncategorized - Needs */}
+      {categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0 && (
+        <div className="space-y-1.5">
           <CategoryCard
-            name="Uncategorized"
+            name="Uncategorized (Needs)"
             icon={null}
-            total={categoryTotals["Uncategorized"].total}
-            count={categoryTotals["Uncategorized"].count}
-            transactions={categoryTotals["Uncategorized"].transactions}
-            isExpanded={expandedCategory === "Uncategorized"}
+            total={categoryTotalsByBudgetType.needs["Uncategorized"].total}
+            count={categoryTotalsByBudgetType.needs["Uncategorized"].count}
+            transactions={categoryTotalsByBudgetType.needs["Uncategorized"].transactions}
+            isExpanded={expandedCategory === "need-Uncategorized"}
             onToggle={() =>
               onToggleCategory(
-                expandedCategory === "Uncategorized" ? null : "Uncategorized"
+                expandedCategory === "need-Uncategorized" ? null : "need-Uncategorized"
               )
             }
             onTransactionClick={onTransactionClick}
             index={EXPENSE_CATEGORIES.length}
           />
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Uncategorized - Wants */}
+      {categoryTotalsByBudgetType.wants["Uncategorized"]?.count > 0 && (
+        <div className="space-y-1.5">
+          <CategoryCard
+            name="Uncategorized (Wants)"
+            icon={null}
+            total={categoryTotalsByBudgetType.wants["Uncategorized"].total}
+            count={categoryTotalsByBudgetType.wants["Uncategorized"].count}
+            transactions={categoryTotalsByBudgetType.wants["Uncategorized"].transactions}
+            isExpanded={expandedCategory === "want-Uncategorized"}
+            onToggle={() =>
+              onToggleCategory(
+                expandedCategory === "want-Uncategorized" ? null : "want-Uncategorized"
+              )
+            }
+            onTransactionClick={onTransactionClick}
+            index={EXPENSE_CATEGORIES.length + 1}
+          />
+        </div>
+      )}
 
       <Footer />
     </div>

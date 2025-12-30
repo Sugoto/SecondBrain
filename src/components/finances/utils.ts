@@ -1,5 +1,5 @@
 import type { Transaction, UserStats } from "@/lib/supabase";
-import { EXPENSE_CATEGORIES } from "./constants";
+import { EXPENSE_CATEGORIES, getTransactionBudgetType, DEFAULT_NEEDS_BUDGET, DEFAULT_WANTS_BUDGET } from "./constants";
 import type { TimeFilter, DateRange } from "./types";
 
 // Net worth calculation
@@ -262,6 +262,54 @@ export function getCategoryTotals(
   return totals;
 }
 
+// Get category totals grouped by budget type (needs vs wants)
+// This considers manual budget_type overrides on individual transactions
+export type CategoryTotalsByBudgetType = {
+  needs: Record<string, CategoryTotal>;
+  wants: Record<string, CategoryTotal>;
+};
+
+export function getCategoryTotalsByBudgetType(
+  transactions: Transaction[],
+  timeFilter: TimeFilter,
+  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange }
+): CategoryTotalsByBudgetType {
+  const filtered = filterByTimeRange(transactions, timeFilter, options?.customRange);
+  
+  const result: CategoryTotalsByBudgetType = {
+    needs: {},
+    wants: {},
+  };
+  
+  // Initialize all categories in both buckets
+  EXPENSE_CATEGORIES.forEach((cat) => {
+    result.needs[cat.name] = { total: 0, count: 0, transactions: [] };
+    result.wants[cat.name] = { total: 0, count: 0, transactions: [] };
+  });
+  result.needs["Uncategorized"] = { total: 0, count: 0, transactions: [] };
+  result.wants["Uncategorized"] = { total: 0, count: 0, transactions: [] };
+
+  filtered.forEach((txn) => {
+    // Skip budget-excluded transactions if option is set
+    if (options?.excludeBudgetExcluded && txn.excluded_from_budget) {
+      return;
+    }
+    
+    const cat = txn.category || "Uncategorized";
+    // Use the actual budget type (considering manual override)
+    const budgetType = getTransactionBudgetType(cat, txn.budget_type);
+    const bucket = budgetType === "need" ? result.needs : result.wants;
+    
+    if (bucket[cat]) {
+      bucket[cat].total += getMonthlyAmount(txn);
+      bucket[cat].count += 1;
+      bucket[cat].transactions.push(txn);
+    }
+  });
+
+  return result;
+}
+
 // Budget calculations
 export function calculateBudgetInfo(totalExpenses: number, monthlyBudget: number) {
   const now = new Date();
@@ -295,6 +343,7 @@ export function createEmptyTransaction(): Transaction {
     details: null,
     created_at: now.toISOString(),
     prorate_months: null,
+    budget_type: null, // auto-assign based on category
   };
 }
 
@@ -444,5 +493,75 @@ export function generateSpendingSummary(
   }
 
   return parts.join(" ");
+}
+
+// Budget type calculations
+export type BudgetTypeInfo = {
+  needsSpent: number;
+  wantsSpent: number;
+  needsBudget: number;
+  wantsBudget: number;
+  needsRemaining: number;
+  wantsRemaining: number;
+  needsPercent: number;
+  wantsPercent: number;
+  totalPercent: number;
+};
+
+/**
+ * Calculate spending totals by budget type (needs vs wants)
+ * Only considers budget-included expenses for the current month
+ */
+export function calculateBudgetTypeInfo(
+  transactions: Transaction[],
+  needsBudget?: number | null,
+  wantsBudget?: number | null
+): BudgetTypeInfo {
+  const { startOfMonth } = getDateRanges();
+  
+  // Use provided budgets or fall back to defaults
+  const actualNeedsBudget = needsBudget ?? DEFAULT_NEEDS_BUDGET;
+  const actualWantsBudget = wantsBudget ?? DEFAULT_WANTS_BUDGET;
+  
+  // Filter to current month, expenses only, budget-included
+  const monthlyTransactions = transactions.filter((t) => {
+    if (t.type !== "expense" || t.excluded_from_budget) return false;
+    
+    // Handle prorated transactions
+    if (t.prorate_months && t.prorate_months > 1) {
+      return isProratedInMonth(t, startOfMonth);
+    }
+    
+    const txnDate = new Date(t.date);
+    return txnDate >= startOfMonth;
+  });
+  
+  let needsSpent = 0;
+  let wantsSpent = 0;
+  
+  monthlyTransactions.forEach((t) => {
+    const budgetType = getTransactionBudgetType(t.category, t.budget_type);
+    const amount = getMonthlyAmount(t);
+    
+    if (budgetType === "need") {
+      needsSpent += amount;
+    } else {
+      wantsSpent += amount;
+    }
+  });
+  
+  const totalBudget = actualNeedsBudget + actualWantsBudget;
+  
+  return {
+    needsSpent,
+    wantsSpent,
+    needsBudget: actualNeedsBudget,
+    wantsBudget: actualWantsBudget,
+    needsRemaining: Math.max(0, actualNeedsBudget - needsSpent),
+    wantsRemaining: Math.max(0, actualWantsBudget - wantsSpent),
+    needsPercent: actualNeedsBudget > 0 ? (needsSpent / actualNeedsBudget) * 100 : 0,
+    wantsPercent: actualWantsBudget > 0 ? (wantsSpent / actualWantsBudget) * 100 : 0,
+    totalPercent: totalBudget > 0 ? ((needsSpent + wantsSpent) / totalBudget) * 100 : 0,
+  };
 }
 

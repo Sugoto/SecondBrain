@@ -1,6 +1,6 @@
 import { memo, useCallback } from "react";
 import type { Transaction } from "@/lib/supabase";
-import { ChevronRight, Info, CalendarRange } from "lucide-react";
+import { ChevronRight, Info, CalendarRange, CheckCheck } from "lucide-react";
 import { getMonthlyAmount } from "./utils";
 import { motion } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
@@ -12,6 +12,7 @@ import {
   formatCurrencyCompact,
   getCategoryColor,
   EXPENSE_CATEGORIES,
+  getTransactionBudgetType,
 } from "./constants";
 
 interface TransactionCardProps {
@@ -27,11 +28,17 @@ export const TransactionCard = memo(function TransactionCard({
 }: TransactionCardProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const categoryColor = getCategoryColor(txn.category ?? "");
   const cat = EXPENSE_CATEGORIES.find((c) => c.name === txn.category);
   const CategoryIcon = cat?.icon;
 
   const isExcluded = txn.excluded_from_budget;
+  
+  // Determine budget type
+  const budgetType = getTransactionBudgetType(txn.category, txn.budget_type);
+  const isNeed = budgetType === "need";
+  
+  // Always use category color (colorful for both needs and wants)
+  const displayColor = getCategoryColor(txn.category ?? "");
   
   // Handle click with haptic feedback
   const handleClick = useCallback(() => {
@@ -83,9 +90,9 @@ export const TransactionCard = memo(function TransactionCard({
                 }
               : {
                   background: isDark
-                    ? `linear-gradient(135deg, ${categoryColor}30 0%, ${categoryColor}18 100%)`
-                    : `linear-gradient(135deg, ${categoryColor}25 0%, ${categoryColor}15 100%)`,
-                  boxShadow: `0 2px 8px ${categoryColor}20`,
+                    ? `linear-gradient(135deg, ${displayColor}30 0%, ${displayColor}18 100%)`
+                    : `linear-gradient(135deg, ${displayColor}25 0%, ${displayColor}15 100%)`,
+                  boxShadow: `0 2px 8px ${displayColor}20`,
                 }
           }
         >
@@ -95,10 +102,25 @@ export const TransactionCard = memo(function TransactionCard({
               color: isExcluded
                 ? "hsl(var(--muted-foreground))"
                 : isDark
-                ? categoryColor
-                : `color-mix(in srgb, ${categoryColor} 80%, black)`,
+                ? displayColor
+                : `color-mix(in srgb, ${displayColor} 80%, black)`,
             }}
           />
+          {/* Need indicator - small icon badge */}
+          {isNeed && !isExcluded && (
+            <div
+              className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full flex items-center justify-center"
+              style={{
+                background: isDark ? "#1e293b" : "#f1f5f9",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+              }}
+            >
+              <CheckCheck
+                className="h-2 w-2"
+                style={{ color: "#64748b" }}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -113,8 +135,8 @@ export const TransactionCard = memo(function TransactionCard({
               ? undefined
               : {
                   color: isDark
-                    ? categoryColor
-                    : `color-mix(in srgb, ${categoryColor} 75%, black)`,
+                    ? displayColor
+                    : `color-mix(in srgb, ${displayColor} 75%, black)`,
                 }
           }
         >
@@ -123,7 +145,7 @@ export const TransactionCard = memo(function TransactionCard({
             <span
               className="hover:opacity-80 shrink-0 transition-opacity"
               title={txn.details}
-              style={{ color: isExcluded ? undefined : categoryColor }}
+              style={{ color: isExcluded ? undefined : displayColor }}
             >
               <Info className="h-3 w-3" />
             </span>
@@ -134,7 +156,7 @@ export const TransactionCard = memo(function TransactionCard({
               title={`${formatCurrency(txn.amount)} over ${
                 txn.prorate_months
               } months`}
-              style={{ color: isExcluded ? undefined : categoryColor }}
+              style={{ color: isExcluded ? undefined : displayColor }}
             >
               <CalendarRange className="h-3 w-3" />
             </span>
@@ -175,8 +197,8 @@ export const TransactionCard = memo(function TransactionCard({
           color: isExcluded
             ? "hsl(var(--muted-foreground)/0.3)"
             : isDark
-            ? `${categoryColor}60`
-            : `${categoryColor}50`,
+            ? `${displayColor}60`
+            : `${displayColor}50`,
         }}
       />
     </motion.button>

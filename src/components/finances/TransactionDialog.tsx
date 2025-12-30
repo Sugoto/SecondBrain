@@ -14,6 +14,9 @@ import {
   EXCLUDED_CATEGORIES,
   formatCurrency,
   getCategoryColor,
+  getTransactionBudgetType,
+  BUDGET_TYPE_CONFIG,
+  CATEGORY_BUDGET_TYPE,
 } from "./constants";
 import {
   CalendarRange,
@@ -318,9 +321,9 @@ export function TransactionDialog({
         </DialogHeader>
 
         <div className="space-y-4 px-5 py-4 overflow-y-auto flex-1">
-          {/* Category Selection - Compact Icon Grid */}
-          <div className="grid grid-cols-5 gap-1">
-            {EXPENSE_CATEGORIES.map((cat) => {
+          {/* Category Selection */}
+          {(() => {
+            const renderCategoryButton = (cat: typeof EXPENSE_CATEGORIES[0]) => {
               const IconComp = cat.icon;
               const isSelected = transaction.category === cat.name;
               const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
@@ -349,6 +352,8 @@ export function TransactionDialog({
                       ...transaction,
                       category: newCategory,
                       excluded_from_budget: newExcludedFromBudget,
+                      // Reset budget_type to auto when category changes
+                      budget_type: null,
                     });
                   }}
                   disabled={saving}
@@ -387,8 +392,63 @@ export function TransactionDialog({
                   />
                 </button>
               );
-            })}
-          </div>
+            };
+
+            const effectiveBudgetType = getTransactionBudgetType(
+              transaction.category,
+              transaction.budget_type
+            );
+            const isWant = effectiveBudgetType === "want";
+            const autoBudgetType = CATEGORY_BUDGET_TYPE[transaction.category ?? ""] ?? "want";
+
+            return (
+              <div className="space-y-2">
+                {/* Category buttons grid */}
+                <div className="grid grid-cols-4 gap-1.5">
+                  {EXPENSE_CATEGORIES.map(renderCategoryButton)}
+                </div>
+
+                {/* Need/Want toggle - fades in when category selected */}
+                <AnimatePresence>
+                  {transaction.category && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex items-center justify-center gap-3 pt-1">
+                        <span
+                          className={`text-xs font-medium transition-opacity ${!isWant ? "opacity-100" : "opacity-40"}`}
+                          style={{ color: BUDGET_TYPE_CONFIG.need.color }}
+                        >
+                          Need
+                        </span>
+                        <Switch
+                          checked={isWant}
+                          onCheckedChange={(checked) => {
+                            const newType = checked ? "want" : "need";
+                            // If matches auto, clear override
+                            const newBudgetType = newType === autoBudgetType ? null : newType;
+                            onChange({ ...transaction, budget_type: newBudgetType });
+                          }}
+                          disabled={saving}
+                          className="scale-90"
+                        />
+                        <span
+                          className={`text-xs font-medium transition-opacity ${isWant ? "opacity-100" : "opacity-40"}`}
+                          style={{ color: BUDGET_TYPE_CONFIG.want.color }}
+                        >
+                          Want
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })()}
 
           {/* Amount with Calculator */}
           <div className="space-y-2">

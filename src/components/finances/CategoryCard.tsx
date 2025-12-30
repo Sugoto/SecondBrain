@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Receipt,
   CalendarRange,
+  CheckCheck,
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +13,7 @@ import {
   formatCurrency,
   getCategoryStyle,
   getCategoryColor,
+  getTransactionBudgetType,
 } from "./constants";
 import { getMonthlyAmount } from "./utils";
 
@@ -116,6 +118,10 @@ export const CategoryCard = memo(function CategoryCard({
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
                 const displayAmount = getMonthlyAmount(txn);
+                
+                // Determine if this is a need transaction
+                const budgetType = getTransactionBudgetType(txn.category, txn.budget_type);
+                const isNeed = budgetType === "need";
 
                 return (
                   <motion.button
@@ -131,6 +137,13 @@ export const CategoryCard = memo(function CategoryCard({
                         : ""
                     }`}
                   >
+                    {/* Need indicator */}
+                    {isNeed && !isExcluded && (
+                      <CheckCheck
+                        className="h-3 w-3 shrink-0"
+                        style={{ color: "#64748b" }}
+                      />
+                    )}
                     <div className="min-w-0 flex-1">
                       <p
                         className={`text-xs font-medium truncate flex items-center gap-1 ${
