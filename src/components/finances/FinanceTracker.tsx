@@ -5,7 +5,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Pencil, Check, X, ChevronDown } from "lucide-react";
+import { Plus, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   formatCurrency,
@@ -49,7 +49,6 @@ function SegmentedBudgetBar({
   onBudgetTypeFilterChange: (filter: "need" | "want" | null) => void;
   onUpdateBudgets: (needsBudget: number, wantsBudget: number) => Promise<void>;
 }) {
-  const [showDetails, setShowDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingNeeds, setEditingNeeds] = useState("");
   const [editingWants, setEditingWants] = useState("");
@@ -103,9 +102,9 @@ function SegmentedBudgetBar({
   };
 
   return (
-    <div className="sticky top-0 z-30 px-4 md:px-6 pt-3">
+    <div className="sticky top-0 z-30 px-4 md:px-6 pt-2">
       <div
-        className="max-w-6xl mx-auto px-4 py-3 rounded-2xl space-y-2"
+        className="max-w-6xl mx-auto px-3 py-2 rounded-xl"
         style={{
           backgroundColor:
             theme === "dark"
@@ -123,227 +122,223 @@ function SegmentedBudgetBar({
               : "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
-        {/* Both Needs and Wants progress bars - tappable to filter */}
-        <div className="space-y-2">
-          {/* Needs progress bar */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onBudgetTypeFilterChange(
-                budgetTypeFilter === "need" ? null : "need"
-              );
-            }}
-            className={`w-full space-y-1 transition-all duration-200 rounded-lg p-1 -m-1 ${
-              budgetTypeFilter === "want"
-                ? "opacity-40"
-                : "hover:opacity-80"
-            }`}
-          >
-            <div className="flex items-center justify-between text-[11px]">
-              <span
-                className={`font-medium ${
-                  budgetTypeFilter === "need" ? "" : "text-muted-foreground"
-                }`}
-                style={{
-                  color:
-                    budgetTypeFilter === "need" ? needsConfig.color : undefined,
-                }}
-              >
-                Needs
-              </span>
-              <div className="flex items-center gap-1">
-                <span
-                  className="font-mono font-medium"
-                  style={{ color: needsConfig.color }}
-                >
-                  {formatCurrency(budgetInfo.needsSpent)}
-                </span>
-                <span className="text-muted-foreground/50">/</span>
-                <span className="text-muted-foreground font-mono text-[10px]">
-                  {formatCurrency(budgetInfo.needsBudget)}
-                </span>
-              </div>
-            </div>
-            <div className="relative h-2.5 bg-muted/50 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(needsPercent, 100)}%` }}
-                transition={{
-                  duration: 0.8,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                  delay: 0.1,
-                }}
-                className="h-full relative overflow-hidden"
-                style={{
-                  background: `linear-gradient(90deg, ${needsConfig.color} 0%, ${needsConfig.color}cc 100%)`,
-                }}
-              >
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
-                  }}
-                />
-              </motion.div>
-            </div>
-          </button>
-
-          {/* Wants progress bar - Purple gradient */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onBudgetTypeFilterChange(
-                budgetTypeFilter === "want" ? null : "want"
-              );
-            }}
-            className={`w-full space-y-1 transition-all duration-200 rounded-lg p-1 -m-1 ${
-              budgetTypeFilter === "need"
-                ? "opacity-40"
-                : "hover:opacity-80"
-            }`}
-          >
-            <div className="flex items-center justify-between text-[11px]">
-              <span
-                className={`font-medium ${
-                  budgetTypeFilter === "want"
-                    ? "text-purple-500"
-                    : "text-muted-foreground"
-                }`}
-              >
-                Wants
-              </span>
-              <div className="flex items-center gap-1">
-                <span className="font-mono font-medium text-primary">
-                  {formatCurrency(budgetInfo.wantsSpent)}
-                </span>
-                <span className="text-muted-foreground/50">/</span>
-                <span className="text-muted-foreground font-mono text-[10px]">
-                  {formatCurrency(budgetInfo.wantsBudget)}
-                </span>
-              </div>
-            </div>
-            <div className="relative h-2.5 bg-muted/50 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
-                transition={{
-                  duration: 0.8,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                  delay: 0.2,
-                }}
-                className="h-full relative overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)",
-                }}
-              >
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
-                  }}
-                />
-              </motion.div>
-            </div>
-          </button>
-        </div>
-
-        {/* Expand/collapse toggle for details */}
-        <button
-          onClick={() => setShowDetails((prev) => !prev)}
-          className="w-full flex justify-center text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <motion.div
-            animate={{ rotate: showDetails ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown className="h-4 w-4" />
-          </motion.div>
-        </button>
-
-        {/* Expanded: Total expenses and edit budget */}
-        <AnimatePresence>
-          {showDetails && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
+        <div className="flex items-center gap-2">
+          {/* Progress bars side by side - tappable to filter */}
+          <div className="flex-1 grid grid-cols-2 gap-3">
+            {/* Needs progress bar */}
+            <button
+              onClick={(e) => {
+                if (isEditing) return;
+                e.stopPropagation();
+                onBudgetTypeFilterChange(
+                  budgetTypeFilter === "need" ? null : "need"
+                );
+              }}
+              disabled={isEditing}
+              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${
+                isEditing
+                  ? ""
+                  : budgetTypeFilter === "want"
+                  ? "opacity-40"
+                  : "hover:opacity-80"
+              }`}
             >
-              <div className="pt-2 space-y-2 border-t border-border/30">
-                {/* Total Expenses */}
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-muted-foreground">Total Expenses</span>
-                  <span
-                    className="font-mono font-bold"
-                    style={{ color: "#ef4444" }}
-                  >
-                    {formatCurrency(totalExpenses)}
-                  </span>
-                </div>
-
-                {/* Edit Budget Section */}
+              <div className="flex items-center justify-between text-[10px]">
+                <span
+                  className={`font-medium ${
+                    budgetTypeFilter === "need" ? "" : "text-muted-foreground"
+                  }`}
+                  style={{
+                    color:
+                      budgetTypeFilter === "need"
+                        ? needsConfig.color
+                        : undefined,
+                  }}
+                >
+                  Needs
+                </span>
                 {isEditing ? (
-                  <div className="space-y-2 pt-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground">
-                        Needs Budget
-                      </span>
-                      <Input
-                        type="number"
-                        value={editingNeeds}
-                        onChange={(e) => setEditingNeeds(e.target.value)}
-                        className="h-6 w-24 text-xs font-mono text-right px-2"
-                        disabled={saving}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground">
-                        Wants Budget
-                      </span>
-                      <Input
-                        type="number"
-                        value={editingWants}
-                        onChange={(e) => setEditingWants(e.target.value)}
-                        className="h-6 w-24 text-xs font-mono text-right px-2"
-                        disabled={saving}
-                      />
-                    </div>
-                    <div className="flex justify-end gap-1 pt-1">
-                      <button
-                        onClick={cancelEditing}
-                        disabled={saving}
-                        className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground transition-colors"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={saveEditing}
-                        disabled={saving}
-                        className="p-1.5 rounded-md hover:bg-primary/10 text-primary transition-colors"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-0.5">
+                    <span
+                      className="font-mono font-medium"
+                      style={{ color: needsConfig.color }}
+                    >
+                      {formatCurrency(budgetInfo.needsSpent)}
+                    </span>
+                    <span className="text-muted-foreground/50">/</span>
+                    <Input
+                      type="number"
+                      value={editingNeeds}
+                      onChange={(e) => setEditingNeeds(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-14 text-[9px] font-mono text-right px-1"
+                      disabled={saving}
+                    />
                   </div>
                 ) : (
-                  <div className="flex justify-end pt-1">
-                    <button
-                      onClick={startEditing}
-                      className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <Pencil className="h-3 w-3" />
-                      Edit Budget
-                    </button>
-                  </div>
+                  <span
+                    className="font-mono font-medium"
+                    style={{ color: needsConfig.color }}
+                  >
+                    {formatCurrency(budgetInfo.needsSpent)}
+                  </span>
                 )}
               </div>
-            </motion.div>
+              <div
+                className="relative h-2 rounded-full overflow-hidden"
+                style={{
+                  background:
+                    theme === "dark"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.08)",
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(needsPercent, 100)}%` }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.1,
+                  }}
+                  className="h-full relative overflow-hidden"
+                  style={{
+                    background: `linear-gradient(90deg, ${needsConfig.color} 0%, ${needsConfig.color}cc 100%)`,
+                  }}
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </button>
+
+            {/* Wants progress bar - Purple gradient */}
+            <button
+              onClick={(e) => {
+                if (isEditing) return;
+                e.stopPropagation();
+                onBudgetTypeFilterChange(
+                  budgetTypeFilter === "want" ? null : "want"
+                );
+              }}
+              disabled={isEditing}
+              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${
+                isEditing
+                  ? ""
+                  : budgetTypeFilter === "need"
+                  ? "opacity-40"
+                  : "hover:opacity-80"
+              }`}
+            >
+              <div className="flex items-center justify-between text-[10px]">
+                <span
+                  className={`font-medium ${
+                    budgetTypeFilter === "want"
+                      ? "text-purple-500"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  Wants
+                </span>
+                {isEditing ? (
+                  <div className="flex items-center gap-0.5">
+                    <span className="font-mono font-medium text-purple-500">
+                      {formatCurrency(budgetInfo.wantsSpent)}
+                    </span>
+                    <span className="text-muted-foreground/50">/</span>
+                    <Input
+                      type="number"
+                      value={editingWants}
+                      onChange={(e) => setEditingWants(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-14 text-[9px] font-mono text-right px-1"
+                      disabled={saving}
+                    />
+                  </div>
+                ) : (
+                  <span className="font-mono font-medium text-purple-500">
+                    {formatCurrency(budgetInfo.wantsSpent)}
+                  </span>
+                )}
+              </div>
+              <div
+                className="relative h-2 rounded-full overflow-hidden"
+                style={{
+                  background:
+                    theme === "dark"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.08)",
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.2,
+                  }}
+                  className="h-full relative overflow-hidden"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Total Expenses row with edit button */}
+        <div className="flex items-center justify-between pt-1 text-[10px]">
+          <div className="flex items-center gap-1.5">
+            <span className="text-muted-foreground">Total</span>
+            <span className="font-mono font-semibold" style={{ color: "#ef4444" }}>
+              {formatCurrency(totalExpenses)}
+            </span>
+          </div>
+          {isEditing ? (
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={saveEditing}
+                disabled={saving}
+                className="p-1 rounded hover:bg-primary/10 text-primary transition-colors"
+                title="Save"
+              >
+                <Check className="h-3 w-3" />
+              </button>
+              <button
+                onClick={cancelEditing}
+                disabled={saving}
+                className="p-1 rounded hover:bg-muted/50 text-muted-foreground transition-colors"
+                title="Cancel"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={startEditing}
+              className="p-1 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              title="Edit Budget"
+            >
+              <Pencil className="h-3 w-3" />
+            </button>
           )}
-        </AnimatePresence>
+        </div>
       </div>
     </div>
   );

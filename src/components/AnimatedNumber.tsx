@@ -5,6 +5,7 @@ interface AnimatedNumberProps {
   duration?: number;
   formatFn?: (value: number) => string;
   className?: string;
+  animateOnMount?: boolean;
 }
 
 export function AnimatedNumber({
@@ -12,18 +13,17 @@ export function AnimatedNumber({
   duration = 800,
   formatFn = (v) => v.toFixed(0),
   className,
+  animateOnMount = false,
 }: AnimatedNumberProps) {
-  // Initialize with actual value to avoid animating from 0 on first render
-  const [displayValue, setDisplayValue] = useState(value);
-  const previousValue = useRef(value);
+  // Initialize with 0 if animating on mount, otherwise start at the actual value
+  const [displayValue, setDisplayValue] = useState(animateOnMount ? 0 : value);
+  const previousValue = useRef(animateOnMount ? 0 : value);
   const animationRef = useRef<number | undefined>(undefined);
-  const isFirstRender = useRef(true);
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    // Skip animation on first render
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      previousValue.current = value;
+    // Skip if value hasn't changed and we've already animated
+    if (previousValue.current === value && hasAnimated.current) {
       return;
     }
 
@@ -45,6 +45,7 @@ export function AnimatedNumber({
         animationRef.current = requestAnimationFrame(animate);
       } else {
         previousValue.current = endValue;
+        hasAnimated.current = true;
       }
     };
 

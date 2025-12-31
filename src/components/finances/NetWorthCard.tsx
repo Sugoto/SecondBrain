@@ -168,7 +168,7 @@ export function NetWorthCard({
                       : "none",
                 }}
               >
-                <AnimatedNumber value={netWorth} formatFn={formatCurrency} />
+                <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
               </p>
             </div>
           </div>
