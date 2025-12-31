@@ -531,20 +531,11 @@ export function FinanceTracker({
     [transactions, timeFilter, customDateRange]
   );
 
-  // Category totals for summary (excludes budget-excluded, uses prorated amounts)
-  const summaryCategoryTotals = useMemo(
-    () =>
-      getCategoryTotals(transactions, timeFilter, {
-        excludeBudgetExcluded: true,
-        customRange: customDateRange,
-      }),
-    [transactions, timeFilter, customDateRange]
-  );
-
   // Category totals grouped by budget type (considers manual overrides)
   const categoryTotalsByBudgetType = useMemo(
     () =>
       getCategoryTotalsByBudgetType(transactions, timeFilter, {
+        excludeBudgetExcluded: true,
         customRange: customDateRange,
       }),
     [transactions, timeFilter, customDateRange]
@@ -646,7 +637,6 @@ export function FinanceTracker({
                   chartMode={chartMode}
                   categoryTotals={categoryTotals}
                   categoryTotalsByBudgetType={categoryTotalsByBudgetType}
-                  chartCategoryTotals={summaryCategoryTotals}
                   expandedCategory={expandedCategory}
                   onToggleCategory={setExpandedCategory}
                   onTransactionClick={handleEditTransaction}

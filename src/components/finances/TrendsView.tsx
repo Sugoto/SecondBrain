@@ -20,7 +20,6 @@ interface TrendsViewProps {
   chartMode: ChartMode;
   categoryTotals: Record<string, CategoryTotal>;
   categoryTotalsByBudgetType: CategoryTotalsByBudgetType;
-  chartCategoryTotals: Record<string, CategoryTotal>;
   expandedCategory: string | null;
   onToggleCategory: (name: string | null) => void;
   onTransactionClick: (txn: Transaction) => void;
@@ -185,7 +184,6 @@ export const TrendsView = memo(function TrendsView({
   chartMode,
   categoryTotals,
   categoryTotalsByBudgetType,
-  chartCategoryTotals,
   expandedCategory,
   onToggleCategory,
   onTransactionClick,
@@ -254,26 +252,47 @@ export const TrendsView = memo(function TrendsView({
 
   const chartData = chartMode === "daily" ? dailyData : monthlyData;
 
-  // Pie chart data
-  const pieData = useMemo(() => {
+  // Pie chart data for Needs
+  const needsPieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
-      (cat) => chartCategoryTotals[cat.name]?.count > 0
+      (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
     ).map((cat) => ({
       name: cat.name,
-      value: chartCategoryTotals[cat.name].total,
+      value: categoryTotalsByBudgetType.needs[cat.name].total,
       color: getCategoryColor(cat.name),
     }));
 
-    if (chartCategoryTotals["Uncategorized"]?.count > 0) {
+    if (categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0) {
       data.push({
         name: "Other",
-        value: chartCategoryTotals["Uncategorized"].total,
+        value: categoryTotalsByBudgetType.needs["Uncategorized"].total,
         color: "#94a3b8",
       });
     }
 
     return data;
-  }, [chartCategoryTotals]);
+  }, [categoryTotalsByBudgetType]);
+
+  // Pie chart data for Wants
+  const wantsPieData = useMemo(() => {
+    const data = EXPENSE_CATEGORIES.filter(
+      (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
+    ).map((cat) => ({
+      name: cat.name,
+      value: categoryTotalsByBudgetType.wants[cat.name].total,
+      color: getCategoryColor(cat.name),
+    }));
+
+    if (categoryTotalsByBudgetType.wants["Uncategorized"]?.count > 0) {
+      data.push({
+        name: "Other",
+        value: categoryTotalsByBudgetType.wants["Uncategorized"].total,
+        color: "#94a3b8",
+      });
+    }
+
+    return data;
+  }, [categoryTotalsByBudgetType]);
 
   const hasCategories =
     EXPENSE_CATEGORIES.some((cat) => categoryTotals[cat.name]?.count > 0) ||
@@ -323,23 +342,52 @@ export const TrendsView = memo(function TrendsView({
         </motion.div>
       )}
 
-      {/* Pie Chart - Pure SVG with connecting lines */}
-      {pieData.length > 0 && (
+      {/* Pie Charts - Wants on top, Needs below, in same card */}
+      {(needsPieData.length > 0 || wantsPieData.length > 0) && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="p-4">
-            <h3 className="text-sm font-medium text-center mb-2">
-              Spending by Category
-            </h3>
-            <div className="h-56 flex items-center justify-center">
-              <LabeledPieChart
-                data={pieData}
-                theme={theme}
-                formatValue={formatCurrency}
-              />
+          <Card className="p-4 space-y-4">
+            {/* Needs Pie Chart */}
+            <div>
+              <h3 className="text-xs font-medium text-center mb-1 text-muted-foreground">
+                Needs
+              </h3>
+              <div className="h-48 flex items-center justify-center">
+                {needsPieData.length > 0 ? (
+                  <LabeledPieChart
+                    data={needsPieData}
+                    theme={theme}
+                    formatValue={formatCurrency}
+                    size={180}
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground">No data</p>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t border-border" />
+
+            {/* Wants Pie Chart */}
+            <div>
+              <h3 className="text-xs font-medium text-center mb-1 text-muted-foreground">
+                Wants
+              </h3>
+              <div className="h-48 flex items-center justify-center">
+                {wantsPieData.length > 0 ? (
+                  <LabeledPieChart
+                    data={wantsPieData}
+                    theme={theme}
+                    formatValue={formatCurrency}
+                    size={180}
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground">No data</p>
+                )}
+              </div>
             </div>
           </Card>
         </motion.div>
