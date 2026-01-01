@@ -112,10 +112,11 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
           {navItems.map(({ id, icon: Icon, label, color }) => {
             const isActive = activeView === id;
             // Items with explicit colors (home page) use their defined color
-            // Otherwise use section-based theme: aqua for omscs, purple for finances, orange for health
+            // Otherwise use section-based theme: aqua for omscs, purple for finances, teal for time, orange for health
             const sectionColor = 
               currentSection === "omscs" ? "#06b6d4" :
-              currentSection === "finances" ? "#8b5cf6" : 
+              currentSection === "finances" ? "#8b5cf6" :
+              currentSection === "time" ? "#14b8a6" : 
               "#f97316";
             const itemColor = color || sectionColor;
             const hasExplicitColor = !!color;

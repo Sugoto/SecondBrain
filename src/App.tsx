@@ -10,6 +10,7 @@ import {
   HEALTH_NAV_ITEMS,
   FINANCE_NAV_ITEMS,
   OMSCS_NAV_ITEMS,
+  TIME_NAV_ITEMS,
 } from "./components/navigation/constants";
 import { Toaster } from "./components/ui/sonner";
 import { useSwipeNavigation } from "./hooks/useSwipeNavigation";
@@ -17,7 +18,7 @@ import { useAppNavigation } from "./hooks/useAppNavigation";
 import type { AppSection } from "./types/navigation";
 
 // Main sections for swipe navigation
-const APP_SECTIONS = ["home", "omscs", "finances", "fitness"] as const;
+const APP_SECTIONS = ["home", "omscs", "finances", "time", "fitness"] as const;
 
 // Lazy load page components for code splitting
 const HomePage = lazy(() =>
@@ -36,6 +37,11 @@ const OmscsTracker = lazy(() =>
     default: m.OmscsTracker,
   }))
 );
+const TimeTracker = lazy(() =>
+  import("./components/time").then((m) => ({
+    default: m.TimeTracker,
+  }))
+);
 
 function AppContent() {
   const {
@@ -43,10 +49,12 @@ function AppContent() {
     healthView,
     financeView,
     omscsView,
+    timeView,
     navigateToSection,
     navigateHealthView,
     navigateFinanceView,
     navigateOmscsView,
+    navigateTimeView,
     goHome,
   } = useAppNavigation();
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
@@ -74,6 +82,8 @@ function AppContent() {
     switch (currentSection) {
       case "finances":
         return FINANCE_NAV_ITEMS;
+      case "time":
+        return TIME_NAV_ITEMS;
       case "fitness":
         return HEALTH_NAV_ITEMS;
       case "omscs":
@@ -87,6 +97,8 @@ function AppContent() {
     switch (currentSection) {
       case "finances":
         return financeView;
+      case "time":
+        return timeView;
       case "fitness":
         return healthView;
       case "omscs":
@@ -94,7 +106,7 @@ function AppContent() {
       default:
         return currentSection;
     }
-  }, [currentSection, financeView, healthView, omscsView]);
+  }, [currentSection, financeView, timeView, healthView, omscsView]);
 
   // Handle nav view changes
   const handleViewChange = useCallback(
@@ -103,13 +115,15 @@ function AppContent() {
         navigateToSection(view as AppSection);
       } else if (currentSection === "finances") {
         navigateFinanceView(view as import("./types/navigation").FinanceView);
+      } else if (currentSection === "time") {
+        navigateTimeView(view as import("./types/navigation").TimeView);
       } else if (currentSection === "fitness") {
         navigateHealthView(view as import("./types/navigation").HealthView);
       } else if (currentSection === "omscs") {
         navigateOmscsView(view as import("./types/navigation").OmscsView);
       }
     },
-    [currentSection, navigateToSection, navigateFinanceView, navigateHealthView, navigateOmscsView]
+    [currentSection, navigateToSection, navigateFinanceView, navigateTimeView, navigateHealthView, navigateOmscsView]
   );
 
   return (
@@ -135,6 +149,12 @@ function AppContent() {
             <FinanceTracker
               activeView={financeView}
               onViewChange={navigateFinanceView}
+            />
+          )}
+          {currentSection === "time" && (
+            <TimeTracker
+              activeView={timeView}
+              onViewChange={navigateTimeView}
             />
           )}
           {currentSection === "fitness" && (
