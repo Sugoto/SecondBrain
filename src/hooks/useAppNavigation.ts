@@ -20,7 +20,7 @@ const DEFAULT_STATE: NavigationState = {
   healthView: "nutrition",
   financeView: "expenses",
   omscsView: "grades",
-  timeView: "calendar",
+  timeView: "today",
 };
 
 // Parse hash into navigation state

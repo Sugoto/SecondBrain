@@ -33,6 +33,21 @@ async function deleteEvent(id: string): Promise<void> {
   if (error) throw error;
 }
 
+async function updateEvent(
+  event: Partial<TimeEvent> & { id: string }
+): Promise<TimeEvent> {
+  const { id, ...updates } = event;
+  const { data, error } = await supabase
+    .from("time_events")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export function useTimeEvents() {
   const queryClient = useQueryClient();
 
@@ -56,12 +71,22 @@ export function useTimeEvents() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: updateEvent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: EVENTS_KEY });
+    },
+  });
+
   return {
     events,
     isLoading,
     addEvent: addMutation.mutateAsync,
+    updateEvent: updateMutation.mutateAsync,
     deleteEvent: deleteMutation.mutateAsync,
     isAdding: addMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 }
 

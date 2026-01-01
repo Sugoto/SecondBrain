@@ -1,7 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Trash2,
   Loader2,
   Briefcase,
   BookOpen,
@@ -90,10 +89,10 @@ function formatTime12h(time: string): string {
 export function TodayView() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { events, isLoading, deleteEvent } = useTimeEvents();
+  const { events, isLoading } = useTimeEvents();
   const [showDialog, setShowDialog] = useState(false);
   const [dialogKey, setDialogKey] = useState(0);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<TimeEvent | null>(null);
   const [initialStartTime, setInitialStartTime] = useState<string>("");
   const [initialEndTime, setInitialEndTime] = useState<string>("");
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -169,16 +168,13 @@ export function TodayView() {
     }
   }, []);
 
-  // Check if event is a default (non-deletable) event
+  // Check if event is a default (non-editable) event
   const isDefaultEvent = (id: string) => id.startsWith("default-");
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    try {
-      await deleteEvent(id);
-    } finally {
-      setDeletingId(null);
-    }
+  const handleEditEvent = (event: TimeEvent) => {
+    setEditingEvent(event);
+    setDialogKey((k) => k + 1);
+    setShowDialog(true);
   };
 
   // Handle tap on timeline to create event
@@ -217,20 +213,21 @@ export function TodayView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Free Time Card with Progress Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl px-3 py-2.5 mx-4 mt-4 shrink-0"
-        style={{
-          background: isDark
-            ? "rgba(255, 255, 255, 0.03)"
-            : "rgba(0, 0, 0, 0.02)",
-          border: isDark
-            ? "1px solid rgba(255, 255, 255, 0.08)"
-            : "1px solid rgba(0, 0, 0, 0.06)",
-        }}
-      >
+      {/* Sticky Free Time Card with Progress Bar */}
+      <div className="sticky top-0 z-20 bg-background px-4 pt-4 pb-2">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl px-3 py-2.5"
+          style={{
+            background: isDark
+              ? "rgba(255, 255, 255, 0.03)"
+              : "rgba(0, 0, 0, 0.02)",
+            border: isDark
+              ? "1px solid rgba(255, 255, 255, 0.08)"
+              : "1px solid rgba(0, 0, 0, 0.06)",
+          }}
+        >
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             Today's Schedule
@@ -278,12 +275,13 @@ export function TodayView() {
           <span className="text-[9px] text-muted-foreground">6pm</span>
           <span className="text-[9px] text-muted-foreground">12am</span>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Timeline Container */}
       <div
         ref={timelineRef}
-        className="flex-1 overflow-y-auto overflow-x-hidden relative mt-6 pr-4"
+        className="flex-1 overflow-y-auto overflow-x-hidden relative mt-2 pr-4"
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -360,8 +358,7 @@ export function TodayView() {
                 key={event.id}
                 event={event}
                 isDark={isDark}
-                onDelete={() => handleDelete(event.id)}
-                isDeleting={deletingId === event.id}
+                onEdit={() => handleEditEvent(event)}
                 isDefault={isDefaultEvent(event.id)}
               />
             ))}
@@ -371,7 +368,7 @@ export function TodayView() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute z-30 pointer-events-none"
+                className="absolute z-10 pointer-events-none"
                 style={{ top: currentTimePosition }}
               >
                 {/* Glowing dot on timeline */}
@@ -414,10 +411,14 @@ export function TodayView() {
       <EventDialog
         key={dialogKey}
         open={showDialog}
-        onOpenChange={setShowDialog}
+        onOpenChange={(open) => {
+          setShowDialog(open);
+          if (!open) setEditingEvent(null);
+        }}
         initialDate={today}
         initialStartTime={initialStartTime}
         initialEndTime={initialEndTime}
+        editEvent={editingEvent}
       />
     </div>
   );
@@ -426,16 +427,14 @@ export function TodayView() {
 interface TimelineEventProps {
   event: TimeEvent;
   isDark: boolean;
-  onDelete: () => void;
-  isDeleting: boolean;
+  onEdit: () => void;
   isDefault?: boolean;
 }
 
 function TimelineEvent({
   event,
   isDark,
-  onDelete,
-  isDeleting,
+  onEdit,
   isDefault = false,
 }: TimelineEventProps) {
   const color = getCategoryColor(event.category);
@@ -463,6 +462,13 @@ function TimelineEvent({
 
   const isShort = height < 50;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isDefault) {
+      onEdit();
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
@@ -470,7 +476,7 @@ function TimelineEvent({
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className="absolute z-10"
       style={{ top, left: 0, right: 0 }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={handleClick}
     >
       {/* Connector dot on timeline */}
       <div
@@ -499,7 +505,7 @@ function TimelineEvent({
 
       {/* Event card */}
       <div
-        className="absolute rounded-xl overflow-hidden"
+        className={`absolute rounded-xl overflow-hidden ${!isDefault ? "cursor-pointer active:scale-[0.98] transition-transform" : ""}`}
         style={{
           left: 20,
           right: 0,
@@ -563,29 +569,6 @@ function TimelineEvent({
             )}
           </div>
 
-          {/* Delete button */}
-          {!isDefault && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              disabled={isDeleting}
-              className={`rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all shrink-0 ${
-                isShort ? "p-1" : "p-1.5"
-              }`}
-            >
-              {isDeleting ? (
-                <Loader2
-                  className={`animate-spin ${
-                    isShort ? "h-3 w-3" : "h-3.5 w-3.5"
-                  }`}
-                />
-              ) : (
-                <Trash2 className={isShort ? "h-3 w-3" : "h-3.5 w-3.5"} />
-              )}
-            </button>
-          )}
         </div>
       </div>
     </motion.div>

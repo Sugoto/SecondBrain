@@ -7,11 +7,13 @@ import {
   Users,
   Car,
   Moon,
+  Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
 import { useTimeEvents } from "@/hooks/useTimeEvents";
 import { EVENT_CATEGORIES } from "@/lib/supabase";
+import type { TimeEvent } from "@/lib/supabase";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +42,7 @@ interface EventDialogProps {
   initialDate: string;
   initialStartTime?: string;
   initialEndTime?: string;
+  editEvent?: TimeEvent | null;
 }
 
 export function EventDialog({
@@ -48,13 +51,18 @@ export function EventDialog({
   initialDate,
   initialStartTime,
   initialEndTime,
+  editEvent,
 }: EventDialogProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { addEvent, isAdding } = useTimeEvents();
+  const { addEvent, updateEvent, deleteEvent, isAdding, isUpdating, isDeleting } = useTimeEvents();
+
+  const isEditMode = !!editEvent;
+  const isBusy = isAdding || isUpdating || isDeleting;
 
   // Initialize with provided time or current time
   const getDefaultStartTime = () => {
+    if (editEvent) return editEvent.start_time;
     if (initialStartTime) return initialStartTime;
     const now = new Date();
     return `${String(now.getHours()).padStart(2, "0")}:${String(
@@ -62,11 +70,11 @@ export function EventDialog({
     ).padStart(2, "0")}`;
   };
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(editEvent?.title || "");
   const [startTime, setStartTime] = useState(getDefaultStartTime);
-  const [endTime, setEndTime] = useState(initialEndTime || "");
-  const [category, setCategory] = useState("");
-  const [notes, setNotes] = useState("");
+  const [endTime, setEndTime] = useState(editEvent?.end_time || initialEndTime || "");
+  const [category, setCategory] = useState(editEvent?.category || "");
+  const [notes, setNotes] = useState(editEvent?.notes || "");
 
   const selectedCat = EVENT_CATEGORIES.find((c) => c.id === category);
   const categoryColor = selectedCat?.color || "#14b8a6";
@@ -74,22 +82,40 @@ export function EventDialog({
   const hasCategory = !!category;
 
   const handleSubmit = async () => {
-    if (!title.trim() || isAdding) return;
+    if (!title.trim() || isBusy) return;
 
-    await addEvent({
-      title: title.trim(),
-      date: initialDate,
-      start_time: startTime,
-      end_time: endTime || null,
-      category,
-      notes: notes.trim() || null,
-    });
+    if (isEditMode && editEvent) {
+      await updateEvent({
+        id: editEvent.id,
+        title: title.trim(),
+        date: initialDate,
+        start_time: startTime,
+        end_time: endTime || null,
+        category,
+        notes: notes.trim() || null,
+      });
+    } else {
+      await addEvent({
+        title: title.trim(),
+        date: initialDate,
+        start_time: startTime,
+        end_time: endTime || null,
+        category,
+        notes: notes.trim() || null,
+      });
+    }
 
     onOpenChange(false);
   };
 
+  const handleDelete = async () => {
+    if (!editEvent || isBusy) return;
+    await deleteEvent(editEvent.id);
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(o) => !isAdding && onOpenChange(o)}>
+    <Dialog open={open} onOpenChange={(o) => !isBusy && onOpenChange(o)}>
       <DialogContent
         className="max-w-md w-[calc(100%-2rem)] rounded-2xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0 border bg-background"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -185,7 +211,7 @@ export function EventDialog({
                   key={cat.id}
                   type="button"
                   onClick={() => setCategory(cat.id)}
-                  disabled={isAdding}
+                  disabled={isBusy}
                   className="h-9 rounded-md flex items-center justify-center border transition-all duration-100 active:scale-95"
                   style={{
                     background: isSelected
@@ -293,14 +319,29 @@ export function EventDialog({
               : `linear-gradient(180deg, transparent 0%, ${categoryColor}05 100%)`,
           }}
         >
-          <Button
-            variant="outline"
-            className="flex-1 h-10"
-            onClick={() => onOpenChange(false)}
-            disabled={isAdding}
-          >
-            Cancel
-          </Button>
+          {isEditMode ? (
+            <Button
+              variant="outline"
+              className="h-10 px-3 text-red-500 hover:text-red-600 hover:bg-red-500/10 border-red-500/30"
+              onClick={handleDelete}
+              disabled={isBusy}
+            >
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="flex-1 h-10"
+              onClick={() => onOpenChange(false)}
+              disabled={isBusy}
+            >
+              Cancel
+            </Button>
+          )}
           <Button
             className="flex-1 h-10 font-semibold"
             style={{
@@ -308,15 +349,15 @@ export function EventDialog({
               boxShadow: `0 4px 12px ${categoryColor}40`,
             }}
             onClick={handleSubmit}
-            disabled={!title.trim() || !category || isAdding}
+            disabled={!title.trim() || !category || isBusy}
           >
-            {isAdding ? (
+            {isBusy && !isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Adding...
+                {isEditMode ? "Saving..." : "Adding..."}
               </>
             ) : (
-              "Add Event"
+              isEditMode ? "Save" : "Add Event"
             )}
           </Button>
         </div>

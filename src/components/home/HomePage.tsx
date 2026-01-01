@@ -4,19 +4,20 @@ import {
   Brain,
   Plus,
   Wallet,
-  Calendar,
   TrendingUp,
   TrendingDown,
   Pill,
   Loader2,
   Check,
   Dumbbell,
+  Building2,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
 import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
 import { useMedicationData } from "@/hooks/useMedicationData";
+import { useTimeEvents, getEventsForDate, getTodayDate } from "@/hooks/useTimeEvents";
 import { formatCurrencyCompact } from "@/components/finances/constants";
 import {
   calculateBudgetTypeInfo,
@@ -29,26 +30,69 @@ import {
 } from "@/components/fitness/utils";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TransactionDialog } from "@/components/finances/TransactionDialog";
-import type { Transaction } from "@/lib/supabase";
+import { OfficeDialog } from "@/components/time/OfficeDialog";
+import { EVENT_CATEGORIES, DEFAULT_DAILY_EVENTS } from "@/lib/supabase";
+import type { Transaction, TimeEvent } from "@/lib/supabase";
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  if (hour < 21) return "Good Evening";
-  return "Good Night";
+function getCategoryColor(categoryId: string): string {
+  return EVENT_CATEGORIES.find((c) => c.id === categoryId)?.color || "#6b7280";
 }
 
-function DateWidget() {
+function ScheduleCard({ onOfficeClick }: { onOfficeClick: () => void }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { events } = useTimeEvents();
 
-  const now = new Date();
-  const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
-  const month = now.toLocaleDateString("en-US", { month: "short" });
-  const dayNum = now.getDate();
+  const today = getTodayDate();
+  const userEvents = useMemo(
+    () => getEventsForDate(events, today),
+    [events, today]
+  );
 
-  const greeting = getGreeting();
+  // Merge user events with default daily events
+  const allEvents = useMemo(() => {
+    const defaultEvents: TimeEvent[] = DEFAULT_DAILY_EVENTS.map((e, i) => ({
+      ...e,
+      id: `default-${i}`,
+      date: today,
+      created_at: "",
+    }));
+    return [...defaultEvents, ...userEvents];
+  }, [userEvents, today]);
+
+  // Calculate free time
+  const scheduledMinutes = useMemo(() => {
+    return allEvents.reduce((total, event) => {
+      if (!event.end_time) return total;
+      const [startH, startM] = event.start_time.split(":").map(Number);
+      const [endH, endM] = event.end_time.split(":").map(Number);
+      const startMinutes = startH * 60 + startM;
+      const endMinutes = endH * 60 + endM;
+      return total + Math.max(0, endMinutes - startMinutes);
+    }, 0);
+  }, [allEvents]);
+
+  const freeMinutes = Math.max(0, 24 * 60 - scheduledMinutes);
+  const freeHours = Math.floor(freeMinutes / 60);
+  const freeMinutesRemainder = Math.round(freeMinutes % 60);
+
+  // Create 24-hour map with category colors
+  const hourlyColors = useMemo(() => {
+    const colors: (string | null)[] = new Array(24).fill(null);
+    allEvents.forEach((event) => {
+      if (!event.end_time) return;
+      const [startH] = event.start_time.split(":").map(Number);
+      const [endH, endM] = event.end_time.split(":").map(Number);
+      const endHour = endM > 0 ? endH : endH - 1;
+      const eventColor = getCategoryColor(event.category);
+      for (let h = startH; h <= Math.min(23, endHour); h++) {
+        if (!colors[h]) {
+          colors[h] = eventColor;
+        }
+      }
+    });
+    return colors;
+  }, [allEvents]);
 
   return (
     <motion.div
@@ -58,61 +102,78 @@ function DateWidget() {
       className="w-full mb-4"
     >
       <div
-        className="relative rounded-2xl p-4 overflow-hidden"
+        className="relative rounded-xl px-3 py-2.5 overflow-hidden"
         style={{
           background: isDark
-            ? "linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%)"
-            : "linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)",
+            ? "rgba(255, 255, 255, 0.03)"
+            : "rgba(0, 0, 0, 0.02)",
           border: isDark
-            ? "1px solid rgba(59, 130, 246, 0.2)"
-            : "1px solid rgba(59, 130, 246, 0.12)",
+            ? "1px solid rgba(255, 255, 255, 0.08)"
+            : "1px solid rgba(0, 0, 0, 0.06)",
         }}
       >
-        {/* Subtle gradient overlay */}
-        <div
-          className="absolute inset-0 opacity-30 pointer-events-none"
-          style={{
-            background: isDark
-              ? "radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 50%)"
-              : "radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)",
-          }}
-        />
-
-        <div className="relative z-10 flex items-center gap-3">
-          {/* Calendar icon */}
-          <div
-            className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{
-              background: isDark
-                ? "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%)"
-                : "linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%)",
-            }}
-          >
-            <Calendar className="h-5 w-5 text-blue-500" />
-          </div>
-
-          <div>
-            {/* Greeting line */}
-            <p className="text-lg font-semibold">
-              <span className="text-foreground">{greeting}, </span>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+            Today's Schedule
+          </p>
+          <div className="flex items-center gap-2">
+            {/* Office Button */}
+            <button
+              onClick={onOfficeClick}
+              className="flex items-center gap-1 px-2 py-1 rounded-md transition-all active:scale-95"
+              style={{
+                background: isDark
+                  ? "rgba(20, 184, 166, 0.15)"
+                  : "rgba(20, 184, 166, 0.1)",
+                border: "1px solid rgba(20, 184, 166, 0.25)",
+              }}
+            >
+              <Building2 className="h-3 w-3 text-teal-500" />
+              <span className="text-[10px] font-medium text-teal-500">Office</span>
+            </button>
+            <div className="flex items-baseline gap-0.5">
               <span
-                style={{
-                  background:
-                    "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
+                className="text-xs font-bold font-mono"
+                style={{ color: "#14b8a6" }}
               >
-                Sugoto
+                {freeHours}h {freeMinutesRemainder}m
               </span>
-            </p>
-
-            {/* Date line */}
-            <p className="text-sm text-muted-foreground mt-0.5">
-              It's {dayName}, {month} {dayNum}
-            </p>
+              <span className="text-[9px] text-muted-foreground ml-1">free</span>
+            </div>
           </div>
+        </div>
+
+        {/* Segmented 24-hour timeline */}
+        <div className="flex gap-[2px]">
+          {hourlyColors.map((color, hour) => (
+            <motion.div
+              key={hour}
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ duration: 0.3, delay: hour * 0.02 }}
+              className="flex-1 h-2.5 rounded-sm"
+              style={{
+                background: color
+                  ? `linear-gradient(180deg, ${color} 0%, ${color}cc 100%)`
+                  : isDark
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.06)",
+                boxShadow: color ? `0 2px 4px ${color}40` : "none",
+              }}
+              title={`${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour} ${
+                hour < 12 ? "AM" : "PM"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Time labels */}
+        <div className="flex justify-between mt-1">
+          <span className="text-[9px] text-muted-foreground">12am</span>
+          <span className="text-[9px] text-muted-foreground">6am</span>
+          <span className="text-[9px] text-muted-foreground">12pm</span>
+          <span className="text-[9px] text-muted-foreground">6pm</span>
+          <span className="text-[9px] text-muted-foreground">12am</span>
         </div>
       </div>
     </motion.div>
@@ -578,6 +639,7 @@ function SupplementsWidget() {
 export function HomePage() {
   const { addTransaction } = useExpenseData();
   const [showAddExpense, setShowAddExpense] = useState(false);
+  const [showOfficeDialog, setShowOfficeDialog] = useState(false);
   const [newTransaction, setNewTransaction] = useState<Transaction | null>(
     null
   );
@@ -619,8 +681,8 @@ export function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto px-4 pb-20">
-        {/* Date Widget */}
-        <DateWidget />
+        {/* Schedule Card */}
+        <ScheduleCard onOfficeClick={() => setShowOfficeDialog(true)} />
 
         {/* Stats Cards Row */}
         <div className="flex gap-2">
@@ -631,6 +693,12 @@ export function HomePage() {
         {/* Supplements Widget */}
         <SupplementsWidget />
       </main>
+
+      {/* Office Dialog */}
+      <OfficeDialog
+        open={showOfficeDialog}
+        onOpenChange={setShowOfficeDialog}
+      />
 
       {/* Transaction Dialog */}
       {showAddExpense && newTransaction && (
