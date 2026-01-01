@@ -1,4 +1,6 @@
 import { memo, useMemo } from "react";
+import ReactECharts from "echarts-for-react";
+import type { EChartsOption } from "echarts";
 
 export interface PieChartDataItem {
   name: string;
@@ -10,21 +12,19 @@ interface LabeledPieChartProps {
   data: PieChartDataItem[];
   theme: "light" | "dark";
   size?: number;
-  innerRadius?: number;
-  outerRadius?: number;
+  innerRadius?: number | string;
+  outerRadius?: number | string;
   labelThreshold?: number;
   formatValue?: (value: number) => string;
 }
-
-const DEG_TO_RAD = Math.PI / 180;
 
 export const LabeledPieChart = memo(function LabeledPieChart({
   data,
   theme,
   size = 240,
-  innerRadius = 42,
-  outerRadius = 60,
-  labelThreshold = 0.0,
+  innerRadius = "25%",
+  outerRadius = "40%",
+  labelThreshold = 0,
   formatValue = (v) => `₹${v.toLocaleString("en-IN")}`,
 }: LabeledPieChartProps) {
   const total = useMemo(
@@ -32,175 +32,158 @@ export const LabeledPieChart = memo(function LabeledPieChart({
     [data]
   );
 
-  const slices = useMemo(() => {
-    if (total === 0) return [];
+  const option: EChartsOption = useMemo(() => {
+    const isDark = theme === "dark";
+    const textColor = isDark ? "#a1a1aa" : "#71717a";
 
-    const cx = size / 2;
-    const cy = size / 2;
-    let currentAngle = -90; // Start from top
+    return {
+      tooltip: {
+        trigger: "item",
+        backgroundColor: isDark
+          ? "rgba(24, 24, 27, 0.8)"
+          : "rgba(255, 255, 255, 0.85)",
+        borderColor: isDark
+          ? "rgba(63, 63, 70, 0.5)"
+          : "rgba(228, 228, 231, 0.6)",
+        borderWidth: 1,
+        padding: [10, 14],
+        textStyle: {
+          color: isDark ? "#fafafa" : "#18181b",
+          fontSize: 12,
+        },
+        extraCssText: `
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 12px;
+          box-shadow: ${
+            isDark
+              ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)"
+          };
+        `,
+        formatter: (params) => {
+          const p = params as { name: string; value: number; percent: number };
+          return `<div style="font-weight:500">${p.name}</div>
+           <div style="color:${textColor}">${formatValue(p.value)} (${p.percent.toFixed(0)}%)</div>`;
+        },
+      },
+      series: [
+        {
+          type: "pie",
+          radius: [innerRadius, outerRadius],
+          center: ["50%", "50%"],
+          avoidLabelOverlap: true,
+          itemStyle: {
+            borderRadius: 4,
+            borderColor: isDark ? "#27272a" : "#ffffff",
+            borderWidth: 2,
+          },
+          label: {
+            show: true,
+            position: "outside",
+            formatter: (params) => {
+              const p = params as { name: string; percent: number };
+              if (p.percent < labelThreshold * 100) return "";
+              return `{name|${p.name}}\n{percent|${p.percent.toFixed(0)}%}`;
+            },
+            rich: {
+              name: {
+                fontSize: 9,
+                fontWeight: 500,
+                color: textColor,
+              },
+              percent: {
+                fontSize: 9,
+                fontWeight: 600,
+              },
+            },
+            color: textColor,
+            minMargin: 5,
+          },
+          labelLine: {
+            show: true,
+            length: 10,
+            length2: 8,
+            smooth: 0.2,
+            lineStyle: {
+              width: 1.5,
+              type: "solid",
+            },
+          },
+          labelLayout: {
+            hideOverlap: false,
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: "rgba(0, 0, 0, 0.2)",
+            },
+            scale: true,
+            scaleSize: 6,
+          },
+          data: data.map((item) => ({
+            name: item.name,
+            value: item.value,
+            itemStyle: {
+              color: {
+                type: "linear",
+                x: 0,
+                y: 0,
+                x2: 1,
+                y2: 1,
+                colorStops: [
+                  { offset: 0, color: item.color },
+                  { offset: 1, color: adjustColorOpacity(item.color, 0.7) },
+                ],
+              },
+            },
+            label: {
+              rich: {
+                percent: {
+                  color: item.color,
+                },
+              },
+            },
+            labelLine: {
+              lineStyle: {
+                color: adjustColorOpacity(item.color, 0.6),
+              },
+            },
+          })),
+          animationType: "scale",
+          animationEasing: "elasticOut",
+          animationDelay: (_idx: number) => _idx * 50,
+        },
+      ],
+    };
+  }, [data, theme, innerRadius, outerRadius, labelThreshold, formatValue]);
 
-    return data.map((item, index) => {
-      const percentage = item.value / total;
-      const angle = percentage * 360;
-      const startAngle = currentAngle;
-      const endAngle = currentAngle + angle;
-      currentAngle = endAngle;
-
-      const startRad = startAngle * DEG_TO_RAD;
-      const endRad = endAngle * DEG_TO_RAD;
-
-      // Outer arc points
-      const x1 = cx + outerRadius * Math.cos(startRad);
-      const y1 = cy + outerRadius * Math.sin(startRad);
-      const x2 = cx + outerRadius * Math.cos(endRad);
-      const y2 = cy + outerRadius * Math.sin(endRad);
-
-      // Inner arc points
-      const x1Inner = cx + innerRadius * Math.cos(startRad);
-      const y1Inner = cy + innerRadius * Math.sin(startRad);
-      const x2Inner = cx + innerRadius * Math.cos(endRad);
-      const y2Inner = cy + innerRadius * Math.sin(endRad);
-
-      const largeArc = angle > 180 ? 1 : 0;
-
-      // SVG path for donut slice
-      const path = `
-        M ${x1Inner} ${y1Inner}
-        L ${x1} ${y1}
-        A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x2} ${y2}
-        L ${x2Inner} ${y2Inner}
-        A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x1Inner} ${y1Inner}
-        Z
-      `;
-
-      // Label line positions
-      const midAngle = (startAngle + endAngle) / 2;
-      const midRad = midAngle * DEG_TO_RAD;
-
-      const lineStartX = cx + (outerRadius + 4) * Math.cos(midRad);
-      const lineStartY = cy + (outerRadius + 4) * Math.sin(midRad);
-
-      const elbowX = cx + (outerRadius + 18) * Math.cos(midRad);
-      const elbowY = cy + (outerRadius + 18) * Math.sin(midRad);
-
-      const isRightSide = Math.cos(midRad) >= 0;
-      const lineEndX = elbowX + (isRightSide ? 16 : -16);
-      const lineEndY = elbowY;
-
-      return {
-        key: `${item.name}-${index}`,
-        name: item.name,
-        value: item.value,
-        color: item.color,
-        path,
-        percentage,
-        lineStartX,
-        lineStartY,
-        elbowX,
-        elbowY,
-        lineEndX,
-        lineEndY,
-        isRightSide,
-      };
-    });
-  }, [data, total, size, innerRadius, outerRadius]);
-
-  if (total === 0 || slices.length === 0) return null;
-
-  const isDark = theme === "dark";
-  const textColor = isDark ? "#a1a1aa" : "#71717a";
-  const strokeColor = isDark ? "#27272a" : "#ffffff";
+  // Don't render if no valid data
+  if (!data || data.length === 0 || total === 0) return null;
 
   return (
-    <svg
-      viewBox={`0 0 ${size} ${size}`}
-      className="w-full h-full"
-      style={{ maxHeight: size - 20 }}
-      aria-label="Pie chart"
-    >
-      {/* Gradient definitions */}
-      <defs>
-        {slices.map((slice, i) => (
-          <linearGradient
-            key={slice.key}
-            id={`pie-grad-${i}`}
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="100%"
-          >
-            <stop offset="0%" stopColor={slice.color} stopOpacity={1} />
-            <stop offset="100%" stopColor={slice.color} stopOpacity={0.7} />
-          </linearGradient>
-        ))}
-      </defs>
-
-      {/* Pie slices */}
-      {slices.map((slice, i) => (
-        <path
-          key={slice.key}
-          d={slice.path}
-          fill={`url(#pie-grad-${i})`}
-          stroke={strokeColor}
-          strokeWidth={2}
-          className="transition-opacity duration-150 hover:opacity-80"
-          style={{ cursor: "pointer" }}
-        >
-          <title>
-            {slice.name}: {formatValue(slice.value)} (
-            {(slice.percentage * 100).toFixed(0)}%)
-          </title>
-        </path>
-      ))}
-
-      {/* Labels with connecting lines */}
-      {slices.map((slice) =>
-        slice.percentage >= labelThreshold ? (
-          <g key={`label-${slice.key}`}>
-            {/* Connecting line */}
-            <path
-              d={`M ${slice.lineStartX} ${slice.lineStartY} L ${slice.elbowX} ${slice.elbowY} L ${slice.lineEndX} ${slice.lineEndY}`}
-              fill="none"
-              stroke={slice.color}
-              strokeWidth={1.5}
-              strokeOpacity={0.6}
-            />
-            {/* Dot at end of line */}
-            <circle
-              cx={slice.lineEndX}
-              cy={slice.lineEndY}
-              r={2}
-              fill={slice.color}
-            />
-            {/* Category name */}
-            <text
-              x={slice.lineEndX + (slice.isRightSide ? 4 : -4)}
-              y={slice.lineEndY}
-              textAnchor={slice.isRightSide ? "start" : "end"}
-              fontSize={9}
-              fill={textColor}
-              fontWeight={500}
-              dominantBaseline="central"
-            >
-              {slice.name}
-            </text>
-            {/* Percentage */}
-            <text
-              x={slice.lineEndX + (slice.isRightSide ? 4 : -4)}
-              y={slice.lineEndY + 10}
-              textAnchor={slice.isRightSide ? "start" : "end"}
-              fontSize={8}
-              fill={slice.color}
-              fontWeight={600}
-              dominantBaseline="central"
-            >
-              {(slice.percentage * 100).toFixed(0)}%
-            </text>
-          </g>
-        ) : null
-      )}
-    </svg>
+    <ReactECharts
+      option={option}
+      style={{ width: "100%", height: size }}
+      opts={{ renderer: "canvas" }}
+      notMerge
+      lazyUpdate
+    />
   );
 });
+
+// Helper to adjust color opacity (works with hex colors)
+function adjustColorOpacity(hex: string, opacity: number): string {
+  // Remove # if present
+  const cleanHex = hex.replace("#", "");
+
+  // Parse RGB values
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
 
 export default LabeledPieChart;

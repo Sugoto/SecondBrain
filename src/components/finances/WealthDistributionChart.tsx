@@ -49,8 +49,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
           <LabeledPieChart
             data={pieData}
             theme={theme}
-            innerRadius={45}
-            outerRadius={65}
+
             formatValue={formatCurrency}
           />
         </div>

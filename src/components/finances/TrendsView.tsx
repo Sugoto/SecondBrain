@@ -2,6 +2,8 @@ import { useMemo, memo } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import ReactECharts from "echarts-for-react";
+import type { EChartsOption } from "echarts";
 import {
   EXPENSE_CATEGORIES,
   formatCurrency,
@@ -25,8 +27,7 @@ interface TrendsViewProps {
   onTransactionClick: (txn: Transaction) => void;
 }
 
-// million-ignore - SVG elements not compatible with Million.js
-// Pure SVG Area Chart - lightweight and works with any data format
+// ECharts Area Chart - performant canvas-based rendering
 const AreaChart = memo(function AreaChart({
   data,
   theme,
@@ -34,148 +35,159 @@ const AreaChart = memo(function AreaChart({
   data: { label: string; total: number }[];
   theme: "light" | "dark";
 }) {
-  const width = 320;
-  const height = 180;
-  const padding = { top: 0, right: 10, bottom: 30, left: 30 };
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
+  const option: EChartsOption = useMemo(() => {
+    const isDark = theme === "dark";
+    const textColor = isDark ? "#a1a1aa" : "#71717a";
+    const gridColor = isDark ? "#3f3f46" : "#e4e4e7";
 
-  const maxValue = Math.max(...data.map((d) => d.total), 1);
+    // Format labels for x-axis (show only day part)
+    const xLabels = data.map((d) => d.label.split(" ")[1] || d.label);
+    const values = data.map((d) => d.total);
 
-  // Create points for the area
-  const points = data.map((d, i) => {
-    const x = padding.left + (i / (data.length - 1)) * chartWidth;
-    const y = padding.top + chartHeight - (d.total / maxValue) * chartHeight;
-    return { x, y, label: d.label, value: d.total };
-  });
+    return {
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: isDark
+          ? "rgba(24, 24, 27, 0.8)"
+          : "rgba(255, 255, 255, 0.85)",
+        borderColor: isDark
+          ? "rgba(63, 63, 70, 0.5)"
+          : "rgba(228, 228, 231, 0.6)",
+        borderWidth: 1,
+        padding: [10, 14],
+        textStyle: {
+          color: isDark ? "#fafafa" : "#18181b",
+          fontSize: 12,
+        },
+        extraCssText: `
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 12px;
+          box-shadow: ${
+            isDark
+              ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)"
+          };
+        `,
+        axisPointer: {
+          type: "line",
+          lineStyle: {
+            color: isDark ? "rgba(139, 92, 246, 0.4)" : "rgba(139, 92, 246, 0.3)",
+            width: 1,
+            type: "dashed",
+          },
+        },
+        formatter: (params) => {
+          const p = params as { dataIndex: number; value: number }[];
+          if (!p.length) return "";
+          const idx = p[0].dataIndex;
+          const item = data[idx];
+          return `<div style="font-weight:500">${item.label}</div>
+                  <div style="color:#8b5cf6">₹${item.total.toLocaleString("en-IN")}</div>`;
+        },
+      },
+      grid: {
+        left: 45,
+        right: 10,
+        top: 10,
+        bottom: 30,
+        containLabel: false,
+      },
+      xAxis: {
+        type: "category",
+        data: xLabels,
+        axisLine: {
+          lineStyle: { color: gridColor },
+        },
+        axisTick: { show: false },
+        axisLabel: {
+          color: textColor,
+          fontSize: 10,
+          interval: Math.ceil(data.length / 7) - 1,
+        },
+      },
+      yAxis: {
+        type: "value",
+        axisLine: {
+          show: true,
+          lineStyle: { color: gridColor },
+        },
+        axisTick: { show: false },
+        splitLine: {
+          lineStyle: {
+            color: gridColor,
+            type: "dashed",
+            opacity: 0.6,
+          },
+        },
+        axisLabel: {
+          color: textColor,
+          fontSize: 10,
+          formatter: (value: number) =>
+            value >= 1000 ? `₹${(value / 1000).toFixed(0)}k` : `₹${value}`,
+        },
+      },
+      series: [
+        {
+          type: "line",
+          data: values,
+          smooth: false,
+          symbol: "circle",
+          symbolSize: 8,
+          itemStyle: {
+            color: "#8b5cf6",
+            borderColor: isDark ? "#18181b" : "#ffffff",
+            borderWidth: 2,
+          },
+          lineStyle: {
+            width: 2.5,
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 1,
+              y2: 0,
+              colorStops: [
+                { offset: 0, color: "#a78bfa" },
+                { offset: 0.5, color: "#8b5cf6" },
+                { offset: 1, color: "#7c3aed" },
+              ],
+            },
+          },
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(139, 92, 246, 0.4)" },
+                { offset: 1, color: "rgba(139, 92, 246, 0)" },
+              ],
+            },
+          },
+          emphasis: {
+            scale: 1.5,
+          },
+          animationDuration: 800,
+          animationEasing: "cubicOut",
+        },
+      ],
+    };
+  }, [data, theme]);
 
-  // Create SVG path for the line
-  const linePath = points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ");
-
-  // Create area path (line + bottom)
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${
-    padding.top + chartHeight
-  } L ${padding.left} ${padding.top + chartHeight} Z`;
-
-  const isDark = theme === "dark";
-  const gridColor = isDark ? "#3f3f46" : "#e4e4e7";
-  const textColor = isDark ? "#a1a1aa" : "#71717a";
-
-  // Y-axis ticks
-  const yTicks = [0, maxValue * 0.5, maxValue];
+  // Don't render if no data or insufficient data points
+  if (!data || data.length < 2) return null;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
-      <defs>
-        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
-          <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-        </linearGradient>
-        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="50%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#7c3aed" />
-        </linearGradient>
-      </defs>
-
-      {/* X-axis line */}
-      <line
-        x1={padding.left}
-        y1={padding.top + chartHeight}
-        x2={width - padding.right}
-        y2={padding.top + chartHeight}
-        stroke={gridColor}
-        strokeWidth={1}
-      />
-
-      {/* Y-axis line */}
-      <line
-        x1={padding.left}
-        y1={padding.top}
-        x2={padding.left}
-        y2={padding.top + chartHeight}
-        stroke={gridColor}
-        strokeWidth={1}
-      />
-
-      {/* Horizontal grid lines */}
-      {yTicks.map((tick, i) => {
-        const y = padding.top + chartHeight - (tick / maxValue) * chartHeight;
-        return (
-          <g key={i}>
-            <line
-              x1={padding.left}
-              y1={y}
-              x2={width - padding.right}
-              y2={y}
-              stroke={gridColor}
-              strokeDasharray="3,3"
-              strokeOpacity={0.6}
-            />
-            <text
-              x={padding.left - 5}
-              y={y + 4}
-              textAnchor="end"
-              fontSize={10}
-              fill={textColor}
-            >
-              {tick >= 1000
-                ? `₹${(tick / 1000).toFixed(0)}k`
-                : `₹${Math.round(tick)}`}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Area fill */}
-      <path d={areaPath} fill="url(#areaGradient)" />
-
-      {/* Line */}
-      <path
-        d={linePath}
-        fill="none"
-        stroke="url(#lineGradient)"
-        strokeWidth={2.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Dots */}
-      {points.map((p, i) => (
-        <circle
-          key={i}
-          cx={p.x}
-          cy={p.y}
-          r={3}
-          fill="#8b5cf6"
-          stroke={isDark ? "#18181b" : "#ffffff"}
-          strokeWidth={2}
-        >
-          <title>{`${p.label}: ₹${p.value.toLocaleString()}`}</title>
-        </circle>
-      ))}
-
-      {/* X-axis labels */}
-      {points
-        .filter(
-          (_, i) =>
-            i % Math.ceil(points.length / 7) === 0 || i === points.length - 1
-        )
-        .map((p, i) => (
-          <text
-            key={i}
-            x={p.x}
-            y={height - 8}
-            textAnchor="middle"
-            fontSize={10}
-            fill={textColor}
-          >
-            {p.label.split(" ")[1] || p.label}
-          </text>
-        ))}
-    </svg>
+    <ReactECharts
+      option={option}
+      style={{ width: "100%", height: "100%" }}
+      opts={{ renderer: "canvas" }}
+      notMerge
+      lazyUpdate
+    />
   );
 });
 
