@@ -17,13 +17,9 @@ import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
 import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
 import { useMedicationData } from "@/hooks/useMedicationData";
+import { formatCurrencyCompact } from "@/components/finances/constants";
 import {
-  MONTHLY_BUDGET,
-  formatCurrencyCompact,
-} from "@/components/finances/constants";
-import {
-  calculateBudgetInfo,
-  getMonthlyAmount,
+  calculateBudgetTypeInfo,
   createEmptyTransaction,
 } from "@/components/finances/utils";
 import {
@@ -177,37 +173,29 @@ interface BudgetCardProps {
 
 function BudgetCard({ onAddExpense }: BudgetCardProps) {
   const { transactions } = useExpenseData();
+  const { userStats } = useUserStats();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const budgetInfo = useMemo(() => {
-    // Get current month's expenses (excluding budget-excluded items)
-    const now = new Date();
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Use the same calculation as the expenses page for consistency
+  const budgetTypeInfo = useMemo(() => {
+    return calculateBudgetTypeInfo(
+      transactions,
+      userStats?.needs_budget,
+      userStats?.wants_budget
+    );
+  }, [transactions, userStats?.needs_budget, userStats?.wants_budget]);
 
-    const monthlyExpenses = transactions
-      .filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          txDate >= currentMonthStart &&
-          t.type === "expense" &&
-          !t.excluded_from_budget
-        );
-      })
-      .reduce((sum, t) => sum + getMonthlyAmount(t), 0);
-
-    return calculateBudgetInfo(monthlyExpenses, MONTHLY_BUDGET);
-  }, [transactions]);
-
-  const { percentUsed, totalRemaining } = budgetInfo;
+  const percentUsed = budgetTypeInfo.wantsPercent;
+  const totalRemaining = budgetTypeInfo.wantsRemaining;
   const isOverBudget = percentUsed > 100;
 
-  // Colors based on budget status
+  // Colors based on budget status (orange for wants theme)
   const progressColor = isOverBudget
     ? "#ef4444"
     : percentUsed > 80
     ? "#f59e0b"
-    : "#8b5cf6";
+    : "#f97316";
 
   return (
     <motion.div
@@ -234,13 +222,13 @@ function BudgetCard({ onAddExpense }: BudgetCardProps) {
             <div
               className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
               style={{
-                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
               }}
             >
               <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
             </div>
             <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-              Budget
+              Wants Budget
             </span>
           </div>
           <Plus className="h-3 w-3 text-muted-foreground/50" />

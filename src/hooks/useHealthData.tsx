@@ -12,6 +12,9 @@ const ACTIVITY_PRIORITY: Record<ActivityLevel, number> = {
   heavy: 3,
 };
 
+// Bonus steps added when marking a day as workout
+const WORKOUT_STEP_BONUS = 1000;
+
 // Get activity level considering workout status (workout = at least moderate)
 function getActivityLevel(steps: number, isWorkout: boolean): ActivityLevel {
   const stepLevel = stepsToActivityLevel(steps);
@@ -184,6 +187,7 @@ export function useHealthData() {
     },
     
     // Merge from Google Fit - keeps the GREATER step count for each date
+    // Preserves workout bonus: incoming steps + bonus (if workout) vs existing
     mergeActivityLog: (_newActivityEntries: ActivityLog, newStepEntries: StepLog) => {
       if (!userStats?.id) return;
       
@@ -193,14 +197,18 @@ export function useHealthData() {
       // For each date, keep the greater step count
       for (const [date, newSteps] of Object.entries(newStepEntries)) {
         const existingSteps = stepLog[date] ?? 0;
-        const greaterSteps = Math.max(existingSteps, newSteps);
+        const isWorkout = workoutDates.has(date);
+        // Add workout bonus to incoming steps if this is a workout day
+        // This ensures the bonus is preserved when syncing
+        const incomingStepsWithBonus = newSteps + (isWorkout ? WORKOUT_STEP_BONUS : 0);
+        const greaterSteps = Math.max(existingSteps, incomingStepsWithBonus);
         mergedStepLog[date] = greaterSteps;
         
         // Update activity level based on the greater step count
         // But respect manual activity entries - don't override those
         // Workout days get at least moderate
         if (!manualActivityDates.has(date)) {
-          mergedActivityLog[date] = getActivityLevel(greaterSteps, workoutDates.has(date));
+          mergedActivityLog[date] = getActivityLevel(greaterSteps, isWorkout);
         }
       }
       
@@ -222,34 +230,44 @@ export function useHealthData() {
     // Workout dates
     workoutDates,
     
-    // Toggle workout for a date - also updates activity level
+    // Toggle workout for a date - also updates activity level and step count
+    // Idempotent: only adds/removes bonus once based on workout state transition
     toggleWorkout: (date: string) => {
       if (!userStats?.id) return;
       
       const newWorkoutDates = new Set(workoutDates);
+      const newStepLog = { ...stepLog };
       const isAdding = !newWorkoutDates.has(date);
       
       if (isAdding) {
+        // Mark as workout - add step bonus (only happens when transitioning to workout)
         newWorkoutDates.add(date);
+        newStepLog[date] = (newStepLog[date] ?? 0) + WORKOUT_STEP_BONUS;
       } else {
+        // Unmark workout - remove step bonus (only happens when transitioning from workout)
         newWorkoutDates.delete(date);
+        // Never go below 0
+        newStepLog[date] = Math.max(0, (newStepLog[date] ?? 0) - WORKOUT_STEP_BONUS);
       }
       
-      // Update activity level based on workout status (unless manually set)
+      // Update activity level based on workout status and new step count (unless manually set)
       const newActivityLog = { ...activityLog };
       if (!manualActivityDates.has(date)) {
-        const steps = stepLog[date] ?? 0;
-        newActivityLog[date] = getActivityLevel(steps, isAdding);
+        newActivityLog[date] = getActivityLevel(newStepLog[date], isAdding);
       }
       
       const workoutDatesArray = [...newWorkoutDates].sort();
       const manualDatesArray = [...manualActivityDates].sort();
       
-      updateCaches({ workout_dates: workoutDatesArray, activity_log: newActivityLog });
+      updateCaches({ 
+        workout_dates: workoutDatesArray, 
+        activity_log: newActivityLog,
+        step_log: newStepLog,
+      });
       activityMutation.mutate({ 
         userId: userStats.id, 
         activityLog: newActivityLog, 
-        stepLog,
+        stepLog: newStepLog,
         manualDates: manualDatesArray,
         workoutDates: workoutDatesArray,
       });
