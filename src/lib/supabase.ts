@@ -13,9 +13,6 @@ export type Transaction = {
   merchant: string | null;
   date: string;
   time: string | null;
-  type: "expense" | "income";
-  account: string | null;
-  upi_ref: string | null;
   category: string | null;
   excluded_from_budget: boolean;
   details: string | null;

@@ -316,3 +316,48 @@ export function useMutualFundWatchlist() {
     lastUpdated: dataUpdatedAt ? new Date(dataUpdatedAt) : null,
   };
 }
+
+// Utility to calculate portfolio totals from funds and investments
+export type PortfolioTotals = {
+  invested: number;
+  current: number;
+  dailyChange: number;
+  netChange: number;
+};
+
+export function calculateMFPortfolioTotals(
+  funds: FundWithStats[],
+  investments: Array<{ schemeCode: number; units: number; amount: number }>
+): PortfolioTotals {
+  let invested = 0;
+  let current = 0;
+  let dailyChange = 0;
+
+  for (const fund of funds) {
+    const fundInvestments = investments.filter(
+      (inv) => inv.schemeCode === fund.schemeCode
+    );
+
+    let totalUnits = 0;
+    let totalInvested = 0;
+
+    for (const inv of fundInvestments) {
+      totalUnits += inv.units;
+      totalInvested += inv.amount;
+    }
+
+    const currentValue = totalUnits * fund.currentNav;
+    const previousValue = totalUnits * fund.previousNav;
+
+    invested += totalInvested;
+    current += currentValue;
+    dailyChange += currentValue - previousValue;
+  }
+
+  return {
+    invested,
+    current,
+    dailyChange,
+    netChange: current - invested,
+  };
+}

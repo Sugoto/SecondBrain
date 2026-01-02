@@ -3,35 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Landmark, ChevronDown, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { UserStats } from "@/lib/supabase";
-
-type FDConfig = {
-  bank: string;
-  rate: number;
-  startDate: string;
-  maturityDate: string;
-  compoundingFrequency: number;
-};
-
-const FD_CONFIG: FDConfig[] = [
-  {
-    bank: "Axis Bank",
-    rate: 7.25,
-    startDate: "2025-02-08",
-    maturityDate: "2026-05-08",
-    compoundingFrequency: 4,
-  },
-];
-
-function calculateCompoundInterest(
-  principal: number,
-  annualRate: number,
-  compoundingFrequency: number,
-  years: number
-): number {
-  const r = annualRate / 100;
-  const n = compoundingFrequency;
-  return principal * Math.pow(1 + r / n, n * years);
-}
+import { calculateFDValues } from "./fdUtils";
 
 interface FixedDepositsSectionProps {
   userStats: UserStats | null;
@@ -46,65 +18,11 @@ export function FixedDepositsSection({
   const principal = userStats?.fixed_deposits ?? 0;
   const isDark = theme === "dark";
 
-  // Calculate current and maturity values for all FDs
-  const fdCalculations = useMemo(() => {
-    if (principal === 0) return [];
-
-    const now = new Date();
-
-    return FD_CONFIG.map((fd) => {
-      const startDate = new Date(fd.startDate);
-      const maturityDate = new Date(fd.maturityDate);
-
-      // Calculate years elapsed since start
-      const yearsElapsed = Math.max(
-        0,
-        (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
-      );
-
-      // Calculate total tenure in years
-      const totalTenure =
-        (maturityDate.getTime() - startDate.getTime()) /
-        (1000 * 60 * 60 * 24 * 365.25);
-
-      // Current value based on time elapsed
-      const currentValue = calculateCompoundInterest(
-        principal,
-        fd.rate,
-        fd.compoundingFrequency,
-        Math.min(yearsElapsed, totalTenure) // Don't exceed maturity
-      );
-
-      // Maturity value
-      const maturityValue = calculateCompoundInterest(
-        principal,
-        fd.rate,
-        fd.compoundingFrequency,
-        totalTenure
-      );
-
-      // Interest earned so far
-      const interestEarned = currentValue - principal;
-
-      // Total interest at maturity
-      const totalInterest = maturityValue - principal;
-
-      return {
-        ...fd,
-        principal,
-        currentValue,
-        maturityValue,
-        interestEarned,
-        totalInterest,
-        yearsElapsed,
-        totalTenure,
-        maturityDateFormatted: maturityDate.toLocaleDateString("en-IN", {
-          month: "short",
-          year: "numeric",
-        }),
-      };
-    });
-  }, [principal]);
+  // Calculate current and maturity values for all FDs using shared utility
+  const fdCalculations = useMemo(
+    () => calculateFDValues(principal),
+    [principal]
+  );
 
   if (principal === 0 || fdCalculations.length === 0) return null;
 

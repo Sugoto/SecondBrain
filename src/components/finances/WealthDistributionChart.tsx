@@ -2,6 +2,7 @@ import { useMemo, memo } from "react";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { formatCurrency } from "./constants";
+import { getCurrentFDValue } from "./fdUtils";
 import type { UserStats } from "@/lib/supabase";
 import { LabeledPieChart } from "@/components/shared";
 
@@ -17,21 +18,34 @@ const ASSET_CONFIG = [
 interface WealthDistributionChartProps {
   userStats: UserStats | null;
   theme: "light" | "dark";
+  mutualFundsValue?: number; // Real-time MF portfolio value
 }
 
 export const WealthDistributionChart = memo(function WealthDistributionChart({
   userStats,
   theme,
+  mutualFundsValue,
 }: WealthDistributionChartProps) {
   const pieData = useMemo(() => {
     if (!userStats) return [];
 
-    return ASSET_CONFIG.map((asset) => ({
-      name: asset.label,
-      value: userStats[asset.key] || 0,
-      color: asset.color,
-    })).filter((item) => item.value > 0);
-  }, [userStats]);
+    return ASSET_CONFIG.map((asset) => {
+      let value = userStats[asset.key] || 0;
+      
+      // Use real-time values for FD and MF
+      if (asset.key === "fixed_deposits") {
+        value = getCurrentFDValue(userStats.fixed_deposits || 0);
+      } else if (asset.key === "mutual_funds" && mutualFundsValue !== undefined) {
+        value = mutualFundsValue;
+      }
+      
+      return {
+        name: asset.label,
+        value,
+        color: asset.color,
+      };
+    }).filter((item) => item.value > 0);
+  }, [userStats, mutualFundsValue]);
 
   if (pieData.length === 0) {
     return null;

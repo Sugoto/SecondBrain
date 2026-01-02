@@ -1,14 +1,30 @@
 import type { Transaction, UserStats } from "@/lib/supabase";
 import { EXPENSE_CATEGORIES, getTransactionBudgetType, DEFAULT_NEEDS_BUDGET, DEFAULT_WANTS_BUDGET } from "./constants";
+import { getCurrentFDValue } from "./fdUtils";
 import type { TimeFilter, DateRange } from "./types";
 
-// Net worth calculation
-export function calculateNetWorth(stats: UserStats | null): number {
+// Net worth calculation options for real-time values
+export type NetWorthOptions = {
+  mutualFundsValue?: number; // Real-time MF portfolio value (units × NAV)
+};
+
+// Net worth calculation - uses current FD value and optionally real-time MF value
+export function calculateNetWorth(
+  stats: UserStats | null,
+  options?: NetWorthOptions
+): number {
   if (!stats) return 0;
+  
+  // Get current FD value with accrued interest instead of just principal
+  const currentFDValue = getCurrentFDValue(stats.fixed_deposits || 0);
+  
+  // Use real-time MF value if provided, otherwise fall back to static value
+  const mfValue = options?.mutualFundsValue ?? (stats.mutual_funds || 0);
+  
   return (
     (stats.bank_savings || 0) +
-    (stats.fixed_deposits || 0) +
-    (stats.mutual_funds || 0) +
+    currentFDValue +
+    mfValue +
     (stats.ppf || 0) +
     (stats.epf || 0)
   );
@@ -33,7 +49,7 @@ export function calculateMonthlySavings(
   
   const recentTransactions = transactions.filter((txn) => {
     const txnDate = new Date(txn.date);
-    return txnDate >= threeMonthsAgo && txn.type === "expense";
+    return txnDate >= threeMonthsAgo;
   });
 
   if (!recentTransactions.length) {
@@ -335,9 +351,6 @@ export function createEmptyTransaction(): Transaction {
     merchant: "",
     date: now.toISOString().split("T")[0],
     time: now.toTimeString().slice(0, 8),
-    type: "expense",
-    account: null,
-    upi_ref: null,
     category: null,
     excluded_from_budget: false,
     details: null,
@@ -525,7 +538,7 @@ export function calculateBudgetTypeInfo(
   
   // Filter to current month, expenses only, budget-included
   const monthlyTransactions = transactions.filter((t) => {
-    if (t.type !== "expense" || t.excluded_from_budget) return false;
+    if (t.excluded_from_budget) return false;
     
     // Handle prorated transactions
     if (t.prorate_months && t.prorate_months > 1) {

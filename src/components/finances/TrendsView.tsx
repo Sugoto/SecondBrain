@@ -220,7 +220,6 @@ export const TrendsView = memo(function TrendsView({
         .filter(
           (t) =>
             t.date === dateStr &&
-            t.type === "expense" &&
             !t.excluded_from_budget
         )
         .reduce((sum, t) => sum + t.amount, 0);
@@ -241,7 +240,7 @@ export const TrendsView = memo(function TrendsView({
 
       const monthTotal = transactions
         .filter((t) => {
-          if (t.type !== "expense" || t.excluded_from_budget) return false;
+          if (t.excluded_from_budget) return false;
 
           if (t.prorate_months && t.prorate_months > 1) {
             return isProratedInMonth(t, monthStart);
@@ -311,7 +310,7 @@ export const TrendsView = memo(function TrendsView({
     categoryTotals["Uncategorized"]?.count > 0;
 
   const hasExpenses = useMemo(
-    () => transactions.some((t) => t.type === "expense"),
+    () => transactions.length > 0,
     [transactions]
   );
 

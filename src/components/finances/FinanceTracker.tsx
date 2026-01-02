@@ -417,7 +417,6 @@ export function FinanceTracker({
             merchant: updated.merchant || null,
             date: updated.date,
             time: updated.time,
-            type: "expense",
             category: updated.category || null,
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details || null,
@@ -552,9 +551,7 @@ export function FinanceTracker({
 
   // Total expenses for current filter period (no prorations or exclusions)
   const totalExpenses = useMemo(() => {
-    return filteredTransactions
-      .filter((t) => t.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0);
+    return filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
   }, [filteredTransactions]);
 
   // Handler to update budget values

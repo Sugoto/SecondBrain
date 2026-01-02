@@ -177,15 +177,12 @@ export const TransactionCard = memo(function TransactionCard({
         className={`font-mono text-xs font-semibold shrink-0 text-right relative z-10 ${
           isExcluded
             ? "text-muted-foreground/50"
-            : txn.type === "expense"
-            ? getMonthlyAmount(txn) >= 500
+            : getMonthlyAmount(txn) >= 500
               ? "text-red-500"
               : "text-foreground"
-            : "text-income"
         }`}
       >
-        {txn.type === "expense" ? "-" : "+"}
-        {formatCurrencyCompact(getMonthlyAmount(txn))}
+        -{formatCurrencyCompact(getMonthlyAmount(txn))}
       </span>
 
       {/* Chevron */}
