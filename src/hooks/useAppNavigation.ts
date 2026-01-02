@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import type {
   AppSection,
   HealthView,
@@ -65,43 +65,57 @@ function toHash(state: NavigationState): string {
   return `#${state.section}`;
 }
 
-// Cache initial state to avoid re-parsing
-const INITIAL_STATE: NavigationState = (() => {
+// ============ SHARED STATE STORE ============
+// Module-level shared state that all hook instances subscribe to
+let sharedState: NavigationState = (() => {
   if (typeof window === "undefined") return DEFAULT_STATE;
   return parseHash(window.location.hash.slice(1)) ?? DEFAULT_STATE;
 })();
 
+const listeners = new Set<() => void>();
+
+function getSnapshot(): NavigationState {
+  return sharedState;
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function emitChange() {
+  listeners.forEach((listener) => listener());
+}
+
+function setSharedState(updater: (prev: NavigationState) => NavigationState) {
+  sharedState = updater(sharedState);
+  emitChange();
+}
+
+// Initialize history state on module load
+if (typeof window !== "undefined") {
+  window.history.replaceState(sharedState, "", toHash(sharedState));
+  
+  // Handle browser back/forward navigation
+  window.addEventListener("popstate", (e: PopStateEvent) => {
+    const newState = (e.state as NavigationState) ?? DEFAULT_STATE;
+    sharedState = newState;
+    emitChange();
+  });
+}
+
 /**
  * Syncs app navigation with browser history for proper back gesture support.
+ * Uses a shared store so all consumers stay in sync.
  */
 export function useAppNavigation() {
-  // Single state object - fewer re-renders than separate useState calls
-  const [state, setState] = useState<NavigationState>(INITIAL_STATE);
+  // Use useSyncExternalStore to subscribe to shared state
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const isHandlingPopstate = useRef(false);
-
-  // Initialize history state on mount
-  useEffect(() => {
-    window.history.replaceState(state, "", toHash(state));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Handle browser back/forward navigation
-  useEffect(() => {
-    const onPopstate = (e: PopStateEvent) => {
-      isHandlingPopstate.current = true;
-      setState((e.state as NavigationState) ?? DEFAULT_STATE);
-      requestAnimationFrame(() => {
-        isHandlingPopstate.current = false;
-      });
-    };
-
-    window.addEventListener("popstate", onPopstate);
-    return () => window.removeEventListener("popstate", onPopstate);
-  }, []);
 
   // Navigate to a section (pushes history for non-home sections)
   const navigateToSection = useCallback((section: AppSection) => {
-    setState((prev) => {
+    setSharedState((prev) => {
       const next = { ...prev, section };
 
       if (!isHandlingPopstate.current) {
@@ -118,7 +132,7 @@ export function useAppNavigation() {
 
   // Update sub-view within a section (replaces history, doesn't add entry)
   const navigateHealthView = useCallback((healthView: HealthView) => {
-    setState((prev) => {
+    setSharedState((prev) => {
       const next = { ...prev, healthView };
       if (!isHandlingPopstate.current) {
         window.history.replaceState(next, "", toHash(next));
@@ -128,7 +142,7 @@ export function useAppNavigation() {
   }, []);
 
   const navigateFinanceView = useCallback((financeView: FinanceView) => {
-    setState((prev) => {
+    setSharedState((prev) => {
       const next = { ...prev, financeView };
       if (!isHandlingPopstate.current) {
         window.history.replaceState(next, "", toHash(next));
@@ -138,7 +152,7 @@ export function useAppNavigation() {
   }, []);
 
   const navigateOmscsView = useCallback((omscsView: OmscsView) => {
-    setState((prev) => {
+    setSharedState((prev) => {
       const next = { ...prev, omscsView };
       if (!isHandlingPopstate.current) {
         window.history.replaceState(next, "", toHash(next));
@@ -148,7 +162,7 @@ export function useAppNavigation() {
   }, []);
 
   const navigateTimeView = useCallback((timeView: TimeView) => {
-    setState((prev) => {
+    setSharedState((prev) => {
       const next = { ...prev, timeView };
       if (!isHandlingPopstate.current) {
         window.history.replaceState(next, "", toHash(next));
@@ -162,7 +176,7 @@ export function useAppNavigation() {
 
     const homeState = { ...DEFAULT_STATE, section: "home" as AppSection };
     window.history.replaceState(homeState, "", "#");
-    setState(homeState);
+    setSharedState(() => homeState);
   }, [state.section]);
 
   return {

@@ -486,7 +486,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
 
       {/* Single Collapsible Card */}
       <Card
-        className="overflow-hidden relative py-0"
+        className="overflow-hidden relative py-0 gap-0"
         style={{
           background: hasPortfolio
             ? isDark

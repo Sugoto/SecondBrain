@@ -15,14 +15,24 @@ export const WATCHLIST_FUNDS = [
     fullName: "SBI Gold Fund - Direct Plan - Growth",
   },
   {
-    schemeCode: 120716,
-    shortName: "UTI Nifty 50",
-    fullName: "UTI Nifty 50 Index Fund - Direct Plan - Growth",
+    schemeCode: 120403,
+    shortName: "Invesco Midcap",
+    fullName: "Invesco India Midcap Fund - Direct Plan - Growth",
   },
   {
-    schemeCode: 143341,
-    shortName: "UTI Nifty Next 50",
-    fullName: "UTI Nifty Next 50 Index Fund - Direct Plan - Growth",
+    schemeCode: 147946,
+    shortName: "Bandhan Small Cap",
+    fullName: "Bandhan Small Cap Fund - Direct Plan - Growth",
+  },
+  {
+    schemeCode: 120524,
+    shortName: "Axis Multi Asset",
+    fullName: "Axis Multi Asset Allocation Fund - Direct Plan - Growth",
+  },
+  {
+    schemeCode: 149383,
+    shortName: "Axis Multicap",
+    fullName: "Axis Multicap Fund - Direct Growth",
   },
 ] as const;
 

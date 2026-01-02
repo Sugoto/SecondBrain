@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Shield } from "lucide-react";
+import { Shield, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { UserStats } from "@/lib/supabase";
 
 interface ProvidentFundSectionProps {
@@ -8,6 +10,7 @@ interface ProvidentFundSectionProps {
 }
 
 export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const ppf = userStats?.ppf ?? 0;
   const epf = userStats?.epf ?? 0;
   const total = ppf + epf;
@@ -23,7 +26,7 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
       <h3 className="text-sm font-semibold">Provident Funds</h3>
       
       <Card 
-        className="px-3 py-2 relative overflow-hidden"
+        className="overflow-hidden relative py-0 gap-0"
         style={{
           background: isDark
             ? "linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, transparent 50%)"
@@ -41,8 +44,11 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
           }}
         />
 
-        {/* Total */}
-        <div className="relative flex items-center justify-between">
+        {/* Summary Header - Clickable to expand */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full px-3 py-2.5 flex items-center justify-between text-left hover:bg-accent/20 transition-colors relative"
+        >
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-violet-500" />
             <span 
@@ -54,55 +60,78 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
               ₹{total.toLocaleString("en-IN")}
             </span>
           </div>
-        </div>
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-transform ${
+              isExpanded ? "rotate-180" : ""
+            }`}
+          />
+        </button>
 
-        {/* Progress Bar */}
-        <div className="relative h-2 rounded-full overflow-hidden flex bg-muted/30">
-          {ppf > 0 && (
-            <div
-              className="h-full"
-              style={{ 
-                width: `${ppfPercent}%`,
-                background: "linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%)",
-                boxShadow: isDark ? "0 0 8px rgba(139, 92, 246, 0.5)" : "none",
-              }}
-            />
-          )}
-          {epf > 0 && (
-            <div
-              className="h-full"
-              style={{ 
-                width: `${epfPercent}%`,
-                background: "linear-gradient(90deg, #6366f1 0%, #818cf8 100%)",
-                boxShadow: isDark ? "0 0 8px rgba(99, 102, 241, 0.5)" : "none",
-              }}
-            />
-          )}
-        </div>
+        {/* Expanded Content */}
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="overflow-hidden"
+            >
+              <div className="px-3 pb-3 relative">
+                {/* Divider */}
+                <div className="h-px bg-border/50 mb-3" />
 
-        {/* Labels */}
-        <div className="relative flex items-center justify-between text-[10px]">
-          {ppf > 0 && (
-            <div className="flex items-center gap-1.5">
-              <div 
-                className="w-2 h-2 rounded-full"
-                style={{ background: "linear-gradient(135deg, #8b5cf6, #a78bfa)" }}
-              />
-              <span className="text-muted-foreground">PPF</span>
-              <span className="font-mono">₹{ppf.toLocaleString("en-IN")}</span>
-            </div>
+                {/* Progress Bar */}
+                <div className="h-2 rounded-full overflow-hidden flex bg-muted/30 mb-2">
+                  {ppf > 0 && (
+                    <div
+                      className="h-full"
+                      style={{ 
+                        width: `${ppfPercent}%`,
+                        background: "linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%)",
+                        boxShadow: isDark ? "0 0 8px rgba(139, 92, 246, 0.5)" : "none",
+                      }}
+                    />
+                  )}
+                  {epf > 0 && (
+                    <div
+                      className="h-full"
+                      style={{ 
+                        width: `${epfPercent}%`,
+                        background: "linear-gradient(90deg, #6366f1 0%, #818cf8 100%)",
+                        boxShadow: isDark ? "0 0 8px rgba(99, 102, 241, 0.5)" : "none",
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Labels */}
+                <div className="flex items-center justify-between text-[10px]">
+                  {ppf > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div 
+                        className="w-2 h-2 rounded-full"
+                        style={{ background: "linear-gradient(135deg, #8b5cf6, #a78bfa)" }}
+                      />
+                      <span className="text-muted-foreground">PPF</span>
+                      <span className="font-mono">₹{ppf.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                  {epf > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div 
+                        className="w-2 h-2 rounded-full"
+                        style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
+                      />
+                      <span className="text-muted-foreground">EPF</span>
+                      <span className="font-mono">₹{epf.toLocaleString("en-IN")}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           )}
-          {epf > 0 && (
-            <div className="flex items-center gap-1.5">
-              <div 
-                className="w-2 h-2 rounded-full"
-                style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
-              />
-              <span className="text-muted-foreground">EPF</span>
-              <span className="font-mono">₹{epf.toLocaleString("en-IN")}</span>
-            </div>
-          )}
-        </div>
+        </AnimatePresence>
       </Card>
     </div>
   );

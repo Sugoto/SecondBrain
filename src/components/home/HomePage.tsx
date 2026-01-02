@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Brain,
@@ -18,6 +18,7 @@ import { useHealthData } from "@/hooks/useHealthData";
 import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
 import { useMedicationData } from "@/hooks/useMedicationData";
 import { useTimeEvents, getEventsForDate, getTodayDate } from "@/hooks/useTimeEvents";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { formatCurrencyCompact } from "@/components/finances/constants";
 import {
   calculateBudgetTypeInfo,
@@ -319,7 +320,7 @@ function BudgetCard({ onAddExpense }: BudgetCardProps) {
 }
 
 // Compact mini-widget for Mutual Funds (today's change only)
-function MiniMutualFundWidget() {
+function MiniMutualFundWidget({ onNavigate }: { onNavigate: () => void }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { funds } = useMutualFundWatchlist();
@@ -349,8 +350,9 @@ function MiniMutualFundWidget() {
   const trendColor = isUp ? "#22c55e" : "#ef4444";
 
   return (
-    <div
-      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2"
+    <button
+      onClick={onNavigate}
+      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2 text-left transition-all active:scale-[0.98]"
       style={{
         background: isDark
           ? "rgba(255, 255, 255, 0.03)"
@@ -388,7 +390,7 @@ function MiniMutualFundWidget() {
           })}
         </p>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -469,7 +471,7 @@ function MiniNutritionWidget() {
 }
 
 // Combined stacked widget for MF + Nutrition
-function StackedMiniWidgets() {
+function StackedMiniWidgets({ onNavigateToAssets }: { onNavigateToAssets: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -478,7 +480,7 @@ function StackedMiniWidgets() {
       className="flex-1 min-w-0"
     >
       <div className="aspect-square flex flex-col gap-2">
-        <MiniMutualFundWidget />
+        <MiniMutualFundWidget onNavigate={onNavigateToAssets} />
         <MiniNutritionWidget />
       </div>
     </motion.div>
@@ -638,12 +640,18 @@ function SupplementsWidget() {
 
 export function HomePage() {
   const { addTransaction } = useExpenseData();
+  const { navigateToSection, navigateFinanceView } = useAppNavigation();
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showOfficeDialog, setShowOfficeDialog] = useState(false);
   const [newTransaction, setNewTransaction] = useState<Transaction | null>(
     null
   );
   const [saving, setSaving] = useState(false);
+
+  const handleNavigateToAssets = useCallback(() => {
+    navigateFinanceView("investments");
+    navigateToSection("finances");
+  }, [navigateFinanceView, navigateToSection]);
 
   const handleAddExpense = () => {
     setNewTransaction(createEmptyTransaction());
@@ -687,7 +695,7 @@ export function HomePage() {
         {/* Stats Cards Row */}
         <div className="flex gap-2">
           <BudgetCard onAddExpense={handleAddExpense} />
-          <StackedMiniWidgets />
+          <StackedMiniWidgets onNavigateToAssets={handleNavigateToAssets} />
         </div>
 
         {/* Supplements Widget */}
