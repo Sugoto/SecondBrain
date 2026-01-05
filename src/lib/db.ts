@@ -1,11 +1,15 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Transaction, UserStats } from "./supabase";
+import type { Transaction, UserStats, ShoppingItem } from "./supabase";
 
 interface CachedTransaction extends Transaction {
   _cachedAt: number;
 }
 
 interface CachedUserStats extends UserStats {
+  _cachedAt: number;
+}
+
+interface CachedShoppingItem extends ShoppingItem {
   _cachedAt: number;
 }
 
@@ -28,6 +32,7 @@ const db = new Dexie("SecondBrainCache") as Dexie & {
   userStats: EntityTable<CachedUserStats, "id">;
   meta: EntityTable<CacheMeta, "key">;
   medicationLogs: EntityTable<MedicationLog, "id">;
+  shoppingList: EntityTable<CachedShoppingItem, "id">;
 };
 
 db.version(1).stores({
@@ -42,6 +47,15 @@ db.version(2).stores({
   userStats: "id, _cachedAt",
   meta: "key, updatedAt",
   medicationLogs: "id, medicationId, date",
+});
+
+// Version 3 adds shopping list cache
+db.version(3).stores({
+  transactions: "id, date, category, type, _cachedAt",
+  userStats: "id, _cachedAt",
+  meta: "key, updatedAt",
+  medicationLogs: "id, medicationId, date",
+  shoppingList: "id, _cachedAt",
 });
 
 const CACHE_TTL = 5 * 60 * 1000;
@@ -169,7 +183,55 @@ export async function clearCache(): Promise<void> {
     db.userStats.clear(),
     db.meta.clear(),
     db.medicationLogs.clear(),
+    db.shoppingList.clear(),
   ]);
+}
+
+/**
+ * Get cached shopping list
+ * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
+ */
+export async function getCachedShoppingList(
+  allowStale = false
+): Promise<ShoppingItem[] | null> {
+  try {
+    const cached = await db.shoppingList.toArray();
+    if (cached.length === 0) return null;
+
+    const oldestCache = Math.min(...cached.map((t) => t._cachedAt));
+    const age = Date.now() - oldestCache;
+
+    const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
+    if (age > maxAge) {
+      return null;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return cached.map(({ _cachedAt, ...item }) => item as ShoppingItem);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Store shopping list in cache
+ */
+export async function cacheShoppingList(
+  items: ShoppingItem[]
+): Promise<void> {
+  try {
+    const now = Date.now();
+    const cached: CachedShoppingItem[] = items.map((item) => ({
+      ...item,
+      _cachedAt: now,
+    }));
+
+    // Clear old and insert new
+    await db.shoppingList.clear();
+    await db.shoppingList.bulkPut(cached);
+  } catch (error) {
+    console.warn("Failed to cache shopping list:", error);
+  }
 }
 
 /**

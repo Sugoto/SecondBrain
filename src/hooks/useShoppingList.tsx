@@ -1,12 +1,30 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase, type ShoppingItem } from "@/lib/supabase";
+import { useState, useEffect } from "react";
+import { getCachedShoppingList, cacheShoppingList } from "@/lib/db";
 
 const shoppingKeys = {
   all: ["shopping"] as const,
   list: () => [...shoppingKeys.all, "list"] as const,
 };
 
+// Pre-load cache data before React Query kicks in
+let cachedShoppingListPromise: Promise<ShoppingItem[] | null> | null = null;
+
+// Start loading cache immediately on module load
+if (typeof window !== "undefined") {
+  cachedShoppingListPromise = getCachedShoppingList(true); // allowStale=true for instant load
+}
+
+/**
+ * Fetch shopping list with IndexedDB cache-first strategy
+ * Returns cached data instantly, then fetches fresh data in background
+ */
 async function fetchShoppingList(): Promise<ShoppingItem[]> {
+  // Try cache first for instant load
+  const cached = await getCachedShoppingList();
+
+  // Fetch fresh data
   const { data, error } = await supabase
     .from("shopping_list")
     .select("*")
@@ -14,9 +32,17 @@ async function fetchShoppingList(): Promise<ShoppingItem[]> {
 
   if (error) {
     console.error("Error fetching shopping list:", error);
+    // If network fails, return cache if available
+    if (cached) return cached;
     return [];
   }
-  return data ?? [];
+
+  // Cache the fresh data for next time
+  if (data) {
+    cacheShoppingList(data); // Fire and forget
+  }
+
+  return data ?? cached ?? [];
 }
 
 async function addShoppingItem(
@@ -56,14 +82,35 @@ async function deleteShoppingItem(id: string): Promise<void> {
 export function useShoppingList() {
   const queryClient = useQueryClient();
 
+  // Get initial cached data for instant display
+  const [initialData, setInitialData] = useState<ShoppingItem[] | undefined>(
+    undefined
+  );
+
+  // Load initial data from IndexedDB on mount (only once)
+  useEffect(() => {
+    cachedShoppingListPromise?.then((cached) => {
+      if (cached && cached.length > 0) {
+        // Prime the query cache with stale data for instant display
+        queryClient.setQueryData(shoppingKeys.list(), cached);
+        setInitialData(cached);
+      }
+    });
+  }, [queryClient]);
+
   const {
     data: items = [],
-    isLoading: loading,
+    isLoading,
     error,
   } = useQuery({
     queryKey: shoppingKeys.list(),
     queryFn: fetchShoppingList,
+    // Show cached data as placeholder while fetching
+    placeholderData: initialData,
   });
+
+  // Consider "loading" only if no data at all (no cache, no fetched data)
+  const loading = isLoading && items.length === 0 && !initialData;
 
   const addMutation = useMutation({
     mutationFn: addShoppingItem,

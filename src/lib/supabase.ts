@@ -66,6 +66,8 @@ export type ShoppingItem = {
   calories: number;
   protein: number;
   cost: number;
+  weight_grams: number; // Weight in grams for the given cost/nutrition values
+  serving_grams: number; // Serving size in grams
   checked: boolean;
   created_at: string;
 };

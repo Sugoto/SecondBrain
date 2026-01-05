@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Beef,
   Wheat,
-  Activity,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
@@ -79,7 +78,7 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 flex flex-col gap-4 h-full">
       {/* Main TDEE Card - Clickable */}
       <motion.button
         whileHover={{ scale: 1.01 }}
@@ -88,124 +87,70 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
         className="w-full text-left"
       >
         <Card
-          className="p-5 overflow-hidden relative border"
+          className="p-3 overflow-hidden relative border"
           style={{
             borderColor: "rgba(128, 128, 128, 0.1)",
           }}
         >
-
-          <div className="relative z-10">
-            {/* Header with Daily Target */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                  <Flame className="h-5 w-5 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Daily Target
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-mono text-muted-foreground line-through">
-                      {formatNumber(tdee.tdee)}
-                    </span>
-                    <span className="text-2xl font-bold font-mono text-emerald-500">
-                      {formatNumber(tdee.targetCalories)}
-                    </span>
-                    <span className="text-sm font-normal text-muted-foreground">
-                      kcal
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </div>
-
-            {/* Activity Level Badge */}
-            <div
-              className="flex items-center justify-between gap-2 mb-3 px-3 py-2 rounded-lg w-full"
-              style={{
-                background: isDark
-                  ? "rgba(139, 92, 246, 0.15)"
-                  : "rgba(139, 92, 246, 0.1)",
-              }}
-            >
+          <div className="relative z-10 space-y-2.5">
+            {/* Header Row: Calories */}
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className="h-3.5 w-3.5 text-violet-500" />
-                <span className="text-[10px] font-medium text-violet-500">
-                  {activityInfo.label} Activity
-                </span>
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                  <Flame className="h-3.5 w-3.5 text-emerald-500" />
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[10px] font-mono text-muted-foreground line-through">
+                    {formatNumber(tdee.tdee)}
+                  </span>
+                  <span className="text-lg font-bold font-mono text-emerald-500">
+                    {formatNumber(tdee.targetCalories)}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">kcal</span>
+                </div>
               </div>
-              <span className="text-[10px] font-mono font-medium text-violet-500">
-                {activityInfo.activeDays} days · ×{activityInfo.multiplier}
-              </span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
 
-            {/* Macros + Water Grid */}
-            <div className="grid grid-cols-4 gap-2">
-              <div
-                className="p-2 rounded-xl text-center"
-                style={{
-                  background: isDark
-                    ? "rgba(245, 158, 11, 0.1)"
-                    : "rgba(245, 158, 11, 0.08)",
-                }}
-              >
-                <Beef className="h-3.5 w-3.5 text-amber-500 mx-auto mb-0.5" />
-                <p className="text-sm font-bold font-mono text-amber-500">
-                  {tdee.protein}g
-                </p>
-                <p className="text-[8px] text-muted-foreground">Protein</p>
+            {/* Macros + Water Row */}
+            <div className="grid grid-cols-4 gap-1.5">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ background: isDark ? "rgba(245, 158, 11, 0.1)" : "rgba(245, 158, 11, 0.08)" }}>
+                <Beef className="h-3 w-3 text-amber-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold font-mono text-amber-500 leading-none">{tdee.protein}g</p>
+                  <p className="text-[7px] text-muted-foreground">Protein</p>
+                </div>
               </div>
-              <div
-                className="p-2 rounded-xl text-center"
-                style={{
-                  background: isDark
-                    ? "rgba(59, 130, 246, 0.1)"
-                    : "rgba(59, 130, 246, 0.08)",
-                }}
-              >
-                <Wheat className="h-3.5 w-3.5 text-blue-500 mx-auto mb-0.5" />
-                <p className="text-sm font-bold font-mono text-blue-500">
-                  {tdee.carbs}g
-                </p>
-                <p className="text-[8px] text-muted-foreground">Carbs</p>
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ background: isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.08)" }}>
+                <Wheat className="h-3 w-3 text-blue-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold font-mono text-blue-500 leading-none">{tdee.carbs}g</p>
+                  <p className="text-[7px] text-muted-foreground">Carbs</p>
+                </div>
               </div>
-              <div
-                className="p-2 rounded-xl text-center"
-                style={{
-                  background: isDark
-                    ? "rgba(244, 63, 94, 0.1)"
-                    : "rgba(244, 63, 94, 0.08)",
-                }}
-              >
-                <Droplet className="h-3.5 w-3.5 text-rose-500 mx-auto mb-0.5" />
-                <p className="text-sm font-bold font-mono text-rose-500">
-                  {tdee.fat}g
-                </p>
-                <p className="text-[8px] text-muted-foreground">Fat</p>
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ background: isDark ? "rgba(244, 63, 94, 0.1)" : "rgba(244, 63, 94, 0.08)" }}>
+                <Droplet className="h-3 w-3 text-rose-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold font-mono text-rose-500 leading-none">{tdee.fat}g</p>
+                  <p className="text-[7px] text-muted-foreground">Fat</p>
+                </div>
               </div>
-              <div
-                className="p-2 rounded-xl text-center"
-                style={{
-                  background: isDark
-                    ? "rgba(6, 182, 212, 0.1)"
-                    : "rgba(6, 182, 212, 0.08)",
-                }}
-              >
-                <GlassWater className="h-3.5 w-3.5 text-cyan-500 mx-auto mb-0.5" />
-                <p className="text-sm font-bold font-mono text-cyan-500">
-                  {waterLiters.toFixed(1)}L
-                </p>
-                <p className="text-[8px] text-muted-foreground">Water</p>
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ background: isDark ? "rgba(6, 182, 212, 0.1)" : "rgba(6, 182, 212, 0.08)" }}>
+                <GlassWater className="h-3 w-3 text-cyan-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold font-mono text-cyan-500 leading-none">{waterLiters.toFixed(1)}L</p>
+                  <p className="text-[7px] text-muted-foreground">Water</p>
+                </div>
               </div>
             </div>
           </div>
         </Card>
       </motion.button>
 
-      {/* Shopping List */}
-      <ShoppingList />
+      {/* Shopping List - takes remaining space */}
+      <div className="flex-1 min-h-0">
+        <ShoppingList />
+      </div>
     </div>
   );
 }
