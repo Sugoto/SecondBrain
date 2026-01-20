@@ -20,10 +20,12 @@ export function PageHeader({
   icon: Icon,
   iconGradient,
   iconShadow,
-  accentColor = "#d4a574",
+  accentColor: _accentColor = "#d4a574",
   noBackground = false,
   children,
 }: PageHeaderProps) {
+  // accentColor reserved for future use
+  void _accentColor;
   const { theme, toggle: toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
