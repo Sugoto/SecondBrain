@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { PageHeader } from "@/components/shared/PageHeader";
 import type { OmscsView } from "@/types/navigation";
@@ -33,10 +33,10 @@ export function OmscsTracker({ activeView, onViewChange }: OmscsTrackerProps) {
     <div className="h-full flex flex-col">
       <header className="shrink-0 bg-background p-4">
         <PageHeader
-          title="OMSCS"
-          icon={GraduationCap}
+          title="Arcane Studies"
+          icon={Sparkles}
           iconGradient="linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
-          iconShadow="0 4px 12px rgba(6, 182, 212, 0.3)"
+          iconShadow="0 4px 12px rgba(6, 182, 212, 0.4)"
           accentColor="#06b6d4"
           noBackground
         />

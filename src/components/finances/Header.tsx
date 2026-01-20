@@ -1,4 +1,4 @@
-import { Wallet, Plus } from "lucide-react";
+import { Coins, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -38,11 +38,11 @@ export function Header({
       )}
 
       <PageHeader
-        title="Finances"
-        icon={Wallet}
-        iconGradient="linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)"
-        iconShadow="0 4px 12px rgba(139, 92, 246, 0.3)"
-        accentColor="#8b5cf6"
+        title="Treasury"
+        icon={Coins}
+        iconGradient="linear-gradient(135deg, #d4a574 0%, #b8956a 100%)"
+        iconShadow="0 4px 12px rgba(212, 165, 116, 0.4)"
+        accentColor="#d4a574"
         noBackground
       >
         <DateFilter

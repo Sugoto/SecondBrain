@@ -294,9 +294,8 @@ export function TransactionDialog({
 
             {/* Title - centered in remaining space */}
             <div
-              className={`flex-1 text-center ${
-                transaction.category || !isNew ? "pr-10" : ""
-              }`}
+              className={`flex-1 text-center ${transaction.category || !isNew ? "pr-10" : ""
+                }`}
             >
               <DialogTitle
                 className="text-base font-bold"
@@ -357,24 +356,23 @@ export function TransactionDialog({
                     });
                   }}
                   disabled={saving}
-                  className={`h-9 rounded-md flex items-center justify-center border transition-all duration-100 ${
-                    saving
-                      ? "pointer-events-none opacity-50"
-                      : "active:scale-95"
-                  }`}
+                  className={`h-9 rounded-md flex items-center justify-center border transition-all duration-100 ${saving
+                    ? "pointer-events-none opacity-50"
+                    : "active:scale-95"
+                    }`}
                   style={{
                     background: isSelected
                       ? isDark
                         ? `linear-gradient(135deg, ${catColor}45 0%, ${catColor}25 100%)`
                         : `linear-gradient(135deg, ${catColor}30 0%, ${catColor}15 100%)`
                       : isDark
-                      ? "hsl(var(--muted) / 0.3)"
-                      : "hsl(var(--muted) / 0.5)",
+                        ? "hsl(var(--muted) / 0.3)"
+                        : "hsl(var(--muted) / 0.5)",
                     borderColor: isSelected
                       ? catColor
                       : isDark
-                      ? `${catColor}25`
-                      : `${catColor}20`,
+                        ? `${catColor}25`
+                        : `${catColor}20`,
                     boxShadow: isSelected ? `0 2px 8px ${catColor}30` : "none",
                   }}
                 >
@@ -386,8 +384,8 @@ export function TransactionDialog({
                           ? "#fff"
                           : `color-mix(in srgb, ${catColor} 90%, black)`
                         : isDark
-                        ? catColor
-                        : `color-mix(in srgb, ${catColor} 65%, black)`,
+                          ? catColor
+                          : `color-mix(in srgb, ${catColor} 65%, black)`,
                     }}
                   />
                 </button>
@@ -456,8 +454,7 @@ export function TransactionDialog({
               htmlFor="amount"
               className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"
             >
-              Amount (₹)
-              <Calculator className="h-3 w-3 opacity-50" />
+              Amount
             </Label>
             <div className="relative">
               <Input
@@ -500,7 +497,7 @@ export function TransactionDialog({
                         : "hsl(var(--destructive))",
                   }}
                 >
-                  {evaluatedAmount !== null ? `= ₹${evaluatedAmount}` : "?"}
+                  {evaluatedAmount !== null ? `= 🪙${evaluatedAmount}` : "?"}
                 </div>
               )}
             </div>
@@ -577,9 +574,8 @@ export function TransactionDialog({
                 </span>
               </span>
               <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform ${
-                  showDatetime ? "rotate-180" : ""
-                }`}
+                className={`h-3.5 w-3.5 transition-transform ${showDatetime ? "rotate-180" : ""
+                  }`}
               />
             </button>
             <AnimatePresence>
@@ -643,7 +639,7 @@ export function TransactionDialog({
                       />
                       <Label className="text-xs shrink-0">
                         {transaction.prorate_months &&
-                        transaction.prorate_months > 1
+                          transaction.prorate_months > 1
                           ? "months"
                           : "month"}
                       </Label>
@@ -695,9 +691,8 @@ export function TransactionDialog({
                 )}
               </span>
               <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform ${
-                  showAdvanced ? "rotate-180" : ""
-                }`}
+                className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""
+                  }`}
               />
             </button>
             <AnimatePresence>

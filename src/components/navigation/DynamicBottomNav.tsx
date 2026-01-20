@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { Home } from "lucide-react";
+import { Scroll } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { hapticSelection } from "@/hooks/useHaptics";
 import type { AppSection } from "@/types/navigation";
@@ -40,21 +40,21 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   const isDark = theme === "dark";
   const showHomeButton = onGoHome && currentSection !== "home";
 
-  // Memoize style objects to prevent recreation every render
+  // RPG-style tavern menu navigation
   const containerStyle = useMemo(
     () => ({
       background: isDark
-        ? "rgba(24, 24, 27, 0.75)"
-        : "rgba(255, 255, 255, 0.7)",
-      backdropFilter: "blur(24px) saturate(180%)",
-      WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        ? "linear-gradient(180deg, rgba(40, 32, 24, 0.95) 0%, rgba(30, 24, 18, 0.98) 100%)"
+        : "linear-gradient(180deg, rgba(245, 235, 220, 0.95) 0%, rgba(235, 220, 200, 0.98) 100%)",
+      backdropFilter: "blur(20px) saturate(150%)",
+      WebkitBackdropFilter: "blur(20px) saturate(150%)",
       border: isDark
-        ? "1px solid rgba(255, 255, 255, 0.1)"
-        : "1px solid rgba(0, 0, 0, 0.06)",
+        ? "1px solid rgba(212, 165, 116, 0.25)"
+        : "1px solid rgba(180, 130, 80, 0.2)",
       boxShadow: isDark
-        ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 0 0.5px rgba(255, 255, 255, 0.05)"
-        : "0 8px 32px rgba(0, 0, 0, 0.12), inset 0 0 0 0.5px rgba(255, 255, 255, 0.5)",
-      borderRadius: "20px",
+        ? "0 -4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.2)"
+        : "0 -4px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.05)",
+      borderRadius: "16px",
     }),
     [isDark]
   );
@@ -70,54 +70,54 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
       className="md:hidden fixed bottom-4 left-4 right-4 z-[9999] no-view-transition"
       style={containerStyle}
     >
-      {/* Top shine effect */}
+      {/* Top gold trim effect */}
       <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none rounded-t-[20px] overflow-hidden"
+        className="absolute inset-x-0 top-0 h-px pointer-events-none rounded-t-[16px] overflow-hidden"
         style={{
           background: isDark
-            ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 50%, transparent)"
-            : "linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 50%, transparent)",
+            ? "linear-gradient(90deg, transparent 10%, rgba(212, 165, 116, 0.4) 50%, transparent 90%)"
+            : "linear-gradient(90deg, transparent 10%, rgba(180, 130, 80, 0.5) 50%, transparent 90%)",
         }}
       />
 
       <div className="flex items-center h-14 relative">
-        {/* Home button */}
+        {/* Home button - Grimoire/Scroll */}
         {showHomeButton && (
           <button
             onClick={onGoHome}
-            className="flex items-center justify-center text-muted-foreground ml-2 active:scale-90"
+            className="flex items-center justify-center ml-2 active:scale-90 transition-transform"
             style={{
               width: 36,
               height: 36,
+              color: isDark ? "rgba(212, 165, 116, 0.8)" : "rgba(140, 100, 60, 0.8)",
             }}
           >
-            <Home className="h-5 w-5" />
+            <Scroll className="h-5 w-5" />
           </button>
         )}
 
-        {/* Divider when home button is shown */}
+        {/* Ornate divider when home button is shown */}
         {showHomeButton && (
           <div
             className="h-6 w-px mx-1"
             style={{
               background: isDark
-                ? "rgba(255, 255, 255, 0.1)"
-                : "rgba(0, 0, 0, 0.08)",
+                ? "linear-gradient(180deg, transparent, rgba(212, 165, 116, 0.3), transparent)"
+                : "linear-gradient(180deg, transparent, rgba(180, 130, 80, 0.25), transparent)",
             }}
           />
         )}
 
-        {/* Nav items container */}
+        {/* Nav items container - RPG menu tabs */}
         <div className="flex items-center justify-around flex-1 h-full">
           {navItems.map(({ id, icon: Icon, label, color }) => {
             const isActive = activeView === id;
-            // Items with explicit colors (home page) use their defined color
-            // Otherwise use section-based theme: aqua for omscs, purple for finances, teal for time, orange for health
+            // RPG-themed section colors: cyan for arcane, gold for treasury, teal for quests, red for vitality
             const sectionColor = 
               currentSection === "omscs" ? "#06b6d4" :
-              currentSection === "finances" ? "#8b5cf6" :
+              currentSection === "finances" ? "#d4a574" :
               currentSection === "time" ? "#14b8a6" : 
-              "#f97316";
+              "#ef4444";
             const itemColor = color || sectionColor;
             const hasExplicitColor = !!color;
 
@@ -132,37 +132,40 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
                 onPointerEnter={() => onPrefetch?.(id)}
                 className="relative flex flex-col items-center justify-center flex-1 h-full"
               >
-                {/* Active background glow */}
+                {/* Active rune glow effect */}
                 {isActive && (
                   <div
-                    className="absolute inset-x-4 -top-1 bottom-2 rounded-xl -z-10"
+                    className="absolute inset-x-4 -top-1 bottom-2 rounded-lg -z-10"
                     style={{
                       background: isDark
-                        ? `radial-gradient(ellipse at center top, ${itemColor}26 0%, transparent 70%)`
-                        : `radial-gradient(ellipse at center top, ${itemColor}1a 0%, transparent 70%)`,
+                        ? `radial-gradient(ellipse at center top, ${itemColor}30 0%, transparent 70%)`
+                        : `radial-gradient(ellipse at center top, ${itemColor}20 0%, transparent 70%)`,
                     }}
                   />
                 )}
-                {/* Only the icon has animation */}
+                {/* Icon with magical bounce animation */}
                 <motion.div
                   animate={{
-                    scale: isActive ? 1.1 : 1,
-                    y: isActive ? -2 : 0,
+                    scale: isActive ? 1.15 : 1,
+                    y: isActive ? -3 : 0,
                   }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
                 >
                   <Icon
                     className="h-5 w-5"
                     style={{
                       // Home page: always show color. Subpages: only color when active
                       color: hasExplicitColor ? itemColor : (isActive ? itemColor : undefined),
+                      filter: isActive ? `drop-shadow(0 2px 4px ${itemColor}60)` : undefined,
                     }}
                   />
                 </motion.div>
                 <span
-                  className="text-[10px] mt-0.5"
+                  className="text-[10px] mt-0.5 font-medium tracking-wide"
                   style={{
                     color: isActive ? itemColor : "var(--muted-foreground)",
+                    fontFamily: '"Texturina", serif',
+                    letterSpacing: "0.02em",
                   }}
                 >
                   {label}

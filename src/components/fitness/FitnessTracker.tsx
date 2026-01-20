@@ -183,10 +183,10 @@ export function HealthTracker({
       {/* Header */}
       <header className="shrink-0 bg-background p-4">
         <PageHeader
-          title="Health"
+          title="Vitality"
           icon={Heart}
-          iconGradient="linear-gradient(135deg, #ef4444 0%, #f97316 100%)"
-          iconShadow="0 4px 12px rgba(239, 68, 68, 0.3)"
+          iconGradient="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+          iconShadow="0 4px 12px rgba(239, 68, 68, 0.4)"
           accentColor="#ef4444"
           noBackground
         />

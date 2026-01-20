@@ -4,8 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  /* Fantasy RPG Fonts */
+  --font-sans: "Texturina", serif;
+  --font-heading: "Texturina", serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -37,68 +39,98 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* Custom expense/income colors */
+  /* RPG stat colors */
+  --color-gold: var(--gold);
+  --color-health: var(--health);
+  --color-mana: var(--mana);
+  --color-xp: var(--xp);
   --color-expense: var(--expense);
   --color-income: var(--income);
 }
 
+/* Light mode - Aged Parchment Theme */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.15 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
-  --primary: oklch(0.5 0.22 280);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.2 0 0);
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.96 0 0);
-  --accent-foreground: oklch(0.2 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
-  --ring: oklch(0.5 0.22 280);
-  --chart-1: oklch(0.5 0.22 280);
-  --chart-2: oklch(0.55 0.2 250);
-  --chart-3: oklch(0.6 0.18 300);
-  --chart-4: oklch(0.5 0.15 230);
-  --chart-5: oklch(0.55 0.2 270);
+  --radius: 0.5rem;
+  /* Warm parchment background */
+  --background: oklch(0.96 0.015 85);
+  --foreground: oklch(0.22 0.02 50);
+  /* Card = aged paper */
+  --card: oklch(0.94 0.02 80);
+  --card-foreground: oklch(0.22 0.02 50);
+  --popover: oklch(0.95 0.018 82);
+  --popover-foreground: oklch(0.22 0.02 50);
+  /* Mystic gold primary */
+  --primary: oklch(0.65 0.15 85);
+  --primary-foreground: oklch(0.15 0.02 50);
+  --secondary: oklch(0.90 0.02 75);
+  --secondary-foreground: oklch(0.25 0.02 50);
+  --muted: oklch(0.88 0.02 80);
+  --muted-foreground: oklch(0.45 0.02 60);
+  --accent: oklch(0.85 0.03 75);
+  --accent-foreground: oklch(0.25 0.02 50);
+  /* Dragon blood red for destructive */
+  --destructive: oklch(0.55 0.22 25);
+  /* Weathered edges */
+  --border: oklch(0.82 0.03 75);
+  --input: oklch(0.88 0.02 80);
+  --ring: oklch(0.65 0.15 85);
 
-  --expense: oklch(0.577 0.245 27.325);
-  --income: oklch(0.5 0.22 280);
+  /* RPG Chart colors */
+  --chart-1: oklch(0.65 0.15 85);  /* Gold */
+  --chart-2: oklch(0.55 0.18 280); /* Arcane purple */
+  --chart-3: oklch(0.50 0.15 160); /* Emerald */
+  --chart-4: oklch(0.55 0.20 25);  /* Crimson */
+  --chart-5: oklch(0.50 0.12 220); /* Steel blue */
+
+  /* RPG Stats */
+  --gold: oklch(0.72 0.16 85);
+  --health: oklch(0.55 0.20 140);
+  --mana: oklch(0.55 0.20 280);
+  --xp: oklch(0.65 0.18 85);
+  --expense: oklch(0.55 0.22 25);
+  --income: oklch(0.55 0.18 140);
 }
 
+/* Dark mode - Dungeon Stone Theme */
 .dark {
-  --background: oklch(0.1 0 0);
-  --foreground: oklch(0.95 0 0);
-  --card: oklch(0.14 0 0);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.14 0 0);
-  --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.7 0.22 280);
-  --primary-foreground: oklch(0.1 0 0);
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.6 0 0);
-  --accent: oklch(0.2 0 0);
-  --accent-foreground: oklch(0.95 0 0);
-  --destructive: oklch(0.65 0.22 25);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.7 0.22 280);
-  --chart-1: oklch(0.7 0.22 280);
-  --chart-2: oklch(0.65 0.2 250);
-  --chart-3: oklch(0.7 0.18 300);
-  --chart-4: oklch(0.6 0.15 230);
-  --chart-5: oklch(0.65 0.2 270);
+  /* Deep stone/dungeon background */
+  --background: oklch(0.14 0.01 260);
+  --foreground: oklch(0.92 0.02 80);
+  /* Card = weathered leather/stone */
+  --card: oklch(0.18 0.015 255);
+  --card-foreground: oklch(0.92 0.02 80);
+  --popover: oklch(0.16 0.012 258);
+  --popover-foreground: oklch(0.92 0.02 80);
+  /* Glowing gold primary */
+  --primary: oklch(0.75 0.16 85);
+  --primary-foreground: oklch(0.12 0.01 260);
+  --secondary: oklch(0.22 0.015 255);
+  --secondary-foreground: oklch(0.90 0.02 80);
+  --muted: oklch(0.22 0.01 260);
+  --muted-foreground: oklch(0.58 0.02 80);
+  --accent: oklch(0.25 0.02 260);
+  --accent-foreground: oklch(0.90 0.02 80);
+  /* Glowing crimson for destructive */
+  --destructive: oklch(0.62 0.22 25);
+  /* Stone edges */
+  --border: oklch(0.28 0.015 260);
+  --input: oklch(0.25 0.01 260);
+  --ring: oklch(0.75 0.16 85);
 
-  --expense: oklch(0.68 0.22 25);
-  --income: oklch(0.7 0.22 280);
+  /* RPG Chart colors - brighter for dark mode */
+  --chart-1: oklch(0.75 0.16 85);  /* Bright gold */
+  --chart-2: oklch(0.65 0.20 280); /* Glowing purple */
+  --chart-3: oklch(0.60 0.18 160); /* Bright emerald */
+  --chart-4: oklch(0.65 0.22 25);  /* Glowing red */
+  --chart-5: oklch(0.60 0.15 220); /* Bright steel */
+
+  /* RPG Stats */
+  --gold: oklch(0.78 0.18 85);
+  --health: oklch(0.62 0.22 140);
+  --mana: oklch(0.65 0.22 280);
+  --xp: oklch(0.75 0.18 85);
+  --expense: oklch(0.65 0.22 25);
+  --income: oklch(0.62 0.20 140);
 }
 
 @layer base {
@@ -113,6 +145,24 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Subtle parchment texture via gradient */
+    background-image: 
+      radial-gradient(ellipse at 20% 30%, oklch(0.98 0.01 85 / 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, oklch(0.95 0.02 75 / 0.3) 0%, transparent 50%);
+  }
+  .dark body,
+  body:is(.dark *) {
+    /* Dungeon torch-light ambiance */
+    background-image: 
+      radial-gradient(ellipse at 30% 20%, oklch(0.25 0.03 30 / 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 80%, oklch(0.20 0.02 280 / 0.1) 0%, transparent 40%);
+  }
+  
+  /* Fantasy heading font for all headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Texturina", serif;
+    letter-spacing: 0.02em;
+    font-weight: 600;
   }
 }
 
@@ -126,6 +176,66 @@
   }
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  /* RPG-style heading font */
+  .font-fantasy {
+    font-family: "Texturina", serif;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+  }
+  
+  /* Parchment card texture */
+  .parchment {
+    background: linear-gradient(
+      135deg,
+      var(--card) 0%,
+      oklch(0.92 0.025 78) 50%,
+      var(--card) 100%
+    );
+    border: 1px solid var(--border);
+    box-shadow: 
+      inset 0 1px 0 oklch(1 0 0 / 0.1),
+      inset 0 -1px 0 oklch(0 0 0 / 0.05),
+      0 4px 12px oklch(0 0 0 / 0.1);
+  }
+  
+  .dark .parchment {
+    background: linear-gradient(
+      135deg,
+      var(--card) 0%,
+      oklch(0.20 0.02 260) 50%,
+      var(--card) 100%
+    );
+    box-shadow: 
+      inset 0 1px 0 oklch(1 0 0 / 0.05),
+      inset 0 -1px 0 oklch(0 0 0 / 0.2),
+      0 4px 16px oklch(0 0 0 / 0.4);
+  }
+  
+  /* Gold shimmer effect for important elements */
+  .gold-shimmer {
+    background: linear-gradient(
+      90deg,
+      oklch(0.65 0.15 85) 0%,
+      oklch(0.80 0.12 80) 50%,
+      oklch(0.65 0.15 85) 100%
+    );
+    background-size: 200% 100%;
+    animation: gold-shimmer 3s ease-in-out infinite;
+  }
+  
+  @keyframes gold-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* Magical glow for active/success states */
+  .magic-glow {
+    box-shadow: 
+      0 0 10px oklch(0.65 0.15 85 / 0.4),
+      0 0 20px oklch(0.65 0.15 85 / 0.2),
+      0 0 30px oklch(0.65 0.15 85 / 0.1);
   }
   
   /* Optimized scroll containers for mobile */
@@ -167,6 +277,28 @@
   .touch-feedback {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+  }
+  
+  /* RPG-style stat bar */
+  .stat-bar {
+    background: linear-gradient(
+      180deg,
+      oklch(0.3 0 0 / 0.3) 0%,
+      oklch(0.15 0 0 / 0.4) 100%
+    );
+    border: 1px solid oklch(0.4 0.02 85 / 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .stat-bar-fill {
+    background: linear-gradient(
+      180deg,
+      oklch(0.72 0.16 85) 0%,
+      oklch(0.58 0.14 85) 100%
+    );
+    box-shadow: 0 0 8px oklch(0.72 0.16 85 / 0.5);
+    transition: width 0.5s ease-out;
   }
 }
 

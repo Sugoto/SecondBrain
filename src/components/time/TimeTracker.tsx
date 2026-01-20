@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Building2 } from "lucide-react";
+import { Hourglass, Castle } from "lucide-react";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useTheme } from "@/hooks/useTheme";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -42,14 +42,14 @@ export function TimeTracker({ activeView, onViewChange }: TimeTrackerProps) {
       {/* Header */}
       <header className="shrink-0 bg-background p-4">
         <PageHeader
-          title="Time"
-          icon={Clock}
+          title="Quest Log"
+          icon={Hourglass}
           iconGradient="linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)"
-          iconShadow="0 4px 12px rgba(20, 184, 166, 0.3)"
+          iconShadow="0 4px 12px rgba(20, 184, 166, 0.4)"
           accentColor="#14b8a6"
           noBackground
         >
-          {/* Go to Office Button */}
+          {/* Go to Guild Hall Button */}
           <button
             onClick={() => setShowOfficeDialog(true)}
             className="h-8 px-2.5 rounded-lg flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
@@ -60,8 +60,8 @@ export function TimeTracker({ activeView, onViewChange }: TimeTrackerProps) {
               border: "1px solid rgba(20, 184, 166, 0.3)",
             }}
           >
-            <Building2 className="h-3.5 w-3.5 text-teal-500" />
-            <span className="text-[11px] font-medium text-teal-500">Office</span>
+            <Castle className="h-3.5 w-3.5 text-teal-500" />
+            <span className="text-[11px] font-medium text-teal-500 font-fantasy tracking-wide">Guild</span>
           </button>
         </PageHeader>
       </header>

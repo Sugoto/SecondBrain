@@ -1,16 +1,16 @@
 import { useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-  Brain,
+  ScrollText,
   Plus,
-  Wallet,
+  Coins,
   TrendingUp,
   TrendingDown,
-  Pill,
+  FlaskConical,
   Loader2,
   Check,
-  Dumbbell,
-  Building2,
+  Swords,
+  Castle,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
@@ -103,34 +103,38 @@ function ScheduleCard({ onOfficeClick }: { onOfficeClick: () => void }) {
       className="w-full mb-4"
     >
       <div
-        className="relative rounded-xl px-3 py-2.5 overflow-hidden"
+        className="relative rounded-lg px-3 py-2.5 overflow-hidden"
         style={{
           background: isDark
-            ? "rgba(255, 255, 255, 0.03)"
-            : "rgba(0, 0, 0, 0.02)",
+            ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
+            : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
           border: isDark
-            ? "1px solid rgba(255, 255, 255, 0.08)"
-            : "1px solid rgba(0, 0, 0, 0.06)",
+            ? "1px solid rgba(212, 165, 116, 0.2)"
+            : "1px solid rgba(180, 130, 80, 0.2)",
+          boxShadow: isDark
+            ? "inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.3)"
+            : "inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08)",
         }}
       >
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-            Today's Schedule
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest font-fantasy">
+            Daily Quests
           </p>
           <div className="flex items-center gap-2">
-            {/* Office Button */}
+            {/* Guild Hall Button */}
             <button
               onClick={onOfficeClick}
               className="flex items-center gap-1 px-2 py-1 rounded-md transition-all active:scale-95"
               style={{
                 background: isDark
-                  ? "rgba(20, 184, 166, 0.15)"
-                  : "rgba(20, 184, 166, 0.1)",
-                border: "1px solid rgba(20, 184, 166, 0.25)",
+                  ? "linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(16, 150, 135, 0.15) 100%)"
+                  : "linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(16, 150, 135, 0.1) 100%)",
+                border: "1px solid rgba(20, 184, 166, 0.3)",
+                boxShadow: "0 2px 6px rgba(20, 184, 166, 0.15)",
               }}
             >
-              <Building2 className="h-3 w-3 text-teal-500" />
-              <span className="text-[10px] font-medium text-teal-500">Office</span>
+              <Castle className="h-3 w-3 text-teal-500" />
+              <span className="text-[10px] font-semibold text-teal-500">Guild</span>
             </button>
             <div className="flex items-baseline gap-0.5">
               <span
@@ -139,12 +143,12 @@ function ScheduleCard({ onOfficeClick }: { onOfficeClick: () => void }) {
               >
                 {freeHours}h {freeMinutesRemainder}m
               </span>
-              <span className="text-[9px] text-muted-foreground ml-1">free</span>
+              <span className="text-[9px] text-muted-foreground ml-1">rest</span>
             </div>
           </div>
         </div>
 
-        {/* Segmented 24-hour timeline */}
+        {/* Segmented 24-hour timeline - Quest progress bar style */}
         <div className="flex gap-[2px]">
           {hourlyColors.map((color, hour) => (
             <motion.div
@@ -157,24 +161,23 @@ function ScheduleCard({ onOfficeClick }: { onOfficeClick: () => void }) {
                 background: color
                   ? `linear-gradient(180deg, ${color} 0%, ${color}cc 100%)`
                   : isDark
-                  ? "rgba(255, 255, 255, 0.1)"
-                  : "rgba(0, 0, 0, 0.06)",
+                    ? "rgba(212, 165, 116, 0.1)"
+                    : "rgba(180, 130, 80, 0.08)",
                 boxShadow: color ? `0 2px 4px ${color}40` : "none",
               }}
-              title={`${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour} ${
-                hour < 12 ? "AM" : "PM"
-              }`}
+              title={`${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour} ${hour < 12 ? "AM" : "PM"
+                }`}
             />
           ))}
         </div>
 
         {/* Time labels */}
         <div className="flex justify-between mt-1">
-          <span className="text-[9px] text-muted-foreground">12am</span>
-          <span className="text-[9px] text-muted-foreground">6am</span>
-          <span className="text-[9px] text-muted-foreground">12pm</span>
-          <span className="text-[9px] text-muted-foreground">6pm</span>
-          <span className="text-[9px] text-muted-foreground">12am</span>
+          <span className="text-[9px] text-muted-foreground">Dawn</span>
+          <span className="text-[9px] text-muted-foreground">Morn</span>
+          <span className="text-[9px] text-muted-foreground">Noon</span>
+          <span className="text-[9px] text-muted-foreground">Dusk</span>
+          <span className="text-[9px] text-muted-foreground">Night</span>
         </div>
       </div>
     </motion.div>
@@ -252,12 +255,12 @@ function BudgetCard({ onAddExpense }: BudgetCardProps) {
   const totalRemaining = budgetTypeInfo.wantsRemaining;
   const isOverBudget = percentUsed > 100;
 
-  // Colors based on budget status (orange for wants theme)
+  // RPG gold colors based on treasury status
   const progressColor = isOverBudget
     ? "#ef4444"
     : percentUsed > 80
-    ? "#f59e0b"
-    : "#f97316";
+      ? "#f59e0b"
+      : "#d4a574";
 
   return (
     <motion.div
@@ -268,14 +271,17 @@ function BudgetCard({ onAddExpense }: BudgetCardProps) {
     >
       <button
         onClick={onAddExpense}
-        className="w-full aspect-square rounded-2xl p-2.5 sm:p-3 relative overflow-hidden flex flex-col text-left transition-transform active:scale-[0.98]"
+        className="w-full aspect-square rounded-lg p-2.5 sm:p-3 relative overflow-hidden flex flex-col text-left transition-transform active:scale-[0.98]"
         style={{
           background: isDark
-            ? "rgba(255, 255, 255, 0.03)"
-            : "rgba(0, 0, 0, 0.02)",
+            ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
+            : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
           border: isDark
-            ? "1px solid rgba(255, 255, 255, 0.08)"
-            : "1px solid rgba(0, 0, 0, 0.06)",
+            ? "1px solid rgba(212, 165, 116, 0.2)"
+            : "1px solid rgba(180, 130, 80, 0.2)",
+          boxShadow: isDark
+            ? "inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.3)"
+            : "inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08)",
         }}
       >
         {/* Header */}
@@ -284,32 +290,33 @@ function BudgetCard({ onAddExpense }: BudgetCardProps) {
             <div
               className="h-5 w-5 sm:h-6 sm:w-6 rounded-md sm:rounded-lg flex items-center justify-center shrink-0"
               style={{
-                background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                background: "linear-gradient(135deg, #d4a574 0%, #b8956a 100%)",
+                boxShadow: "0 2px 6px rgba(212, 165, 116, 0.4)",
               }}
             >
-              <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+              <Coins className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-              Wants Budget
+            <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-widest font-fantasy">
+              Gold Reserve
             </span>
           </div>
           <Plus className="h-3 w-3 text-muted-foreground/50" />
         </div>
 
-        {/* Circular Progress */}
+        {/* Circular Progress - Treasury gauge */}
         <div className="flex-1 flex flex-col items-center justify-center min-h-0 py-1">
           <div className="relative w-full flex items-center justify-center">
             <CircularProgress
               percentage={percentUsed}
               color={progressColor}
-              bgColor={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}
+              bgColor={isDark ? "rgba(212, 165, 116, 0.15)" : "rgba(180, 130, 80, 0.1)"}
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-sm sm:text-base font-bold font-mono text-foreground">
                 {formatCurrencyCompact(totalRemaining)}
               </span>
               <span className="text-[7px] sm:text-[8px] text-muted-foreground">
-                left
+                remaining
               </span>
             </div>
           </div>
@@ -319,7 +326,7 @@ function BudgetCard({ onAddExpense }: BudgetCardProps) {
   );
 }
 
-// Compact mini-widget for Mutual Funds (today's change only)
+// Compact mini-widget for Mutual Funds (today's change only) - Treasure Hoard
 function MiniMutualFundWidget({ onNavigate }: { onNavigate: () => void }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -352,14 +359,17 @@ function MiniMutualFundWidget({ onNavigate }: { onNavigate: () => void }) {
   return (
     <button
       onClick={onNavigate}
-      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2 text-left transition-all active:scale-[0.98]"
+      className="flex-1 rounded-lg p-2 sm:p-2.5 flex items-center gap-2 text-left transition-all active:scale-[0.98]"
       style={{
         background: isDark
-          ? "rgba(255, 255, 255, 0.03)"
-          : "rgba(0, 0, 0, 0.02)",
+          ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
+          : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
         border: isDark
-          ? "1px solid rgba(255, 255, 255, 0.08)"
-          : "1px solid rgba(0, 0, 0, 0.06)",
+          ? "1px solid rgba(212, 165, 116, 0.2)"
+          : "1px solid rgba(180, 130, 80, 0.2)",
+        boxShadow: isDark
+          ? "inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+          : "inset 0 1px 0 rgba(255, 255, 255, 0.5)",
       }}
     >
       <div
@@ -368,6 +378,9 @@ function MiniMutualFundWidget({ onNavigate }: { onNavigate: () => void }) {
           background: isUp
             ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
             : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+          boxShadow: isUp
+            ? "0 2px 6px rgba(34, 197, 94, 0.4)"
+            : "0 2px 6px rgba(239, 68, 68, 0.4)",
         }}
       >
         {isUp ? (
@@ -377,8 +390,8 @@ function MiniMutualFundWidget({ onNavigate }: { onNavigate: () => void }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-          Mutual Funds
+        <p className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-widest font-fantasy">
+          Vault
         </p>
         <p
           className="text-sm sm:text-base font-bold font-mono"
@@ -394,7 +407,7 @@ function MiniMutualFundWidget({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-// Compact mini-widget for Nutrition with activity level and workout toggle
+// Compact mini-widget for Nutrition with activity level and workout toggle - Vitality/Energy
 function MiniNutritionWidget() {
   const { userStats, activityLog, workoutDates, toggleWorkout } = useHealthData();
   const { theme } = useTheme();
@@ -429,41 +442,44 @@ function MiniNutritionWidget() {
 
   return (
     <div
-      className="flex-1 rounded-xl p-2 sm:p-2.5 flex items-center gap-2"
+      className="flex-1 rounded-lg p-2 sm:p-2.5 flex items-center gap-2"
       style={{
         background: isDark
-          ? "rgba(255, 255, 255, 0.03)"
-          : "rgba(0, 0, 0, 0.02)",
+          ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
+          : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
         border: isDark
-          ? "1px solid rgba(255, 255, 255, 0.08)"
-          : "1px solid rgba(0, 0, 0, 0.06)",
+          ? "1px solid rgba(212, 165, 116, 0.2)"
+          : "1px solid rgba(180, 130, 80, 0.2)",
+        boxShadow: isDark
+          ? "inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+          : "inset 0 1px 0 rgba(255, 255, 255, 0.5)",
       }}
     >
-      {/* Workout toggle button */}
+      {/* Training toggle button - Sword for combat training */}
       <button
         onClick={() => toggleWorkout(today)}
         className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 active:scale-95"
         style={{
           background: isWorkoutToday
             ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
-            : "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
-          boxShadow: isWorkoutToday 
-            ? "0 2px 8px rgba(34, 197, 94, 0.4)" 
-            : "0 2px 8px rgba(249, 115, 22, 0.3)",
+            : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+          boxShadow: isWorkoutToday
+            ? "0 2px 8px rgba(34, 197, 94, 0.4)"
+            : "0 2px 8px rgba(239, 68, 68, 0.3)",
         }}
       >
         {isWorkoutToday ? (
           <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
         ) : (
-          <Dumbbell className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
+          <Swords className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
         )}
       </button>
       <div className="flex-1 min-w-0">
-        <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-          {todayLevel ? `${todayLevel}` : activityInfo?.label ?? "Nutrition"}
+        <p className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-widest font-fantasy">
+          {todayLevel ? `${todayLevel}` : activityInfo?.label ?? "Vitality"}
         </p>
         <p className="text-sm sm:text-base font-bold font-mono text-foreground">
-          {formatNumber(calories)} kcal
+          {formatNumber(calories)} EP
         </p>
       </div>
     </div>
@@ -487,7 +503,7 @@ function StackedMiniWidgets({ onNavigateToAssets }: { onNavigateToAssets: () => 
   );
 }
 
-// Minimal full-width supplements widget
+// Minimal full-width supplements widget - Potions inventory
 function SupplementsWidget() {
   const { medications, toggling, toggleMedication, isTakenToday, loading } =
     useMedicationData();
@@ -506,14 +522,14 @@ function SupplementsWidget() {
         className="w-full mt-3"
       >
         <div
-          className="rounded-2xl p-4"
+          className="rounded-lg p-4"
           style={{
             background: isDark
-              ? "rgba(255, 255, 255, 0.03)"
-              : "rgba(0, 0, 0, 0.02)",
+              ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
+              : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
             border: isDark
-              ? "1px solid rgba(255, 255, 255, 0.08)"
-              : "1px solid rgba(0, 0, 0, 0.06)",
+              ? "1px solid rgba(212, 165, 116, 0.2)"
+              : "1px solid rgba(180, 130, 80, 0.2)",
           }}
         >
           <div className="flex items-center justify-center py-4">
@@ -532,14 +548,17 @@ function SupplementsWidget() {
       className="w-full mt-3"
     >
       <div
-        className="rounded-2xl p-3 sm:p-4"
+        className="rounded-lg p-3 sm:p-4"
         style={{
           background: isDark
-            ? "rgba(255, 255, 255, 0.03)"
-            : "rgba(0, 0, 0, 0.02)",
+            ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
+            : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
           border: isDark
-            ? "1px solid rgba(255, 255, 255, 0.08)"
-            : "1px solid rgba(0, 0, 0, 0.06)",
+            ? "1px solid rgba(212, 165, 116, 0.2)"
+            : "1px solid rgba(180, 130, 80, 0.2)",
+          boxShadow: isDark
+            ? "inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.3)"
+            : "inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08)",
         }}
       >
         {/* Header */}
@@ -550,25 +569,28 @@ function SupplementsWidget() {
               style={{
                 background: allTaken
                   ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
-                  : "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                  : "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
+                boxShadow: allTaken
+                  ? "0 2px 6px rgba(34, 197, 94, 0.4)"
+                  : "0 2px 6px rgba(168, 85, 247, 0.4)",
               }}
             >
               {allTaken ? (
                 <Check className="h-3 w-3 text-white" />
               ) : (
-                <Pill className="h-3 w-3 text-white" />
+                <FlaskConical className="h-3 w-3 text-white" />
               )}
             </div>
-            <span className="text-xs font-medium text-foreground">
-              Supplements
+            <span className="text-xs font-semibold text-foreground font-fantasy tracking-wide">
+              Potions
             </span>
           </div>
-          <span className="text-[10px] font-medium text-muted-foreground">
+          <span className="text-[10px] font-bold text-muted-foreground font-mono">
             {takenCount}/{medications.length}
           </span>
         </div>
 
-        {/* Pills Grid */}
+        {/* Potions Grid */}
         <div className="grid grid-cols-4 gap-2">
           {medications.map((med) => {
             const isTaken = isTakenToday(med.id);
@@ -579,29 +601,31 @@ function SupplementsWidget() {
                 key={med.id}
                 onClick={() => toggleMedication(med.id)}
                 disabled={isToggling}
-                className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 active:scale-95"
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all duration-200 active:scale-95"
                 style={{
                   background: isTaken
                     ? isDark
                       ? `${med.color}20`
                       : `${med.color}15`
                     : isDark
-                    ? "rgba(255, 255, 255, 0.05)"
-                    : "rgba(0, 0, 0, 0.03)",
+                      ? "rgba(212, 165, 116, 0.08)"
+                      : "rgba(180, 130, 80, 0.06)",
                   border: isTaken
                     ? `1px solid ${med.color}40`
-                    : "1px solid transparent",
+                    : isDark
+                      ? "1px solid rgba(212, 165, 116, 0.1)"
+                      : "1px solid rgba(180, 130, 80, 0.1)",
                 }}
               >
-                {/* Icon Circle */}
+                {/* Potion Flask Icon */}
                 <div
                   className="h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200"
                   style={{
                     background: isTaken
                       ? `linear-gradient(135deg, ${med.color} 0%, ${med.color}cc 100%)`
                       : isDark
-                      ? `${med.color}25`
-                      : `${med.color}20`,
+                        ? `${med.color}25`
+                        : `${med.color}20`,
                     boxShadow: isTaken ? `0 2px 8px ${med.color}40` : "none",
                   }}
                 >
@@ -613,7 +637,7 @@ function SupplementsWidget() {
                   ) : isTaken ? (
                     <Check className="h-3.5 w-3.5 text-white" />
                   ) : (
-                    <Pill
+                    <FlaskConical
                       className="h-3.5 w-3.5"
                       style={{ color: med.color }}
                     />
@@ -678,31 +702,31 @@ export function HomePage() {
       {/* Header */}
       <header className="shrink-0 bg-background p-4">
         <PageHeader
-          title="Second Brain"
-          icon={Brain}
-          iconGradient="linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)"
-          iconShadow="0 4px 12px rgba(139, 92, 246, 0.3)"
-          accentColor="#8b5cf6"
+          title="Your Chronicles"
+          icon={ScrollText}
+          iconGradient="linear-gradient(135deg, #d4a574 0%, #b8956a 100%)"
+          iconShadow="0 4px 12px rgba(212, 165, 116, 0.4)"
+          accentColor="#d4a574"
           noBackground
         />
       </header>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto px-4 pb-20">
-        {/* Schedule Card */}
+        {/* Schedule Card - Daily Quests */}
         <ScheduleCard onOfficeClick={() => setShowOfficeDialog(true)} />
 
-        {/* Stats Cards Row */}
+        {/* Stats Cards Row - Character Stats */}
         <div className="flex gap-2">
           <BudgetCard onAddExpense={handleAddExpense} />
           <StackedMiniWidgets onNavigateToAssets={handleNavigateToAssets} />
         </div>
 
-        {/* Supplements Widget */}
+        {/* Supplements Widget - Potions */}
         <SupplementsWidget />
       </main>
 
-      {/* Office Dialog */}
+      {/* Guild Hall Dialog */}
       <OfficeDialog
         open={showOfficeDialog}
         onOpenChange={setShowOfficeDialog}
@@ -725,12 +749,12 @@ export function HomePage() {
 
       {/* Footer */}
       <footer className="shrink-0 py-4 text-center">
-        <p className="text-[10px] text-muted-foreground">
-          © {new Date().getFullYear()}{" "}
+        <p className="text-[10px] text-muted-foreground font-fantasy tracking-wide">
+          Forged in {new Date().getFullYear()} by{" "}
           <span
-            className="font-medium"
+            className="font-semibold"
             style={{
-              background: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
+              background: "linear-gradient(135deg, #d4a574 0%, #b8956a 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
