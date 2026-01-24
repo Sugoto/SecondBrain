@@ -1,7 +1,7 @@
 export type AppSection = "home" | "omscs" | "finances" | "time" | "fitness";
 
 export type FinanceView = "investments" | "expenses" | "trends";
-export type HealthView = "nutrition" | "activity" | "medication";
+export type HealthView = "nutrition";
 export type OmscsView = "grades" | "semester" | "courses";
 export type TimeView = "calendar" | "today" | "trends";
 

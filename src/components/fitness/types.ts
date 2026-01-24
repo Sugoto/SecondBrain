@@ -27,28 +27,28 @@ export const ACTIVITY_LEVELS: {
   {
     value: "sedentary",
     label: "Sedentary",
-    description: "<2k steps",
+    description: "Little to no exercise",
     multiplier: 1.2,
     color: "#6b7280", // gray
   },
   {
     value: "light",
     label: "Light",
-    description: "<5k steps, no gym",
+    description: "Light activity, no gym",
     multiplier: 1.375,
     color: "#eab308", // yellow
   },
   {
     value: "moderate",
     label: "Moderate",
-    description: "5-10k steps + gym",
+    description: "Regular gym sessions",
     multiplier: 1.55,
     color: "#3b82f6", // blue
   },
   {
     value: "heavy",
     label: "Heavy",
-    description: "10k+ steps + intense gym",
+    description: "Intense daily training",
     multiplier: 1.725,
     color: "#f97316", // fiery orange
   },

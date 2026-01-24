@@ -16,12 +16,10 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import type { HealthView } from "@/types/navigation";
 import { useHealthData } from "@/hooks/useHealthData";
 import { HealthStatsEditDialog } from "./HealthStatsCard";
-import { StepGraph } from "./StepGraph";
 import { ShoppingList } from "./ShoppingList";
-import { MedicationTracker } from "./MedicationTracker";
 import { calculateTDEE, formatNumber, getActivityLevelInfo } from "./utils";
 
-const HEALTH_VIEWS = ["nutrition", "activity", "medication"] as const;
+const HEALTH_VIEWS = ["nutrition"] as const;
 
 interface HealthTrackerProps {
   activeView: HealthView;
@@ -155,14 +153,6 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
   );
 }
 
-function ActivityView() {
-  return (
-    <div className="p-4 space-y-4">
-      <StepGraph />
-    </div>
-  );
-}
-
 export function HealthTracker({
   activeView,
   onViewChange,
@@ -201,16 +191,6 @@ export function HealthTracker({
           {activeView === "nutrition" && (
             <motion.div key="nutrition" {...VIEW_ANIMATION}>
               <NutritionView onEditHealth={() => setShowHealthDialog(true)} />
-            </motion.div>
-          )}
-          {activeView === "activity" && (
-            <motion.div key="activity" {...VIEW_ANIMATION}>
-              <ActivityView />
-            </motion.div>
-          )}
-          {activeView === "medication" && (
-            <motion.div key="medication" {...VIEW_ANIMATION}>
-              <MedicationTracker />
             </motion.div>
           )}
         </AnimatePresence>

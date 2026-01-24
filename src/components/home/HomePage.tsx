@@ -6,8 +6,6 @@ import {
   Coins,
   TrendingUp,
   TrendingDown,
-  FlaskConical,
-  Loader2,
   Check,
   Swords,
   Castle,
@@ -16,7 +14,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
 import { useMutualFundWatchlist } from "@/hooks/useMutualFunds";
-import { useMedicationData } from "@/hooks/useMedicationData";
 import { useTimeEvents, getEventsForDate, getTodayDate } from "@/hooks/useTimeEvents";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { formatCurrencyCompact } from "@/components/finances/constants";
@@ -503,165 +500,6 @@ function StackedMiniWidgets({ onNavigateToAssets }: { onNavigateToAssets: () => 
   );
 }
 
-// Minimal full-width supplements widget - Potions inventory
-function SupplementsWidget() {
-  const { medications, toggling, toggleMedication, isTakenToday, loading } =
-    useMedicationData();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
-  const takenCount = medications.filter((m) => isTakenToday(m.id)).length;
-  const allTaken = takenCount === medications.length;
-
-  if (loading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="w-full mt-3"
-      >
-        <div
-          className="rounded-lg p-4"
-          style={{
-            background: isDark
-              ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
-              : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
-            border: isDark
-              ? "1px solid rgba(212, 165, 116, 0.2)"
-              : "1px solid rgba(180, 130, 80, 0.2)",
-          }}
-        >
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
-      className="w-full mt-3"
-    >
-      <div
-        className="rounded-lg p-3 sm:p-4"
-        style={{
-          background: isDark
-            ? "linear-gradient(135deg, rgba(40, 32, 24, 0.6) 0%, rgba(35, 28, 20, 0.7) 100%)"
-            : "linear-gradient(135deg, rgba(245, 235, 220, 0.8) 0%, rgba(235, 220, 200, 0.9) 100%)",
-          border: isDark
-            ? "1px solid rgba(212, 165, 116, 0.2)"
-            : "1px solid rgba(180, 130, 80, 0.2)",
-          boxShadow: isDark
-            ? "inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.3)"
-            : "inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.08)",
-        }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="h-6 w-6 rounded-lg flex items-center justify-center"
-              style={{
-                background: allTaken
-                  ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
-                  : "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
-                boxShadow: allTaken
-                  ? "0 2px 6px rgba(34, 197, 94, 0.4)"
-                  : "0 2px 6px rgba(168, 85, 247, 0.4)",
-              }}
-            >
-              {allTaken ? (
-                <Check className="h-3 w-3 text-white" />
-              ) : (
-                <FlaskConical className="h-3 w-3 text-white" />
-              )}
-            </div>
-            <span className="text-xs font-semibold text-foreground font-fantasy tracking-wide">
-              Potions
-            </span>
-          </div>
-          <span className="text-[10px] font-bold text-muted-foreground font-mono">
-            {takenCount}/{medications.length}
-          </span>
-        </div>
-
-        {/* Potions Grid */}
-        <div className="grid grid-cols-4 gap-2">
-          {medications.map((med) => {
-            const isTaken = isTakenToday(med.id);
-            const isToggling = toggling === med.id;
-
-            return (
-              <button
-                key={med.id}
-                onClick={() => toggleMedication(med.id)}
-                disabled={isToggling}
-                className="flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all duration-200 active:scale-95"
-                style={{
-                  background: isTaken
-                    ? isDark
-                      ? `${med.color}20`
-                      : `${med.color}15`
-                    : isDark
-                      ? "rgba(212, 165, 116, 0.08)"
-                      : "rgba(180, 130, 80, 0.06)",
-                  border: isTaken
-                    ? `1px solid ${med.color}40`
-                    : isDark
-                      ? "1px solid rgba(212, 165, 116, 0.1)"
-                      : "1px solid rgba(180, 130, 80, 0.1)",
-                }}
-              >
-                {/* Potion Flask Icon */}
-                <div
-                  className="h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200"
-                  style={{
-                    background: isTaken
-                      ? `linear-gradient(135deg, ${med.color} 0%, ${med.color}cc 100%)`
-                      : isDark
-                        ? `${med.color}25`
-                        : `${med.color}20`,
-                    boxShadow: isTaken ? `0 2px 8px ${med.color}40` : "none",
-                  }}
-                >
-                  {isToggling ? (
-                    <Loader2
-                      className="h-3.5 w-3.5 animate-spin"
-                      style={{ color: isTaken ? "white" : med.color }}
-                    />
-                  ) : isTaken ? (
-                    <Check className="h-3.5 w-3.5 text-white" />
-                  ) : (
-                    <FlaskConical
-                      className="h-3.5 w-3.5"
-                      style={{ color: med.color }}
-                    />
-                  )}
-                </div>
-
-                {/* Label */}
-                <span
-                  className="text-[9px] font-medium text-center leading-tight line-clamp-2"
-                  style={{
-                    color: isTaken ? med.color : "var(--muted-foreground)",
-                  }}
-                >
-                  {med.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 export function HomePage() {
   const { addTransaction } = useExpenseData();
   const { navigateToSection, navigateFinanceView } = useAppNavigation();
@@ -722,8 +560,6 @@ export function HomePage() {
           <StackedMiniWidgets onNavigateToAssets={handleNavigateToAssets} />
         </div>
 
-        {/* Supplements Widget - Potions */}
-        <SupplementsWidget />
       </main>
 
       {/* Guild Hall Dialog */}

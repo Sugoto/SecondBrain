@@ -1,9 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Sofa, Footprints, Dumbbell, Flame, X, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sofa, Footprints, Dumbbell, Flame, X } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useHealthData } from "@/hooks/useHealthData";
-import { useGoogleFit } from "@/hooks/useGoogleFit";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,18 +75,10 @@ function getLevelInfo(level: ActivityLevel | undefined) {
 export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { activityLog, setActivityLevel, mergeActivityLog } = useHealthData();
-  const { syncSteps, isLoading: isSyncing, isConfigured: isGoogleFitConfigured } = useGoogleFit();
+  const { activityLog, setActivityLevel } = useHealthData();
 
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => formatDateKey(today), [today]);
-
-  const handleSyncGoogleFit = async () => {
-    const result = await syncSteps(30); // Sync last 30 days
-    if (result) {
-      mergeActivityLog(result.activityLog, result.stepLog);
-    }
-  };
 
   const [currentMonth, setCurrentMonth] = useState(() => ({
     year: today.getFullYear(),
@@ -340,19 +331,6 @@ export function WorkoutCalendar({ className }: WorkoutCalendarProps) {
             ))}
           </div>
 
-          {/* Google Fit Sync Button */}
-          {isGoogleFitConfigured && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSyncGoogleFit}
-              disabled={isSyncing}
-              className="w-full mt-3 text-xs gap-2"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Syncing..." : "Sync from Google Fit"}
-            </Button>
-          )}
         </div>
       </Card>
 

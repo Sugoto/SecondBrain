@@ -35,9 +35,6 @@ export type ActivityLevel = "sedentary" | "light" | "moderate" | "heavy";
 // Activity log: date -> activity level
 export type ActivityLog = Record<string, ActivityLevel>;
 
-// Step counts: date -> step count
-export type StepLog = Record<string, number>;
-
 export type UserStats = {
   id: string;
   bank_savings: number;
@@ -54,8 +51,7 @@ export type UserStats = {
   gender: "male" | "female" | null;
   activity_level: ActivityLevel | null;
   activity_log: ActivityLog | null;
-  step_log: StepLog | null; // Raw step counts from Google Fit
-  manual_activity_dates: string[] | null; // Dates with manual entries (priority over auto-sync)
+  manual_activity_dates: string[] | null; // Dates with manual entries
   workout_dates: string[] | null; // Dates with gym workouts marked
   investments: Investment[] | null;
 };

@@ -3,7 +3,6 @@ export { HEALTH_NAV_ITEMS } from "../navigation/constants";
 export { HealthStatsEditDialog } from "./HealthStatsCard";
 export { WorkoutCalendar } from "./WorkoutCalendar";
 export { ShoppingList } from "./ShoppingList";
-export { MedicationTracker } from "./MedicationTracker";
 export {
   calculateTDEE,
   calculateBMI,

@@ -1,4 +1,4 @@
-import { Coins, Heart, TrendingUp, ScrollText, PieChart, Flame, Swords, FlaskConical, Sparkles, Calculator, BookOpen, CalendarDays, Hourglass, CalendarCheck, BarChart3 } from "lucide-react";
+import { Coins, Heart, TrendingUp, ScrollText, PieChart, Flame, Sparkles, Calculator, BookOpen, CalendarDays, Hourglass, CalendarCheck, BarChart3 } from "lucide-react";
 import type { NavItem } from "./DynamicBottomNav";
 
 // Home page nav items with RPG theme colors
@@ -19,8 +19,6 @@ export const FINANCE_NAV_ITEMS: NavItem[] = [
 // Health tracker nav items - Vitality theme
 export const HEALTH_NAV_ITEMS: NavItem[] = [
   { id: "nutrition", icon: Flame, label: "Rations" },
-  { id: "medication", icon: FlaskConical, label: "Potions" },
-  { id: "activity", icon: Swords, label: "Training" },
 ];
 
 // OMSCS tracker nav items - Arcane Studies theme
