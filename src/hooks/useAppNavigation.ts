@@ -4,7 +4,6 @@ import type {
   HealthView,
   FinanceView,
   OmscsView,
-  TimeView,
 } from "@/types/navigation";
 
 interface NavigationState {
@@ -12,7 +11,6 @@ interface NavigationState {
   healthView: HealthView;
   financeView: FinanceView;
   omscsView: OmscsView;
-  timeView: TimeView;
 }
 
 const DEFAULT_STATE: NavigationState = {
@@ -20,7 +18,6 @@ const DEFAULT_STATE: NavigationState = {
   healthView: "nutrition",
   financeView: "expenses",
   omscsView: "grades",
-  timeView: "today",
 };
 
 // Parse hash into navigation state
@@ -30,7 +27,7 @@ function parseHash(hash: string): NavigationState | null {
   const parts = hash.split("/");
   const section = parts[0] as AppSection;
 
-  if (!["home", "omscs", "finances", "time", "fitness"].includes(section)) {
+  if (!["home", "omscs", "finances", "fitness"].includes(section)) {
     return null;
   }
 
@@ -48,10 +45,6 @@ function parseHash(hash: string): NavigationState | null {
       section === "omscs" && parts[1]
         ? (parts[1] as OmscsView)
         : DEFAULT_STATE.omscsView,
-    timeView:
-      section === "time" && parts[1]
-        ? (parts[1] as TimeView)
-        : DEFAULT_STATE.timeView,
   };
 }
 
@@ -59,7 +52,6 @@ function parseHash(hash: string): NavigationState | null {
 function toHash(state: NavigationState): string {
   if (state.section === "home") return "#";
   if (state.section === "finances") return `#finances/${state.financeView}`;
-  if (state.section === "time") return `#time/${state.timeView}`;
   if (state.section === "fitness") return `#fitness/${state.healthView}`;
   if (state.section === "omscs") return `#omscs/${state.omscsView}`;
   return `#${state.section}`;
@@ -161,16 +153,6 @@ export function useAppNavigation() {
     });
   }, []);
 
-  const navigateTimeView = useCallback((timeView: TimeView) => {
-    setSharedState((prev) => {
-      const next = { ...prev, timeView };
-      if (!isHandlingPopstate.current) {
-        window.history.replaceState(next, "", toHash(next));
-      }
-      return next;
-    });
-  }, []);
-
   const goHome = useCallback(() => {
     if (state.section === "home") return;
 
@@ -184,12 +166,10 @@ export function useAppNavigation() {
     healthView: state.healthView,
     financeView: state.financeView,
     omscsView: state.omscsView,
-    timeView: state.timeView,
     navigateToSection,
     navigateHealthView,
     navigateFinanceView,
     navigateOmscsView,
-    navigateTimeView,
     goHome,
   };
 }

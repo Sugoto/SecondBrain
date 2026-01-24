@@ -40,9 +40,9 @@ export function Header({
       <PageHeader
         title="Treasury"
         icon={Coins}
-        iconGradient="linear-gradient(135deg, #d4a574 0%, #b8956a 100%)"
-        iconShadow="0 4px 12px rgba(212, 165, 116, 0.4)"
-        accentColor="#d4a574"
+        iconGradient="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
+        iconShadow="0 4px 12px rgba(139, 92, 246, 0.4)"
+        accentColor="#8b5cf6"
         noBackground
       >
         <DateFilter

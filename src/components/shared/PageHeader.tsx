@@ -20,7 +20,7 @@ export function PageHeader({
   icon: Icon,
   iconGradient,
   iconShadow,
-  accentColor: _accentColor = "#d4a574",
+  accentColor: _accentColor = "#8b5cf6",
   noBackground = false,
   children,
 }: PageHeaderProps) {
@@ -29,17 +29,17 @@ export function PageHeader({
   const { theme, toggle: toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
-  // RPG-style button with gold accents
+  // Clean button style with subtle amethyst accent
   const buttonStyle = {
     background: isDark
-      ? "linear-gradient(135deg, rgba(212, 165, 116, 0.2) 0%, rgba(180, 130, 80, 0.15) 100%)"
-      : "linear-gradient(135deg, rgba(212, 165, 116, 0.15) 0%, rgba(180, 130, 80, 0.1) 100%)",
+      ? "rgba(139, 92, 246, 0.15)"
+      : "rgba(139, 92, 246, 0.08)",
     border: isDark
-      ? "1px solid rgba(212, 165, 116, 0.4)"
-      : "1px solid rgba(180, 130, 80, 0.35)",
+      ? "1px solid rgba(139, 92, 246, 0.3)"
+      : "1px solid rgba(139, 92, 246, 0.2)",
     boxShadow: isDark
-      ? "0 2px 8px rgba(212, 165, 116, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
-      : "0 2px 8px rgba(180, 130, 80, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
+      ? "0 2px 8px rgba(0, 0, 0, 0.3)"
+      : "0 2px 8px rgba(0, 0, 0, 0.05)",
   };
 
   return (
@@ -50,23 +50,23 @@ export function PageHeader({
           ? undefined
           : {
               background: isDark
-                ? "linear-gradient(135deg, rgba(40, 32, 24, 0.9) 0%, rgba(30, 25, 20, 0.95) 100%)"
-                : "linear-gradient(135deg, rgba(245, 235, 220, 0.9) 0%, rgba(235, 220, 200, 0.95) 100%)",
+                ? "rgba(20, 20, 22, 0.95)"
+                : "rgba(255, 255, 255, 0.95)",
               borderBottom: isDark
-                ? "1px solid rgba(212, 165, 116, 0.2)"
-                : "1px solid rgba(180, 130, 80, 0.15)",
+                ? "1px solid rgba(139, 92, 246, 0.15)"
+                : "1px solid rgba(0, 0, 0, 0.06)",
             }
       }
     >
-      {/* Animated torch-light glow */}
+      {/* Subtle animated glow */}
       {!noBackground && (
         <motion.div
           className="absolute inset-0 pointer-events-none"
           animate={{
             background: [
-              `radial-gradient(circle at 20% 50%, ${isDark ? "rgba(255, 180, 100, 0.08)" : "rgba(212, 165, 116, 0.1)"} 0%, transparent 50%)`,
-              `radial-gradient(circle at 80% 50%, ${isDark ? "rgba(255, 180, 100, 0.08)" : "rgba(212, 165, 116, 0.1)"} 0%, transparent 50%)`,
-              `radial-gradient(circle at 20% 50%, ${isDark ? "rgba(255, 180, 100, 0.08)" : "rgba(212, 165, 116, 0.1)"} 0%, transparent 50%)`,
+              `radial-gradient(circle at 20% 50%, ${isDark ? "rgba(139, 92, 246, 0.06)" : "rgba(139, 92, 246, 0.04)"} 0%, transparent 50%)`,
+              `radial-gradient(circle at 80% 50%, ${isDark ? "rgba(139, 92, 246, 0.06)" : "rgba(139, 92, 246, 0.04)"} 0%, transparent 50%)`,
+              `radial-gradient(circle at 20% 50%, ${isDark ? "rgba(139, 92, 246, 0.06)" : "rgba(139, 92, 246, 0.04)"} 0%, transparent 50%)`,
             ],
           }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -100,9 +100,9 @@ export function PageHeader({
             style={buttonStyle}
           >
             {isDark ? (
-              <Sun className="h-4 w-4 text-amber-400" />
+              <Sun className="h-4 w-4 text-violet-400" />
             ) : (
-              <Moon className="h-4 w-4 text-amber-700" />
+              <Moon className="h-4 w-4 text-violet-600" />
             )}
           </button>
         </div>

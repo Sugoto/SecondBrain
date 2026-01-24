@@ -40,20 +40,20 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   const isDark = theme === "dark";
   const showHomeButton = onGoHome && currentSection !== "home";
 
-  // RPG-style tavern menu navigation
+  // Clean navigation with amethyst accents
   const containerStyle = useMemo(
     () => ({
       background: isDark
-        ? "linear-gradient(180deg, rgba(40, 32, 24, 0.95) 0%, rgba(30, 24, 18, 0.98) 100%)"
-        : "linear-gradient(180deg, rgba(245, 235, 220, 0.95) 0%, rgba(235, 220, 200, 0.98) 100%)",
+        ? "rgba(20, 20, 22, 0.95)"
+        : "rgba(255, 255, 255, 0.95)",
       backdropFilter: "blur(20px) saturate(150%)",
       WebkitBackdropFilter: "blur(20px) saturate(150%)",
       border: isDark
-        ? "1px solid rgba(212, 165, 116, 0.25)"
-        : "1px solid rgba(180, 130, 80, 0.2)",
+        ? "1px solid rgba(139, 92, 246, 0.2)"
+        : "1px solid rgba(0, 0, 0, 0.08)",
       boxShadow: isDark
-        ? "0 -4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.2)"
-        : "0 -4px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.05)",
+        ? "0 -4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+        : "0 -4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
       borderRadius: "16px",
     }),
     [isDark]
@@ -70,13 +70,13 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
       className="md:hidden fixed bottom-4 left-4 right-4 z-[9999] no-view-transition"
       style={containerStyle}
     >
-      {/* Top gold trim effect */}
+      {/* Top amethyst trim effect */}
       <div
         className="absolute inset-x-0 top-0 h-px pointer-events-none rounded-t-[16px] overflow-hidden"
         style={{
           background: isDark
-            ? "linear-gradient(90deg, transparent 10%, rgba(212, 165, 116, 0.4) 50%, transparent 90%)"
-            : "linear-gradient(90deg, transparent 10%, rgba(180, 130, 80, 0.5) 50%, transparent 90%)",
+            ? "linear-gradient(90deg, transparent 10%, rgba(139, 92, 246, 0.4) 50%, transparent 90%)"
+            : "linear-gradient(90deg, transparent 10%, rgba(139, 92, 246, 0.3) 50%, transparent 90%)",
         }}
       />
 
@@ -89,21 +89,21 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
             style={{
               width: 36,
               height: 36,
-              color: isDark ? "rgba(212, 165, 116, 0.8)" : "rgba(140, 100, 60, 0.8)",
+              color: isDark ? "rgba(139, 92, 246, 0.8)" : "rgba(109, 40, 217, 0.7)",
             }}
           >
             <Scroll className="h-5 w-5" />
           </button>
         )}
 
-        {/* Ornate divider when home button is shown */}
+        {/* Divider when home button is shown */}
         {showHomeButton && (
           <div
             className="h-6 w-px mx-1"
             style={{
               background: isDark
-                ? "linear-gradient(180deg, transparent, rgba(212, 165, 116, 0.3), transparent)"
-                : "linear-gradient(180deg, transparent, rgba(180, 130, 80, 0.25), transparent)",
+                ? "linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.3), transparent)"
+                : "linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.2), transparent)",
             }}
           />
         )}
@@ -112,11 +112,10 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
         <div className="flex items-center justify-around flex-1 h-full">
           {navItems.map(({ id, icon: Icon, label, color }) => {
             const isActive = activeView === id;
-            // RPG-themed section colors: cyan for arcane, gold for treasury, teal for quests, red for vitality
+            // Section colors: cyan for arcane, amethyst for treasury, red for vitality
             const sectionColor = 
               currentSection === "omscs" ? "#06b6d4" :
-              currentSection === "finances" ? "#d4a574" :
-              currentSection === "time" ? "#14b8a6" : 
+              currentSection === "finances" ? "#8b5cf6" :
               "#ef4444";
             const itemColor = color || sectionColor;
             const hasExplicitColor = !!color;
