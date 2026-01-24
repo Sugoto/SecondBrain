@@ -8,36 +8,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Wallet,
   Landmark,
   TrendingUp,
   Shield,
   Building2,
   Banknote,
   PiggyBank,
-  ChevronRight,
-  Sparkles,
+  Wallet,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
 import { formatCurrency } from "./constants";
 import { supabase, type UserStats } from "@/lib/supabase";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { toast } from "sonner";
-
-// Type for goal progress data
-type GoalProgress = {
-  monthlySavings: number;
-  timeToGoal: {
-    months: number;
-    years: number;
-    remainingMonths: number;
-    targetDate: Date;
-  } | null;
-};
-
-// Target net worth: 1 Crore (₹1,00,00,000)
-const TARGET_NET_WORTH = 10000000;
 
 // Asset categories with their display info
 const ASSET_CATEGORIES = [
@@ -92,129 +75,89 @@ interface NetWorthCardProps {
   netWorth: number;
   theme: "light" | "dark";
   onEdit: () => void;
-  goalProgress?: GoalProgress;
-}
-
-// Format duration as years and months
-function formatDuration(years: number, months: number): string {
-  if (years === 0 && months === 0) return "Done!";
-  if (years === 0) return `${months}m`;
-  if (months === 0) return `${years}y`;
-  return `${years}y ${months}m`;
 }
 
 export function NetWorthCard({
   netWorth,
   theme,
   onEdit,
-  goalProgress,
 }: NetWorthCardProps) {
-  const percentToTarget = Math.min(100, (netWorth / TARGET_NET_WORTH) * 100);
-
-  // Consistent purple color scheme
-  const getProgressGradient = () => {
-    return "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)";
-  };
-
-  const hasGoalData = goalProgress?.timeToGoal != null;
-  const goalReached = hasGoalData && goalProgress.timeToGoal!.months === 0;
+  const isDark = theme === "dark";
 
   return (
     <div className="sticky top-0 z-30 px-4 md:px-6 pt-3">
       <button
         onClick={onEdit}
-        className="w-full max-w-6xl mx-auto px-3 py-2.5 rounded-2xl text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
+        className="relative w-full max-w-6xl mx-auto px-4 py-3 rounded-lg text-left transition-all hover:scale-[1.01] active:scale-[0.99] overflow-hidden"
         style={{
-          backgroundColor:
-            theme === "dark"
-              ? "rgba(24, 24, 27, 0.7)"
-              : "rgba(255, 255, 255, 0.7)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          boxShadow:
-            theme === "dark"
-              ? "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
-              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5)",
-          border:
-            theme === "dark"
-              ? "1px solid rgba(255, 255, 255, 0.08)"
-              : "1px solid rgba(0, 0, 0, 0.05)",
+          // Iron vault door / stone aesthetic
+          background: isDark
+            ? `linear-gradient(145deg, #27272a 0%, #18181b 50%, #09090b 100%)`
+            : `linear-gradient(145deg, #6b7280 0%, #4b5563 50%, #374151 100%)`,
+          border: isDark
+            ? "2px solid #3f3f46"
+            : "2px solid #1f2937",
+          boxShadow: isDark
+            ? "inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -2px 4px rgba(0,0,0,0.4), 0 6px 20px rgba(0, 0, 0, 0.6)"
+            : "inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.25), 0 6px 20px rgba(0, 0, 0, 0.35)",
         }}
       >
-        {/* Top row: Net worth + projected date */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2.5">
-            <div
-              className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{
-                background:
-                  theme === "dark"
-                    ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 100%)"
-                    : "linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%)",
-              }}
-            >
-              <Wallet className="h-4 w-4 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] text-muted-foreground font-medium">
-                Net Worth
-              </p>
-              <p
-                className="text-sm font-bold font-mono text-income truncate"
-                style={{
-                  textShadow:
-                    theme === "dark"
-                      ? "0 0 12px rgba(139, 92, 246, 0.4)"
-                      : "none",
-                }}
-              >
-                <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
-              </p>
-            </div>
-          </div>
-          
-          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        {/* Stone/metal texture */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: isDark ? 0.1 : 0.15,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+
+        {/* Iron trim at top */}
+        <div
+          className="absolute inset-x-0 top-0 h-1 pointer-events-none"
+          style={{
+            background: isDark
+              ? "linear-gradient(90deg, transparent 5%, #52525b 20%, #a1a1aa 50%, #52525b 80%, transparent 95%)"
+              : "linear-gradient(90deg, transparent 5%, #4b5563 20%, #9ca3af 50%, #4b5563 80%, transparent 95%)",
+          }}
+        />
+
+        {/* Centered content */}
+        <div className="relative flex flex-col items-center justify-center py-1">
+          <p
+            className="text-[10px] font-fantasy uppercase tracking-wider font-semibold"
+            style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
+          >
+            Vault Holdings
+          </p>
+          <p
+            className="text-xl font-bold font-mono"
+            style={{
+              color: isDark ? "#e5e7eb" : "#f9fafb",
+              textShadow: isDark
+                ? "0 0 12px rgba(161, 161, 170, 0.4)"
+                : "0 1px 2px rgba(0,0,0,0.4)",
+            }}
+          >
+            <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
+          </p>
         </div>
 
-        {/* Progress bar with goal info inside */}
-        <div className="relative h-3.5 bg-muted/50 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${percentToTarget}%` }}
-            transition={{
-              duration: 1,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              delay: 0.2,
+        {/* Iron bolt/rivet corners */}
+        {["top-1.5 left-1.5", "top-1.5 right-1.5", "bottom-1.5 left-1.5", "bottom-1.5 right-1.5"].map((pos, i) => (
+          <div
+            key={i}
+            className={`absolute ${pos} w-2.5 h-2.5 rounded-full pointer-events-none`}
+            style={{
+              background: isDark
+                ? "radial-gradient(circle at 30% 30%, #71717a 0%, #3f3f46 60%, #27272a 100%)"
+                : "radial-gradient(circle at 30% 30%, #d1d5db 0%, #6b7280 60%, #374151 100%)",
+              boxShadow: isDark
+                ? "inset 0 1px 1px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.5)"
+                : "inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.3)",
+              border: isDark ? "1px solid #52525b" : "1px solid #4b5563",
             }}
-            className="h-full rounded-full relative overflow-hidden"
-            style={{ background: getProgressGradient() }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
-              }}
-            />
-          </motion.div>
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-foreground/70"
-          >
-            {goalReached ? (
-              <span className="flex items-center gap-1">
-                <Sparkles className="h-2.5 w-2.5 text-amber-500" />
-                <span className="text-amber-500">₹1Cr reached!</span>
-              </span>
-            ) : hasGoalData ? (
-              <span>₹1Cr in {formatDuration(goalProgress.timeToGoal!.years, goalProgress.timeToGoal!.remainingMonths)}</span>
-            ) : (
-              <span>{percentToTarget.toFixed(1)}%</span>
-            )}
-          </motion.span>
-        </div>
+          />
+        ))}
       </button>
     </div>
   );

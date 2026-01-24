@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Heart,
   Flame,
   Droplet,
   GlassWater,
@@ -12,7 +11,8 @@ import {
 import { useTheme } from "@/hooks/useTheme";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Card } from "@/components/ui/card";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { TopTabs } from "@/components/navigation/TopTabs";
+import { HEALTH_NAV_ITEMS } from "@/components/navigation/constants";
 import type { HealthView } from "@/types/navigation";
 import { useHealthData } from "@/hooks/useHealthData";
 import { HealthStatsEditDialog } from "./HealthStatsCard";
@@ -24,6 +24,7 @@ const HEALTH_VIEWS = ["nutrition"] as const;
 interface HealthTrackerProps {
   activeView: HealthView;
   onViewChange: (view: HealthView) => void;
+  onGoHome: () => void;
 }
 
 const VIEW_ANIMATION = {
@@ -156,7 +157,10 @@ function NutritionView({ onEditHealth }: NutritionViewProps) {
 export function HealthTracker({
   activeView,
   onViewChange,
+  onGoHome,
 }: HealthTrackerProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const { userStats, updateInCache } = useHealthData();
   const [showHealthDialog, setShowHealthDialog] = useState(false);
 
@@ -169,22 +173,57 @@ export function HealthTracker({
   });
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <header className="shrink-0 bg-background p-4">
-        <PageHeader
+    <div
+      className="h-full flex flex-col relative overflow-hidden"
+      style={{
+        // Vitality/health warm parchment background
+        background: isDark
+          ? `radial-gradient(ellipse at top, #2a1f1f 0%, #1a1212 50%, #0f0a0a 100%)`
+          : `radial-gradient(ellipse at top, #fef2f2 0%, #fecaca 50%, #fca5a5 100%)`,
+      }}
+    >
+      {/* Texture overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: isDark ? 0.05 : 0.08,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Vignette effect */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: isDark
+            ? `radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.6) 100%)`
+            : `radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(239, 68, 68, 0.1) 100%)`,
+        }}
+      />
+
+      {/* Header with TopTabs */}
+      <header
+        className="relative shrink-0 z-10"
+        style={{
+          background: isDark
+            ? "rgba(26, 18, 18, 0.95)"
+            : "rgba(254, 242, 242, 0.95)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        <TopTabs
+          navItems={HEALTH_NAV_ITEMS}
+          activeView={activeView}
+          onViewChange={(view) => onViewChange(view as HealthView)}
+          onGoHome={onGoHome}
           title="Vitality"
-          icon={Heart}
-          iconGradient="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-          iconShadow="0 4px 12px rgba(239, 68, 68, 0.4)"
           accentColor="#ef4444"
-          noBackground
         />
       </header>
 
       {/* Main Content */}
       <main
-        className="flex-1 overflow-y-auto pb-20 overscroll-contain touch-pan-y"
+        className="relative flex-1 overflow-y-auto pb-4 overscroll-contain touch-pan-y"
         {...swipeHandlers}
       >
         <AnimatePresence mode="wait">

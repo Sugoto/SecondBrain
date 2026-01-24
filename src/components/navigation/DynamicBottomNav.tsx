@@ -40,21 +40,28 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   const isDark = theme === "dark";
   const showHomeButton = onGoHome && currentSection !== "home";
 
-  // Clean navigation with amethyst accents
+  // Wooden tavern sign navigation with medieval RPG aesthetics
   const containerStyle = useMemo(
     () => ({
+      // Wood grain background
       background: isDark
-        ? "rgba(20, 20, 22, 0.95)"
-        : "rgba(255, 255, 255, 0.95)",
-      backdropFilter: "blur(20px) saturate(150%)",
-      WebkitBackdropFilter: "blur(20px) saturate(150%)",
+        ? `linear-gradient(180deg, 
+            #3d2a1c 0%, 
+            #2d1f14 40%, 
+            #2a1e12 60%, 
+            #241a0f 100%)`
+        : `linear-gradient(180deg, 
+            #a0785c 0%, 
+            #8B5A2B 40%, 
+            #7a4f24 60%, 
+            #6d4520 100%)`,
       border: isDark
-        ? "1px solid rgba(139, 92, 246, 0.2)"
-        : "1px solid rgba(0, 0, 0, 0.08)",
+        ? "2px solid #1a1208"
+        : "2px solid #5D3A1A",
       boxShadow: isDark
-        ? "0 -4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
-        : "0 -4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
-      borderRadius: "16px",
+        ? "inset 0 2px 4px rgba(255,255,255,0.05), inset 0 -2px 4px rgba(0,0,0,0.3), 0 4px 20px rgba(0, 0, 0, 0.6)"
+        : "inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.15), 0 4px 20px rgba(0, 0, 0, 0.25)",
+      borderRadius: "12px",
     }),
     [isDark]
   );
@@ -70,40 +77,80 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
       className="md:hidden fixed bottom-4 left-4 right-4 z-[9999] no-view-transition"
       style={containerStyle}
     >
-      {/* Top amethyst trim effect */}
+      {/* Wood grain texture overlay */}
       <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none rounded-t-[16px] overflow-hidden"
+        className="absolute inset-0 pointer-events-none rounded-[10px] overflow-hidden opacity-30"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 3px,
+            rgba(0,0,0,0.08) 3px,
+            rgba(0,0,0,0.08) 5px
+          )`,
+        }}
+      />
+
+      {/* Metal trim/bracket effect at top */}
+      <div
+        className="absolute inset-x-4 top-0 h-1 pointer-events-none rounded-t-[8px] overflow-hidden"
         style={{
           background: isDark
-            ? "linear-gradient(90deg, transparent 10%, rgba(139, 92, 246, 0.4) 50%, transparent 90%)"
-            : "linear-gradient(90deg, transparent 10%, rgba(139, 92, 246, 0.3) 50%, transparent 90%)",
+            ? "linear-gradient(90deg, transparent 0%, #5d4530 20%, #8b6914 50%, #5d4530 80%, transparent 100%)"
+            : "linear-gradient(90deg, transparent 0%, #c9a66b 20%, #daa520 50%, #c9a66b 80%, transparent 100%)",
+        }}
+      />
+
+      {/* Decorative corner nails */}
+      <div
+        className="absolute top-2 left-2 w-2 h-2 rounded-full pointer-events-none"
+        style={{
+          background: isDark
+            ? "radial-gradient(circle at 30% 30%, #6b7280 0%, #374151 100%)"
+            : "radial-gradient(circle at 30% 30%, #9ca3af 0%, #6b7280 100%)",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
+        }}
+      />
+      <div
+        className="absolute top-2 right-2 w-2 h-2 rounded-full pointer-events-none"
+        style={{
+          background: isDark
+            ? "radial-gradient(circle at 30% 30%, #6b7280 0%, #374151 100%)"
+            : "radial-gradient(circle at 30% 30%, #9ca3af 0%, #6b7280 100%)",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
         }}
       />
 
       <div className="flex items-center h-14 relative">
-        {/* Home button - Grimoire/Scroll */}
+        {/* Home button - Grimoire/Scroll styled as wax seal */}
         {showHomeButton && (
           <button
             onClick={onGoHome}
-            className="flex items-center justify-center ml-2 active:scale-90 transition-transform"
+            className="flex items-center justify-center ml-3 active:scale-90 transition-transform rounded-full"
             style={{
-              width: 36,
-              height: 36,
-              color: isDark ? "rgba(139, 92, 246, 0.8)" : "rgba(109, 40, 217, 0.7)",
+              width: 32,
+              height: 32,
+              background: isDark
+                ? "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)"
+                : "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
+              boxShadow: isDark
+                ? "0 2px 6px rgba(139, 92, 246, 0.4)"
+                : "0 2px 6px rgba(139, 92, 246, 0.3)",
+              border: "1px solid rgba(139, 92, 246, 0.3)",
             }}
           >
-            <Scroll className="h-5 w-5" />
+            <Scroll className="h-4 w-4 text-white" />
           </button>
         )}
 
-        {/* Divider when home button is shown */}
+        {/* Divider when home button is shown - rope/chain style */}
         {showHomeButton && (
           <div
-            className="h-6 w-px mx-1"
+            className="h-8 w-px mx-2"
             style={{
               background: isDark
-                ? "linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.3), transparent)"
-                : "linear-gradient(180deg, transparent, rgba(139, 92, 246, 0.2), transparent)",
+                ? "linear-gradient(180deg, transparent 0%, #5d4530 20%, #8b6914 50%, #5d4530 80%, transparent 100%)"
+                : "linear-gradient(180deg, transparent 0%, #8b7355 20%, #c9a66b 50%, #8b7355 80%, transparent 100%)",
             }}
           />
         )}
@@ -131,14 +178,17 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
                 onPointerEnter={() => onPrefetch?.(id)}
                 className="relative flex flex-col items-center justify-center flex-1 h-full"
               >
-                {/* Active rune glow effect */}
+                {/* Active torch/magical glow effect */}
                 {isActive && (
                   <div
-                    className="absolute inset-x-4 -top-1 bottom-2 rounded-lg -z-10"
+                    className="absolute inset-x-2 -top-1 bottom-1 rounded-lg -z-10"
                     style={{
                       background: isDark
-                        ? `radial-gradient(ellipse at center top, ${itemColor}30 0%, transparent 70%)`
-                        : `radial-gradient(ellipse at center top, ${itemColor}20 0%, transparent 70%)`,
+                        ? `radial-gradient(ellipse at center, ${itemColor}25 0%, transparent 70%)`
+                        : `radial-gradient(ellipse at center, ${itemColor}20 0%, transparent 70%)`,
+                      boxShadow: isDark
+                        ? `0 0 12px ${itemColor}30`
+                        : `0 0 8px ${itemColor}20`,
                     }}
                   />
                 )}
@@ -146,7 +196,7 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
                 <motion.div
                   animate={{
                     scale: isActive ? 1.15 : 1,
-                    y: isActive ? -3 : 0,
+                    y: isActive ? -2 : 0,
                   }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
                 >
@@ -154,17 +204,32 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
                     className="h-5 w-5"
                     style={{
                       // Home page: always show color. Subpages: only color when active
-                      color: hasExplicitColor ? itemColor : (isActive ? itemColor : undefined),
-                      filter: isActive ? `drop-shadow(0 2px 4px ${itemColor}60)` : undefined,
+                      color: hasExplicitColor 
+                        ? itemColor 
+                        : isActive 
+                          ? itemColor 
+                          : isDark ? "#a89070" : "#f5e6c8",
+                      filter: isActive 
+                        ? `drop-shadow(0 0 6px ${itemColor}80)` 
+                        : isDark 
+                          ? "drop-shadow(0 1px 2px rgba(0,0,0,0.5))"
+                          : "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
                     }}
                   />
                 </motion.div>
                 <span
-                  className="text-[10px] mt-0.5 font-medium tracking-wide"
+                  className="text-[10px] mt-0.5 font-semibold tracking-wide uppercase"
                   style={{
-                    color: isActive ? itemColor : "var(--muted-foreground)",
+                    color: isActive 
+                      ? itemColor 
+                      : isDark ? "#a89070" : "#f5e6c8",
                     fontFamily: '"Texturina", serif',
-                    letterSpacing: "0.02em",
+                    letterSpacing: "0.05em",
+                    textShadow: isActive
+                      ? `0 0 8px ${itemColor}60`
+                      : isDark 
+                        ? "0 1px 2px rgba(0,0,0,0.5)" 
+                        : "0 1px 2px rgba(0,0,0,0.3)",
                   }}
                 >
                   {label}

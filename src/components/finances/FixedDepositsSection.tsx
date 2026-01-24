@@ -37,8 +37,30 @@ export function FixedDepositsSection({
   );
 
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold">Fixed Deposits</h3>
+    <div className="space-y-3">
+      {/* Iron vault section header */}
+      <div className="flex items-center gap-2">
+        <div
+          className="h-6 w-6 rounded flex items-center justify-center"
+          style={{
+            background: isDark
+              ? "linear-gradient(135deg, #52525b 0%, #3f3f46 100%)"
+              : "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)",
+            boxShadow: isDark
+              ? "inset 0 1px 1px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4)"
+              : "inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.3)",
+            border: isDark ? "1px solid #3f3f46" : "1px solid #4b5563",
+          }}
+        >
+          <Landmark className="h-3 w-3" style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }} />
+        </div>
+        <h3
+          className="text-sm font-bold font-fantasy uppercase tracking-wider"
+          style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
+        >
+          Vault Deposits
+        </h3>
+      </div>
       <Card
         className="overflow-hidden relative py-0 gap-0"
         style={{

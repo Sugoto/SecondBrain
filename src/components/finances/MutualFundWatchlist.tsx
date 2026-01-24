@@ -433,9 +433,28 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
 
   if (error && funds.length === 0) {
     return (
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Mutual Funds</h3>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div
+            className="h-6 w-6 rounded flex items-center justify-center"
+            style={{
+              background: isDark
+                ? "linear-gradient(135deg, #52525b 0%, #3f3f46 100%)"
+                : "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)",
+              boxShadow: isDark
+                ? "inset 0 1px 1px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4)"
+                : "inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.3)",
+              border: isDark ? "1px solid #3f3f46" : "1px solid #4b5563",
+            }}
+          >
+            <TrendingUp className="h-3 w-3" style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }} />
+          </div>
+          <h3
+            className="text-sm font-bold font-fantasy uppercase tracking-wider"
+            style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
+          >
+            Investment Scrolls
+          </h3>
         </div>
         <Card className="p-3">
           <div className="text-center py-2">
@@ -455,10 +474,31 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   }
 
   return (
-    <div className="space-y-2">
-      {/* Header - Outside the card */}
+    <div className="space-y-3">
+      {/* Header - Iron vault style */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Mutual Funds</h3>
+        <div className="flex items-center gap-2">
+          <div
+            className="h-6 w-6 rounded flex items-center justify-center"
+            style={{
+              background: isDark
+                ? "linear-gradient(135deg, #52525b 0%, #3f3f46 100%)"
+                : "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)",
+              boxShadow: isDark
+                ? "inset 0 1px 1px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4)"
+                : "inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.3)",
+              border: isDark ? "1px solid #3f3f46" : "1px solid #4b5563",
+            }}
+          >
+            <TrendingUp className="h-3 w-3" style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }} />
+          </div>
+          <h3
+            className="text-sm font-bold font-fantasy uppercase tracking-wider"
+            style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
+          >
+            Investment Scrolls
+          </h3>
+        </div>
         <div className="flex items-center gap-2">
           {lastUpdated && (
             <p className="text-[10px] text-muted-foreground">

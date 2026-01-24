@@ -22,7 +22,7 @@ export const HEALTH_NAV_ITEMS: NavItem[] = [
 
 // OMSCS tracker nav items - Arcane Studies theme
 export const OMSCS_NAV_ITEMS: NavItem[] = [
-  { id: "grades", icon: Calculator, label: "Runes" },
-  { id: "semester", icon: CalendarDays, label: "Season" },
-  { id: "courses", icon: BookOpen, label: "Tomes" },
+  { id: "grades", icon: Calculator, label: "Grades" },
+  { id: "semester", icon: CalendarDays, label: "Semester" },
+  { id: "courses", icon: BookOpen, label: "Courses" },
 ];

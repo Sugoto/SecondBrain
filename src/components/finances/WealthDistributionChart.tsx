@@ -51,19 +51,37 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
     return null;
   }
 
+  const isDark = theme === "dark";
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay: 0.15 }}
+      className="space-y-3"
     >
-      <Card className="p-4">
-        <h3 className="text-sm font-medium text-center">Portfolio</h3>
-        <div className="h-48 flex items-center justify-center">
+      <Card
+        className="p-4 relative overflow-hidden"
+        style={{
+          // Stone/iron vault aesthetic
+          background: isDark
+            ? "linear-gradient(145deg, rgba(39, 39, 42, 0.9) 0%, rgba(24, 24, 27, 0.9) 100%)"
+            : "linear-gradient(145deg, rgba(107, 114, 128, 0.9) 0%, rgba(75, 85, 99, 0.9) 100%)",
+          border: isDark ? "1px solid #3f3f46" : "1px solid #374151",
+        }}
+      >
+        {/* Stone texture */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: isDark ? 0.08 : 0.1,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+        <div className="relative h-48 flex items-center justify-center">
           <LabeledPieChart
             data={pieData}
             theme={theme}
-
             formatValue={formatCurrency}
           />
         </div>

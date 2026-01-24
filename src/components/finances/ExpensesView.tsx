@@ -57,7 +57,7 @@ export const ExpensesView = memo(function ExpensesView({
     <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
       <div
         ref={parentRef}
-        className="h-[60vh] overflow-auto scrollbar-hide"
+        className="h-[64vh] overflow-auto scrollbar-hide"
         style={{ contain: "strict" }}
       >
         <div

@@ -14,8 +14,10 @@ import {
 } from "./constants";
 import { Input } from "@/components/ui/input";
 import { calculateBudgetTypeInfo } from "./utils";
+import { TopTabs } from "@/components/navigation/TopTabs";
+import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
 
-import { Header } from "./Header";
+import { DateFilter } from "./DateFilter";
 import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
 import { InvestmentsView } from "./InvestmentsView";
@@ -101,27 +103,32 @@ function SegmentedBudgetBar({
     }
   };
 
+  const isDark = theme === "dark";
+  
   return (
     <div className="sticky top-0 z-30 px-4 md:px-6 pt-2">
       <div
-        className="max-w-6xl mx-auto px-3 py-2 rounded-xl"
+        className="max-w-6xl mx-auto px-3 py-2 rounded-lg relative overflow-hidden"
         style={{
-          backgroundColor:
-            theme === "dark"
-              ? "rgba(24, 24, 27, 0.7)"
-              : "rgba(255, 255, 255, 0.7)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          boxShadow:
-            theme === "dark"
-              ? "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
-              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5)",
-          border:
-            theme === "dark"
-              ? "1px solid rgba(255, 255, 255, 0.08)"
-              : "1px solid rgba(0, 0, 0, 0.05)",
+          // Parchment background for budget bar
+          background: isDark
+            ? `linear-gradient(145deg, rgba(45, 35, 25, 0.95) 0%, rgba(35, 28, 20, 0.95) 100%)`
+            : `linear-gradient(145deg, #f5e6c8 0%, #e8d4b0 100%)`,
+          border: isDark
+            ? "2px solid #5d4530"
+            : "2px solid #c9a66b",
+          boxShadow: isDark
+            ? "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0, 0, 0, 0.4)"
+            : "inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
+        {/* Subtle paper texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-10"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
         <div className="flex items-center gap-2">
           {/* Progress bars side by side - tappable to filter */}
           <div className="flex-1 grid grid-cols-2 gap-3">
@@ -363,14 +370,16 @@ type DialogState = {
 interface FinanceTrackerProps {
   activeView: ActiveView;
   onViewChange: (view: ActiveView) => void;
+  onGoHome: () => void;
 }
 
 export function FinanceTracker({
   activeView,
   onViewChange,
+  onGoHome,
 }: FinanceTrackerProps) {
   // Data from React Query cache
-  const { transactions, error, addToCache, updateInCache, removeFromCache } =
+  const { transactions, addToCache, updateInCache, removeFromCache } =
     useExpenseData();
 
   // User stats for budget values
@@ -576,28 +585,142 @@ export function FinanceTracker({
     });
   };
 
+  const isDark = theme === "dark";
+  const isVault = activeView === "investments";
+
+  // Dynamic background based on view
+  const getBackground = () => {
+    if (isVault) {
+      // Iron and stone dungeon vault aesthetic
+      return isDark
+        ? `radial-gradient(ellipse at top, #1f1f23 0%, #18181b 40%, #09090b 100%)`
+        : `radial-gradient(ellipse at top, #6b7280 0%, #4b5563 40%, #374151 100%)`;
+    }
+    // Worn parchment paper for ledger/trends
+    return isDark
+      ? `radial-gradient(ellipse at top, #2a2218 0%, #1a1510 50%, #0f0d0a 100%)`
+      : `radial-gradient(ellipse at top, #fdf6e3 0%, #f5e6c8 50%, #e8d4b0 100%)`;
+  };
+
+  const getHeaderBackground = () => {
+    return isDark
+      ? "rgba(9, 9, 11, 0.95)"
+      : "rgba(255, 255, 255, 0.95)";
+  };
+
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden relative">
-      {/* Header - Fixed on mobile */}
-      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 bg-background z-20">
-        <div className="max-w-6xl mx-auto p-4 md:p-6">
-          <Header
-            error={error}
+    <div
+      className="h-[100dvh] flex flex-col overflow-hidden relative"
+      style={{ background: getBackground() }}
+    >
+      {/* Texture overlay - stone for vault, paper for ledger */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: isVault ? (isDark ? 0.08 : 0.15) : (isDark ? 0.05 : 0.08),
+          backgroundImage: isVault
+            ? `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
+            : `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Vault iron bars / stone blocks pattern overlay */}
+      {isVault && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: isDark ? 0.03 : 0.05,
+            backgroundImage: `repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 40px,
+              rgba(0,0,0,0.1) 40px,
+              rgba(0,0,0,0.1) 42px
+            ),
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 60px,
+              rgba(0,0,0,0.08) 60px,
+              rgba(0,0,0,0.08) 62px
+            )`,
+          }}
+        />
+      )}
+
+      {/* Vignette effect */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: isVault
+            ? isDark
+              ? `radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(0,0,0,0.7) 100%)`
+              : `radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.3) 100%)`
+            : isDark
+              ? `radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.6) 100%)`
+              : `radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(139, 90, 43, 0.15) 100%)`,
+        }}
+      />
+
+      {/* Torch glow effect for vault */}
+      {isVault && (
+        <>
+          <div
+            className="absolute top-0 left-0 w-32 h-48 pointer-events-none"
+            style={{
+              background: isDark
+                ? "radial-gradient(ellipse at top left, rgba(251, 146, 60, 0.08) 0%, transparent 70%)"
+                : "radial-gradient(ellipse at top left, rgba(251, 146, 60, 0.1) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            className="absolute top-0 right-0 w-32 h-48 pointer-events-none"
+            style={{
+              background: isDark
+                ? "radial-gradient(ellipse at top right, rgba(251, 146, 60, 0.06) 0%, transparent 70%)"
+                : "radial-gradient(ellipse at top right, rgba(251, 146, 60, 0.08) 0%, transparent 70%)",
+            }}
+          />
+        </>
+      )}
+
+      {/* Header with TopTabs - Fixed on mobile */}
+      <header
+        className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20"
+        style={{
+          background: getHeaderBackground(),
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        <div className="max-w-6xl mx-auto">
+          {/* Top Tabs Navigation with Date Filter */}
+          <TopTabs
+            navItems={FINANCE_NAV_ITEMS}
             activeView={activeView}
-            timeFilter={timeFilter}
-            chartMode={chartMode}
-            customDateRange={customDateRange}
-            onAddExpense={openAddExpense}
-            onTimeFilterChange={setTimeFilter}
-            onChartModeChange={setChartMode}
-            onCustomDateRangeChange={setCustomDateRange}
+            onViewChange={(view) => onViewChange(view as ActiveView)}
+            onGoHome={onGoHome}
+            title="Treasury"
+            accentColor="#8b5cf6"
+            rightContent={
+              activeView !== "investments" ? (
+                <DateFilter
+                  activeView={activeView}
+                  timeFilter={timeFilter}
+                  chartMode={chartMode}
+                  customDateRange={customDateRange}
+                  onTimeFilterChange={setTimeFilter}
+                  onChartModeChange={setChartMode}
+                  onCustomDateRangeChange={setCustomDateRange}
+                />
+              ) : undefined
+            }
           />
         </div>
       </header>
 
-      {/* Main Content - with top padding for fixed header on mobile */}
+      {/* Main Content - with top padding for fixed header with tabs on mobile */}
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-20 md:pb-0 pt-[72px] md:pt-0"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-4 md:pb-0 pt-[88px] md:pt-0"
         {...swipeHandlers}
       >
         {/* Sticky Segmented Budget Bar - only on expenses view */}
@@ -656,7 +779,7 @@ export function FinanceTracker({
         onDelete={deleteTransaction}
       />
 
-      {/* Mobile FAB - only on expenses view */}
+      {/* Mobile FAB - styled as wax seal */}
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
@@ -669,36 +792,27 @@ export function FinanceTracker({
             onClick={openAddExpense}
             className="group md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-full overflow-hidden"
             style={{
-              background:
-                theme === "dark"
-                  ? "rgba(24, 24, 27, 0.6)"
-                  : "rgba(255, 255, 255, 0.6)",
-              boxShadow:
-                theme === "dark"
-                  ? "0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(139, 92, 246, 0.3)"
-                  : "0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(139, 92, 246, 0.2)",
-              backdropFilter: "blur(20px) saturate(180%)",
-              WebkitBackdropFilter: "blur(20px) saturate(180%)",
-              border:
-                theme === "dark"
-                  ? "1px solid rgba(139, 92, 246, 0.4)"
-                  : "1px solid rgba(139, 92, 246, 0.3)",
+              // Wax seal / gold coin style
+              background: isDark
+                ? "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #5b21b6 100%)"
+                : "linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%)",
+              boxShadow: isDark
+                ? "inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.3), 0 4px 16px rgba(139, 92, 246, 0.5)"
+                : "inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2), 0 4px 16px rgba(139, 92, 246, 0.4)",
+              border: isDark
+                ? "3px solid #7c3aed"
+                : "3px solid #a855f7",
             }}
             aria-label="Add expense"
           >
-            {/* Glass shine effect */}
+            {/* Wax seal texture overlay */}
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 pointer-events-none rounded-full"
               style={{
-                background:
-                  theme === "dark"
-                    ? "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)"
-                    : "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%)",
+                background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 50%)",
               }}
             />
-            {/* Static ring - hover effect instead of infinite animation */}
-            <div className="absolute inset-0 rounded-full pointer-events-none transition-shadow duration-300 group-hover:shadow-[0_0_0_4px_rgba(139,92,246,0.2)]" />
-            <Plus className="h-6 w-6 text-primary relative z-10" />
+            <Plus className="h-6 w-6 text-white relative z-10" strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>

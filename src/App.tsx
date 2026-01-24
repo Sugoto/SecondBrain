@@ -129,31 +129,37 @@ function AppContent() {
             <OmscsTracker
               activeView={omscsView}
               onViewChange={navigateOmscsView}
+              onGoHome={goHome}
             />
           )}
           {currentSection === "finances" && (
             <FinanceTracker
               activeView={financeView}
               onViewChange={navigateFinanceView}
+              onGoHome={goHome}
             />
           )}
           {currentSection === "fitness" && (
             <HealthTracker
               activeView={healthView}
               onViewChange={navigateHealthView}
+              onGoHome={goHome}
             />
           )}
         </div>
       </Suspense>
 
-      <DynamicBottomNav
-        currentSection={currentSection}
-        activeView={activeView}
-        navItems={navItems}
-        onViewChange={handleViewChange}
-        onGoHome={goHome}
-        onPrefetch={handlePrefetch}
-      />
+      {/* Only show bottom nav on home page */}
+      {currentSection === "home" && (
+        <DynamicBottomNav
+          currentSection={currentSection}
+          activeView={activeView}
+          navItems={navItems}
+          onViewChange={handleViewChange}
+          onGoHome={goHome}
+          onPrefetch={handlePrefetch}
+        />
+      )}
 
       <Toaster position="top-center" richColors />
     </div>

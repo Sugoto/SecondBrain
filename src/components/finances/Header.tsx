@@ -1,7 +1,6 @@
-import { Coins, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { PageHeader } from "@/components/shared/PageHeader";
 import { DateFilter } from "./DateFilter";
 import type { TimeFilter, ChartMode, ActiveView, DateRange } from "./types";
 
@@ -29,7 +28,7 @@ export function Header({
   onCustomDateRangeChange,
 }: HeaderProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {error && (
         <Alert variant="destructive" className="py-2">
           <AlertTitle className="text-sm">Error</AlertTitle>
@@ -37,14 +36,7 @@ export function Header({
         </Alert>
       )}
 
-      <PageHeader
-        title="Treasury"
-        icon={Coins}
-        iconGradient="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
-        iconShadow="0 4px 12px rgba(139, 92, 246, 0.4)"
-        accentColor="#8b5cf6"
-        noBackground
-      >
+      <div className="flex items-center gap-2">
         <DateFilter
           activeView={activeView}
           timeFilter={timeFilter}
@@ -64,7 +56,7 @@ export function Header({
           <Plus className="h-3 w-3 mr-1.5" />
           Add Expense
         </Button>
-      </PageHeader>
+      </div>
     </div>
   );
 }
