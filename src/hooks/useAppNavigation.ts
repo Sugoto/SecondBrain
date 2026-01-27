@@ -17,7 +17,7 @@ const DEFAULT_STATE: NavigationState = {
   section: "home",
   healthView: "nutrition",
   financeView: "expenses",
-  omscsView: "grades",
+  omscsView: "semester",
 };
 
 // Parse hash into navigation state
