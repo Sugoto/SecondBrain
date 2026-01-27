@@ -85,76 +85,63 @@ export function NetWorthCard({
   const isDark = theme === "dark";
 
   return (
-    <div className="sticky top-0 z-30 px-4 md:px-6 pt-3">
+    <div className="px-4 md:px-6 pt-1">
       <button
         onClick={onEdit}
-        className="relative w-full max-w-6xl mx-auto px-4 py-3 rounded-lg text-left transition-all hover:scale-[1.01] active:scale-[0.99] overflow-hidden"
+        className="relative w-full max-w-6xl mx-auto px-3 py-2 rounded-md text-left transition-all hover:scale-[1.01] active:scale-[0.99] overflow-hidden"
         style={{
-          // Iron vault door / stone aesthetic
+          // Subtle iron vault aesthetic
           background: isDark
-            ? `linear-gradient(145deg, #27272a 0%, #18181b 50%, #09090b 100%)`
-            : `linear-gradient(145deg, #6b7280 0%, #4b5563 50%, #374151 100%)`,
+            ? `linear-gradient(145deg, #27272a 0%, #1c1c1f 100%)`
+            : `linear-gradient(145deg, #5a6370 0%, #4b5563 100%)`,
           border: isDark
-            ? "2px solid #3f3f46"
-            : "2px solid #1f2937",
+            ? "1px solid #3f3f46"
+            : "1px solid #374151",
           boxShadow: isDark
-            ? "inset 0 2px 4px rgba(255,255,255,0.08), inset 0 -2px 4px rgba(0,0,0,0.4), 0 6px 20px rgba(0, 0, 0, 0.6)"
-            : "inset 0 2px 4px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.25), 0 6px 20px rgba(0, 0, 0, 0.35)",
+            ? "inset 0 1px 2px rgba(255,255,255,0.05), 0 2px 8px rgba(0, 0, 0, 0.4)"
+            : "inset 0 1px 2px rgba(255,255,255,0.1), 0 2px 8px rgba(0, 0, 0, 0.2)",
         }}
       >
-        {/* Stone/metal texture */}
+        {/* Subtle metal texture */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            opacity: isDark ? 0.1 : 0.15,
+            opacity: isDark ? 0.06 : 0.08,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
           }}
         />
 
-        {/* Iron trim at top */}
-        <div
-          className="absolute inset-x-0 top-0 h-1 pointer-events-none"
-          style={{
-            background: isDark
-              ? "linear-gradient(90deg, transparent 5%, #52525b 20%, #a1a1aa 50%, #52525b 80%, transparent 95%)"
-              : "linear-gradient(90deg, transparent 5%, #4b5563 20%, #9ca3af 50%, #4b5563 80%, transparent 95%)",
-          }}
-        />
-
-        {/* Centered content */}
-        <div className="relative flex flex-col items-center justify-center py-1">
+        {/* Centered inline content */}
+        <div className="relative flex items-center justify-center gap-2">
           <p
-            className="text-[10px] font-fantasy uppercase tracking-wider font-semibold"
-            style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
+            className="text-[9px] font-fantasy uppercase tracking-wide opacity-70"
+            style={{ color: isDark ? "#a1a1aa" : "#d1d5db" }}
           >
-            Vault Holdings
+            Vault
           </p>
           <p
-            className="text-xl font-bold font-mono"
+            className="text-base font-semibold font-mono"
             style={{
               color: isDark ? "#e5e7eb" : "#f9fafb",
               textShadow: isDark
-                ? "0 0 12px rgba(161, 161, 170, 0.4)"
-                : "0 1px 2px rgba(0,0,0,0.4)",
+                ? "0 0 8px rgba(161, 161, 170, 0.3)"
+                : "0 1px 1px rgba(0,0,0,0.3)",
             }}
           >
             <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
           </p>
         </div>
 
-        {/* Iron bolt/rivet corners */}
-        {["top-1.5 left-1.5", "top-1.5 right-1.5", "bottom-1.5 left-1.5", "bottom-1.5 right-1.5"].map((pos, i) => (
+        {/* Small corner rivets */}
+        {["top-1 left-1", "top-1 right-1", "bottom-1 left-1", "bottom-1 right-1"].map((pos, i) => (
           <div
             key={i}
-            className={`absolute ${pos} w-2.5 h-2.5 rounded-full pointer-events-none`}
+            className={`absolute ${pos} w-1.5 h-1.5 rounded-full pointer-events-none`}
             style={{
               background: isDark
-                ? "radial-gradient(circle at 30% 30%, #71717a 0%, #3f3f46 60%, #27272a 100%)"
-                : "radial-gradient(circle at 30% 30%, #d1d5db 0%, #6b7280 60%, #374151 100%)",
-              boxShadow: isDark
-                ? "inset 0 1px 1px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.5)"
-                : "inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.3)",
-              border: isDark ? "1px solid #52525b" : "1px solid #4b5563",
+                ? "radial-gradient(circle at 30% 30%, #52525b 0%, #3f3f46 100%)"
+                : "radial-gradient(circle at 30% 30%, #9ca3af 0%, #6b7280 100%)",
+              opacity: 0.6,
             }}
           />
         ))}

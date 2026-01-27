@@ -276,13 +276,11 @@ export function HomePage() {
         <CharacterHeader />
 
         {/* Net Worth Widget */}
-        <div className="-mx-4">
-          <NetWorthCard
-            netWorth={netWorth}
-            theme={theme}
-            onEdit={() => setEditDialogOpen(true)}
-          />
-        </div>
+        <NetWorthCard
+          netWorth={netWorth}
+          theme={theme}
+          onEdit={() => setEditDialogOpen(true)}
+        />
 
         <OrnateDivider />
 

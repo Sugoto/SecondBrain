@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { ThemeProvider } from "./hooks/useTheme";
 import {
   ExpenseDataProvider,
@@ -15,27 +15,13 @@ import { Toaster } from "./components/ui/sonner";
 import { useSwipeNavigation } from "./hooks/useSwipeNavigation";
 import { useAppNavigation } from "./hooks/useAppNavigation";
 import type { AppSection } from "./types/navigation";
+import { HomePage } from "./components/home/HomePage";
+import { FinanceTracker } from "./components/finances";
+import { HealthTracker } from "./components/fitness/FitnessTracker";
+import { OmscsTracker } from "./components/omscs/OmscsTracker";
 
 // Main sections for swipe navigation
 const APP_SECTIONS = ["home", "omscs", "finances", "fitness"] as const;
-
-// Lazy load page components for code splitting
-const HomePage = lazy(() =>
-  import("./components/home/HomePage").then((m) => ({ default: m.HomePage }))
-);
-const FinanceTracker = lazy(() =>
-  import("./components/finances").then((m) => ({ default: m.FinanceTracker }))
-);
-const HealthTracker = lazy(() =>
-  import("./components/fitness/FitnessTracker").then((m) => ({
-    default: m.HealthTracker,
-  }))
-);
-const OmscsTracker = lazy(() =>
-  import("./components/omscs/OmscsTracker").then((m) => ({
-    default: m.OmscsTracker,
-  }))
-);
 
 function AppContent() {
   const {
@@ -114,40 +100,37 @@ function AppContent() {
 
   return (
     <div className="h-[100dvh] bg-background overflow-hidden">
-      {/* No loading fallback - components render instantly with cached data */}
-      <Suspense fallback={null}>
-        <div className="h-full">
-          {currentSection === "home" && (
-            <div
-              className="h-full overscroll-contain touch-pan-y"
-              {...sectionSwipeHandlers}
-            >
-              <HomePage />
-            </div>
-          )}
-          {currentSection === "omscs" && (
-            <OmscsTracker
-              activeView={omscsView}
-              onViewChange={navigateOmscsView}
-              onGoHome={goHome}
-            />
-          )}
-          {currentSection === "finances" && (
-            <FinanceTracker
-              activeView={financeView}
-              onViewChange={navigateFinanceView}
-              onGoHome={goHome}
-            />
-          )}
-          {currentSection === "fitness" && (
-            <HealthTracker
-              activeView={healthView}
-              onViewChange={navigateHealthView}
-              onGoHome={goHome}
-            />
-          )}
-        </div>
-      </Suspense>
+      <div className="h-full">
+        {currentSection === "home" && (
+          <div
+            className="h-full overscroll-contain touch-pan-y"
+            {...sectionSwipeHandlers}
+          >
+            <HomePage />
+          </div>
+        )}
+        {currentSection === "omscs" && (
+          <OmscsTracker
+            activeView={omscsView}
+            onViewChange={navigateOmscsView}
+            onGoHome={goHome}
+          />
+        )}
+        {currentSection === "finances" && (
+          <FinanceTracker
+            activeView={financeView}
+            onViewChange={navigateFinanceView}
+            onGoHome={goHome}
+          />
+        )}
+        {currentSection === "fitness" && (
+          <HealthTracker
+            activeView={healthView}
+            onViewChange={navigateHealthView}
+            onGoHome={goHome}
+          />
+        )}
+      </div>
 
       {/* Only show bottom nav on home page */}
       {currentSection === "home" && (
