@@ -104,7 +104,7 @@ function SegmentedBudgetBar({
   };
 
   const isDark = theme === "dark";
-  
+
   return (
     <div className="sticky top-0 z-30 px-4 md:px-6 pt-2">
       <div
@@ -142,19 +142,17 @@ function SegmentedBudgetBar({
                 );
               }}
               disabled={isEditing}
-              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${
-                isEditing
+              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${isEditing
                   ? ""
                   : budgetTypeFilter === "want"
-                  ? "opacity-40"
-                  : "hover:opacity-80"
-              }`}
+                    ? "opacity-40"
+                    : "hover:opacity-80"
+                }`}
             >
               <div className="flex items-center justify-between text-[10px]">
                 <span
-                  className={`font-medium ${
-                    budgetTypeFilter === "need" ? "" : "text-muted-foreground"
-                  }`}
+                  className={`font-medium ${budgetTypeFilter === "need" ? "" : "text-muted-foreground"
+                    }`}
                   style={{
                     color:
                       budgetTypeFilter === "need"
@@ -234,21 +232,19 @@ function SegmentedBudgetBar({
                 );
               }}
               disabled={isEditing}
-              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${
-                isEditing
+              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${isEditing
                   ? ""
                   : budgetTypeFilter === "need"
-                  ? "opacity-40"
-                  : "hover:opacity-80"
-              }`}
+                    ? "opacity-40"
+                    : "hover:opacity-80"
+                }`}
             >
               <div className="flex items-center justify-between text-[10px]">
                 <span
-                  className={`font-medium ${
-                    budgetTypeFilter === "want"
+                  className={`font-medium ${budgetTypeFilter === "want"
                       ? "text-purple-500"
                       : "text-muted-foreground"
-                  }`}
+                    }`}
                 >
                   Wants
                 </span>
@@ -379,7 +375,7 @@ export function FinanceTracker({
   onGoHome,
 }: FinanceTrackerProps) {
   // Data from React Query cache
-  const { transactions, addToCache, updateInCache, removeFromCache } =
+  const { transactions, error, addToCache, updateInCache, removeFromCache } =
     useExpenseData();
 
   // User stats for budget values
@@ -587,6 +583,7 @@ export function FinanceTracker({
 
   const isDark = theme === "dark";
   const isVault = activeView === "investments";
+  const isLedger = activeView === "expenses" || activeView === "trends";
 
   // Dynamic background based on view
   const getBackground = () => {

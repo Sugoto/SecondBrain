@@ -52,7 +52,7 @@ const FundSection = memo(function FundSection({
     const previousValue = totalUnits * fund.previousNav;
     const netChange = currentValue - totalInvested;
     const dailyChangeAmount = currentValue - previousValue;
-    
+
     return {
       totalUnits,
       totalInvested,
@@ -73,21 +73,21 @@ const FundSection = memo(function FundSection({
   const sparklinePath = useMemo(() => {
     const history = fund.navHistory;
     if (history.length === 0) return "";
-    
+
     let minNav = history[0].nav;
     let maxNav = history[0].nav;
     for (const h of history) {
       if (h.nav < minNav) minNav = h.nav;
       if (h.nav > maxNav) maxNav = h.nav;
     }
-    
+
     const range = maxNav - minNav || 1;
     const points = history.map((d, i) => {
       const x = (i / (history.length - 1)) * 100;
       const y = 24 - ((d.nav - minNav) / range) * 20;
       return `${x},${y}`;
     });
-    
+
     return `M ${points.join(" L ")}`;
   }, [fund.navHistory]);
 
@@ -168,9 +168,8 @@ const FundSection = memo(function FundSection({
 
         {/* Expand Icon */}
         <ChevronDown
-          className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${
-            isExpanded ? "rotate-180" : ""
-          }`}
+          className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""
+            }`}
         />
       </button>
 
@@ -239,9 +238,8 @@ const FundSection = memo(function FundSection({
                         {period.label}
                       </p>
                       <p
-                        className={`text-xs font-mono font-medium ${
-                          period.value >= 0 ? "text-green-500" : "text-red-500"
-                        }`}
+                        className={`text-xs font-mono font-medium ${period.value >= 0 ? "text-green-500" : "text-red-500"
+                          }`}
                       >
                         {period.value >= 0 ? "+" : ""}
                         {period.value.toFixed(1)}%
@@ -335,7 +333,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
   const isDark = theme === "dark";
-  
+
   // Memoize investments to prevent dependency array changes
   const investments = useMemo(() => userStats?.investments || [], [userStats?.investments]);
 
@@ -403,25 +401,25 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
     let invested = 0;
     let current = 0;
     let dailyChange = 0;
-    
+
     for (const fund of funds) {
       const fundInvestments = investmentsByFund.get(fund.schemeCode) || [];
       let totalUnits = 0;
       let totalInvested = 0;
-      
+
       for (const inv of fundInvestments) {
         totalUnits += inv.units;
         totalInvested += inv.amount;
       }
-      
+
       const currentValue = totalUnits * fund.currentNav;
       const previousValue = totalUnits * fund.previousNav;
-      
+
       invested += totalInvested;
       current += currentValue;
       dailyChange += currentValue - previousValue;
     }
-    
+
     return { invested, current, dailyChange };
   }, [funds, investmentsByFund]);
 
@@ -453,7 +451,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
             className="text-sm font-bold font-fantasy uppercase tracking-wider"
             style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
           >
-            Investment Scrolls
+            Mutual Funds
           </h3>
         </div>
         <Card className="p-3">
@@ -496,7 +494,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
             className="text-sm font-bold font-fantasy uppercase tracking-wider"
             style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
           >
-            Investment Scrolls
+            Mutual Funds
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -516,9 +514,8 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
             title="Refresh"
           >
             <RefreshCw
-              className={`h-3.5 w-3.5 text-muted-foreground ${
-                isRefetching ? "animate-spin" : ""
-              }`}
+              className={`h-3.5 w-3.5 text-muted-foreground ${isRefetching ? "animate-spin" : ""
+                }`}
             />
           </motion.button>
         </div>
@@ -589,9 +586,8 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
               </>
             )}
             <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                isCardExpanded ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 text-muted-foreground transition-transform ${isCardExpanded ? "rotate-180" : ""
+                }`}
             />
           </div>
         </button>

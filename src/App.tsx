@@ -38,7 +38,7 @@ function AppContent() {
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
 
   // Swipe navigation between main sections
-  const sectionSwipeHandlers = useSwipeNavigation({
+  const { ref: sectionSwipeRef } = useSwipeNavigation({
     views: APP_SECTIONS,
     currentView: currentSection,
     onViewChange: navigateToSection,
@@ -103,8 +103,8 @@ function AppContent() {
       <div className="h-full">
         {currentSection === "home" && (
           <div
-            className="h-full overscroll-contain touch-pan-y"
-            {...sectionSwipeHandlers}
+            ref={sectionSwipeRef as React.RefObject<HTMLDivElement>}
+            className="h-full overscroll-contain"
           >
             <HomePage />
           </div>

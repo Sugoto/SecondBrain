@@ -165,7 +165,8 @@ export function HealthTracker({
   const [showHealthDialog, setShowHealthDialog] = useState(false);
 
   // Swipe navigation for mobile (no View Transitions - Framer Motion handles animations)
-  const swipeHandlers = useSwipeNavigation({
+  // Note: Currently only one view, swipe will be disabled automatically
+  const { ref: swipeRef } = useSwipeNavigation({
     views: HEALTH_VIEWS,
     currentView: activeView,
     onViewChange,
@@ -223,8 +224,8 @@ export function HealthTracker({
 
       {/* Main Content */}
       <main
-        className="relative flex-1 overflow-y-auto pb-4 overscroll-contain touch-pan-y"
-        {...swipeHandlers}
+        ref={swipeRef as React.RefObject<HTMLElement>}
+        className="relative flex-1 overflow-y-auto pb-4 overscroll-contain"
       >
         <AnimatePresence mode="wait">
           {activeView === "nutrition" && (

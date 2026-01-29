@@ -43,7 +43,7 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
           className="text-sm font-bold font-fantasy uppercase tracking-wider"
           style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
         >
-          Royal Coffers
+          Provident Funds
         </h3>
       </div>
 

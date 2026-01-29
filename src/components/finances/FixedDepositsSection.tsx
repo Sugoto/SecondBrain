@@ -58,7 +58,7 @@ export function FixedDepositsSection({
           className="text-sm font-bold font-fantasy uppercase tracking-wider"
           style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
         >
-          Vault Deposits
+          Fixed Deposits
         </h3>
       </div>
       <Card

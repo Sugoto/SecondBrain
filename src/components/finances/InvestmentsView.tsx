@@ -73,7 +73,7 @@ export function InvestmentsView() {
   );
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 pt-4">
       <NetWorthCard
         netWorth={netWorth}
         theme={theme}

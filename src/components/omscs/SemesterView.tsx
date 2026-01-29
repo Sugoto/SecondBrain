@@ -1,7 +1,24 @@
 import { useState, useMemo, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
 import { RoughNotation } from "react-rough-notation";
+
+// Unified OMSCS color palette - matches OmscsTracker
+const COLORS = {
+  bgCard: "#263241",
+  bgCardHover: "#2d3a4a",
+  bgHeader: "rgba(6, 182, 212, 0.08)",
+  bgActive: "rgba(6, 182, 212, 0.06)",
+  bgAlt: "rgba(255, 255, 255, 0.02)",
+  textPrimary: "#f1f5f9",
+  textSecondary: "#94a3b8",
+  textMuted: "#64748b",
+  textDimmed: "#475569",
+  accent: "#06b6d4",
+  accentMuted: "#67e8f9",
+  border: "rgba(100, 116, 139, 0.25)",
+  borderLight: "rgba(6, 182, 212, 0.2)",
+  success: "#10b981",
+};
 
 // Assignment data
 interface Assignment {
@@ -66,9 +83,6 @@ function getDateStatus(startDate: string, endDate: string): DateStatus {
 const STORAGE_KEY = "semester-completed-assignments";
 
 export function SemesterView() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [sortKey, setSortKey] = useState<SortKey>("endDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   
@@ -132,11 +146,11 @@ export function SemesterView() {
 
   const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
     if (sortKey !== columnKey) {
-      return <ChevronUp className="h-2.5 w-2.5 opacity-30" />;
+      return <ChevronUp className="h-2.5 w-2.5" style={{ opacity: 0.3, color: COLORS.textMuted }} />;
     }
     return sortDirection === "asc" 
-      ? <ChevronUp className="h-2.5 w-2.5 text-cyan-400" />
-      : <ChevronDown className="h-2.5 w-2.5 text-cyan-400" />;
+      ? <ChevronUp className="h-2.5 w-2.5" style={{ color: COLORS.accentMuted }} />
+      : <ChevronDown className="h-2.5 w-2.5" style={{ color: COLORS.accentMuted }} />;
   };
 
   const getRowId = (assignment: Assignment) => `${assignment.code}-${assignment.name}`;
@@ -147,24 +161,18 @@ export function SemesterView() {
       <div
         className="rounded-lg overflow-hidden relative"
         style={{
-          background: isDark
-            ? "linear-gradient(180deg, rgba(18, 28, 32, 0.98) 0%, rgba(12, 20, 24, 0.99) 100%)"
-            : "linear-gradient(180deg, rgba(236, 254, 255, 0.98) 0%, rgba(207, 250, 254, 0.99) 100%)",
-          border: isDark ? "1px solid rgba(6, 182, 212, 0.2)" : "1px solid rgba(8, 145, 178, 0.25)",
-          boxShadow: isDark
-            ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.03)"
-            : "0 8px 32px rgba(6, 182, 212, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
+          background: `linear-gradient(180deg, ${COLORS.bgCard} 0%, #1e2937 100%)`,
+          border: `1px solid ${COLORS.borderLight}`,
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.02)",
         }}
       >
         {/* Table Header */}
         <div
           className="grid grid-cols-[1fr_52px_52px] gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-wider items-center"
           style={{
-            background: isDark
-              ? "linear-gradient(180deg, rgba(6, 182, 212, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%)"
-              : "linear-gradient(180deg, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0.06) 100%)",
-            borderBottom: isDark ? "1px solid rgba(6, 182, 212, 0.2)" : "1px solid rgba(8, 145, 178, 0.2)",
-            color: isDark ? "#67e8f9" : "#0891b2",
+            background: "linear-gradient(180deg, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0.05) 100%)",
+            borderBottom: `1px solid ${COLORS.borderLight}`,
+            color: COLORS.accentMuted,
           }}
         >
           <button
@@ -202,28 +210,23 @@ export function SemesterView() {
             // Calculate row background
             const getRowBackground = () => {
               if (isActive) {
-                // Subtle highlight for active rows
-                return isDark 
-                  ? "rgba(6, 182, 212, 0.08)" 
-                  : "rgba(6, 182, 212, 0.06)";
+                return COLORS.bgActive;
               }
               // Alternating background for inactive rows
-              return idx % 2 === 0
-                ? "transparent"
-                : isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)";
+              return idx % 2 === 0 ? "transparent" : COLORS.bgAlt;
             };
 
             // Get text color based on status
             const getNameColor = () => {
-              if (isCompleted) return isDark ? "#64748b" : "#94a3b8";
-              if (isDimmed) return isDark ? "#64748b" : "#9ca3af";
-              return isDark ? "#e2e8f0" : "#1e293b";
+              if (isCompleted) return COLORS.textMuted;
+              if (isDimmed) return COLORS.textMuted;
+              return COLORS.textPrimary;
             };
 
             const getDateColor = () => {
-              if (isCompleted) return isDark ? "#475569" : "#cbd5e1";
-              if (isDimmed) return isDark ? "#475569" : "#9ca3af";
-              return isDark ? "#94a3b8" : "#64748b";
+              if (isCompleted) return COLORS.textDimmed;
+              if (isDimmed) return COLORS.textDimmed;
+              return COLORS.textSecondary;
             };
 
             return (
@@ -232,11 +235,11 @@ export function SemesterView() {
                 onClick={() => toggleCompleted(rowId)}
                 className="grid grid-cols-[1fr_52px_52px] gap-1.5 px-3 py-2 text-[10px] transition-colors items-center cursor-pointer active:opacity-80"
                 style={{ 
-                  opacity: isDimmed && !isCompleted ? 0.6 : 1,
+                  opacity: isDimmed && !isCompleted ? 0.7 : 1,
                   background: getRowBackground(),
-                  borderBottom: isDark ? "1px solid rgba(255,255,255,0.03)" : "1px solid rgba(0,0,0,0.05)",
+                  borderBottom: "1px solid rgba(255,255,255,0.03)",
                   borderLeft: isActive && !isCompleted
-                    ? isDark ? "2px solid rgba(6, 182, 212, 0.6)" : "2px solid rgba(8, 145, 178, 0.5)"
+                    ? `2px solid rgba(6, 182, 212, 0.6)`
                     : "2px solid transparent",
                 }}
               >
@@ -245,7 +248,7 @@ export function SemesterView() {
                   <RoughNotation
                     type="strike-through"
                     show={isCompleted}
-                    color="#10b981"
+                    color={COLORS.success}
                     strokeWidth={2}
                     iterations={1}
                     animationDuration={400}
@@ -284,9 +287,7 @@ export function SemesterView() {
         <div
           className="h-1"
           style={{
-            background: isDark
-              ? "linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.3) 50%, transparent 100%)"
-              : "linear-gradient(90deg, transparent 0%, rgba(8, 145, 178, 0.2) 50%, transparent 100%)",
+            background: "linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.25) 50%, transparent 100%)",
           }}
         />
       </div>
