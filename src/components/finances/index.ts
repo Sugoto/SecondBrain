@@ -5,5 +5,8 @@ export { FinanceTracker } from "./FinanceTracker";
 export * from "./types";
 
 // Constants and utilities
-export { EXPENSE_CATEGORIES, MONTHLY_BUDGET, formatCurrency, getCategoryColor } from "./constants";
-
+export {
+  EXPENSE_CATEGORIES,
+  formatCurrency,
+  getCategoryColor,
+} from "./constants";

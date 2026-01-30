@@ -4,10 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Fantasy RPG Fonts */
-  --font-sans: "Texturina", serif;
-  --font-heading: "Texturina", serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* TASA Explorer font */
+  --font-sans:
+    "TASA Explorer", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-heading:
+    "TASA Explorer", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -39,7 +42,7 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* RPG stat colors */
+  /* Monochrome stat colors */
   --color-gold: var(--gold);
   --color-health: var(--health);
   --color-mana: var(--mana);
@@ -48,89 +51,89 @@
   --color-income: var(--income);
 }
 
-/* Light mode - Clean White + Amethyst Theme */
+/* Light mode - Clean Monochrome Theme */
 :root {
   --radius: 0.5rem;
   /* Clean white background */
   --background: oklch(0.985 0 0);
-  --foreground: oklch(0.15 0.01 285);
+  --foreground: oklch(0.15 0 0);
   /* Pure white cards */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 285);
+  --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 285);
-  /* Amethyst purple primary */
-  --primary: oklch(0.55 0.22 290);
+  --popover-foreground: oklch(0.15 0 0);
+  /* Neutral gray primary */
+  --primary: oklch(0.25 0 0);
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.96 0.01 290);
-  --secondary-foreground: oklch(0.25 0.02 285);
-  --muted: oklch(0.94 0.005 290);
-  --muted-foreground: oklch(0.45 0.02 285);
-  --accent: oklch(0.94 0.02 290);
-  --accent-foreground: oklch(0.25 0.02 285);
-  /* Crimson for destructive */
-  --destructive: oklch(0.55 0.22 25);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.25 0 0);
+  --muted: oklch(0.94 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.94 0 0);
+  --accent-foreground: oklch(0.25 0 0);
+  /* Gray for destructive */
+  --destructive: oklch(0.45 0 0);
   /* Subtle borders */
-  --border: oklch(0.90 0.01 290);
-  --input: oklch(0.94 0.005 290);
-  --ring: oklch(0.55 0.22 290);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.94 0 0);
+  --ring: oklch(0.25 0 0);
 
-  /* Chart colors - amethyst-based palette */
-  --chart-1: oklch(0.55 0.22 290); /* Amethyst */
-  --chart-2: oklch(0.55 0.18 160); /* Emerald */
-  --chart-3: oklch(0.55 0.20 25);  /* Crimson */
-  --chart-4: oklch(0.55 0.15 220); /* Azure */
-  --chart-5: oklch(0.55 0.12 55);  /* Amber */
+  /* Chart colors - monochrome palette */
+  --chart-1: oklch(0.2 0 0);
+  --chart-2: oklch(0.35 0 0);
+  --chart-3: oklch(0.5 0 0);
+  --chart-4: oklch(0.65 0 0);
+  --chart-5: oklch(0.8 0 0);
 
-  /* RPG Stats - amethyst as primary */
-  --gold: oklch(0.55 0.22 290);
-  --health: oklch(0.55 0.20 145);
-  --mana: oklch(0.60 0.22 290);
-  --xp: oklch(0.55 0.22 290);
-  --expense: oklch(0.55 0.22 25);
-  --income: oklch(0.55 0.18 145);
+  /* Monochrome Stats */
+  --gold: oklch(0.25 0 0);
+  --health: oklch(0.35 0 0);
+  --mana: oklch(0.45 0 0);
+  --xp: oklch(0.55 0 0);
+  --expense: oklch(0.35 0 0);
+  --income: oklch(0.45 0 0);
 }
 
-/* Dark mode - Clean Black + Amethyst Theme */
+/* Dark mode - Clean Monochrome Theme */
 .dark {
   /* True black background */
   --background: oklch(0.08 0 0);
-  --foreground: oklch(0.95 0.01 290);
+  --foreground: oklch(0.95 0 0);
   /* Dark gray cards */
-  --card: oklch(0.14 0.005 290);
-  --card-foreground: oklch(0.95 0.01 290);
-  --popover: oklch(0.12 0.005 290);
-  --popover-foreground: oklch(0.95 0.01 290);
-  /* Glowing amethyst primary */
-  --primary: oklch(0.70 0.22 290);
+  --card: oklch(0.14 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  /* Light gray primary */
+  --primary: oklch(0.9 0 0);
   --primary-foreground: oklch(0.08 0 0);
-  --secondary: oklch(0.18 0.01 290);
-  --secondary-foreground: oklch(0.92 0.01 290);
-  --muted: oklch(0.18 0.005 290);
-  --muted-foreground: oklch(0.60 0.02 290);
-  --accent: oklch(0.20 0.02 290);
-  --accent-foreground: oklch(0.92 0.01 290);
-  /* Glowing crimson for destructive */
-  --destructive: oklch(0.62 0.22 25);
+  --secondary: oklch(0.18 0 0);
+  --secondary-foreground: oklch(0.92 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.2 0 0);
+  --accent-foreground: oklch(0.92 0 0);
+  /* Gray for destructive */
+  --destructive: oklch(0.55 0 0);
   /* Subtle dark borders */
-  --border: oklch(0.22 0.01 290);
-  --input: oklch(0.18 0.005 290);
-  --ring: oklch(0.70 0.22 290);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.18 0 0);
+  --ring: oklch(0.9 0 0);
 
-  /* Chart colors - brighter for dark mode */
-  --chart-1: oklch(0.70 0.22 290); /* Bright amethyst */
-  --chart-2: oklch(0.62 0.20 160); /* Bright emerald */
-  --chart-3: oklch(0.65 0.22 25);  /* Glowing red */
-  --chart-4: oklch(0.62 0.18 220); /* Bright azure */
-  --chart-5: oklch(0.65 0.15 55);  /* Bright amber */
+  /* Chart colors - monochrome for dark mode */
+  --chart-1: oklch(0.9 0 0);
+  --chart-2: oklch(0.75 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.45 0 0);
+  --chart-5: oklch(0.3 0 0);
 
-  /* RPG Stats - amethyst as primary */
-  --gold: oklch(0.70 0.22 290);
-  --health: oklch(0.62 0.22 145);
-  --mana: oklch(0.72 0.22 290);
-  --xp: oklch(0.70 0.22 290);
-  --expense: oklch(0.65 0.22 25);
-  --income: oklch(0.62 0.20 145);
+  /* Monochrome Stats */
+  --gold: oklch(0.9 0 0);
+  --health: oklch(0.75 0 0);
+  --mana: oklch(0.6 0 0);
+  --xp: oklch(0.85 0 0);
+  --expense: oklch(0.7 0 0);
+  --income: oklch(0.75 0 0);
 }
 
 @layer base {
@@ -144,14 +147,32 @@
     display: none;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  
-  /* Fantasy heading font for all headings */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: "Texturina", serif;
-    letter-spacing: 0.02em;
+
+  /* Headings with TASA Explorer */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family:
+      "TASA Explorer",
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+    letter-spacing: -0.01em;
     font-weight: 600;
+  }
+
+  /* Improve number rendering in mono */
+  .font-mono {
+    font-feature-settings: "tnum", "zero";
   }
 }
 
@@ -166,63 +187,31 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  
-  /* RPG-style heading font */
-  .font-fantasy {
-    font-family: "Texturina", serif;
-    letter-spacing: 0.03em;
-    font-weight: 600;
-  }
-  
+
   /* Clean card style */
   .parchment {
     background: var(--card);
     border: 1px solid var(--border);
     box-shadow: 0 1px 3px oklch(0 0 0 / 0.08);
   }
-  
+
   .dark .parchment {
     box-shadow: 0 1px 3px oklch(0 0 0 / 0.3);
   }
-  
-  /* Amethyst shimmer effect for important elements */
-  .gold-shimmer {
-    background: linear-gradient(
-      90deg,
-      oklch(0.55 0.22 290) 0%,
-      oklch(0.70 0.18 290) 50%,
-      oklch(0.55 0.22 290) 100%
-    );
-    background-size: 200% 100%;
-    animation: gold-shimmer 3s ease-in-out infinite;
-  }
-  
-  @keyframes gold-shimmer {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-  
-  /* Magical glow for active/success states */
-  .magic-glow {
-    box-shadow: 
-      0 0 10px oklch(0.55 0.22 290 / 0.4),
-      0 0 20px oklch(0.55 0.22 290 / 0.2),
-      0 0 30px oklch(0.55 0.22 290 / 0.1);
-  }
-  
+
   /* Optimized scroll containers for mobile */
   .scroll-optimized {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     contain: content;
   }
-  
+
   /* GPU-accelerated animations */
   .will-animate {
     will-change: transform, opacity;
     contain: layout style paint;
   }
-  
+
   /* Skeleton shimmer animation */
   .skeleton-shimmer {
     background: linear-gradient(
@@ -234,164 +223,25 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite ease-in-out;
   }
-  
+
   @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
-  
+
   /* Pull-to-refresh indicator */
   .pull-indicator {
     transition: transform 0.2s ease-out;
   }
-  
+
   /* Touch feedback optimization */
   .touch-feedback {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-  }
-  
-  /* RPG-style stat bar */
-  .stat-bar {
-    background: linear-gradient(
-      180deg,
-      oklch(0.3 0 0 / 0.3) 0%,
-      oklch(0.15 0 0 / 0.4) 100%
-    );
-    border: 1px solid oklch(0.4 0.02 290 / 0.3);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .stat-bar-fill {
-    background: linear-gradient(
-      180deg,
-      oklch(0.65 0.22 290) 0%,
-      oklch(0.50 0.20 290) 100%
-    );
-    box-shadow: 0 0 8px oklch(0.65 0.22 290 / 0.5);
-    transition: width 0.5s ease-out;
-  }
-  
-  /* ========================================
-     Medieval RPG Theme Utilities
-     ======================================== */
-  
-  /* Wooden plank background */
-  .wood-bg {
-    background: linear-gradient(135deg, 
-      #8B5A2B 0%, 
-      #A0522D 25%, 
-      #8B4513 50%, 
-      #A0522D 75%, 
-      #8B5A2B 100%);
-  }
-  
-  .dark .wood-bg {
-    background: linear-gradient(135deg, 
-      #2d1f14 0%, 
-      #3d2a1c 25%, 
-      #2a1e12 50%, 
-      #3a2618 75%, 
-      #2d1f14 100%);
-  }
-  
-  /* Parchment paper background */
-  .parchment-bg {
-    background: linear-gradient(145deg, 
-      #fdf6e3 0%, 
-      #f5e6c8 30%, 
-      #ebe0c0 70%, 
-      #e6d9b5 100%);
-  }
-  
-  .dark .parchment-bg {
-    background: linear-gradient(145deg, 
-      #d4c4a8 0%, 
-      #c9b896 30%, 
-      #bfae88 70%, 
-      #b8a57d 100%);
-  }
-  
-  /* Metal/iron accent */
-  .iron-accent {
-    background: radial-gradient(circle at 30% 30%, 
-      #9ca3af 0%, 
-      #6b7280 40%, 
-      #4b5563 100%);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  }
-  
-  /* Gold/brass accent */
-  .gold-accent {
-    background: linear-gradient(135deg, 
-      #fbbf24 0%, 
-      #d97706 50%, 
-      #b45309 100%);
-    box-shadow: 0 2px 6px rgba(251, 191, 36, 0.4);
-  }
-  
-  /* Torch flicker animation */
-  .torch-flicker {
-    animation: torch-flicker 3s ease-in-out infinite;
-  }
-  
-  @keyframes torch-flicker {
-    0%, 100% { 
-      opacity: 1; 
-      filter: brightness(1);
-    }
-    25% { 
-      opacity: 0.95; 
-      filter: brightness(1.05);
-    }
-    50% { 
-      opacity: 0.98; 
-      filter: brightness(0.98);
-    }
-    75% { 
-      opacity: 0.96; 
-      filter: brightness(1.02);
-    }
-  }
-  
-  /* Wax seal effect */
-  .wax-seal {
-    background: linear-gradient(135deg, 
-      #dc2626 0%, 
-      #991b1b 50%, 
-      #7f1d1d 100%);
-    box-shadow: 
-      inset 0 2px 4px rgba(255,255,255,0.2),
-      inset 0 -2px 4px rgba(0,0,0,0.3),
-      0 2px 8px rgba(0,0,0,0.4);
-    border-radius: 50%;
-  }
-  
-  /* Leather texture */
-  .leather-texture {
-    background: linear-gradient(145deg, 
-      #5d4037 0%, 
-      #4e342e 50%, 
-      #3e2723 100%);
-  }
-  
-  .dark .leather-texture {
-    background: linear-gradient(145deg, 
-      #3e2723 0%, 
-      #2d1f1a 50%, 
-      #1a1210 100%);
-  }
-  
-  /* Ink/quill text effect */
-  .ink-text {
-    color: #1a1a1a;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
-  }
-  
-  .dark .ink-text {
-    color: #e8d4b0;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   }
 }
 
@@ -437,24 +287,24 @@ body > nav.no-view-transition {
 }
 
 @keyframes slide-out-left {
-  from { 
-    opacity: 1; 
-    transform: translateX(0); 
+  from {
+    opacity: 1;
+    transform: translateX(0);
   }
-  to { 
-    opacity: 0; 
-    transform: translateX(-30px); 
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
   }
 }
 
 @keyframes slide-in-right {
-  from { 
-    opacity: 0; 
-    transform: translateX(30px); 
+  from {
+    opacity: 0;
+    transform: translateX(30px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateX(0); 
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -468,13 +318,21 @@ body > nav.no-view-transition {
 }
 
 @keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* GPU-accelerated page transition class */

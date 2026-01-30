@@ -22,25 +22,6 @@ import { useOmscsData } from "@/hooks/useOmscsData";
 import { toast } from "sonner";
 import type { OmscsCourse, OmscsCourseDetails } from "@/lib/supabase";
 
-// Unified OMSCS color palette - matches OmscsTracker
-const COLORS = {
-  bgCard: "#263241",
-  bgCardHover: "#2d3a4a",
-  bgMuted: "rgba(255, 255, 255, 0.05)",
-  textPrimary: "#f1f5f9",
-  textSecondary: "#94a3b8",
-  textMuted: "#64748b",
-  textForeground: "rgba(241, 245, 249, 0.8)",
-  accent: "#06b6d4",
-  accentBg: "rgba(6, 182, 212, 0.15)",
-  warning: "#f59e0b",
-  warningBg: "rgba(245, 158, 11, 0.15)",
-  success: "#10b981",
-  danger: "#ef4444",
-  dangerBg: "rgba(239, 68, 68, 0.1)",
-  border: "rgba(100, 116, 139, 0.25)",
-};
-
 interface CourseCardProps {
   course: OmscsCourse;
   onEdit: (course: OmscsCourse) => void;
@@ -55,36 +36,24 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
     (details.analysis || details.pros?.length || details.cons?.length);
 
   return (
-    <div
-      className="overflow-hidden rounded-lg"
-      style={{
-        background: COLORS.bgCard,
-        border: `1px solid ${COLORS.border}`,
-      }}
-    >
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-3 py-2"
+        className="w-full text-left px-3 py-2 hover:bg-accent/50 transition-colors"
       >
         <div className="flex items-center">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-xs" style={{ color: COLORS.textPrimary }}>
+              <p className="font-semibold text-xs text-foreground">
                 {course.code}
               </p>
               {course.enrolled_semester && (
-                <span
-                  className="text-[9px] px-1.5 py-0.5 rounded font-medium"
-                  style={{
-                    background: course.final_grade ? COLORS.accentBg : COLORS.warningBg,
-                    color: course.final_grade ? COLORS.accent : COLORS.warning,
-                  }}
-                >
+                <span className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-muted text-muted-foreground">
                   {course.final_grade || "In Progress"}
                 </span>
               )}
             </div>
-            <p className="text-[10px] truncate" style={{ color: COLORS.textSecondary }}>
+            <p className="text-[10px] truncate text-muted-foreground">
               {course.name}
             </p>
           </div>
@@ -93,7 +62,7 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
             transition={{ duration: 0.2 }}
             className="shrink-0"
           >
-            <ChevronDown className="h-3.5 w-3.5" style={{ color: COLORS.textMuted }} />
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
           </motion.div>
         </div>
       </button>
@@ -107,23 +76,17 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div
-              className="px-3 pb-3 pt-2 space-y-2 border-t"
-              style={{ borderColor: COLORS.border }}
-            >
+            <div className="px-3 pb-3 pt-2 space-y-2 border-t border-border">
               {/* Details section - only if has details */}
               {hasDetails && (
                 <div className="space-y-2">
                   {/* Analysis */}
                   {details.analysis && (
                     <div>
-                      <p
-                        className="text-[9px] uppercase tracking-wider mb-0.5 font-medium"
-                        style={{ color: COLORS.textMuted }}
-                      >
+                      <p className="text-[9px] uppercase tracking-wider mb-0.5 font-medium text-muted-foreground">
                         Analysis
                       </p>
-                      <p className="text-[10px]" style={{ color: COLORS.textForeground }}>
+                      <p className="text-[10px] text-foreground">
                         {details.analysis}
                       </p>
                     </div>
@@ -132,20 +95,16 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
                   {/* Pros */}
                   {details.pros && details.pros.length > 0 && (
                     <div>
-                      <p
-                        className="text-[9px] uppercase tracking-wider mb-0.5 font-medium flex items-center gap-1"
-                        style={{ color: COLORS.textMuted }}
-                      >
-                        <ThumbsUp className="h-2.5 w-2.5" style={{ color: COLORS.success }} /> Pros
+                      <p className="text-[9px] uppercase tracking-wider mb-0.5 font-medium flex items-center gap-1 text-muted-foreground">
+                        <ThumbsUp className="h-2.5 w-2.5" /> Pros
                       </p>
                       <ul className="space-y-0.5">
                         {details.pros.map((pro, i) => (
                           <li
                             key={i}
-                            className="text-[10px] flex items-start gap-1"
-                            style={{ color: COLORS.textForeground }}
+                            className="text-[10px] flex items-start gap-1 text-foreground"
                           >
-                            <span style={{ color: COLORS.success }}>•</span>
+                            <span className="text-muted-foreground">•</span>
                             {pro}
                           </li>
                         ))}
@@ -156,20 +115,16 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
                   {/* Cons */}
                   {details.cons && details.cons.length > 0 && (
                     <div>
-                      <p
-                        className="text-[9px] uppercase tracking-wider mb-0.5 font-medium flex items-center gap-1"
-                        style={{ color: COLORS.textMuted }}
-                      >
-                        <ThumbsDown className="h-2.5 w-2.5" style={{ color: COLORS.danger }} /> Cons
+                      <p className="text-[9px] uppercase tracking-wider mb-0.5 font-medium flex items-center gap-1 text-muted-foreground">
+                        <ThumbsDown className="h-2.5 w-2.5" /> Cons
                       </p>
                       <ul className="space-y-0.5">
                         {details.cons.map((con, i) => (
                           <li
                             key={i}
-                            className="text-[10px] flex items-start gap-1"
-                            style={{ color: COLORS.textForeground }}
+                            className="text-[10px] flex items-start gap-1 text-foreground"
                           >
-                            <span style={{ color: COLORS.danger }}>•</span>
+                            <span className="text-muted-foreground">•</span>
                             {con}
                           </li>
                         ))}
@@ -186,10 +141,7 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
                     e.stopPropagation();
                     onEdit(course);
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-medium transition-colors"
-                  style={{ color: COLORS.textSecondary }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = COLORS.bgMuted}
-                  onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-medium transition-colors text-muted-foreground hover:bg-accent"
                 >
                   <Pencil className="h-3 w-3" /> Edit
                 </button>
@@ -198,10 +150,7 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
                     e.stopPropagation();
                     onDelete(course);
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-medium transition-colors"
-                  style={{ color: COLORS.danger }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = COLORS.dangerBg}
-                  onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-medium transition-colors text-muted-foreground hover:bg-accent"
                 >
                   <Trash2 className="h-3 w-3" /> Delete
                 </button>
@@ -329,7 +278,7 @@ export function CoursesView() {
   if (loading) {
     return (
       <div className="p-4 flex items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin" style={{ color: COLORS.accent }} />
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -341,10 +290,7 @@ export function CoursesView() {
     <div className="p-4 space-y-3">
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
-        <h3
-          className="text-[10px] font-medium uppercase tracking-wider"
-          style={{ color: COLORS.textSecondary }}
-        >
+        <h3 className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
           Course Catalog ({courses.length})
         </h3>
         <Button
@@ -352,10 +298,6 @@ export function CoursesView() {
           variant="outline"
           onClick={handleOpenAdd}
           className="h-7 text-xs"
-          style={{
-            borderColor: "rgba(6, 182, 212, 0.5)",
-            color: COLORS.accent,
-          }}
         >
           <Plus className="h-3.5 w-3.5 mr-1" /> Add Course
         </Button>
@@ -373,7 +315,7 @@ export function CoursesView() {
         ))}
 
         {courses.length === 0 && (
-          <p className="text-xs text-center py-8" style={{ color: COLORS.textSecondary }}>
+          <p className="text-xs text-center py-8 text-muted-foreground">
             No courses in catalog. Add one to get started!
           </p>
         )}
@@ -437,8 +379,7 @@ export function CoursesView() {
 
             <div>
               <label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                <ThumbsUp className="h-2.5 w-2.5 text-green-500" /> Pros (one
-                per line)
+                <ThumbsUp className="h-2.5 w-2.5" /> Pros (one per line)
               </label>
               <Textarea
                 value={formData.pros}
@@ -453,8 +394,7 @@ export function CoursesView() {
 
             <div>
               <label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                <ThumbsDown className="h-2.5 w-2.5 text-red-500" /> Cons (one
-                per line)
+                <ThumbsDown className="h-2.5 w-2.5" /> Cons (one per line)
               </label>
               <Textarea
                 value={formData.cons}
@@ -470,7 +410,7 @@ export function CoursesView() {
             <Button
               onClick={isEditing ? handleUpdateCourse : handleAddCourse}
               disabled={saving || !formData.code || !formData.name}
-              className="w-full bg-cyan-500 hover:bg-cyan-600 h-8 text-xs"
+              className="w-full h-8 text-xs"
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

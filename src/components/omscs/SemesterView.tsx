@@ -1,24 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import { RoughNotation } from "react-rough-notation";
-
-// Unified OMSCS color palette - matches OmscsTracker
-const COLORS = {
-  bgCard: "#263241",
-  bgCardHover: "#2d3a4a",
-  bgHeader: "rgba(6, 182, 212, 0.08)",
-  bgActive: "rgba(6, 182, 212, 0.06)",
-  bgAlt: "rgba(255, 255, 255, 0.02)",
-  textPrimary: "#f1f5f9",
-  textSecondary: "#94a3b8",
-  textMuted: "#64748b",
-  textDimmed: "#475569",
-  accent: "#06b6d4",
-  accentMuted: "#67e8f9",
-  border: "rgba(100, 116, 139, 0.25)",
-  borderLight: "rgba(6, 182, 212, 0.2)",
-  success: "#10b981",
-};
+import { ChevronUp, ChevronDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Assignment data
 interface Assignment {
@@ -71,10 +53,10 @@ type DateStatus = "past" | "active" | "future";
 function getDateStatus(startDate: string, endDate: string): DateStatus {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const start = parseDate(startDate);
   const end = parseDate(endDate);
-  
+
   if (end < today) return "past";
   if (start > today) return "future";
   return "active";
@@ -85,7 +67,7 @@ const STORAGE_KEY = "semester-completed-assignments";
 export function SemesterView() {
   const [sortKey, setSortKey] = useState<SortKey>("endDate");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  
+
   // Load completed assignments from localStorage
   const [completedAssignments, setCompletedAssignments] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
@@ -127,7 +109,7 @@ export function SemesterView() {
   const sortedAssignments = useMemo(() => {
     return [...ASSIGNMENTS].sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortKey) {
         case "name":
           comparison = a.name.localeCompare(b.name);
@@ -139,59 +121,45 @@ export function SemesterView() {
           comparison = parseDate(a.endDate).getTime() - parseDate(b.endDate).getTime();
           break;
       }
-      
+
       return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [sortKey, sortDirection]);
 
   const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
     if (sortKey !== columnKey) {
-      return <ChevronUp className="h-2.5 w-2.5" style={{ opacity: 0.3, color: COLORS.textMuted }} />;
+      return <ChevronUp className="h-2.5 w-2.5 opacity-30 text-muted-foreground" />;
     }
-    return sortDirection === "asc" 
-      ? <ChevronUp className="h-2.5 w-2.5" style={{ color: COLORS.accentMuted }} />
-      : <ChevronDown className="h-2.5 w-2.5" style={{ color: COLORS.accentMuted }} />;
+    return sortDirection === "asc"
+      ? <ChevronUp className="h-2.5 w-2.5 text-foreground" />
+      : <ChevronDown className="h-2.5 w-2.5 text-foreground" />;
   };
 
   const getRowId = (assignment: Assignment) => `${assignment.code}-${assignment.name}`;
 
   return (
     <div className="p-3 space-y-3">
-      {/* Timetable - RPG Scroll Style */}
-      <div
-        className="rounded-lg overflow-hidden relative"
-        style={{
-          background: `linear-gradient(180deg, ${COLORS.bgCard} 0%, #1e2937 100%)`,
-          border: `1px solid ${COLORS.borderLight}`,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.02)",
-        }}
-      >
+      {/* Timetable */}
+      <div className="rounded-lg overflow-hidden border border-border bg-card">
         {/* Table Header */}
-        <div
-          className="grid grid-cols-[1fr_52px_52px] gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-wider items-center"
-          style={{
-            background: "linear-gradient(180deg, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0.05) 100%)",
-            borderBottom: `1px solid ${COLORS.borderLight}`,
-            color: COLORS.accentMuted,
-          }}
-        >
+        <div className="grid grid-cols-[1fr_52px_52px] gap-1.5 px-3 py-2 text-[9px] font-bold uppercase tracking-wider items-center border-b border-border bg-muted">
           <button
             onClick={() => handleSort("name")}
-            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left"
+            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-muted-foreground"
           >
             <span>Course</span>
             <SortIcon columnKey="name" />
           </button>
           <button
             onClick={() => handleSort("startDate")}
-            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left"
+            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-muted-foreground"
           >
             <span>Start</span>
             <SortIcon columnKey="startDate" />
           </button>
           <button
             onClick={() => handleSort("endDate")}
-            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left"
+            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-muted-foreground"
           >
             <span>End</span>
             <SortIcon columnKey="endDate" />
@@ -199,97 +167,67 @@ export function SemesterView() {
         </div>
 
         {/* Table Body */}
-        <div>
-          {sortedAssignments.map((assignment, idx) => {
+        <div className="divide-y divide-border">
+          {sortedAssignments.map((assignment) => {
             const rowId = getRowId(assignment);
             const isCompleted = completedAssignments.has(rowId);
             const dateStatus = getDateStatus(assignment.startDate, assignment.endDate);
             const isActive = dateStatus === "active";
             const isDimmed = dateStatus !== "active";
 
-            // Calculate row background
-            const getRowBackground = () => {
-              if (isActive) {
-                return COLORS.bgActive;
-              }
-              // Alternating background for inactive rows
-              return idx % 2 === 0 ? "transparent" : COLORS.bgAlt;
-            };
-
-            // Get text color based on status
-            const getNameColor = () => {
-              if (isCompleted) return COLORS.textMuted;
-              if (isDimmed) return COLORS.textMuted;
-              return COLORS.textPrimary;
-            };
-
-            const getDateColor = () => {
-              if (isCompleted) return COLORS.textDimmed;
-              if (isDimmed) return COLORS.textDimmed;
-              return COLORS.textSecondary;
-            };
-
             return (
-              <div 
-                key={rowId} 
+              <div
+                key={rowId}
                 onClick={() => toggleCompleted(rowId)}
-                className="grid grid-cols-[1fr_52px_52px] gap-1.5 px-3 py-2 text-[10px] transition-colors items-center cursor-pointer active:opacity-80"
-                style={{ 
-                  opacity: isDimmed && !isCompleted ? 0.7 : 1,
-                  background: getRowBackground(),
-                  borderBottom: "1px solid rgba(255,255,255,0.03)",
-                  borderLeft: isActive && !isCompleted
-                    ? `2px solid rgba(6, 182, 212, 0.6)`
-                    : "2px solid transparent",
-                }}
+                className={cn(
+                  "grid grid-cols-[1fr_52px_52px] gap-1.5 px-3 py-2 text-[10px] transition-colors items-center cursor-pointer",
+                  "hover:bg-accent/50 active:bg-accent",
+                  isActive && !isCompleted && "bg-accent/30",
+                  isDimmed && "opacity-60"
+                )}
               >
-                {/* Assignment Name with strikethrough */}
-                <div className="min-w-0">
-                  <RoughNotation
-                    type="strike-through"
-                    show={isCompleted}
-                    color={COLORS.success}
-                    strokeWidth={2}
-                    iterations={1}
-                    animationDuration={400}
+                {/* Assignment Name with checkbox */}
+                <div className="min-w-0 flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "h-3.5 w-3.5 rounded flex items-center justify-center shrink-0 transition-colors",
+                      isCompleted
+                        ? "bg-foreground text-background"
+                        : "border border-muted-foreground/30"
+                    )}
                   >
-                    <span
-                      className="truncate font-medium block"
-                      style={{ color: getNameColor() }}
-                      title={assignment.name}
-                    >
-                      {assignment.name}
-                    </span>
-                  </RoughNotation>
+                    {isCompleted && <Check className="h-2 w-2" />}
+                  </div>
+                  <span
+                    className={cn(
+                      "truncate font-medium",
+                      isCompleted ? "text-muted-foreground line-through" : "text-foreground"
+                    )}
+                    title={assignment.name}
+                  >
+                    {assignment.name}
+                  </span>
                 </div>
 
                 {/* Start Date */}
-                <span
-                  className="text-[9px] font-mono"
-                  style={{ color: getDateColor() }}
-                >
+                <span className={cn(
+                  "text-[9px] font-mono",
+                  isCompleted ? "text-muted-foreground" : "text-muted-foreground"
+                )}>
                   {assignment.startDate}
                 </span>
 
                 {/* End Date */}
-                <span
-                  className="text-[9px] font-mono"
-                  style={{ color: getDateColor() }}
-                >
+                <span className={cn(
+                  "text-[9px] font-mono",
+                  isCompleted ? "text-muted-foreground" : "text-muted-foreground"
+                )}>
                   {assignment.endDate}
                 </span>
               </div>
             );
           })}
         </div>
-
-        {/* Decorative bottom flourish */}
-        <div
-          className="h-1"
-          style={{
-            background: "linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.25) 50%, transparent 100%)",
-          }}
-        />
       </div>
     </div>
   );

@@ -4,17 +4,10 @@ import {
   ChevronRight,
   Receipt,
   CalendarRange,
-  CheckCheck,
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  formatDate,
-  formatCurrency,
-  getCategoryStyle,
-  getCategoryColor,
-  getTransactionBudgetType,
-} from "./constants";
+import { formatDate, formatCurrency } from "./constants";
 import { getMonthlyAmount } from "./utils";
 
 interface CategoryCardProps {
@@ -41,8 +34,6 @@ export const CategoryCard = memo(function CategoryCard({
   index = 0,
 }: CategoryCardProps) {
   const IconComp = icon || Receipt;
-  const isUncategorized = name === "Uncategorized";
-  const categoryColor = getCategoryColor(name);
 
   return (
     <motion.div
@@ -64,28 +55,9 @@ export const CategoryCard = memo(function CategoryCard({
         <motion.div
           animate={{ scale: isExpanded ? 1.05 : 1 }}
           transition={{ duration: 0.2 }}
-          className={`h-8 w-8 rounded-lg flex items-center justify-center relative overflow-hidden ${
-            isUncategorized ? "bg-muted" : getCategoryStyle(name)
-          }`}
-          style={{
-            boxShadow: isUncategorized
-              ? "none"
-              : "0 2px 6px rgba(0, 0, 0, 0.08)",
-          }}
+          className="h-8 w-8 rounded-md bg-muted flex items-center justify-center"
         >
-          {/* Shine effect */}
-          <div
-            className="absolute inset-0 rounded-lg pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
-            }}
-          />
-          <IconComp
-            className={`h-4 w-4 relative z-10 ${
-              isUncategorized ? "text-muted-foreground" : ""
-            }`}
-          />
+          <IconComp className="h-4 w-4 text-muted-foreground" />
         </motion.div>
         <div className="flex-1 text-left min-w-0">
           <p className="font-medium text-sm text-foreground truncate">{name}</p>
@@ -118,10 +90,6 @@ export const CategoryCard = memo(function CategoryCard({
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
                 const displayAmount = getMonthlyAmount(txn);
-                
-                // Determine if this is a need transaction
-                const budgetType = getTransactionBudgetType(txn.category, txn.budget_type);
-                const isNeed = budgetType === "need";
 
                 return (
                   <motion.button
@@ -131,46 +99,31 @@ export const CategoryCard = memo(function CategoryCard({
                     transition={{ delay: i * 0.03, duration: 0.2 }}
                     whileTap={{ backgroundColor: "var(--accent)" }}
                     onClick={() => onTransactionClick(txn)}
-                    className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-accent/50 text-left ${
-                      isExcluded
-                        ? "opacity-40 grayscale-[60%] saturate-50"
-                        : ""
-                    }`}
+                    className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-accent/50 text-left ${isExcluded
+                      ? "opacity-40 grayscale-[60%] saturate-50"
+                      : ""
+                      }`}
                   >
-                    {/* Need indicator */}
-                    {isNeed && !isExcluded && (
-                      <CheckCheck
-                        className="h-3 w-3 shrink-0"
-                        style={{ color: "#64748b" }}
-                      />
-                    )}
                     <div className="min-w-0 flex-1">
                       <p
-                        className={`text-xs font-medium truncate flex items-center gap-1 ${
-                          isExcluded ? "text-muted-foreground/70" : ""
-                        }`}
+                        className={`text-xs font-medium truncate flex items-center gap-1 ${isExcluded ? "text-muted-foreground/70" : ""
+                          }`}
                       >
                         {txn.merchant || "Unknown"}
                         {isProrated && (
                           <span
-                            className="shrink-0"
-                            title={`${formatCurrency(txn.amount)} over ${
-                              txn.prorate_months
-                            } months`}
-                            style={{
-                              color: isExcluded ? undefined : categoryColor,
-                            }}
+                            className="shrink-0 text-muted-foreground"
+                            title={`${formatCurrency(txn.amount)} over ${txn.prorate_months} months`}
                           >
                             <CalendarRange className="h-3 w-3" />
                           </span>
                         )}
                       </p>
                       <p
-                        className={`text-[10px] ${
-                          isExcluded
-                            ? "text-muted-foreground/50"
-                            : "text-muted-foreground"
-                        }`}
+                        className={`text-[10px] ${isExcluded
+                          ? "text-muted-foreground/50"
+                          : "text-muted-foreground"
+                          }`}
                       >
                         {formatDate(txn.date)}
                         {isProrated && (
@@ -181,13 +134,10 @@ export const CategoryCard = memo(function CategoryCard({
                       </p>
                     </div>
                     <span
-                      className={`font-mono text-xs font-semibold ${
-                        isExcluded
-                          ? "text-muted-foreground/50"
-                          : displayAmount >= 500
-                          ? "text-red-500"
-                          : "text-expense"
-                      }`}
+                      className={`font-mono text-xs font-semibold ${isExcluded
+                        ? "text-muted-foreground/50"
+                        : "text-foreground"
+                        }`}
                     >
                       -{formatCurrency(displayAmount)}
                     </span>

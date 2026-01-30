@@ -69,18 +69,6 @@ function AppContent() {
     }
   }, [currentSection]);
 
-  const activeView = useMemo(() => {
-    switch (currentSection) {
-      case "finances":
-        return financeView;
-      case "fitness":
-        return healthView;
-      case "omscs":
-        return omscsView;
-      default:
-        return currentSection;
-    }
-  }, [currentSection, financeView, healthView, omscsView]);
 
   // Handle nav view changes
   const handleViewChange = useCallback(
@@ -135,11 +123,8 @@ function AppContent() {
       {/* Only show bottom nav on home page */}
       {currentSection === "home" && (
         <DynamicBottomNav
-          currentSection={currentSection}
-          activeView={activeView}
           navItems={navItems}
           onViewChange={handleViewChange}
-          onGoHome={goHome}
           onPrefetch={handlePrefetch}
         />
       )}

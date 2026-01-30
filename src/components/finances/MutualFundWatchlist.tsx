@@ -67,7 +67,9 @@ const FundSection = memo(function FundSection({
   }, [investments, fund.currentNav, fund.previousNav]);
 
   const { currentValue, netChange, dailyChangeAmount, hasInvestments, isNetUp, isPositiveDay } = investmentStats;
-  const dayColor = isPositiveDay ? "#22c55e" : "#ef4444";
+
+  // Sparkline color based on daily performance
+  const dayColor = isPositiveDay ? "#737373" : "#737373"; // Monochromatic
 
   // Memoize sparkline calculation - O(n) instead of O(n²)
   const sparklinePath = useMemo(() => {
@@ -125,10 +127,13 @@ const FundSection = memo(function FundSection({
         className="w-full py-2.5 flex items-center gap-2 text-left hover:bg-accent/20 transition-colors"
       >
         {/* Trend indicator */}
-        <div
-          className="h-1.5 w-1.5 rounded-full shrink-0"
-          style={{ backgroundColor: dayColor }}
-        />
+        <div className="shrink-0">
+          {isPositiveDay ? (
+            <TrendingUp className="h-3 w-3 text-muted-foreground" />
+          ) : (
+            <TrendingDown className="h-3 w-3 text-muted-foreground" />
+          )}
+        </div>
 
         {/* Fund Name */}
         <div className="min-w-0 flex-1">
@@ -144,19 +149,13 @@ const FundSection = memo(function FundSection({
                 maximumFractionDigits: 0,
               })}
             </span>
-            <span
-              className="text-[10px] font-mono font-medium"
-              style={{ color: isNetUp ? "#22c55e" : "#ef4444" }}
-            >
+            <span className="text-[10px] font-mono font-medium text-muted-foreground">
               {isNetUp ? "+" : "-"}₹
               {Math.abs(netChange).toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
               })}
             </span>
-            <span
-              className="text-[10px] font-mono"
-              style={{ color: isPositiveDay ? "#22c55e" : "#ef4444" }}
-            >
+            <span className="text-[10px] font-mono text-muted-foreground">
               ({isPositiveDay ? "+" : "-"}₹
               {Math.abs(dailyChangeAmount).toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
@@ -238,7 +237,7 @@ const FundSection = memo(function FundSection({
                         {period.label}
                       </p>
                       <p
-                        className={`text-xs font-mono font-medium ${period.value >= 0 ? "text-green-500" : "text-red-500"
+                        className={`text-xs font-mono font-medium text-foreground
                           }`}
                       >
                         {period.value >= 0 ? "+" : ""}
@@ -275,7 +274,7 @@ const FundSection = memo(function FundSection({
                           e.stopPropagation();
                           onDeleteInvestment(inv.id);
                         }}
-                        className="p-1 hover:bg-red-500/10 rounded text-red-500/50 hover:text-red-500 transition-colors"
+                        className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
@@ -325,14 +324,12 @@ interface MutualFundWatchlistProps {
   theme: "light" | "dark";
 }
 
-export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
+export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps) {
   const { funds, error, isRefetching, refresh, lastUpdated } =
     useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
-
-  const isDark = theme === "dark";
 
   // Memoize investments to prevent dependency array changes
   const investments = useMemo(() => userStats?.investments || [], [userStats?.investments]);
@@ -427,33 +424,13 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   const netChange = portfolioTotals.current - portfolioTotals.invested;
   const isNetUp = netChange >= 0;
   const isPortfolioUp = portfolioTotals.dailyChange >= 0;
-  const trendColor = isPortfolioUp ? "#22c55e" : "#ef4444";
 
   if (error && funds.length === 0) {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <div
-            className="h-6 w-6 rounded flex items-center justify-center"
-            style={{
-              background: isDark
-                ? "linear-gradient(135deg, #52525b 0%, #3f3f46 100%)"
-                : "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)",
-              boxShadow: isDark
-                ? "inset 0 1px 1px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4)"
-                : "inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.3)",
-              border: isDark ? "1px solid #3f3f46" : "1px solid #4b5563",
-            }}
-          >
-            <TrendingUp className="h-3 w-3" style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }} />
-          </div>
-          <h3
-            className="text-sm font-bold font-fantasy uppercase tracking-wider"
-            style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
-          >
-            Mutual Funds
-          </h3>
-        </div>
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold text-muted-foreground">
+          Mutual Funds
+        </h3>
         <Card className="p-3">
           <div className="text-center py-2">
             <p className="text-xs text-muted-foreground mb-1">
@@ -461,7 +438,7 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
             </p>
             <button
               onClick={refresh}
-              className="text-xs text-primary hover:underline"
+              className="text-xs text-foreground hover:underline"
             >
               Try again
             </button>
@@ -472,31 +449,12 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
   }
 
   return (
-    <div className="space-y-3">
-      {/* Header - Iron vault style */}
+    <div className="space-y-2">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className="h-6 w-6 rounded flex items-center justify-center"
-            style={{
-              background: isDark
-                ? "linear-gradient(135deg, #52525b 0%, #3f3f46 100%)"
-                : "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)",
-              boxShadow: isDark
-                ? "inset 0 1px 1px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4)"
-                : "inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.3)",
-              border: isDark ? "1px solid #3f3f46" : "1px solid #4b5563",
-            }}
-          >
-            <TrendingUp className="h-3 w-3" style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }} />
-          </div>
-          <h3
-            className="text-sm font-bold font-fantasy uppercase tracking-wider"
-            style={{ color: isDark ? "#a1a1aa" : "#e5e7eb" }}
-          >
-            Mutual Funds
-          </h3>
-        </div>
+        <h3 className="text-sm font-semibold text-muted-foreground">
+          Mutual Funds
+        </h3>
         <div className="flex items-center gap-2">
           {lastUpdated && (
             <p className="text-[10px] text-muted-foreground">
@@ -522,58 +480,29 @@ export function MutualFundWatchlist({ theme }: MutualFundWatchlistProps) {
       </div>
 
       {/* Single Collapsible Card */}
-      <Card
-        className="overflow-hidden relative py-0 gap-0"
-        style={{
-          background: hasPortfolio
-            ? isDark
-              ? `linear-gradient(135deg, ${trendColor}08 0%, transparent 50%)`
-              : `linear-gradient(135deg, ${trendColor}05 0%, transparent 50%)`
-            : undefined,
-          borderColor: hasPortfolio
-            ? isDark
-              ? `${trendColor}20`
-              : `${trendColor}15`
-            : undefined,
-        }}
-      >
+      <Card className="overflow-hidden border border-border bg-card py-0 gap-0">
         {/* Summary Header - Clickable to expand */}
         <button
           onClick={() => setIsCardExpanded(!isCardExpanded)}
           className="w-full px-3 py-2.5 flex items-center justify-between text-left hover:bg-accent/20 transition-colors"
         >
-          <div className="flex items-center gap-2">
-            {hasPortfolio ? (
-              isPortfolioUp ? (
-                <TrendingUp className="h-4 w-4 text-green-500" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-500" />
-              )
-            ) : null}
-            <span className="text-sm font-bold font-mono">
-              ₹
-              {portfolioTotals.current.toLocaleString("en-IN", {
-                maximumFractionDigits: 0,
-              })}
-            </span>
-          </div>
+          <span className="text-sm font-bold font-mono">
+            ₹
+            {portfolioTotals.current.toLocaleString("en-IN", {
+              maximumFractionDigits: 0,
+            })}
+          </span>
 
           <div className="flex items-center gap-2">
             {hasPortfolio && (
               <>
-                <span
-                  className="text-xs font-mono font-medium"
-                  style={{ color: isNetUp ? "#22c55e" : "#ef4444" }}
-                >
+                <span className="text-xs font-mono font-medium text-muted-foreground">
                   {isNetUp ? "+" : "-"}₹
                   {Math.abs(netChange).toLocaleString("en-IN", {
                     maximumFractionDigits: 0,
                   })}
                 </span>
-                <span
-                  className="text-[10px] font-mono"
-                  style={{ color: isPortfolioUp ? "#22c55e" : "#ef4444" }}
-                >
+                <span className="text-[10px] font-mono text-muted-foreground">
                   ({isPortfolioUp ? "+" : "-"}₹
                   {Math.abs(portfolioTotals.dailyChange).toLocaleString(
                     "en-IN",

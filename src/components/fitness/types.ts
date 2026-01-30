@@ -29,28 +29,28 @@ export const ACTIVITY_LEVELS: {
     label: "Sedentary",
     description: "Little to no exercise",
     multiplier: 1.2,
-    color: "#6b7280", // gray
+    color: "#a3a3a3",
   },
   {
     value: "light",
     label: "Light",
     description: "Light activity, no gym",
     multiplier: 1.375,
-    color: "#eab308", // yellow
+    color: "#737373",
   },
   {
     value: "moderate",
     label: "Moderate",
     description: "Regular gym sessions",
     multiplier: 1.55,
-    color: "#3b82f6", // blue
+    color: "#525252",
   },
   {
     value: "heavy",
     label: "Heavy",
     description: "Intense daily training",
     multiplier: 1.725,
-    color: "#f97316", // fiery orange
+    color: "#262626",
   },
 ];
 

@@ -14,7 +14,6 @@ import {
   Scale,
   ArrowUpDown,
 } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useShoppingList } from "@/hooks/useShoppingList";
@@ -51,8 +50,6 @@ function ItemForm({
   isSubmitting,
   submitLabel,
 }: ItemFormProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [name, setName] = useState(initialValues?.name ?? "");
   const [calories, setCalories] = useState(
     initialValues?.calories?.toString() ?? ""
@@ -91,17 +88,7 @@ function ItemForm({
       onSubmit={handleSubmit}
       className="overflow-hidden"
     >
-      <div
-        className="p-3 rounded-xl space-y-3"
-        style={{
-          background: isDark
-            ? "rgba(128, 128, 128, 0.1)"
-            : "rgba(128, 128, 128, 0.06)",
-          border: isDark
-            ? "1px solid rgba(128, 128, 128, 0.2)"
-            : "1px solid rgba(128, 128, 128, 0.15)",
-        }}
-      >
+      <div className="p-3 rounded-lg border border-border bg-card space-y-3">
         {/* Item name */}
         <Input
           placeholder="Item name"
@@ -118,7 +105,7 @@ function ItemForm({
           <div className="grid grid-cols-4 gap-2">
             <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
-                <Flame className="h-3 w-3 text-emerald-500" />
+                <Flame className="h-3 w-3" />
                 Cal <span className="text-[8px] opacity-60">/100g</span>
               </label>
               <Input
@@ -132,7 +119,7 @@ function ItemForm({
             </div>
             <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
-                <Beef className="h-3 w-3 text-amber-500" />
+                <Beef className="h-3 w-3" />
                 Pro <span className="text-[8px] opacity-60">/100g</span>
               </label>
               <Input
@@ -146,7 +133,7 @@ function ItemForm({
             </div>
             <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
-                <Scale className="h-3 w-3 text-blue-500" />
+                <Scale className="h-3 w-3" />
                 Weight
               </label>
               <Input
@@ -160,7 +147,7 @@ function ItemForm({
             </div>
             <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
-                <Scale className="h-3 w-3 text-violet-500" />
+                <Scale className="h-3 w-3" />
                 Serve
               </label>
               <Input
@@ -177,7 +164,7 @@ function ItemForm({
           {/* Row 2: Cost (full width) */}
           <div className="space-y-1">
             <label className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
-              <IndianRupee className="h-3 w-3 text-green-500" />
+              <IndianRupee className="h-3 w-3" />
               Cost
             </label>
             <Input
@@ -204,18 +191,17 @@ function ItemForm({
             <X className="h-3.5 w-3.5 mr-1" />
             Cancel
           </Button>
-          <Button
+          <button
             type="submit"
-            size="sm"
             disabled={!name.trim() || isSubmitting}
-            className="flex-1 h-8 bg-violet-500 hover:bg-violet-600 text-white"
+            className="flex-1 h-8 rounded-md bg-foreground text-background text-sm font-medium transition-colors hover:bg-foreground/90 disabled:opacity-50"
           >
             {isSubmitting ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" />
             ) : (
               submitLabel
             )}
-          </Button>
+          </button>
         </div>
 
         {/* Delete button (only in edit mode) */}
@@ -226,7 +212,7 @@ function ItemForm({
             size="sm"
             onClick={onDelete}
             disabled={isSubmitting}
-            className="w-full h-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+            className="w-full h-8 text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             <Trash2 className="h-3.5 w-3.5 mr-1.5" />
             Delete Item
@@ -258,9 +244,6 @@ function ShoppingItemRow({
   onEdit,
   displayMode,
 }: ShoppingItemRowProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   // Input values are per 100g, extrapolate based on display mode
   const weight = item.weight_grams || 100;
   const serving = item.serving_grams || 100;
@@ -280,20 +263,20 @@ function ShoppingItemRow({
     displayMode === "per100g"
       ? item.calories
       : displayMode === "perServe"
-      ? Math.round(caloriesPerServe)
-      : Math.round(caloriesRaw);
+        ? Math.round(caloriesPerServe)
+        : Math.round(caloriesRaw);
   const displayProtein =
     displayMode === "per100g"
       ? Math.round(item.protein)
       : displayMode === "perServe"
-      ? Math.round(proteinPerServe)
-      : Math.round(proteinRaw);
+        ? Math.round(proteinPerServe)
+        : Math.round(proteinRaw);
   const displayCost =
     displayMode === "per100g"
       ? Math.round(costPer100g)
       : displayMode === "perServe"
-      ? Math.round(costPerServe)
-      : item.cost;
+        ? Math.round(costPerServe)
+        : item.cost;
 
   // Cost per gram of protein (use cost per 100g since protein is per 100g)
   const costPerProtein = item.protein > 0 ? costPer100g / item.protein : 0;
@@ -305,25 +288,18 @@ function ShoppingItemRow({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20, height: 0 }}
       transition={{ duration: 0.2 }}
-      className={`flex items-center gap-3 p-2.5 rounded-lg transition-all ${
-        item.checked ? "opacity-60" : ""
-      }`}
-      style={{
-        background: isDark
-          ? "rgba(255, 255, 255, 0.03)"
-          : "rgba(0, 0, 0, 0.02)",
-      }}
+      className={`flex items-center gap-3 p-2.5 rounded-lg border border-border bg-card transition-all ${item.checked ? "opacity-60" : ""
+        }`}
     >
       {/* Checkbox */}
       <button
         onClick={() => onToggle(item.id, !item.checked)}
-        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${
-          item.checked
-            ? "bg-violet-500 border-violet-500"
-            : "border-muted-foreground/30 hover:border-violet-500"
-        }`}
+        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${item.checked
+          ? "bg-foreground border-foreground"
+          : "border-muted-foreground/30 hover:border-foreground"
+          }`}
       >
-        {item.checked && <Check className="h-3 w-3 text-white" />}
+        {item.checked && <Check className="h-3 w-3 text-background" />}
       </button>
 
       {/* Item details */}
@@ -334,27 +310,27 @@ function ShoppingItemRow({
             className="flex items-center gap-0.5"
             title={`${item.calories} kcal for ${weight}g`}
           >
-            <Flame className="h-2.5 w-2.5 text-emerald-500" />
+            <Flame className="h-2.5 w-2.5" />
             {displayCalories}
           </span>
           <span
             className="flex items-center gap-0.5"
             title={`${item.protein}g for ${weight}g`}
           >
-            <Beef className="h-2.5 w-2.5 text-amber-500" />
+            <Beef className="h-2.5 w-2.5" />
             {displayProtein}g
           </span>
           <span
             className="flex items-center gap-0.5"
             title={`₹${item.cost} for ${weight}g`}
           >
-            <IndianRupee className="h-2.5 w-2.5 text-green-500" />₹{displayCost}
+            <IndianRupee className="h-2.5 w-2.5" />₹{displayCost}
           </span>
           <span
             className="flex items-center gap-0.5"
             title={`₹${costPerProtein.toFixed(2)} per gram of protein`}
           >
-            <span className="text-violet-500 font-medium">₹/g</span>
+            <span className="font-medium">₹/g</span>
             {costPerProtein.toFixed(2)}
           </span>
         </div>
@@ -363,7 +339,7 @@ function ShoppingItemRow({
       {/* Edit button */}
       <button
         onClick={() => onEdit(item)}
-        className="p-1.5 rounded-lg text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 transition-colors"
+        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
       >
         <Pencil className="h-3.5 w-3.5" />
       </button>
@@ -383,8 +359,6 @@ type SortOption =
   | "costPerProtein_desc";
 
 export function ShoppingList() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("costPerProtein_asc");
@@ -551,55 +525,33 @@ export function ShoppingList() {
 
         <div className="flex items-center gap-2">
           {/* Display mode toggle */}
-          <div
-            className="flex rounded-md overflow-hidden text-[10px] border"
-            style={{
-              borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-            }}
-          >
+          <div className="flex rounded-md overflow-hidden text-[10px] border border-border">
             <button
               onClick={() => setDisplayMode("raw")}
-              className={`px-2 py-1 transition-colors ${
-                displayMode === "raw"
-                  ? "bg-violet-500 text-white"
-                  : "hover:bg-muted/50"
-              }`}
+              className={`px-2 py-1 transition-colors ${displayMode === "raw"
+                ? "bg-foreground text-background"
+                : "hover:bg-muted"
+                }`}
             >
               Raw
             </button>
-            <div
-              className="w-px"
-              style={{
-                background: isDark
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(0,0,0,0.1)",
-              }}
-            />
+            <div className="w-px bg-border" />
             <button
               onClick={() => setDisplayMode("per100g")}
-              className={`px-2 py-1 transition-colors ${
-                displayMode === "per100g"
-                  ? "bg-violet-500 text-white"
-                  : "hover:bg-muted/50"
-              }`}
+              className={`px-2 py-1 transition-colors ${displayMode === "per100g"
+                ? "bg-foreground text-background"
+                : "hover:bg-muted"
+                }`}
             >
               /100g
             </button>
-            <div
-              className="w-px"
-              style={{
-                background: isDark
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(0,0,0,0.1)",
-              }}
-            />
+            <div className="w-px bg-border" />
             <button
               onClick={() => setDisplayMode("perServe")}
-              className={`px-2 py-1 transition-colors ${
-                displayMode === "perServe"
-                  ? "bg-violet-500 text-white"
-                  : "hover:bg-muted/50"
-              }`}
+              className={`px-2 py-1 transition-colors ${displayMode === "perServe"
+                ? "bg-foreground text-background"
+                : "hover:bg-muted"
+                }`}
             >
               /serve
             </button>
@@ -610,7 +562,7 @@ export function ShoppingList() {
               size="sm"
               variant="outline"
               onClick={() => setShowAddForm(true)}
-              className="h-8 w-8 p-0 text-violet-500 hover:text-violet-600 hover:bg-violet-500/10 border-violet-500/30 hover:border-violet-500/50"
+              className="h-8 w-8 p-0"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -619,22 +571,21 @@ export function ShoppingList() {
       </div>
 
       {/* Totals summary (only checked items) - clickable for sorting */}
-      <div className="grid grid-cols-4 gap-1.5 p- rounded-lg">
+      <div className="grid grid-cols-4 gap-1.5 rounded-lg">
         <button
           onClick={() => toggleSort("calories")}
-          className={`text-center py-1 rounded-md transition-all ${
-            sortBy.startsWith("calories")
-              ? "bg-emerald-500/20"
-              : "hover:bg-white/5"
-          }`}
+          className={`text-center py-1 rounded-md transition-all ${sortBy.startsWith("calories")
+            ? "bg-accent"
+            : "hover:bg-accent/50"
+            }`}
         >
-          <p className="text-xs font-mono font-semibold text-emerald-500">
+          <p className="text-xs font-mono font-semibold text-foreground">
             {Math.round(displayTotals.calories).toLocaleString()}
           </p>
           <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
             kcal
             {getSortIndicator("calories") ? (
-              <span className="text-emerald-500">
+              <span className="text-foreground">
                 {getSortIndicator("calories")}
               </span>
             ) : (
@@ -644,19 +595,18 @@ export function ShoppingList() {
         </button>
         <button
           onClick={() => toggleSort("protein")}
-          className={`text-center py-1 rounded-md transition-all ${
-            sortBy.startsWith("protein")
-              ? "bg-amber-500/20"
-              : "hover:bg-white/5"
-          }`}
+          className={`text-center py-1 rounded-md transition-all ${sortBy.startsWith("protein")
+            ? "bg-accent"
+            : "hover:bg-accent/50"
+            }`}
         >
-          <p className="text-xs font-mono font-semibold text-amber-500">
+          <p className="text-xs font-mono font-semibold text-foreground">
             {Math.round(displayTotals.protein)}g
           </p>
           <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
             protein
             {getSortIndicator("protein") ? (
-              <span className="text-amber-500">
+              <span className="text-foreground">
                 {getSortIndicator("protein")}
               </span>
             ) : (
@@ -666,19 +616,18 @@ export function ShoppingList() {
         </button>
         <button
           onClick={() => toggleSort("cost")}
-          className={`text-center py-1 rounded-md transition-all ${
-            sortBy === "cost_asc" || sortBy === "cost_desc"
-              ? "bg-green-500/20"
-              : "hover:bg-white/5"
-          }`}
+          className={`text-center py-1 rounded-md transition-all ${sortBy === "cost_asc" || sortBy === "cost_desc"
+            ? "bg-accent"
+            : "hover:bg-accent/50"
+            }`}
         >
-          <p className="text-xs font-mono font-semibold text-green-500">
+          <p className="text-xs font-mono font-semibold text-foreground">
             ₹{Math.round(displayTotals.cost).toLocaleString()}
           </p>
           <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
             cost
             {getSortIndicator("cost") ? (
-              <span className="text-green-500">{getSortIndicator("cost")}</span>
+              <span className="text-foreground">{getSortIndicator("cost")}</span>
             ) : (
               <ArrowUpDown className="h-2 w-2 opacity-40" />
             )}
@@ -686,19 +635,18 @@ export function ShoppingList() {
         </button>
         <button
           onClick={() => toggleSort("costPerProtein")}
-          className={`text-center py-1 rounded-md transition-all ${
-            sortBy.startsWith("costPerProtein")
-              ? "bg-violet-500/20"
-              : "hover:bg-white/5"
-          }`}
+          className={`text-center py-1 rounded-md transition-all ${sortBy.startsWith("costPerProtein")
+            ? "bg-accent"
+            : "hover:bg-accent/50"
+            }`}
         >
-          <p className="text-xs font-mono font-semibold text-violet-500">
+          <p className="text-xs font-mono font-semibold text-foreground">
             ₹{displayTotals.costPerProtein.toFixed(2)}
           </p>
           <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
             ₹/g
             {getSortIndicator("costPerProtein") ? (
-              <span className="text-violet-500">
+              <span className="text-foreground">
                 {getSortIndicator("costPerProtein")}
               </span>
             ) : (
@@ -709,10 +657,7 @@ export function ShoppingList() {
       </div>
 
       {/* Divider */}
-      <div
-        className="h-px w-full"
-        style={{ background: "rgba(128, 128, 128, 0.15)" }}
-      />
+      <div className="h-px w-full bg-border" />
 
       {/* Add item form */}
       <AnimatePresence>

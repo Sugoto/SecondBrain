@@ -9,7 +9,6 @@ import { Plus, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   formatCurrency,
-  BUDGET_TYPE_CONFIG,
   getTransactionBudgetType,
 } from "./constants";
 import { Input } from "@/components/ui/input";
@@ -38,7 +37,6 @@ import {
 
 function SegmentedBudgetBar({
   budgetInfo,
-  theme,
   totalExpenses,
   budgetTypeFilter,
   onBudgetTypeFilterChange,
@@ -55,8 +53,6 @@ function SegmentedBudgetBar({
   const [editingNeeds, setEditingNeeds] = useState("");
   const [editingWants, setEditingWants] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const needsConfig = BUDGET_TYPE_CONFIG.need;
 
   // Wants progress
   const wantsPercent =
@@ -103,32 +99,9 @@ function SegmentedBudgetBar({
     }
   };
 
-  const isDark = theme === "dark";
-
   return (
     <div className="sticky top-0 z-30 px-4 md:px-6 pt-2">
-      <div
-        className="max-w-6xl mx-auto px-3 py-2 rounded-lg relative overflow-hidden"
-        style={{
-          // Parchment background for budget bar
-          background: isDark
-            ? `linear-gradient(145deg, rgba(45, 35, 25, 0.95) 0%, rgba(35, 28, 20, 0.95) 100%)`
-            : `linear-gradient(145deg, #f5e6c8 0%, #e8d4b0 100%)`,
-          border: isDark
-            ? "2px solid #5d4530"
-            : "2px solid #c9a66b",
-          boxShadow: isDark
-            ? "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0, 0, 0, 0.4)"
-            : "inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 12px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        {/* Subtle paper texture */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
+      <div className="max-w-6xl mx-auto px-3 py-2 rounded-lg border border-border bg-card">
         <div className="flex items-center gap-2">
           {/* Progress bars side by side - tappable to filter */}
           <div className="flex-1 grid grid-cols-2 gap-3">
@@ -143,31 +116,21 @@ function SegmentedBudgetBar({
               }}
               disabled={isEditing}
               className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${isEditing
-                  ? ""
-                  : budgetTypeFilter === "want"
-                    ? "opacity-40"
-                    : "hover:opacity-80"
+                ? ""
+                : budgetTypeFilter === "want"
+                  ? "opacity-40"
+                  : "hover:opacity-80"
                 }`}
             >
               <div className="flex items-center justify-between text-[10px]">
                 <span
-                  className={`font-medium ${budgetTypeFilter === "need" ? "" : "text-muted-foreground"
-                    }`}
-                  style={{
-                    color:
-                      budgetTypeFilter === "need"
-                        ? needsConfig.color
-                        : undefined,
-                  }}
+                  className={`font-medium ${budgetTypeFilter === "need" ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   Needs
                 </span>
                 {isEditing ? (
                   <div className="flex items-center gap-0.5">
-                    <span
-                      className="font-mono font-medium"
-                      style={{ color: needsConfig.color }}
-                    >
+                    <span className="font-mono font-medium text-foreground">
                       {formatCurrency(budgetInfo.needsSpent)}
                     </span>
                     <span className="text-muted-foreground/50">/</span>
@@ -181,23 +144,12 @@ function SegmentedBudgetBar({
                     />
                   </div>
                 ) : (
-                  <span
-                    className="font-mono font-medium"
-                    style={{ color: needsConfig.color }}
-                  >
+                  <span className="font-mono font-medium text-foreground">
                     {formatCurrency(budgetInfo.needsSpent)}
                   </span>
                 )}
               </div>
-              <div
-                className="relative h-2 rounded-full overflow-hidden"
-                style={{
-                  background:
-                    theme === "dark"
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "rgba(0, 0, 0, 0.08)",
-                }}
-              >
+              <div className="relative h-1.5 rounded-full overflow-hidden bg-muted">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(needsPercent, 100)}%` }}
@@ -206,23 +158,12 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.1,
                   }}
-                  className="h-full relative overflow-hidden"
-                  style={{
-                    background: `linear-gradient(90deg, ${needsConfig.color} 0%, ${needsConfig.color}cc 100%)`,
-                  }}
-                >
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
-                    }}
-                  />
-                </motion.div>
+                  className="h-full bg-foreground rounded-full"
+                />
               </div>
             </button>
 
-            {/* Wants progress bar - Purple gradient */}
+            {/* Wants progress bar */}
             <button
               onClick={(e) => {
                 if (isEditing) return;
@@ -233,24 +174,21 @@ function SegmentedBudgetBar({
               }}
               disabled={isEditing}
               className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${isEditing
-                  ? ""
-                  : budgetTypeFilter === "need"
-                    ? "opacity-40"
-                    : "hover:opacity-80"
+                ? ""
+                : budgetTypeFilter === "need"
+                  ? "opacity-40"
+                  : "hover:opacity-80"
                 }`}
             >
               <div className="flex items-center justify-between text-[10px]">
                 <span
-                  className={`font-medium ${budgetTypeFilter === "want"
-                      ? "text-purple-500"
-                      : "text-muted-foreground"
-                    }`}
+                  className={`font-medium ${budgetTypeFilter === "want" ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   Wants
                 </span>
                 {isEditing ? (
                   <div className="flex items-center gap-0.5">
-                    <span className="font-mono font-medium text-purple-500">
+                    <span className="font-mono font-medium text-foreground">
                       {formatCurrency(budgetInfo.wantsSpent)}
                     </span>
                     <span className="text-muted-foreground/50">/</span>
@@ -264,20 +202,12 @@ function SegmentedBudgetBar({
                     />
                   </div>
                 ) : (
-                  <span className="font-mono font-medium text-purple-500">
+                  <span className="font-mono font-medium text-foreground">
                     {formatCurrency(budgetInfo.wantsSpent)}
                   </span>
                 )}
               </div>
-              <div
-                className="relative h-2 rounded-full overflow-hidden"
-                style={{
-                  background:
-                    theme === "dark"
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "rgba(0, 0, 0, 0.08)",
-                }}
-              >
+              <div className="relative h-1.5 rounded-full overflow-hidden bg-muted">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
@@ -286,20 +216,8 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.2,
                   }}
-                  className="h-full relative overflow-hidden"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%)",
-                  }}
-                >
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)",
-                    }}
-                  />
-                </motion.div>
+                  className="h-full bg-foreground rounded-full"
+                />
               </div>
             </button>
           </div>
@@ -309,7 +227,7 @@ function SegmentedBudgetBar({
         <div className="flex items-center justify-between pt-1 text-[10px]">
           <div className="flex items-center gap-1.5">
             <span className="text-muted-foreground">Total</span>
-            <span className="font-mono font-semibold" style={{ color: "#ef4444" }}>
+            <span className="font-mono font-semibold text-foreground">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
@@ -318,7 +236,7 @@ function SegmentedBudgetBar({
               <button
                 onClick={saveEditing}
                 disabled={saving}
-                className="p-1 rounded hover:bg-primary/10 text-primary transition-colors"
+                className="p-1 rounded hover:bg-accent text-foreground transition-colors"
                 title="Save"
               >
                 <Check className="h-3 w-3" />
@@ -326,7 +244,7 @@ function SegmentedBudgetBar({
               <button
                 onClick={cancelEditing}
                 disabled={saving}
-                className="p-1 rounded hover:bg-muted/50 text-muted-foreground transition-colors"
+                className="p-1 rounded hover:bg-accent text-muted-foreground transition-colors"
                 title="Cancel"
               >
                 <X className="h-3 w-3" />
@@ -335,7 +253,7 @@ function SegmentedBudgetBar({
           ) : (
             <button
               onClick={startEditing}
-              className="p-1 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               title="Edit Budget"
             >
               <Pencil className="h-3 w-3" />
@@ -375,7 +293,7 @@ export function FinanceTracker({
   onGoHome,
 }: FinanceTrackerProps) {
   // Data from React Query cache
-  const { transactions, error, addToCache, updateInCache, removeFromCache } =
+  const { transactions, addToCache, updateInCache, removeFromCache } =
     useExpenseData();
 
   // User stats for budget values
@@ -581,114 +499,10 @@ export function FinanceTracker({
     });
   };
 
-  const isDark = theme === "dark";
-  const isVault = activeView === "investments";
-  const isLedger = activeView === "expenses" || activeView === "trends";
-
-  // Dynamic background based on view
-  const getBackground = () => {
-    if (isVault) {
-      // Iron and stone dungeon vault aesthetic
-      return isDark
-        ? `radial-gradient(ellipse at top, #1f1f23 0%, #18181b 40%, #09090b 100%)`
-        : `radial-gradient(ellipse at top, #6b7280 0%, #4b5563 40%, #374151 100%)`;
-    }
-    // Worn parchment paper for ledger/trends
-    return isDark
-      ? `radial-gradient(ellipse at top, #2a2218 0%, #1a1510 50%, #0f0d0a 100%)`
-      : `radial-gradient(ellipse at top, #fdf6e3 0%, #f5e6c8 50%, #e8d4b0 100%)`;
-  };
-
-  const getHeaderBackground = () => {
-    return isDark
-      ? "rgba(9, 9, 11, 0.95)"
-      : "rgba(255, 255, 255, 0.95)";
-  };
-
   return (
-    <div
-      className="h-[100dvh] flex flex-col overflow-hidden relative"
-      style={{ background: getBackground() }}
-    >
-      {/* Texture overlay - stone for vault, paper for ledger */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          opacity: isVault ? (isDark ? 0.08 : 0.15) : (isDark ? 0.05 : 0.08),
-          backgroundImage: isVault
-            ? `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-            : `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }}
-      />
-
-      {/* Vault iron bars / stone blocks pattern overlay */}
-      {isVault && (
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: isDark ? 0.03 : 0.05,
-            backgroundImage: `repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 40px,
-              rgba(0,0,0,0.1) 40px,
-              rgba(0,0,0,0.1) 42px
-            ),
-            repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 60px,
-              rgba(0,0,0,0.08) 60px,
-              rgba(0,0,0,0.08) 62px
-            )`,
-          }}
-        />
-      )}
-
-      {/* Vignette effect */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: isVault
-            ? isDark
-              ? `radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(0,0,0,0.7) 100%)`
-              : `radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.3) 100%)`
-            : isDark
-              ? `radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0,0,0,0.6) 100%)`
-              : `radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(139, 90, 43, 0.15) 100%)`,
-        }}
-      />
-
-      {/* Torch glow effect for vault */}
-      {isVault && (
-        <>
-          <div
-            className="absolute top-0 left-0 w-32 h-48 pointer-events-none"
-            style={{
-              background: isDark
-                ? "radial-gradient(ellipse at top left, rgba(251, 146, 60, 0.08) 0%, transparent 70%)"
-                : "radial-gradient(ellipse at top left, rgba(251, 146, 60, 0.1) 0%, transparent 70%)",
-            }}
-          />
-          <div
-            className="absolute top-0 right-0 w-32 h-48 pointer-events-none"
-            style={{
-              background: isDark
-                ? "radial-gradient(ellipse at top right, rgba(251, 146, 60, 0.06) 0%, transparent 70%)"
-                : "radial-gradient(ellipse at top right, rgba(251, 146, 60, 0.08) 0%, transparent 70%)",
-            }}
-          />
-        </>
-      )}
-
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
       {/* Header with TopTabs - Fixed on mobile */}
-      <header
-        className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20"
-        style={{
-          background: getHeaderBackground(),
-          backdropFilter: "blur(12px)",
-        }}
-      >
+      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20 bg-background">
         <div className="max-w-6xl mx-auto">
           {/* Top Tabs Navigation with Date Filter */}
           <TopTabs
@@ -696,8 +510,7 @@ export function FinanceTracker({
             activeView={activeView}
             onViewChange={(view) => onViewChange(view as ActiveView)}
             onGoHome={onGoHome}
-            title="Treasury"
-            accentColor="#8b5cf6"
+            title="Finances"
             rightContent={
               activeView !== "investments" ? (
                 <DateFilter
@@ -776,7 +589,7 @@ export function FinanceTracker({
         onDelete={deleteTransaction}
       />
 
-      {/* Mobile FAB - styled as wax seal */}
+      {/* Mobile FAB */}
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
@@ -785,31 +598,11 @@ export function FinanceTracker({
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             whileTap={{ scale: 0.9 }}
-            whileHover={{ scale: 1.05 }}
             onClick={openAddExpense}
-            className="group md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-full overflow-hidden"
-            style={{
-              // Wax seal / gold coin style
-              background: isDark
-                ? "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #5b21b6 100%)"
-                : "linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%)",
-              boxShadow: isDark
-                ? "inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.3), 0 4px 16px rgba(139, 92, 246, 0.5)"
-                : "inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2), 0 4px 16px rgba(139, 92, 246, 0.4)",
-              border: isDark
-                ? "3px solid #7c3aed"
-                : "3px solid #a855f7",
-            }}
+            className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-12 w-12 rounded-full bg-foreground text-background shadow-lg"
             aria-label="Add expense"
           >
-            {/* Wax seal texture overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none rounded-full"
-              style={{
-                background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 50%)",
-              }}
-            />
-            <Plus className="h-6 w-6 text-white relative z-10" strokeWidth={2.5} />
+            <Plus className="h-5 w-5" strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>

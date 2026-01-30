@@ -4,7 +4,6 @@ import {
   Clapperboard,
   Receipt,
   HeartPulse,
-  ShoppingCart,
   Car,
   TrendingUp,
   type LucideIcon,
@@ -14,41 +13,42 @@ import type { BudgetType } from "@/lib/supabase";
 // Default budget values (used when user hasn't set custom values)
 export const DEFAULT_NEEDS_BUDGET = 15000;
 export const DEFAULT_WANTS_BUDGET = 10000;
-export const MONTHLY_BUDGET = DEFAULT_NEEDS_BUDGET + DEFAULT_WANTS_BUDGET; // Legacy: total default budget
 
 // Category to budget type mapping (auto-assignment)
 // Food defaults to "want" but user can override individual transactions
 export const CATEGORY_BUDGET_TYPE: Record<string, BudgetType> = {
   // NEEDS - Essential expenses
-  Groceries: "need",
-  Health: "need",
+  "Self Care": "need",
   Bills: "need",
   Investments: "need", // excluded from budget anyway
-  // WANTS - Discretionary spending
-  Food: "want", // Consolidated from Snacks, Meals, Restaurants
+  // WANTS - Discretionary spending (user can override to "need" for groceries etc.)
+  Food: "want",
   Shopping: "want",
   Entertainment: "want",
   Travel: "want",
 };
 
-// Budget type styling
-export const BUDGET_TYPE_CONFIG: Record<BudgetType, { 
-  label: string; 
-  color: string; 
-  bgLight: string;
-  bgDark: string;
-}> = {
+// Budget type styling - monochromatic
+export const BUDGET_TYPE_CONFIG: Record<
+  BudgetType,
+  {
+    label: string;
+    color: string;
+    bgLight: string;
+    bgDark: string;
+  }
+> = {
   need: {
     label: "Need",
-    color: "#64748b", // Slate - monochromatic
-    bgLight: "rgba(100, 116, 139, 0.1)",
-    bgDark: "rgba(100, 116, 139, 0.2)",
+    color: "#525252", // Neutral gray
+    bgLight: "rgba(82, 82, 82, 0.1)",
+    bgDark: "rgba(82, 82, 82, 0.2)",
   },
   want: {
     label: "Want",
-    color: "#f97316", // Orange - colorful
-    bgLight: "rgba(249, 115, 22, 0.1)",
-    bgDark: "rgba(249, 115, 22, 0.2)",
+    color: "#737373", // Neutral gray
+    bgLight: "rgba(115, 115, 115, 0.1)",
+    bgDark: "rgba(115, 115, 115, 0.2)",
   },
 };
 
@@ -58,59 +58,20 @@ export const BUDGET_TYPE_CONFIG: Record<BudgetType, {
  */
 export function getTransactionBudgetType(
   category: string | null,
-  explicitBudgetType: BudgetType | null
+  explicitBudgetType: BudgetType | null,
 ): BudgetType {
   // If explicitly set, use that
   if (explicitBudgetType) return explicitBudgetType;
-  // Auto-assign based on category, default to "want" for uncategorized
+  // Auto-assign based category, default to "want" for uncategorized
   return CATEGORY_BUDGET_TYPE[category ?? ""] ?? "want";
 }
 
-// Consolidated category theme data
-const CATEGORY_THEMES: Record<string, { color: string; style: string }> = {
-  Food: {
-    color: "#f97316",
-    style:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  },
-  Shopping: {
-    color: "#ec4899",
-    style: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
-  },
-  Entertainment: {
-    color: "#a855f7",
-    style:
-      "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  },
-  Bills: {
-    color: "#64748b",
-    style:
-      "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400",
-  },
-  Health: {
-    color: "#10b981",
-    style:
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  },
-  Groceries: {
-    color: "#84cc16",
-    style: "bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-400",
-  },
-  Travel: {
-    color: "#0ea5e9",
-    style: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400",
-  },
-  Investments: {
-    color: "#6366f1",
-    style:
-      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-  },
-};
+// Monochromatic category styling
+const CATEGORY_COLOR = "#737373"; // Neutral gray for all categories
 
 export const EXPENSE_CATEGORIES: { name: string; icon: LucideIcon }[] = [
   // Needs
-  { name: "Groceries", icon: ShoppingCart },
-  { name: "Health", icon: HeartPulse },
+  { name: "Self Care", icon: HeartPulse },
   { name: "Bills", icon: Receipt },
   { name: "Investments", icon: TrendingUp },
   // Wants
@@ -172,12 +133,6 @@ export const formatTime = (timeStr: string) => {
   return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };
 
-export const getCategoryStyle = (category: string | null): string => {
-  return (
-    CATEGORY_THEMES[category ?? ""]?.style ?? "bg-muted text-muted-foreground"
-  );
-};
-
-export const getCategoryColor = (category: string): string => {
-  return CATEGORY_THEMES[category]?.color ?? "#94a3b8";
+export const getCategoryColor = (_category: string): string => {
+  return CATEGORY_COLOR;
 };

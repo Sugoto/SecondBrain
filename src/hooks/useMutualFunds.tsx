@@ -208,26 +208,8 @@ function calculateFundStats(
 
 const mutualFundKeys = {
   all: ["mutualFunds"] as const,
-  fund: (schemeCode: number) => [...mutualFundKeys.all, schemeCode] as const,
   watchlist: () => [...mutualFundKeys.all, "watchlist"] as const,
 };
-
-export function useMutualFund(schemeCode: number) {
-  const fund = WATCHLIST_FUNDS.find((f) => f.schemeCode === schemeCode);
-
-  return useQuery({
-    queryKey: mutualFundKeys.fund(schemeCode),
-    queryFn: async () => {
-      const data = await fetchMutualFund(schemeCode);
-      if (!fund) throw new Error("Fund not in watchlist");
-      return calculateFundStats(fund, data);
-    },
-    staleTime: 30 * 60 * 1000, // 30 minutes - NAV updates only 3x daily
-    gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnWindowFocus: false,
-    retry: 2,
-  });
-}
 
 const MF_CACHE_KEY = "mutualFundWatchlist";
 
@@ -248,10 +230,10 @@ if (typeof window !== 'undefined') {
 
 export function useMutualFundWatchlist() {
   const queryClient = useQueryClient();
-  
+
   // Get initial cached data for instant display (same pattern as useExpenseData)
   const [initialData, setInitialData] = useState<FundWithStats[]>([]);
-  
+
   // Load initial data from IndexedDB on mount
   useEffect(() => {
     cachedMFPromise?.then((cached) => {
@@ -284,12 +266,12 @@ export function useMutualFundWatchlist() {
             r.status === "fulfilled"
         )
         .map((r) => r.value);
-      
+
       // Cache for next time
       if (funds.length > 0) {
         setCacheMeta(MF_CACHE_KEY, JSON.stringify(funds));
       }
-      
+
       return funds;
     },
     placeholderData: initialData.length > 0 ? initialData : undefined,
@@ -298,7 +280,7 @@ export function useMutualFundWatchlist() {
     refetchOnWindowFocus: false,
     retry: 2,
   });
-  
+
   // Use fetched data or cached initial data
   const funds: FundWithStats[] = data || initialData;
   const loading = isLoading && funds.length === 0;

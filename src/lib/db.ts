@@ -19,19 +19,10 @@ interface CacheMeta {
   updatedAt: number;
 }
 
-// Medication log entry - tracks when a medication was taken
-export interface MedicationLog {
-  id: string; // Format: "medicationId-YYYY-MM-DD"
-  medicationId: string;
-  date: string; // YYYY-MM-DD
-  takenAt: string; // ISO timestamp
-}
-
 const db = new Dexie("SecondBrainCache") as Dexie & {
   transactions: EntityTable<CachedTransaction, "id">;
   userStats: EntityTable<CachedUserStats, "id">;
   meta: EntityTable<CacheMeta, "key">;
-  medicationLogs: EntityTable<MedicationLog, "id">;
   shoppingList: EntityTable<CachedShoppingItem, "id">;
 };
 
@@ -41,20 +32,11 @@ db.version(1).stores({
   meta: "key, updatedAt",
 });
 
-// Version 2 adds medication logs
+// Version 2 adds shopping list cache
 db.version(2).stores({
   transactions: "id, date, category, type, _cachedAt",
   userStats: "id, _cachedAt",
   meta: "key, updatedAt",
-  medicationLogs: "id, medicationId, date",
-});
-
-// Version 3 adds shopping list cache
-db.version(3).stores({
-  transactions: "id, date, category, type, _cachedAt",
-  userStats: "id, _cachedAt",
-  meta: "key, updatedAt",
-  medicationLogs: "id, medicationId, date",
   shoppingList: "id, _cachedAt",
 });
 
@@ -66,7 +48,7 @@ const STALE_TTL = 24 * 60 * 60 * 1000;
  * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
 export async function getCachedTransactions(
-  allowStale = false
+  allowStale = false,
 ): Promise<Transaction[] | null> {
   try {
     const cached = await db.transactions.toArray();
@@ -91,7 +73,7 @@ export async function getCachedTransactions(
  * Store transactions in cache
  */
 export async function cacheTransactions(
-  transactions: Transaction[]
+  transactions: Transaction[],
 ): Promise<void> {
   try {
     const now = Date.now();
@@ -113,7 +95,7 @@ export async function cacheTransactions(
  * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
 export async function getCachedUserStats(
-  allowStale = false
+  allowStale = false,
 ): Promise<UserStats | null> {
   try {
     const cached = await db.userStats.toArray();
@@ -175,24 +157,11 @@ export async function getCacheMeta(key: string): Promise<string | null> {
 }
 
 /**
- * Clear all caches
- */
-export async function clearCache(): Promise<void> {
-  await Promise.all([
-    db.transactions.clear(),
-    db.userStats.clear(),
-    db.meta.clear(),
-    db.medicationLogs.clear(),
-    db.shoppingList.clear(),
-  ]);
-}
-
-/**
  * Get cached shopping list
  * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
 export async function getCachedShoppingList(
-  allowStale = false
+  allowStale = false,
 ): Promise<ShoppingItem[] | null> {
   try {
     const cached = await db.shoppingList.toArray();
@@ -216,9 +185,7 @@ export async function getCachedShoppingList(
 /**
  * Store shopping list in cache
  */
-export async function cacheShoppingList(
-  items: ShoppingItem[]
-): Promise<void> {
+export async function cacheShoppingList(items: ShoppingItem[]): Promise<void> {
   try {
     const now = Date.now();
     const cached: CachedShoppingItem[] = items.map((item) => ({
@@ -231,77 +198,6 @@ export async function cacheShoppingList(
     await db.shoppingList.bulkPut(cached);
   } catch (error) {
     console.warn("Failed to cache shopping list:", error);
-  }
-}
-
-/**
- * Get medication logs for a specific date
- */
-export async function getMedicationLogsForDate(
-  date: string
-): Promise<MedicationLog[]> {
-  try {
-    return await db.medicationLogs.where("date").equals(date).toArray();
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Get all medication logs (for history/stats)
- */
-export async function getAllMedicationLogs(): Promise<MedicationLog[]> {
-  try {
-    return await db.medicationLogs.toArray();
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Toggle medication for a specific date
- * If already taken, removes the log. If not taken, adds a new log.
- */
-export async function toggleMedicationLog(
-  medicationId: string,
-  date: string
-): Promise<boolean> {
-  const id = `${medicationId}-${date}`;
-
-  try {
-    const existing = await db.medicationLogs.get(id);
-
-    if (existing) {
-      await db.medicationLogs.delete(id);
-      return false; // Now unmarked
-    } else {
-      await db.medicationLogs.put({
-        id,
-        medicationId,
-        date,
-        takenAt: new Date().toISOString(),
-      });
-      return true; // Now marked as taken
-    }
-  } catch (error) {
-    console.warn("Failed to toggle medication log:", error);
-    throw error;
-  }
-}
-
-/**
- * Check if a medication was taken on a specific date
- */
-export async function wasMedicationTaken(
-  medicationId: string,
-  date: string
-): Promise<boolean> {
-  const id = `${medicationId}-${date}`;
-  try {
-    const log = await db.medicationLogs.get(id);
-    return !!log;
-  } catch {
-    return false;
   }
 }
 

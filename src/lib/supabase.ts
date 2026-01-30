@@ -84,37 +84,3 @@ export type OmscsCourse = {
   details: OmscsCourseDetails | null;
   created_at: string;
 };
-
-export type TimeEvent = {
-  id: string;
-  title: string;
-  date: string; // YYYY-MM-DD
-  start_time: string; // HH:MM
-  end_time: string | null; // HH:MM (null = point event)
-  category: string;
-  notes: string | null;
-  created_at: string;
-};
-
-export const EVENT_CATEGORIES = [
-  { id: "work", label: "Work", color: "#3b82f6", icon: "Briefcase" },
-  { id: "study", label: "Study", color: "#8b5cf6", icon: "BookOpen" },
-  { id: "gym", label: "Gym", color: "#22c55e", icon: "Dumbbell" },
-  { id: "hangout", label: "Hangout", color: "#ec4899", icon: "Users" },
-  { id: "travel", label: "Travel", color: "#f97316", icon: "Car" },
-  { id: "sleep", label: "Sleep", color: "#6b7280", icon: "Moon" },
-] as const;
-
-// Default recurring events that appear every day
-export const DEFAULT_DAILY_EVENTS: Omit<
-  TimeEvent,
-  "id" | "date" | "created_at"
->[] = [
-  {
-    title: "Sleep",
-    start_time: "00:00",
-    end_time: "08:00",
-    category: "sleep",
-    notes: null,
-  },
-];

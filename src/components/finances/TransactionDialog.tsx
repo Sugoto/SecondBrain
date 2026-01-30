@@ -13,9 +13,7 @@ import {
   EXPENSE_CATEGORIES,
   EXCLUDED_CATEGORIES,
   formatCurrency,
-  getCategoryColor,
   getTransactionBudgetType,
-  BUDGET_TYPE_CONFIG,
   CATEGORY_BUDGET_TYPE,
 } from "./constants";
 import {
@@ -24,7 +22,6 @@ import {
   ChevronDown,
   Trash2,
 } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
@@ -143,8 +140,6 @@ export function TransactionDialog({
   onChange,
   onDelete,
 }: TransactionDialogProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [amountInput, setAmountInput] = useState<string>("");
   const [showDatetime, setShowDatetime] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -162,12 +157,6 @@ export function TransactionDialog({
   }, [transaction?.id]); // Only reset when transaction ID changes
 
   if (!transaction) return null;
-
-  const categoryColor = getCategoryColor(transaction.category ?? "");
-  const selectedCategory = EXPENSE_CATEGORIES.find(
-    (c) => c.name === transaction.category
-  );
-  const SelectedIcon = selectedCategory?.icon;
 
   // Check if input contains a math expression
   const isExpression = /[+\-*/]/.test(amountInput);
@@ -232,90 +221,20 @@ export function TransactionDialog({
       onOpenChange={(open) => !open && !saving && onClose()}
     >
       <DialogContent
-        className="max-w-md w-[calc(100%-2rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border bg-background"
+        className="max-w-md w-[calc(100%-2rem)] rounded-xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border bg-background"
         onOpenAutoFocus={(e) => e.preventDefault()}
-        style={{
-          borderColor: `${categoryColor}30`,
-          boxShadow: `0 25px 50px -12px ${categoryColor}30, 0 0 0 1px ${categoryColor}20`,
-        }}
       >
-        {/* Dynamic colored header - icon left, title centered */}
-        <DialogHeader
-          className="shrink-0 px-5 pt-5 pb-4 relative"
-          style={{
-            background: isDark
-              ? `linear-gradient(135deg, ${categoryColor}25 0%, ${categoryColor}10 100%)`
-              : `linear-gradient(135deg, ${categoryColor}18 0%, ${categoryColor}08 100%)`,
-            boxShadow: `0 8px 24px -8px ${categoryColor}40`,
-          }}
-        >
-          {/* Static background glow - avoids infinite animation GPU drain */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at 50% 50%, ${categoryColor}12 0%, transparent 60%)`,
-            }}
-          />
-
-          <div className="flex items-center relative z-10 min-h-[40px]">
-            {/* Category icon - left side (only show when category selected or editing) */}
-            {(transaction.category || !isNew) && (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={transaction.category || "none"}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{
-                    background: isDark
-                      ? `linear-gradient(135deg, ${categoryColor}40 0%, ${categoryColor}25 100%)`
-                      : `linear-gradient(135deg, ${categoryColor}30 0%, ${categoryColor}18 100%)`,
-                    boxShadow: `0 4px 12px ${categoryColor}30`,
-                  }}
-                >
-                  {SelectedIcon ? (
-                    <SelectedIcon
-                      className="h-5 w-5"
-                      style={{
-                        color: isDark
-                          ? categoryColor
-                          : `color-mix(in srgb, ${categoryColor} 80%, black)`,
-                      }}
-                    />
-                  ) : (
-                    <span className="text-xl">💸</span>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            )}
-
-            {/* Title - centered in remaining space */}
-            <div
-              className={`flex-1 text-center ${transaction.category || !isNew ? "pr-10" : ""
-                }`}
-            >
-              <DialogTitle
-                className="text-base font-bold"
-                style={{
-                  color: transaction.category
-                    ? isDark
-                      ? categoryColor
-                      : `color-mix(in srgb, ${categoryColor} 75%, black)`
-                    : undefined,
-                }}
-              >
-                {transaction.category ||
-                  (isNew ? "New Expense" : "Edit Transaction")}
-              </DialogTitle>
-              {transaction.merchant && (
-                <p className="text-xs text-muted-foreground">
-                  {transaction.merchant}
-                </p>
-              )}
-            </div>
-          </div>
+        {/* Header */}
+        <DialogHeader className="shrink-0 px-5 pt-5 pb-4 border-b border-border">
+          <DialogTitle className="text-base font-semibold text-foreground">
+            {transaction.category ||
+              (isNew ? "New Expense" : "Edit Transaction")}
+          </DialogTitle>
+          {transaction.merchant && (
+            <p className="text-xs text-muted-foreground">
+              {transaction.merchant}
+            </p>
+          )}
         </DialogHeader>
 
         <div className="space-y-4 px-5 py-4 overflow-y-auto flex-1">
@@ -325,7 +244,6 @@ export function TransactionDialog({
               const IconComp = cat.icon;
               const isSelected = transaction.category === cat.name;
               const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
-              const catColor = getCategoryColor(cat.name);
 
               return (
                 <button
@@ -355,37 +273,15 @@ export function TransactionDialog({
                     });
                   }}
                   disabled={saving}
-                  className={`h-9 rounded-md flex items-center justify-center border transition-all duration-100 ${saving
-                    ? "pointer-events-none opacity-50"
-                    : "active:scale-95"
+                  className={`h-9 rounded-md flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
+                    } ${isSelected
+                      ? "bg-foreground border-foreground"
+                      : "bg-muted border-border hover:bg-accent"
                     }`}
-                  style={{
-                    background: isSelected
-                      ? isDark
-                        ? `linear-gradient(135deg, ${catColor}45 0%, ${catColor}25 100%)`
-                        : `linear-gradient(135deg, ${catColor}30 0%, ${catColor}15 100%)`
-                      : isDark
-                        ? "hsl(var(--muted) / 0.3)"
-                        : "hsl(var(--muted) / 0.5)",
-                    borderColor: isSelected
-                      ? catColor
-                      : isDark
-                        ? `${catColor}25`
-                        : `${catColor}20`,
-                    boxShadow: isSelected ? `0 2px 8px ${catColor}30` : "none",
-                  }}
                 >
                   <IconComp
-                    className="h-4 w-4"
-                    style={{
-                      color: isSelected
-                        ? isDark
-                          ? "#fff"
-                          : `color-mix(in srgb, ${catColor} 90%, black)`
-                        : isDark
-                          ? catColor
-                          : `color-mix(in srgb, ${catColor} 65%, black)`,
-                    }}
+                    className={`h-4 w-4 ${isSelected ? "text-background" : "text-muted-foreground"
+                      }`}
                   />
                 </button>
               );
@@ -417,8 +313,7 @@ export function TransactionDialog({
                     >
                       <div className="flex items-center justify-center gap-3 pt-1">
                         <span
-                          className={`text-xs font-medium transition-opacity ${!isWant ? "opacity-100" : "opacity-40"}`}
-                          style={{ color: BUDGET_TYPE_CONFIG.need.color }}
+                          className={`text-xs font-medium transition-opacity ${!isWant ? "text-foreground" : "text-muted-foreground"}`}
                         >
                           Need
                         </span>
@@ -434,8 +329,7 @@ export function TransactionDialog({
                           className="scale-90"
                         />
                         <span
-                          className={`text-xs font-medium transition-opacity ${isWant ? "opacity-100" : "opacity-40"}`}
-                          style={{ color: BUDGET_TYPE_CONFIG.want.color }}
+                          className={`text-xs font-medium transition-opacity ${isWant ? "text-foreground" : "text-muted-foreground"}`}
                         >
                           Want
                         </span>
@@ -462,11 +356,6 @@ export function TransactionDialog({
                 inputMode="text"
                 placeholder="e.g. 100 or 100+50"
                 className="h-12 text-xl font-semibold font-mono pr-20 placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground/50"
-                style={{
-                  borderColor: transaction.category
-                    ? `${categoryColor}30`
-                    : undefined,
-                }}
                 value={amountInput}
                 onChange={(e) => handleAmountInputChange(e.target.value)}
                 onBlur={handleAmountBlur}
@@ -488,15 +377,10 @@ export function TransactionDialog({
               {/* Show evaluated result for expressions */}
               {isExpression && (
                 <div
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-mono font-semibold"
-                  style={{
-                    color:
-                      evaluatedAmount !== null
-                        ? categoryColor
-                        : "hsl(var(--destructive))",
-                  }}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm font-mono font-semibold ${evaluatedAmount !== null ? "text-foreground" : "text-destructive"
+                    }`}
                 >
-                  {evaluatedAmount !== null ? `= 🪙${evaluatedAmount}` : "?"}
+                  {evaluatedAmount !== null ? `= ₹${evaluatedAmount}` : "?"}
                 </div>
               )}
             </div>
@@ -520,11 +404,6 @@ export function TransactionDialog({
               autoFocus={false}
               placeholder="Where did you spend?"
               className="h-10"
-              style={{
-                borderColor: transaction.category
-                  ? `${categoryColor}20`
-                  : undefined,
-              }}
               value={transaction.merchant || ""}
               onChange={(e) =>
                 onChange({ ...transaction, merchant: e.target.value })
@@ -533,16 +412,8 @@ export function TransactionDialog({
             />
           </div>
 
-          {/* Date, Time & Prorate - Collapsible and de-emphasized */}
-          <div
-            className="rounded-lg border overflow-hidden"
-            style={{
-              borderColor: isDark ? "hsl(var(--border))" : `${categoryColor}15`,
-              background: isDark
-                ? "hsl(var(--muted) / 0.2)"
-                : `${categoryColor}05`,
-            }}
-          >
+          {/* Date, Time & Prorate - Collapsible */}
+          <div className="rounded-lg border border-border overflow-hidden">
             <button
               type="button"
               onClick={() => setShowDatetime(!showDatetime)}
@@ -644,10 +515,7 @@ export function TransactionDialog({
                       </Label>
                       {transaction.prorate_months &&
                         transaction.prorate_months > 1 && (
-                          <span
-                            className="text-xs ml-auto font-mono font-semibold"
-                            style={{ color: categoryColor }}
-                          >
+                          <span className="text-xs ml-auto font-mono font-semibold text-foreground">
                             {formatCurrency(
                               transaction.amount / transaction.prorate_months
                             )}
@@ -662,15 +530,7 @@ export function TransactionDialog({
           </div>
 
           {/* Advanced section - collapsible */}
-          <div
-            className="rounded-lg border overflow-hidden"
-            style={{
-              borderColor: isDark ? "hsl(var(--border))" : `${categoryColor}15`,
-              background: isDark
-                ? "hsl(var(--muted) / 0.2)"
-                : `${categoryColor}05`,
-            }}
-          >
+          <div className="rounded-lg border border-border overflow-hidden">
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
@@ -749,13 +609,7 @@ export function TransactionDialog({
                         type="button"
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={saving || deleting}
-                        className="w-full mt-4 h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
-                          boxShadow:
-                            "0 4px 14px rgba(220, 38, 38, 0.4), 0 0 0 1px rgba(220, 38, 38, 0.1)",
-                        }}
+                        className="w-full mt-4 h-10 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
                       >
                         <Trash2 className="h-4 w-4" />
                         Delete Transaction
@@ -769,15 +623,7 @@ export function TransactionDialog({
         </div>
 
         {/* Fixed footer buttons */}
-        <div
-          className="flex gap-3 p-5 shrink-0 border-t"
-          style={{
-            borderColor: `${categoryColor}20`,
-            background: isDark
-              ? `linear-gradient(180deg, transparent 0%, ${categoryColor}08 100%)`
-              : `linear-gradient(180deg, transparent 0%, ${categoryColor}05 100%)`,
-          }}
-        >
+        <div className="flex gap-3 p-5 shrink-0 border-t border-border">
           <Button
             variant="outline"
             className="flex-1 h-11"
@@ -787,15 +633,7 @@ export function TransactionDialog({
             Cancel
           </Button>
           <Button
-            className="flex-1 h-11 font-semibold"
-            style={{
-              background: transaction.category
-                ? `linear-gradient(135deg, ${categoryColor} 0%, color-mix(in srgb, ${categoryColor} 80%, black) 100%)`
-                : undefined,
-              boxShadow: transaction.category
-                ? `0 4px 12px ${categoryColor}40`
-                : undefined,
-            }}
+            className="flex-1 h-11 font-semibold bg-foreground text-background hover:bg-foreground/90"
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
           >

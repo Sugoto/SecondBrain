@@ -39,6 +39,7 @@ const AreaChart = memo(function AreaChart({
     const isDark = theme === "dark";
     const textColor = isDark ? "#a1a1aa" : "#71717a";
     const gridColor = isDark ? "#3f3f46" : "#e4e4e7";
+    const lineColor = isDark ? "#a1a1aa" : "#525252";
 
     // Format labels for x-axis (show only day part)
     const xLabels = data.map((d) => d.label.split(" ")[1] || d.label);
@@ -48,8 +49,8 @@ const AreaChart = memo(function AreaChart({
       tooltip: {
         trigger: "axis",
         backgroundColor: isDark
-          ? "rgba(24, 24, 27, 0.8)"
-          : "rgba(255, 255, 255, 0.85)",
+          ? "rgba(24, 24, 27, 0.9)"
+          : "rgba(255, 255, 255, 0.95)",
         borderColor: isDark
           ? "rgba(63, 63, 70, 0.5)"
           : "rgba(228, 228, 231, 0.6)",
@@ -60,19 +61,13 @@ const AreaChart = memo(function AreaChart({
           fontSize: 12,
         },
         extraCssText: `
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-radius: 12px;
-          box-shadow: ${
-            isDark
-              ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
-              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)"
-          };
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         `,
         axisPointer: {
           type: "line",
           lineStyle: {
-            color: isDark ? "rgba(139, 92, 246, 0.4)" : "rgba(139, 92, 246, 0.3)",
+            color: isDark ? "rgba(161, 161, 170, 0.4)" : "rgba(82, 82, 91, 0.3)",
             width: 1,
             type: "dashed",
           },
@@ -83,7 +78,7 @@ const AreaChart = memo(function AreaChart({
           const idx = p[0].dataIndex;
           const item = data[idx];
           return `<div style="font-weight:500">${item.label}</div>
-                  <div style="color:#8b5cf6">₹${item.total.toLocaleString("en-IN")}</div>`;
+                  <div style="color:${isDark ? "#fafafa" : "#18181b"}">₹${item.total.toLocaleString("en-IN")}</div>`;
         },
       },
       grid: {
@@ -135,24 +130,13 @@ const AreaChart = memo(function AreaChart({
           symbol: "circle",
           symbolSize: 8,
           itemStyle: {
-            color: "#8b5cf6",
+            color: lineColor,
             borderColor: isDark ? "#18181b" : "#ffffff",
             borderWidth: 2,
           },
           lineStyle: {
             width: 2.5,
-            color: {
-              type: "linear",
-              x: 0,
-              y: 0,
-              x2: 1,
-              y2: 0,
-              colorStops: [
-                { offset: 0, color: "#a78bfa" },
-                { offset: 0.5, color: "#8b5cf6" },
-                { offset: 1, color: "#7c3aed" },
-              ],
-            },
+            color: lineColor,
           },
           areaStyle: {
             color: {
@@ -162,8 +146,8 @@ const AreaChart = memo(function AreaChart({
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(139, 92, 246, 0.4)" },
-                { offset: 1, color: "rgba(139, 92, 246, 0)" },
+                { offset: 0, color: isDark ? "rgba(161, 161, 170, 0.3)" : "rgba(82, 82, 91, 0.2)" },
+                { offset: 1, color: isDark ? "rgba(161, 161, 170, 0)" : "rgba(82, 82, 91, 0)" },
               ],
             },
           },
@@ -408,81 +392,81 @@ export const TrendsView = memo(function TrendsView({
       {EXPENSE_CATEGORIES.filter(
         (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
       ).length > 0 && (
-        <div className="space-y-1.5">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
-            Needs
-          </h3>
-          {EXPENSE_CATEGORIES.filter(
-            (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
-          )
-            .sort(
-              (a, b) =>
-                (categoryTotalsByBudgetType.needs[b.name]?.total ?? 0) -
-                (categoryTotalsByBudgetType.needs[a.name]?.total ?? 0)
+          <div className="space-y-1.5">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+              Needs
+            </h3>
+            {EXPENSE_CATEGORIES.filter(
+              (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
             )
-            .map((cat, index) => {
-              const data = categoryTotalsByBudgetType.needs[cat.name];
-              return (
-                <CategoryCard
-                  key={`need-${cat.name}`}
-                  name={cat.name}
-                  icon={cat.icon}
-                  total={data.total}
-                  count={data.count}
-                  transactions={data.transactions}
-                  isExpanded={expandedCategory === `need-${cat.name}`}
-                  onToggle={() =>
-                    onToggleCategory(
-                      expandedCategory === `need-${cat.name}` ? null : `need-${cat.name}`
-                    )
-                  }
-                  onTransactionClick={onTransactionClick}
-                  index={index}
-                />
-              );
-            })}
-        </div>
-      )}
+              .sort(
+                (a, b) =>
+                  (categoryTotalsByBudgetType.needs[b.name]?.total ?? 0) -
+                  (categoryTotalsByBudgetType.needs[a.name]?.total ?? 0)
+              )
+              .map((cat, index) => {
+                const data = categoryTotalsByBudgetType.needs[cat.name];
+                return (
+                  <CategoryCard
+                    key={`need-${cat.name}`}
+                    name={cat.name}
+                    icon={cat.icon}
+                    total={data.total}
+                    count={data.count}
+                    transactions={data.transactions}
+                    isExpanded={expandedCategory === `need-${cat.name}`}
+                    onToggle={() =>
+                      onToggleCategory(
+                        expandedCategory === `need-${cat.name}` ? null : `need-${cat.name}`
+                      )
+                    }
+                    onTransactionClick={onTransactionClick}
+                    index={index}
+                  />
+                );
+              })}
+          </div>
+        )}
 
       {/* Wants Categories - uses actual budget type from transactions */}
       {EXPENSE_CATEGORIES.filter(
         (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
       ).length > 0 && (
-        <div className="space-y-1.5">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
-            Wants
-          </h3>
-          {EXPENSE_CATEGORIES.filter(
-            (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
-          )
-            .sort(
-              (a, b) =>
-                (categoryTotalsByBudgetType.wants[b.name]?.total ?? 0) -
-                (categoryTotalsByBudgetType.wants[a.name]?.total ?? 0)
+          <div className="space-y-1.5">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+              Wants
+            </h3>
+            {EXPENSE_CATEGORIES.filter(
+              (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
             )
-            .map((cat, index) => {
-              const data = categoryTotalsByBudgetType.wants[cat.name];
-              return (
-                <CategoryCard
-                  key={`want-${cat.name}`}
-                  name={cat.name}
-                  icon={cat.icon}
-                  total={data.total}
-                  count={data.count}
-                  transactions={data.transactions}
-                  isExpanded={expandedCategory === `want-${cat.name}`}
-                  onToggle={() =>
-                    onToggleCategory(
-                      expandedCategory === `want-${cat.name}` ? null : `want-${cat.name}`
-                    )
-                  }
-                  onTransactionClick={onTransactionClick}
-                  index={index}
-                />
-              );
-            })}
-        </div>
-      )}
+              .sort(
+                (a, b) =>
+                  (categoryTotalsByBudgetType.wants[b.name]?.total ?? 0) -
+                  (categoryTotalsByBudgetType.wants[a.name]?.total ?? 0)
+              )
+              .map((cat, index) => {
+                const data = categoryTotalsByBudgetType.wants[cat.name];
+                return (
+                  <CategoryCard
+                    key={`want-${cat.name}`}
+                    name={cat.name}
+                    icon={cat.icon}
+                    total={data.total}
+                    count={data.count}
+                    transactions={data.transactions}
+                    isExpanded={expandedCategory === `want-${cat.name}`}
+                    onToggle={() =>
+                      onToggleCategory(
+                        expandedCategory === `want-${cat.name}` ? null : `want-${cat.name}`
+                      )
+                    }
+                    onTransactionClick={onTransactionClick}
+                    index={index}
+                  />
+                );
+              })}
+          </div>
+        )}
 
       {/* Uncategorized - Needs */}
       {categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0 && (

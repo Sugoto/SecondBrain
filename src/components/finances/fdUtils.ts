@@ -24,7 +24,7 @@ export function calculateCompoundInterest(
   principal: number,
   annualRate: number,
   compoundingFrequency: number,
-  years: number
+  years: number,
 ): number {
   const r = annualRate / 100;
   const n = compoundingFrequency;
@@ -59,7 +59,7 @@ export function calculateFDValues(principal: number): FDCalculation[] {
     // Calculate years elapsed since start
     const yearsElapsed = Math.max(
       0,
-      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25),
     );
 
     // Calculate total tenure in years
@@ -72,7 +72,7 @@ export function calculateFDValues(principal: number): FDCalculation[] {
       principal,
       fd.rate,
       fd.compoundingFrequency,
-      Math.min(yearsElapsed, totalTenure) // Don't exceed maturity
+      Math.min(yearsElapsed, totalTenure), // Don't exceed maturity
     );
 
     // Maturity value
@@ -80,7 +80,7 @@ export function calculateFDValues(principal: number): FDCalculation[] {
       principal,
       fd.rate,
       fd.compoundingFrequency,
-      totalTenure
+      totalTenure,
     );
 
     // Interest earned so far
@@ -114,10 +114,3 @@ export function getCurrentFDValue(principal: number): number {
   const calculations = calculateFDValues(principal);
   return calculations.reduce((sum, fd) => sum + fd.currentValue, 0);
 }
-
-// Get total interest earned so far
-export function getTotalFDInterest(principal: number): number {
-  const calculations = calculateFDValues(principal);
-  return calculations.reduce((sum, fd) => sum + fd.interestEarned, 0);
-}
-

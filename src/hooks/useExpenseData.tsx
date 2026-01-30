@@ -39,36 +39,6 @@ const queryClient = new QueryClient({
   },
 });
 
-/**
- * Hook to get initial data from IndexedDB cache for instant load
- * Returns cached data that can be used as initialData for React Query
- */
-export function useInitialCachedData() {
-  const [transactionsCache, setTransactionsCache] = useState<Transaction[] | null>(null);
-  const [userStatsCache, setUserStatsCache] = useState<UserStats | null>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    async function loadCache() {
-      try {
-        const [txns, stats] = await Promise.all([
-          cachedTransactionsPromise,
-          cachedUserStatsPromise,
-        ]);
-        setTransactionsCache(txns);
-        setUserStatsCache(stats);
-      } catch {
-        // Ignore cache errors
-      } finally {
-        setIsReady(true);
-      }
-    }
-    loadCache();
-  }, []);
-
-  return { transactionsCache, userStatsCache, isReady };
-}
-
 // Export for prefetching
 export { queryClient };
 
@@ -89,7 +59,7 @@ const userStatsKeys = {
 async function fetchTransactions(): Promise<Transaction[]> {
   // Try cache first for instant load
   const cached = await getCachedTransactions();
-  
+
   // Fetch fresh data
   const { data, error } = await supabase
     .from("transactions")
@@ -103,12 +73,12 @@ async function fetchTransactions(): Promise<Transaction[]> {
     if (cached) return cached;
     throw error;
   }
-  
+
   // Cache the fresh data for next time
   if (data) {
     cacheTransactions(data); // Fire and forget
   }
-  
+
   return data || cached || [];
 }
 
@@ -118,7 +88,7 @@ async function fetchTransactions(): Promise<Transaction[]> {
 async function fetchUserStats(): Promise<UserStats | null> {
   // Try cache first
   const cached = await getCachedUserStats();
-  
+
   const { data, error } = await supabase
     .from("user_stats")
     .select("*")
@@ -129,12 +99,12 @@ async function fetchUserStats(): Promise<UserStats | null> {
     console.error("Error fetching user stats:", error);
     return cached; // Return cache on error
   }
-  
+
   // Cache fresh data
   if (data) {
     cacheUserStats(data);
   }
-  
+
   return data || cached;
 }
 
@@ -146,10 +116,10 @@ export function ExpenseDataProvider({ children }: { children: ReactNode }) {
 
 export function useExpenseData() {
   const queryClient = useQueryClient();
-  
+
   // Get initial cached data for instant display
   const [initialData, setInitialData] = useState<Transaction[] | undefined>(undefined);
-  
+
   // Load initial data from IndexedDB on mount (only once)
   useEffect(() => {
     cachedTransactionsPromise?.then((cached) => {
@@ -173,7 +143,7 @@ export function useExpenseData() {
     // Show cached data as placeholder while fetching
     placeholderData: initialData,
   });
-  
+
   // Consider "loading" only if no data at all (no cache, no fetched data)
   const loading = isLoading && transactions.length === 0 && !initialData;
 
@@ -249,12 +219,7 @@ export function useExpenseData() {
     refreshing,
     error: error ? (error as Error).message : null,
 
-    fetchTransactions: (isRefresh = false) => {
-      if (isRefresh) {
-        return refetch();
-      }
-      return refetch();
-    },
+    fetchTransactions: () => refetch(),
 
     addTransaction: addMutation.mutateAsync,
     updateTransaction: updateMutation.mutateAsync,
@@ -286,7 +251,7 @@ export function useExpenseData() {
  */
 export function usePrefetchTransactions() {
   const qc = useQueryClient();
-  
+
   return {
     prefetch: () => {
       qc.prefetchQuery({
@@ -300,10 +265,10 @@ export function usePrefetchTransactions() {
 
 export function useUserStats() {
   const queryClient = useQueryClient();
-  
+
   // Get initial cached data for instant display (same pattern as useExpenseData)
   const [initialData, setInitialData] = useState<UserStats | undefined>(undefined);
-  
+
   // Load initial data from IndexedDB on mount
   useEffect(() => {
     cachedUserStatsPromise?.then((cached) => {
@@ -324,7 +289,7 @@ export function useUserStats() {
     placeholderData: initialData,
     staleTime: 10 * 60 * 1000, // 10 minutes - user stats change less frequently
   });
-  
+
   const loading = isLoading && !userStats && !initialData;
 
   const updateUserStats = (updated: UserStats) => {
@@ -339,22 +304,22 @@ export function useUserStats() {
   // Investment management
   const addInvestment = async (investment: Omit<Investment, "id">) => {
     if (!userStats?.id) throw new Error("No user stats");
-    
+
     const newInvestment: Investment = {
       ...investment,
       id: crypto.randomUUID(),
     };
-    
+
     const currentInvestments = userStats.investments || [];
     const updatedInvestments = [...currentInvestments, newInvestment];
-    
+
     const { error } = await supabase
       .from("user_stats")
       .update({ investments: updatedInvestments })
       .eq("id", userStats.id);
-    
+
     if (error) throw error;
-    
+
     const updated = { ...userStats, investments: updatedInvestments };
     queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
     cacheUserStats(updated);
@@ -363,17 +328,17 @@ export function useUserStats() {
 
   const deleteInvestment = async (investmentId: string) => {
     if (!userStats?.id) throw new Error("No user stats");
-    
+
     const currentInvestments = userStats.investments || [];
     const updatedInvestments = currentInvestments.filter(i => i.id !== investmentId);
-    
+
     const { error } = await supabase
       .from("user_stats")
       .update({ investments: updatedInvestments })
       .eq("id", userStats.id);
-    
+
     if (error) throw error;
-    
+
     const updated = { ...userStats, investments: updatedInvestments };
     queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
     cacheUserStats(updated);

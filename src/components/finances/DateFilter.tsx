@@ -137,14 +137,14 @@ export function DateFilter({
 
   const buttonStyle = {
     background: isDark
-      ? "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%)"
-      : "linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%)",
+      ? "rgba(39, 39, 42, 0.8)"
+      : "rgba(250, 250, 250, 0.9)",
     border: isDark
-      ? "1px solid rgba(139, 92, 246, 0.3)"
-      : "1px solid rgba(139, 92, 246, 0.25)",
+      ? "1px solid rgba(63, 63, 70, 0.5)"
+      : "1px solid rgba(228, 228, 231, 0.8)",
     boxShadow: isDark
-      ? "0 2px 8px rgba(139, 92, 246, 0.2)"
-      : "0 2px 8px rgba(139, 92, 246, 0.1)",
+      ? "0 2px 8px rgba(0, 0, 0, 0.2)"
+      : "0 2px 8px rgba(0, 0, 0, 0.05)",
   };
 
   return (
@@ -162,7 +162,7 @@ export function DateFilter({
           className="h-8 px-2.5 rounded-lg flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
           style={buttonStyle}
         >
-          <CalendarDays className="h-4 w-4 text-primary" />
+          <CalendarDays className="h-4 w-4 text-muted-foreground" />
           <span className="text-xs font-medium">{getFilterLabel()}</span>
         </button>
       </PopoverTrigger>
@@ -179,11 +179,10 @@ export function DateFilter({
                     onChartModeChange(mode);
                     setFilterOpen(false);
                   }}
-                  className={`h-8 flex-1 text-sm rounded-md transition-all duration-200 px-4 ${
-                    chartMode === mode
+                  className={`h-8 flex-1 text-sm rounded-md transition-all duration-200 px-4 ${chartMode === mode
                       ? "bg-background text-foreground font-medium shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {mode === "daily" ? "Daily" : "Monthly"}
                 </button>
@@ -204,11 +203,10 @@ export function DateFilter({
                       onTimeFilterChange(filter);
                       setFilterOpen(false);
                     }}
-                    className={`h-7 flex-1 text-xs rounded-md transition-all duration-200 ${
-                      timeFilter === filter
+                    className={`h-7 flex-1 text-xs rounded-md transition-all duration-200 ${timeFilter === filter
                         ? "bg-background text-foreground font-medium shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
                     {TIME_LABELS[filter]}
                   </button>
