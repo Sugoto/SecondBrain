@@ -472,9 +472,20 @@ export function FinanceTracker({
     );
   }, [transactions, userStats?.needs_budget, userStats?.wants_budget]);
 
-  // Total expenses for current filter period (no prorations or exclusions)
+  // Total expenses for current month only - full amount for purchases made this month
+  // (excludes past prorations from previous months, includes future prorations from this month)
   const totalExpenses = useMemo(() => {
-    return filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    return filteredTransactions
+      .filter((t) => {
+        if (t.excluded_from_budget) return false;
+        // Only include transactions actually made this month
+        const txnDate = new Date(t.date);
+        return txnDate >= startOfMonth;
+      })
+      .reduce((sum, t) => sum + t.amount, 0); // Full amount, not prorated
   }, [filteredTransactions]);
 
   // Handler to update budget values
