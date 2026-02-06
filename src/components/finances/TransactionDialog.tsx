@@ -17,9 +17,7 @@ import {
   CATEGORY_PASTEL_COLORS,
 } from "./constants";
 import {
-  CalendarRange,
   Loader2,
-  ChevronDown,
   Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -141,8 +139,6 @@ export function TransactionDialog({
   onDelete,
 }: TransactionDialogProps) {
   const [amountInput, setAmountInput] = useState<string>("");
-  const [showDatetime, setShowDatetime] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Reset state when transaction changes using useEffect (proper pattern)
@@ -151,8 +147,6 @@ export function TransactionDialog({
       setAmountInput(
         transaction.amount === 0 ? "" : transaction.amount.toString()
       );
-      setShowDatetime(false);
-      setShowAdvanced(false);
     }
   }, [transaction?.id]); // Only reset when transaction ID changes
 
@@ -368,7 +362,7 @@ export function TransactionDialog({
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div className="flex items-center justify-center gap-3 pt-1">
+                      <div className="flex items-center justify-center gap-3 py-1">
                         <span
                           className={`text-xs font-medium transition-opacity ${!isWant ? "text-foreground" : "text-muted-foreground"}`}
                         >
@@ -404,7 +398,7 @@ export function TransactionDialog({
               htmlFor="amount"
               className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"
             >
-              Amount
+              How much did you spend?
             </Label>
             <div className="relative">
               <Input
@@ -454,12 +448,12 @@ export function TransactionDialog({
               htmlFor="merchant"
               className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
             >
-              Merchant
+              Where did you spend?
             </Label>
             <Input
               id="merchant"
               autoFocus={false}
-              placeholder="Where did you spend?"
+              placeholder="e.g. Amazon, Swiggy, Uber"
               className="h-10"
               value={transaction.merchant || ""}
               onChange={(e) =>
@@ -469,214 +463,102 @@ export function TransactionDialog({
             />
           </div>
 
-          {/* Date, Time & Prorate - Collapsible */}
-          <div className="rounded-xl border-2 border-black dark:border-white overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowDatetime(!showDatetime)}
-              className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-foreground hover:bg-pastel-pink/50 transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <CalendarRange className="h-3.5 w-3.5" />
-                <span>
-                  {new Date(transaction.date).toLocaleDateString("en-IN", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                  })}
-                  {transaction.time &&
-                    (() => {
-                      const [hours, minutes] = transaction.time
-                        .split(":")
-                        .map(Number);
-                      const period = hours >= 12 ? "PM" : "AM";
-                      const hour12 = hours % 12 || 12;
-                      return ` • ${hour12}:${minutes
-                        .toString()
-                        .padStart(2, "0")} ${period}`;
-                    })()}
-                  {transaction.prorate_months &&
-                    transaction.prorate_months > 1 &&
-                    ` • ${transaction.prorate_months}mo`}
-                </span>
-              </span>
-              <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform ${showDatetime ? "rotate-180" : ""
-                  }`}
+          {/* Date & Time row */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                Date
+              </Label>
+              <Input
+                id="date"
+                type="date"
+                className="h-9 text-sm"
+                value={transaction.date}
+                onChange={(e) =>
+                  onChange({ ...transaction, date: e.target.value })
+                }
+                disabled={saving}
               />
-            </button>
-            <AnimatePresence>
-              {showDatetime && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="space-y-3 px-3 pb-3">
-                    {/* Date & Time row */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] text-muted-foreground uppercase">
-                          Date
-                        </Label>
-                        <Input
-                          id="date"
-                          type="date"
-                          className="h-9 text-sm"
-                          value={transaction.date}
-                          onChange={(e) =>
-                            onChange({ ...transaction, date: e.target.value })
-                          }
-                          disabled={saving}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] text-muted-foreground uppercase">
-                          Time
-                        </Label>
-                        <Input
-                          id="time"
-                          type="time"
-                          className="h-9 text-sm"
-                          value={transaction.time?.slice(0, 5) || ""}
-                          onChange={(e) => handleTimeChange(e.target.value)}
-                          disabled={saving}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Prorate section */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                      <Label htmlFor="prorate" className="text-xs shrink-0">
-                        Spread over
-                      </Label>
-                      <Input
-                        id="prorate"
-                        type="number"
-                        min="1"
-                        max="60"
-                        placeholder="1"
-                        className="h-8 text-sm w-14 text-center"
-                        value={transaction.prorate_months ?? ""}
-                        onChange={(e) => handleProrateChange(e.target.value)}
-                        onBlur={handleProrateBlur}
-                        disabled={saving}
-                      />
-                      <Label className="text-xs shrink-0">
-                        {transaction.prorate_months &&
-                          transaction.prorate_months > 1
-                          ? "months"
-                          : "month"}
-                      </Label>
-                      {transaction.prorate_months &&
-                        transaction.prorate_months > 1 && (
-                          <span className="text-xs ml-auto font-mono font-semibold text-foreground">
-                            {formatCurrency(
-                              transaction.amount / transaction.prorate_months
-                            )}
-                            /mo
-                          </span>
-                        )}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground uppercase">
+                Time
+              </Label>
+              <Input
+                id="time"
+                type="time"
+                className="h-9 text-sm"
+                value={transaction.time?.slice(0, 5) || ""}
+                onChange={(e) => handleTimeChange(e.target.value)}
+                disabled={saving}
+              />
+            </div>
           </div>
 
-          {/* Advanced section - collapsible */}
-          <div className="rounded-xl border-2 border-black dark:border-white overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-foreground hover:bg-pastel-purple/50 transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <span>Advanced</span>
-                {!showAdvanced && (
-                  <span className="text-[10px] opacity-60">
-                    {[
-                      transaction.details && "notes",
-                      transaction.excluded_from_budget && "excluded",
-                    ]
-                      .filter(Boolean)
-                      .join(", ") || ""}
+          {/* Prorate row */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="prorate" className="text-[10px] text-muted-foreground uppercase">
+              Spread over months
+            </Label>
+            <div className="flex items-center gap-2">
+              {transaction.prorate_months &&
+                transaction.prorate_months > 1 && (
+                  <span className="text-xs font-mono font-semibold text-foreground">
+                    {formatCurrency(
+                      transaction.amount / transaction.prorate_months
+                    )}
+                    /mo
                   </span>
                 )}
-              </span>
-              <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""
-                  }`}
+              <Input
+                id="prorate"
+                type="number"
+                min="1"
+                max="60"
+                placeholder="1"
+                className="h-8 text-sm w-14 text-center"
+                value={transaction.prorate_months ?? ""}
+                onChange={(e) => handleProrateChange(e.target.value)}
+                onBlur={handleProrateBlur}
+                disabled={saving}
               />
-            </button>
-            <AnimatePresence>
-              {showAdvanced && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="space-y-3 px-3 pb-3">
-                    {/* Notes */}
-                    <div className="space-y-1">
-                      <textarea
-                        id="details"
-                        className="w-full min-h-[50px] px-2 py-2 mt-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
-                        value={transaction.details || ""}
-                        onChange={(e) =>
-                          onChange({
-                            ...transaction,
-                            details: e.target.value || null,
-                          })
-                        }
-                        placeholder="Add notes or details..."
-                        disabled={saving}
-                      />
-                    </div>
-
-                    {/* Exclude from budget */}
-                    <div className="flex items-center justify-between">
-                      <Label
-                        htmlFor="excluded"
-                        className="text-xs text-muted-foreground cursor-pointer"
-                      >
-                        Exclude from monthly budget
-                      </Label>
-                      <Switch
-                        id="excluded"
-                        checked={transaction.excluded_from_budget}
-                        onCheckedChange={(checked) =>
-                          onChange({
-                            ...transaction,
-                            excluded_from_budget: checked,
-                          })
-                        }
-                        disabled={saving}
-                        className="scale-75"
-                      />
-                    </div>
-
-                    {/* Delete button - only show for existing transactions */}
-                    {!isNew && onDelete && (
-                      <button
-                        type="button"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        disabled={saving || deleting}
-                        className="w-full mt-4 h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-bold border-2 border-black dark:border-white text-black/60 dark:text-white/60 transition-all hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-600 dark:hover:border-red-400 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete Transaction
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </div>
           </div>
+
+          {/* Exclude row */}
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="excluded"
+              className="text-[10px] text-muted-foreground uppercase cursor-pointer"
+            >
+              Exclude from budget
+            </Label>
+            <Switch
+              id="excluded"
+              checked={transaction.excluded_from_budget}
+              onCheckedChange={(checked) =>
+                onChange({
+                  ...transaction,
+                  excluded_from_budget: checked,
+                })
+              }
+              disabled={saving}
+              className="scale-75"
+            />
+          </div>
+
+          {/* Delete button - only show for existing transactions */}
+          {!isNew && onDelete && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={saving || deleting}
+              className="w-full h-10 rounded-lg flex items-center justify-center gap-2 text-xs font-bold border-2 border-black dark:border-white text-black/60 dark:text-white/60 transition-all hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-600 dark:hover:border-red-400 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete Transaction
+            </button>
+          )}
         </div>
 
         {/* Fixed footer buttons - neo-brutalism style */}
