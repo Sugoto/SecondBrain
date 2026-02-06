@@ -228,7 +228,7 @@ function SegmentedBudgetBar({
         </div>
 
         {/* Total Expenses row with edit button */}
-        <div className="flex items-center justify-between pt-1.5 mt-1.5 border-t border-black/20 dark:border-white/20">
+        <div className="flex items-center justify-between pt-1.5 mt-1.5">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wide text-black/70 dark:text-white/70">Total</span>
             <span className="font-mono text-xs font-bold text-black dark:text-white">
