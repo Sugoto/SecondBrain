@@ -87,13 +87,13 @@ function ItemForm({
       onSubmit={handleSubmit}
       className="overflow-hidden"
     >
-      <div className="p-4 rounded-xl border-2 border-black dark:border-white bg-pastel-blue shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] space-y-3">
+      <div className="p-3 rounded-lg border-[1.5px] border-black dark:border-white bg-pastel-blue shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] space-y-2">
         {/* Item name */}
         <Input
           placeholder="Item name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="h-9 text-sm"
+          className="h-7 text-xs"
           autoFocus
           disabled={isSubmitting}
         />
@@ -112,7 +112,7 @@ function ItemForm({
                 placeholder="0"
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
-                className="h-8 text-sm font-mono"
+                className="h-6 text-xs font-mono"
                 disabled={isSubmitting}
               />
             </div>
@@ -126,7 +126,7 @@ function ItemForm({
                 placeholder="0"
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
-                className="h-8 text-sm font-mono"
+                className="h-6 text-xs font-mono"
                 disabled={isSubmitting}
               />
             </div>
@@ -140,7 +140,7 @@ function ItemForm({
                 placeholder="100"
                 value={weightGrams}
                 onChange={(e) => setWeightGrams(e.target.value)}
-                className="h-8 text-sm font-mono"
+                className="h-6 text-xs font-mono"
                 disabled={isSubmitting}
               />
             </div>
@@ -154,7 +154,7 @@ function ItemForm({
                 placeholder="100"
                 value={servingGrams}
                 onChange={(e) => setServingGrams(e.target.value)}
-                className="h-8 text-sm font-mono"
+                className="h-6 text-xs font-mono"
                 disabled={isSubmitting}
               />
             </div>
@@ -171,30 +171,30 @@ function ItemForm({
               placeholder="0"
               value={cost}
               onChange={(e) => setCost(e.target.value)}
-              className="h-8 text-sm font-mono"
+              className="h-6 text-xs font-mono"
               disabled={isSubmitting}
             />
           </div>
         </div>
 
-        {/* Action buttons - neo-brutalism style */}
-        <div className="flex gap-2">
+        {/* Action buttons - neo-brutalism style (compact) */}
+        <div className="flex gap-1.5">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex-1 h-9 rounded-lg bg-white border-2 border-black dark:border-white text-black font-bold text-sm transition-all hover:bg-pastel-pink disabled:opacity-50 flex items-center justify-center gap-1"
+            className="flex-1 h-7 rounded-md bg-white border-[1.5px] border-black dark:border-white text-black font-bold text-xs transition-all hover:bg-pastel-pink disabled:opacity-50 flex items-center justify-center gap-1"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
             Cancel
           </button>
           <button
             type="submit"
             disabled={!name.trim() || isSubmitting}
-            className="flex-1 h-9 rounded-lg bg-pastel-green border-2 border-black dark:border-white text-black text-sm font-bold transition-all shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+            className="flex-1 h-7 rounded-md bg-pastel-green border-[1.5px] border-black dark:border-white text-black text-xs font-bold transition-all shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
           >
             {isSubmitting ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" />
+              <Loader2 className="h-2.5 w-2.5 animate-spin mx-auto" />
             ) : (
               submitLabel
             )}
@@ -207,9 +207,9 @@ function ItemForm({
             type="button"
             onClick={onDelete}
             disabled={isSubmitting}
-            className="w-full h-9 rounded-lg bg-white border-2 border-black dark:border-white text-black/60 font-bold text-sm transition-all hover:bg-red-100 hover:text-red-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
+            className="w-full h-7 rounded-md bg-white border-[1.5px] border-black dark:border-white text-black/60 font-bold text-xs transition-all hover:bg-red-100 hover:text-red-600 disabled:opacity-50 flex items-center justify-center gap-1"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-2.5 w-2.5" />
             Delete Item
           </button>
         )}
@@ -286,45 +286,45 @@ function ShoppingItemRow({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20, height: 0 }}
       transition={{ duration: 0.2 }}
-      className={`flex items-center gap-3 p-3 rounded-xl border-2 border-black dark:border-white bg-card transition-all ${item.checked 
+      className={`flex items-center gap-2 p-2 rounded-lg border-[1.5px] border-black dark:border-white bg-card transition-all ${item.checked 
         ? "opacity-50 bg-muted" 
-        : "shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
+        : "shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0]"
         }`}
     >
       {/* Checkbox */}
       <button
         onClick={() => onToggle(item.id, !item.checked)}
-        className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${item.checked
+        className={`w-4 h-4 rounded flex items-center justify-center transition-all shrink-0 border-[1.5px] ${item.checked
           ? "bg-black dark:bg-white border-black dark:border-white"
           : "border-black dark:border-white bg-white dark:bg-white/10 hover:bg-pastel-green"
           }`}
       >
-        {item.checked && <Check className="h-4 w-4 text-white dark:text-black" />}
+        {item.checked && <Check className="h-2.5 w-2.5 text-white dark:text-black" />}
       </button>
 
       {/* Item details */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold truncate">{item.name}</p>
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
+        <p className="text-xs font-bold truncate">{item.name}</p>
+        <div className="flex items-center gap-2 text-[9px] text-muted-foreground font-medium">
           <span
             className="flex items-center gap-0.5"
             title={`${item.calories} kcal for ${weight}g`}
           >
-            <Flame className="h-2.5 w-2.5" />
+            <Flame className="h-2 w-2" />
             {displayCalories}
           </span>
           <span
             className="flex items-center gap-0.5"
             title={`${item.protein}g for ${weight}g`}
           >
-            <Beef className="h-2.5 w-2.5" />
+            <Beef className="h-2 w-2" />
             {displayProtein}g
           </span>
           <span
             className="flex items-center gap-0.5"
             title={`₹${item.cost} for ${weight}g`}
           >
-            <IndianRupee className="h-2.5 w-2.5" />₹{displayCost}
+            <IndianRupee className="h-2 w-2" />₹{displayCost}
           </span>
           <span
             className="flex items-center gap-0.5"
@@ -346,9 +346,9 @@ function ShoppingItemRow({
       {/* Edit button */}
       <button
         onClick={() => onEdit(item)}
-        className="p-2 rounded-lg border-2 border-black dark:border-white bg-white dark:bg-white/10 text-black dark:text-white hover:bg-pastel-pink transition-colors"
+        className="p-1.5 rounded-md border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10 text-black dark:text-white hover:bg-pastel-pink transition-colors"
       >
-        <Pencil className="h-3.5 w-3.5" />
+        <Pencil className="h-2.5 w-2.5" />
       </button>
     </motion.div>
   );
@@ -542,37 +542,37 @@ export function ShoppingList() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-wide">Shopping List</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wide">Shopping List</h3>
 
-        <div className="flex items-center gap-2">
-          {/* Display mode toggle - neo-brutalism style */}
-          <div className="flex rounded-lg overflow-hidden text-[10px] border-2 border-black dark:border-white">
+        <div className="flex items-center gap-1.5">
+          {/* Display mode toggle - neo-brutalism style (compact) */}
+          <div className="flex rounded-md overflow-hidden text-[9px] border-[1.5px] border-black dark:border-white">
             <button
               onClick={() => setDisplayMode("raw")}
-              className={`px-2 py-1.5 font-bold transition-colors ${displayMode === "raw"
+              className={`px-1.5 py-1 font-bold transition-colors ${displayMode === "raw"
                 ? "bg-pastel-blue text-black"
                 : "hover:bg-muted text-foreground"
                 }`}
             >
               Raw
             </button>
-            <div className="w-0.5 bg-black dark:bg-white" />
+            <div className="w-px bg-black dark:bg-white" />
             <button
               onClick={() => setDisplayMode("per100g")}
-              className={`px-2 py-1.5 font-bold transition-colors ${displayMode === "per100g"
+              className={`px-1.5 py-1 font-bold transition-colors ${displayMode === "per100g"
                 ? "bg-pastel-blue text-black"
                 : "hover:bg-muted text-foreground"
                 }`}
             >
               /100g
             </button>
-            <div className="w-0.5 bg-black dark:bg-white" />
+            <div className="w-px bg-black dark:bg-white" />
             <button
               onClick={() => setDisplayMode("perServe")}
-              className={`px-2 py-1.5 font-bold transition-colors ${displayMode === "perServe"
+              className={`px-1.5 py-1 font-bold transition-colors ${displayMode === "perServe"
                 ? "bg-pastel-blue text-black"
                 : "hover:bg-muted text-foreground"
                 }`}
@@ -584,116 +584,116 @@ export function ShoppingList() {
           {!showAddForm && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="h-8 w-8 p-0 flex items-center justify-center rounded-lg border-2 border-black dark:border-white bg-pastel-pink shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] transition-all"
+              className="h-6 w-6 p-0 flex items-center justify-center rounded-md border-[1.5px] border-black dark:border-white bg-pastel-pink shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] transition-all"
             >
-              <Plus className="h-4 w-4 text-black dark:text-white" />
+              <Plus className="h-3 w-3 text-black dark:text-white" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Totals summary (only checked items) - neo-brutalism style */}
-      <div className="grid grid-cols-5 gap-1.5 p-3 rounded-xl bg-pastel-yellow border-2 border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+      {/* Totals summary (only checked items) - neo-brutalism style (compact) */}
+      <div className="grid grid-cols-5 gap-1 p-2 rounded-lg bg-pastel-yellow border-[1.5px] border-black dark:border-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0]">
         <button
           onClick={() => toggleSort("calories")}
-          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy === "calories_asc" || sortBy === "calories_desc"
+          className={`text-center py-1 rounded-md transition-all border-[1.5px] ${sortBy === "calories_asc" || sortBy === "calories_desc"
             ? "bg-white border-black dark:border-white"
             : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-sm font-mono font-bold text-black">
+          <p className="text-xs font-mono font-bold text-black">
             {Math.round(displayTotals.calories).toLocaleString()}
           </p>
-          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
+          <p className="text-[8px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             kcal
             {getSortIndicator("calories") ? (
               <span className="text-black">
                 {getSortIndicator("calories")}
               </span>
             ) : (
-              <ArrowUpDown className="h-2 w-2 opacity-40" />
+              <ArrowUpDown className="h-1.5 w-1.5 opacity-40" />
             )}
           </p>
         </button>
         <button
           onClick={() => toggleSort("protein")}
-          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy.startsWith("protein")
+          className={`text-center py-1 rounded-md transition-all border-[1.5px] ${sortBy.startsWith("protein")
             ? "bg-white border-black dark:border-white"
             : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-sm font-mono font-bold text-black">
+          <p className="text-xs font-mono font-bold text-black">
             {Math.round(displayTotals.protein)}g
           </p>
-          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
+          <p className="text-[8px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             protein
             {getSortIndicator("protein") ? (
               <span className="text-black">
                 {getSortIndicator("protein")}
               </span>
             ) : (
-              <ArrowUpDown className="h-2 w-2 opacity-40" />
+              <ArrowUpDown className="h-1.5 w-1.5 opacity-40" />
             )}
           </p>
         </button>
         <button
           onClick={() => toggleSort("cost")}
-          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy === "cost_asc" || sortBy === "cost_desc"
+          className={`text-center py-1 rounded-md transition-all border-[1.5px] ${sortBy === "cost_asc" || sortBy === "cost_desc"
             ? "bg-white border-black dark:border-white"
             : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-sm font-mono font-bold text-black">
+          <p className="text-xs font-mono font-bold text-black">
             ₹{Math.round(displayTotals.cost).toLocaleString()}
           </p>
-          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
+          <p className="text-[8px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             cost
             {getSortIndicator("cost") ? (
               <span className="text-black">{getSortIndicator("cost")}</span>
             ) : (
-              <ArrowUpDown className="h-2 w-2 opacity-40" />
+              <ArrowUpDown className="h-1.5 w-1.5 opacity-40" />
             )}
           </p>
         </button>
         <button
           onClick={() => toggleSort("costPerProtein")}
-          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy.startsWith("costPerProtein")
+          className={`text-center py-1 rounded-md transition-all border-[1.5px] ${sortBy.startsWith("costPerProtein")
             ? "bg-white border-black dark:border-white"
             : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-sm font-mono font-bold text-black">
+          <p className="text-xs font-mono font-bold text-black">
             ₹{displayTotals.costPerProtein.toFixed(2)}
           </p>
-          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
+          <p className="text-[8px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             ₹/g
             {getSortIndicator("costPerProtein") ? (
               <span className="text-black">
                 {getSortIndicator("costPerProtein")}
               </span>
             ) : (
-              <ArrowUpDown className="h-2 w-2 opacity-40" />
+              <ArrowUpDown className="h-1.5 w-1.5 opacity-40" />
             )}
           </p>
         </button>
         <button
           onClick={() => toggleSort("caloriesPerProtein")}
-          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy.startsWith("caloriesPerProtein")
+          className={`text-center py-1 rounded-md transition-all border-[1.5px] ${sortBy.startsWith("caloriesPerProtein")
             ? "bg-white border-black dark:border-white"
             : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-sm font-mono font-bold text-black">
+          <p className="text-xs font-mono font-bold text-black">
             {displayTotals.caloriesPerProtein.toFixed(1)}
           </p>
-          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
+          <p className="text-[8px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             cal/g
             {getSortIndicator("caloriesPerProtein") ? (
               <span className="text-black">
                 {getSortIndicator("caloriesPerProtein")}
               </span>
             ) : (
-              <ArrowUpDown className="h-2 w-2 opacity-40" />
+              <ArrowUpDown className="h-1.5 w-1.5 opacity-40" />
             )}
           </p>
         </button>
@@ -736,7 +736,7 @@ export function ShoppingList() {
       </AnimatePresence>
 
       {/* Items list */}
-      <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto">
+      <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto">
         <AnimatePresence mode="popLayout">
           {sortedItems
             .filter((item) => item.id !== editingItem?.id)
@@ -755,11 +755,11 @@ export function ShoppingList() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-8 rounded-xl border-2 border-dashed border-black/30 dark:border-white/30"
+            className="text-center py-6 rounded-lg border-[1.5px] border-dashed border-black/30 dark:border-white/30"
           >
-            <ShoppingCart className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm font-bold">No items yet</p>
-            <p className="text-xs text-muted-foreground">Tap + to add grocery items</p>
+            <ShoppingCart className="h-8 w-8 mx-auto mb-1.5 text-muted-foreground" />
+            <p className="text-xs font-bold">No items yet</p>
+            <p className="text-[10px] text-muted-foreground">Tap + to add grocery items</p>
           </motion.div>
         )}
       </div>

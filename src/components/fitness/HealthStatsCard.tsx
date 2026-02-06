@@ -82,22 +82,22 @@ export function HealthStatsEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border-2 border-black dark:border-white shadow-[6px_6px_0_#1a1a1a] dark:shadow-[6px_6px_0_#FFFBF0]"
+        className="sm:max-w-xs max-h-[90vh] overflow-y-auto rounded-xl border-[1.5px] border-black dark:border-white shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="pb-3 border-b-2 border-black dark:border-white -mx-6 -mt-6 px-6 pt-6 mb-4 bg-pastel-purple rounded-t-2xl">
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold text-black dark:text-white">
+        <DialogHeader className="pb-2 border-b-[1.5px] border-black dark:border-white -mx-5 -mt-5 px-4 pt-4 mb-3 bg-pastel-purple rounded-t-xl">
+          <DialogTitle className="flex items-center gap-1.5 text-sm font-bold text-black dark:text-white">
             Edit Profile
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5">
+        <div className="space-y-3">
           {/* All fields in one compact row */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-2">
             {/* Height */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
-                <Ruler className="h-3.5 w-3.5" /> cm
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
+                <Ruler className="h-2.5 w-2.5" /> cm
               </label>
               <Input
                 type="number"
@@ -110,15 +110,15 @@ export function HealthStatsEditDialog({
                       : null,
                   }))
                 }
-                className="font-mono h-10 text-sm text-center border-2 border-black dark:border-white rounded-lg font-bold"
+                className="font-mono h-7 text-xs text-center border-[1.5px] border-black dark:border-white rounded-md font-bold"
                 placeholder="175"
               />
             </div>
 
             {/* Weight */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
-                <Scale className="h-3.5 w-3.5" /> kg
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
+                <Scale className="h-2.5 w-2.5" /> kg
               </label>
               <Input
                 type="number"
@@ -131,15 +131,15 @@ export function HealthStatsEditDialog({
                       : null,
                   }))
                 }
-                className="font-mono h-10 text-sm text-center border-2 border-black dark:border-white rounded-lg font-bold"
+                className="font-mono h-7 text-xs text-center border-[1.5px] border-black dark:border-white rounded-md font-bold"
                 placeholder="70"
               />
             </div>
 
             {/* Age */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
-                <Calendar className="h-3.5 w-3.5" /> yrs
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
+                <Calendar className="h-2.5 w-2.5" /> yrs
               </label>
               <Input
                 type="number"
@@ -150,15 +150,15 @@ export function HealthStatsEditDialog({
                     age: e.target.value ? parseFloat(e.target.value) : null,
                   }))
                 }
-                className="font-mono h-10 text-sm text-center border-2 border-black dark:border-white rounded-lg font-bold"
+                className="font-mono h-7 text-xs text-center border-[1.5px] border-black dark:border-white rounded-md font-bold"
                 placeholder="25"
               />
             </div>
 
             {/* Gender Toggle */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
-                <User className="h-3.5 w-3.5" /> Sex
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
+                <User className="h-2.5 w-2.5" /> Sex
               </label>
               <button
                 type="button"
@@ -168,9 +168,9 @@ export function HealthStatsEditDialog({
                     gender: prev.gender === "male" ? "female" : "male",
                   }))
                 }
-                className="h-10 w-full rounded-lg border-2 border-black dark:border-white bg-pastel-pink flex items-center justify-center transition-all hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
+                className="h-7 w-full rounded-md border-[1.5px] border-black dark:border-white bg-pastel-pink flex items-center justify-center transition-all hover:shadow-[1.5px_1.5px_0_#1a1a1a] dark:hover:shadow-[1.5px_1.5px_0_#FFFBF0]"
               >
-                <span className="text-lg font-bold text-black dark:text-white">
+                <span className="text-sm font-bold text-black dark:text-white">
                   {values.gender === "female" ? "♀" : "♂"}
                 </span>
               </button>
@@ -181,7 +181,7 @@ export function HealthStatsEditDialog({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-12 rounded-xl text-sm font-bold transition-all border-2 border-black dark:border-white bg-pastel-green text-black shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_#1a1a1a] dark:hover:shadow-[4px_4px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-9 rounded-lg text-xs font-bold transition-all border-[1.5px] border-black dark:border-white bg-pastel-green text-black shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2.5px_2.5px_0_#1a1a1a] dark:hover:shadow-[2.5px_2.5px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

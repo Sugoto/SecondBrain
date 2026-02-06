@@ -46,35 +46,35 @@ export const CategoryCard = memo(function CategoryCard({
         delay: index * 0.05,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="bg-card border-2 border-black dark:border-white rounded-xl overflow-hidden shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
+      className="bg-card border-[1.5px] border-black dark:border-white rounded-lg overflow-hidden shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0]"
     >
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.99 }}
-        className="w-full flex items-center gap-3 p-3 transition-colors hover:bg-pastel-yellow/30"
+        className="w-full flex items-center gap-2 p-2 transition-colors hover:bg-pastel-yellow/30"
       >
         <motion.div
           animate={{ scale: isExpanded ? 1.05 : 1 }}
           transition={{ duration: 0.2 }}
-          className={`h-9 w-9 rounded-lg ${categoryPastelColor} border-2 border-black dark:border-white flex items-center justify-center`}
+          className={`h-7 w-7 rounded-md ${categoryPastelColor} border-[1.5px] border-black dark:border-white flex items-center justify-center`}
         >
-          <IconComp className="h-4 w-4 text-black dark:text-white" />
+          <IconComp className="h-3 w-3 text-black dark:text-white" />
         </motion.div>
         <div className="flex-1 text-left min-w-0">
-          <p className="font-bold text-sm text-foreground truncate">{name}</p>
-          <p className="text-xs text-muted-foreground font-medium">
+          <p className="font-bold text-xs text-foreground truncate">{name}</p>
+          <p className="text-[10px] text-muted-foreground font-medium">
             {count} transaction{count !== 1 ? "s" : ""}
           </p>
         </div>
-        <span className="font-mono text-sm font-bold text-foreground">
+        <span className="font-mono text-xs font-bold text-foreground">
           {formatCurrency(total)}
         </span>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="h-7 w-7 rounded-md bg-white dark:bg-white/10 border-2 border-black dark:border-white flex items-center justify-center"
+          className="h-5 w-5 rounded flex items-center justify-center border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10"
         >
-          <ChevronRight className="h-4 w-4 text-black dark:text-white" />
+          <ChevronRight className="h-3 w-3 text-black dark:text-white" />
         </motion.div>
       </motion.button>
 
@@ -87,7 +87,7 @@ export const CategoryCard = memo(function CategoryCard({
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div className="border-t-2 border-black/10 dark:border-white/10 divide-y-2 divide-black/5 dark:divide-white/5">
+            <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/5 dark:divide-white/5">
               {transactions.map((txn, i) => {
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
@@ -101,14 +101,14 @@ export const CategoryCard = memo(function CategoryCard({
                     transition={{ delay: i * 0.03, duration: 0.2 }}
                     whileTap={{ backgroundColor: "var(--accent)" }}
                     onClick={() => onTransactionClick(txn)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-pastel-pink/30 text-left ${isExcluded
+                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-pastel-pink/30 text-left ${isExcluded
                       ? "opacity-40"
                       : ""
                       }`}
                   >
                     <div className="min-w-0 flex-1">
                       <p
-                        className={`text-sm font-bold truncate flex items-center gap-1.5 ${isExcluded ? "text-muted-foreground" : "text-foreground"
+                        className={`text-xs font-bold truncate flex items-center gap-1 ${isExcluded ? "text-muted-foreground" : "text-foreground"
                           }`}
                       >
                         {txn.merchant || "Unknown"}
@@ -117,12 +117,12 @@ export const CategoryCard = memo(function CategoryCard({
                             className="shrink-0 text-muted-foreground"
                             title={`${formatCurrency(txn.amount)} over ${txn.prorate_months} months`}
                           >
-                            <CalendarRange className="h-3 w-3" />
+                            <CalendarRange className="h-2.5 w-2.5" />
                           </span>
                         )}
                       </p>
                       <p
-                        className={`text-xs font-medium ${isExcluded
+                        className={`text-[10px] font-medium ${isExcluded
                           ? "text-muted-foreground/50"
                           : "text-muted-foreground"
                           }`}
@@ -136,7 +136,7 @@ export const CategoryCard = memo(function CategoryCard({
                       </p>
                     </div>
                     <span
-                      className={`font-mono text-sm font-bold ${isExcluded
+                      className={`font-mono text-xs font-bold ${isExcluded
                         ? "text-muted-foreground/50"
                         : "text-foreground"
                         }`}

@@ -21,19 +21,19 @@ export const TopTabs = memo(function TopTabs({
   rightContent,
 }: TopTabsProps) {
   return (
-    <div className="flex flex-col px-5 pt-3 pb-2 h-[88px]">
+    <div className="flex flex-col px-4 pt-2 pb-1.5 h-[72px]">
       {/* Header row */}
-      <div className="flex items-center gap-2 mb-3 h-7">
+      <div className="flex items-center gap-2 mb-2 h-6">
         {/* Back button */}
         <button
           onClick={onGoHome}
-          className="h-8 w-8 rounded-lg flex items-center justify-center border-2 border-black dark:border-white bg-pastel-pink transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
+          className="h-6 w-6 rounded-md flex items-center justify-center border-[1.5px] border-black dark:border-white bg-pastel-pink transition-all hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[1.5px_1.5px_0_#1a1a1a] dark:hover:shadow-[1.5px_1.5px_0_#FFFBF0]"
         >
-          <ChevronLeft className="h-4 w-4 text-black dark:text-white" />
+          <ChevronLeft className="h-3 w-3 text-black dark:text-white" />
         </button>
 
         {/* Title */}
-        <h1 className="text-lg font-bold text-foreground flex-1">
+        <h1 className="text-sm font-bold text-foreground flex-1">
           {title}
         </h1>
 
@@ -41,8 +41,8 @@ export const TopTabs = memo(function TopTabs({
         {rightContent}
       </div>
 
-      {/* Full-width tabs - neo-brutalism style */}
-      <div className="flex items-center gap-2">
+      {/* Full-width tabs - neo-brutalism style (compact) */}
+      <div className="flex items-center gap-1.5">
         {navItems.map(({ id, label }) => {
           const isActive = activeView === id;
 
@@ -51,9 +51,9 @@ export const TopTabs = memo(function TopTabs({
               key={id}
               onClick={() => onViewChange(id)}
               className={cn(
-                "flex-1 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border-2",
+                "flex-1 px-2 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide transition-all border-[1.5px]",
                 isActive
-                  ? "bg-pastel-purple border-black dark:border-white text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
+                  ? "bg-pastel-purple border-black dark:border-white text-black dark:text-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0]"
                   : "bg-transparent border-transparent text-muted-foreground hover:text-foreground"
               )}
             >

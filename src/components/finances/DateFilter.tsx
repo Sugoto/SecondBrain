@@ -143,10 +143,10 @@ export function DateFilter({
     >
       <PopoverTrigger asChild>
         <button
-          className="h-9 px-3 rounded-lg flex items-center gap-2 transition-all border-2 border-black dark:border-white bg-pastel-yellow text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none"
+          className="h-7 px-2 rounded-md flex items-center gap-1.5 transition-all border-[1.5px] border-black dark:border-white bg-pastel-yellow text-black dark:text-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none"
         >
-          <CalendarDays className="h-4 w-4" />
-          <span className="text-xs font-bold">{getFilterLabel()}</span>
+          <CalendarDays className="h-3 w-3" />
+          <span className="text-[10px] font-bold">{getFilterLabel()}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent 

@@ -138,28 +138,28 @@ export function SemesterView() {
   const getRowId = (assignment: Assignment) => `${assignment.code}-${assignment.name}`;
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Timetable - Neo-brutalism */}
-      <div className="rounded-xl overflow-hidden border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
+    <div className="p-3 space-y-3">
+      {/* Timetable - Neo-brutalism (compact) */}
+      <div className="rounded-lg overflow-hidden border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
         {/* Table Header */}
-        <div className="grid grid-cols-[1fr_52px_52px] gap-2 px-4 py-3 text-[10px] font-bold uppercase tracking-wider items-center border-b-2 border-black dark:border-white bg-pastel-blue">
+        <div className="grid grid-cols-[1fr_44px_44px] gap-1.5 px-2.5 py-2 text-[9px] font-bold uppercase tracking-wider items-center border-b-[1.5px] border-black dark:border-white bg-pastel-blue">
           <button
             onClick={() => handleSort("name")}
-            className="flex items-center gap-1 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
+            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
           >
             <span>Course</span>
             <SortIcon columnKey="name" />
           </button>
           <button
             onClick={() => handleSort("startDate")}
-            className="flex items-center gap-1 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
+            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
           >
             <span>Start</span>
             <SortIcon columnKey="startDate" />
           </button>
           <button
             onClick={() => handleSort("endDate")}
-            className="flex items-center gap-1 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
+            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
           >
             <span>End</span>
             <SortIcon columnKey="endDate" />
@@ -167,7 +167,7 @@ export function SemesterView() {
         </div>
 
         {/* Table Body */}
-        <div className="divide-y-2 divide-black/10 dark:divide-white/10">
+        <div className="divide-y divide-black/10 dark:divide-white/10">
           {sortedAssignments.map((assignment) => {
             const rowId = getRowId(assignment);
             const isCompleted = completedAssignments.has(rowId);
@@ -180,23 +180,23 @@ export function SemesterView() {
                 key={rowId}
                 onClick={() => toggleCompleted(rowId)}
                 className={cn(
-                  "grid grid-cols-[1fr_52px_52px] gap-2 px-4 py-2.5 text-xs transition-colors items-center cursor-pointer",
+                  "grid grid-cols-[1fr_44px_44px] gap-1.5 px-2.5 py-1.5 text-[10px] transition-colors items-center cursor-pointer",
                   "hover:bg-pastel-yellow/50 active:bg-pastel-yellow",
                   isActive && !isCompleted && "bg-pastel-green/30",
                   isDimmed && "opacity-50"
                 )}
               >
                 {/* Assignment Name with checkbox */}
-                <div className="min-w-0 flex items-center gap-2.5">
+                <div className="min-w-0 flex items-center gap-2">
                   <div
                     className={cn(
-                      "h-5 w-5 rounded-md flex items-center justify-center shrink-0 transition-colors border-2",
+                      "h-4 w-4 rounded flex items-center justify-center shrink-0 transition-colors border-[1.5px]",
                       isCompleted
                         ? "bg-black dark:bg-white border-black dark:border-white text-white dark:text-black"
                         : "border-black/30 dark:border-white/30 bg-white dark:bg-white/10"
                     )}
                   >
-                    {isCompleted && <Check className="h-3 w-3" />}
+                    {isCompleted && <Check className="h-2.5 w-2.5" />}
                   </div>
                   <span
                     className={cn(
@@ -211,7 +211,7 @@ export function SemesterView() {
 
                 {/* Start Date */}
                 <span className={cn(
-                  "text-[10px] font-mono font-medium",
+                  "text-[9px] font-mono font-medium",
                   isCompleted ? "text-muted-foreground" : "text-muted-foreground"
                 )}>
                   {assignment.startDate}
@@ -219,7 +219,7 @@ export function SemesterView() {
 
                 {/* End Date */}
                 <span className={cn(
-                  "text-[10px] font-mono font-medium",
+                  "text-[9px] font-mono font-medium",
                   isCompleted ? "text-muted-foreground" : "text-muted-foreground"
                 )}>
                   {assignment.endDate}

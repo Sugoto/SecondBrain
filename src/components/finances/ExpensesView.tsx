@@ -5,8 +5,8 @@ import { TransactionCard } from "./TransactionCard";
 import { Footer } from "./Footer";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-// Increased row height for neo-brutalism cards (card height + gap for shadow + spacing)
-const ROW_HEIGHT = 72;
+// Compact row height for neo-brutalism cards (card height + gap for shadow + spacing)
+const ROW_HEIGHT = 56;
 const OVERSCAN = 5;
 
 interface ExpensesViewProps {

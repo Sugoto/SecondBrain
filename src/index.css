@@ -162,12 +162,29 @@
   *::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Full screen PWA support - extend to edges including notch/dynamic island */
+  html {
+    /* Ensure background extends behind status bar */
+    background-color: var(--background);
+    /* Full height including safe areas */
+    min-height: 100%;
+    min-height: 100dvh;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Full height for PWA */
+    min-height: 100%;
+    min-height: 100dvh;
+    /* Safe area padding - content won't go under notch but bg extends */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 
   /* Headings with TASA Explorer */
@@ -200,7 +217,31 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  /* Safe area insets for notch/dynamic island support */
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
   .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-area-pl {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .safe-area-pr {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .safe-area-inset {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .safe-area-inset-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .safe-area-inset-y {
+    padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
