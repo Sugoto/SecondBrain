@@ -155,12 +155,10 @@ const AreaChart = memo(function AreaChart({
             },
           },
           emphasis: {
-            scale: 1.8,
+            scale: 1.5,
             itemStyle: {
-              shadowBlur: 0,
-              shadowOffsetX: 3,
-              shadowOffsetY: 3,
-              shadowColor: borderColor,
+              // Just increase border on hover, no shadow offset
+              borderWidth: 3,
             },
           },
           animationDuration: 600,

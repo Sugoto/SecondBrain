@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -16,7 +15,6 @@ import {
   isSameMonth,
   subMonths,
 } from "date-fns";
-import { useTheme } from "@/hooks/useTheme";
 import type { TimeFilter, ChartMode, ActiveView, DateRange } from "./types";
 
 interface DateFilterProps {
@@ -58,8 +56,6 @@ export function DateFilter({
   onChartModeChange,
   onCustomDateRangeChange,
 }: DateFilterProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [filterOpen, setFilterOpen] = useState(false);
   const [pendingRange, setPendingRange] = useState<{ from?: Date; to?: Date }>({});
 
@@ -135,18 +131,6 @@ export function DateFilter({
 
   const isTrendsView = activeView === "trends";
 
-  const buttonStyle = {
-    background: isDark
-      ? "rgba(39, 39, 42, 0.8)"
-      : "rgba(250, 250, 250, 0.9)",
-    border: isDark
-      ? "1px solid rgba(63, 63, 70, 0.5)"
-      : "1px solid rgba(228, 228, 231, 0.8)",
-    boxShadow: isDark
-      ? "0 2px 8px rgba(0, 0, 0, 0.2)"
-      : "0 2px 8px rgba(0, 0, 0, 0.05)",
-  };
-
   return (
     <Popover
       open={filterOpen}
@@ -159,19 +143,21 @@ export function DateFilter({
     >
       <PopoverTrigger asChild>
         <button
-          className="h-8 px-2.5 rounded-lg flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
-          style={buttonStyle}
+          className="h-9 px-3 rounded-lg flex items-center gap-2 transition-all border-2 border-black dark:border-white bg-pastel-yellow text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none"
         >
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs font-medium">{getFilterLabel()}</span>
+          <CalendarDays className="h-4 w-4" />
+          <span className="text-xs font-bold">{getFilterLabel()}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="end">
+      <PopoverContent 
+        className="w-auto p-0 rounded-xl border-2 border-black dark:border-white bg-background shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]" 
+        align="end"
+      >
         {isTrendsView ? (
-          // Trends view: Daily/Monthly toggle
-          <div className="p-3">
-            <p className="text-sm font-medium mb-3">Chart View</p>
-            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+          // Trends view: Daily/Monthly toggle - Neo-brutalism
+          <div className="p-4">
+            <p className="text-sm font-bold mb-3 text-foreground">Chart View</p>
+            <div className="flex items-center gap-2">
               {(["daily", "monthly"] as ChartMode[]).map((mode) => (
                 <button
                   key={mode}
@@ -179,9 +165,9 @@ export function DateFilter({
                     onChartModeChange(mode);
                     setFilterOpen(false);
                   }}
-                  className={`h-8 flex-1 text-sm rounded-md transition-all duration-200 px-4 ${chartMode === mode
-                      ? "bg-background text-foreground font-medium shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                  className={`h-9 flex-1 text-sm font-bold rounded-lg transition-all duration-100 px-4 border-2 ${chartMode === mode
+                      ? "bg-pastel-purple border-black dark:border-white text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
+                      : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 text-muted-foreground hover:border-black dark:hover:border-white hover:text-foreground"
                     }`}
                 >
                   {mode === "daily" ? "Daily" : "Monthly"}
@@ -190,12 +176,12 @@ export function DateFilter({
             </div>
           </div>
         ) : (
-          // Unified time filter view
-          <div className="p-3 space-y-3">
+          // Unified time filter view - Neo-brutalism
+          <div className="p-4 space-y-4">
             {/* Quick filters */}
             <div>
-              <p className="text-xs text-muted-foreground mb-2">Quick select</p>
-              <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Quick select</p>
+              <div className="flex items-center gap-2">
                 {(["today", "week", "month"] as const).map((filter) => (
                   <button
                     key={filter}
@@ -203,9 +189,9 @@ export function DateFilter({
                       onTimeFilterChange(filter);
                       setFilterOpen(false);
                     }}
-                    className={`h-7 flex-1 text-xs rounded-md transition-all duration-200 ${timeFilter === filter
-                        ? "bg-background text-foreground font-medium shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
+                    className={`h-8 flex-1 text-xs font-bold rounded-lg transition-all duration-100 border-2 ${timeFilter === filter
+                        ? "bg-pastel-green border-black dark:border-white text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
+                        : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 text-muted-foreground hover:border-black dark:hover:border-white hover:text-foreground"
                       }`}
                   >
                     {TIME_LABELS[filter]}
@@ -216,25 +202,23 @@ export function DateFilter({
 
             {/* Month buttons */}
             <div>
-              <p className="text-xs text-muted-foreground mb-2">Select month</p>
-              <div className="grid grid-cols-3 gap-1.5">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Select month</p>
+              <div className="grid grid-cols-3 gap-2">
                 {recentMonths.map((month) => (
-                  <Button
+                  <button
                     key={month.label}
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
                     onClick={() => handleMonthSelect(month.date)}
+                    className="h-8 text-xs font-bold rounded-lg border-2 border-black/30 dark:border-white/30 bg-white dark:bg-white/10 text-foreground transition-all hover:border-black dark:hover:border-white hover:bg-pastel-blue hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
                   >
                     {month.shortLabel}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
 
             {/* Calendar for custom range */}
-            <div className="border-t border-border pt-3">
-              <p className="text-xs text-muted-foreground mb-2">
+            <div className="border-t-2 border-black/10 dark:border-white/10 pt-4">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
                 {pendingRange.from
                   ? `From ${format(pendingRange.from, "d MMM")} — pick end`
                   : "Or pick a date range"}
@@ -247,17 +231,15 @@ export function DateFilter({
                 fromYear={2020}
                 toYear={new Date().getFullYear()}
                 defaultMonth={customDateRange?.from || new Date()}
-                className="rounded-md border"
+                className="rounded-xl border-2 border-black dark:border-white"
               />
               {pendingRange.from && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs mt-2"
+                <button
                   onClick={() => setPendingRange({})}
+                  className="w-full h-8 mt-3 text-xs font-bold rounded-lg border-2 border-black/30 dark:border-white/30 bg-white dark:bg-white/10 text-muted-foreground transition-all hover:border-black dark:hover:border-white hover:bg-pastel-pink hover:text-foreground"
                 >
                   Clear selection
-                </Button>
+                </button>
               )}
             </div>
           </div>

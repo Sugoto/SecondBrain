@@ -101,10 +101,10 @@ function SegmentedBudgetBar({
 
   return (
     <div className="sticky top-0 z-30 px-5 md:px-6 pt-2">
-      <div className="max-w-6xl mx-auto px-3 py-3 rounded-xl border-2 border-black dark:border-white bg-pastel-green shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
-        <div className="flex items-center gap-2">
+      <div className="max-w-6xl mx-auto px-4 py-3 rounded-xl border-2 border-black dark:border-white bg-pastel-green shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
+        <div className="flex items-center gap-3">
           {/* Progress bars side by side - tappable to filter */}
-          <div className="flex-1 grid grid-cols-2 gap-3">
+          <div className="flex-1 grid grid-cols-2 gap-4">
             {/* Needs progress bar */}
             <button
               onClick={(e) => {
@@ -115,41 +115,43 @@ function SegmentedBudgetBar({
                 );
               }}
               disabled={isEditing}
-              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${isEditing
+              className={`w-full space-y-1.5 transition-all duration-200 rounded-lg p-2 -m-2 ${isEditing
                 ? ""
                 : budgetTypeFilter === "want"
                   ? "opacity-40"
-                  : "hover:opacity-80"
+                  : budgetTypeFilter === "need"
+                    ? "bg-white/40 dark:bg-black/20"
+                    : "hover:bg-white/30 dark:hover:bg-black/10"
                 }`}
             >
-              <div className="flex items-center justify-between text-[10px]">
+              <div className="flex items-center justify-between">
                 <span
-                  className={`font-medium ${budgetTypeFilter === "need" ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"}`}
+                  className={`text-xs font-bold uppercase tracking-wide ${budgetTypeFilter === "need" ? "text-black dark:text-white" : "text-black/70 dark:text-white/70"}`}
                 >
                   Needs
                 </span>
                 {isEditing ? (
-                  <div className="flex items-center gap-0.5">
-                    <span className="font-mono font-medium text-black dark:text-white">
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs font-bold text-black dark:text-white">
                       {formatCurrency(budgetInfo.needsSpent)}
                     </span>
-                    <span className="text-black/50 dark:text-white/50">/</span>
+                    <span className="text-black/50 dark:text-white/50 font-bold">/</span>
                     <Input
                       type="number"
                       value={editingNeeds}
                       onChange={(e) => setEditingNeeds(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-14 text-[9px] font-mono text-right px-1"
+                      className="h-5 w-16 text-[10px] font-mono font-bold text-right px-1.5 border-2 border-black dark:border-white rounded-md"
                       disabled={saving}
                     />
                   </div>
                 ) : (
-                  <span className="font-mono font-medium text-black dark:text-white">
+                  <span className="font-mono text-xs font-bold text-black dark:text-white">
                     {formatCurrency(budgetInfo.needsSpent)}
                   </span>
                 )}
               </div>
-              <div className="relative h-2 rounded-full overflow-hidden bg-white/50 dark:bg-black/20 border border-black/20 dark:border-white/20">
+              <div className="relative h-3 rounded-md overflow-hidden bg-white dark:bg-black/30 border-2 border-black dark:border-white">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(needsPercent, 100)}%` }}
@@ -158,7 +160,7 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.1,
                   }}
-                  className="h-full bg-black dark:bg-white rounded-full"
+                  className="h-full bg-black dark:bg-white"
                 />
               </div>
             </button>
@@ -173,41 +175,43 @@ function SegmentedBudgetBar({
                 );
               }}
               disabled={isEditing}
-              className={`w-full space-y-0.5 transition-all duration-200 rounded-md p-1 -m-1 ${isEditing
+              className={`w-full space-y-1.5 transition-all duration-200 rounded-lg p-2 -m-2 ${isEditing
                 ? ""
                 : budgetTypeFilter === "need"
                   ? "opacity-40"
-                  : "hover:opacity-80"
+                  : budgetTypeFilter === "want"
+                    ? "bg-white/40 dark:bg-black/20"
+                    : "hover:bg-white/30 dark:hover:bg-black/10"
                 }`}
             >
-              <div className="flex items-center justify-between text-[10px]">
+              <div className="flex items-center justify-between">
                 <span
-                  className={`font-medium ${budgetTypeFilter === "want" ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"}`}
+                  className={`text-xs font-bold uppercase tracking-wide ${budgetTypeFilter === "want" ? "text-black dark:text-white" : "text-black/70 dark:text-white/70"}`}
                 >
                   Wants
                 </span>
                 {isEditing ? (
-                  <div className="flex items-center gap-0.5">
-                    <span className="font-mono font-medium text-black dark:text-white">
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs font-bold text-black dark:text-white">
                       {formatCurrency(budgetInfo.wantsSpent)}
                     </span>
-                    <span className="text-black/50 dark:text-white/50">/</span>
+                    <span className="text-black/50 dark:text-white/50 font-bold">/</span>
                     <Input
                       type="number"
                       value={editingWants}
                       onChange={(e) => setEditingWants(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-14 text-[9px] font-mono text-right px-1"
+                      className="h-5 w-16 text-[10px] font-mono font-bold text-right px-1.5 border-2 border-black dark:border-white rounded-md"
                       disabled={saving}
                     />
                   </div>
                 ) : (
-                  <span className="font-mono font-medium text-black dark:text-white">
+                  <span className="font-mono text-xs font-bold text-black dark:text-white">
                     {formatCurrency(budgetInfo.wantsSpent)}
                   </span>
                 )}
               </div>
-              <div className="relative h-2 rounded-full overflow-hidden bg-white/50 dark:bg-black/20 border border-black/20 dark:border-white/20">
+              <div className="relative h-3 rounded-md overflow-hidden bg-white dark:bg-black/30 border-2 border-black dark:border-white">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
@@ -216,7 +220,7 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.2,
                   }}
-                  className="h-full bg-black dark:bg-white rounded-full"
+                  className="h-full bg-black dark:bg-white"
                 />
               </div>
             </button>
@@ -224,39 +228,39 @@ function SegmentedBudgetBar({
         </div>
 
         {/* Total Expenses row with edit button */}
-        <div className="flex items-center justify-between pt-1.5 text-[10px]">
-          <div className="flex items-center gap-1.5">
-            <span className="text-black/60 dark:text-white/60">Total</span>
-            <span className="font-mono font-bold text-black dark:text-white">
+        <div className="flex items-center justify-between pt-2.5 mt-2 border-t-2 border-black/20 dark:border-white/20">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-black/70 dark:text-white/70">Total</span>
+            <span className="font-mono text-sm font-bold text-black dark:text-white">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
           {isEditing ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
                 onClick={saveEditing}
                 disabled={saving}
-                className="p-1.5 rounded-md bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 text-black dark:text-white transition-colors hover:bg-black/5 dark:hover:bg-white/20"
+                className="h-7 w-7 rounded-lg flex items-center justify-center bg-pastel-blue border-2 border-black dark:border-white text-black dark:text-white transition-all shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50"
                 title="Save"
               >
-                <Check className="h-3 w-3" />
+                <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
               </button>
               <button
                 onClick={cancelEditing}
                 disabled={saving}
-                className="p-1.5 rounded-md bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 transition-colors hover:bg-black/5 dark:hover:bg-white/20"
+                className="h-7 w-7 rounded-lg flex items-center justify-center bg-pastel-pink border-2 border-black dark:border-white text-black dark:text-white transition-all shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50"
                 title="Cancel"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" strokeWidth={2.5} />
               </button>
             </div>
           ) : (
             <button
               onClick={startEditing}
-              className="p-1.5 rounded-md bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors"
+              className="h-7 w-7 rounded-lg flex items-center justify-center bg-white dark:bg-white/10 border-2 border-black dark:border-white text-black dark:text-white transition-all shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] hover:bg-pastel-yellow active:translate-x-0 active:translate-y-0 active:shadow-none"
               title="Edit Budget"
             >
-              <Pencil className="h-3 w-3" />
+              <Pencil className="h-3.5 w-3.5" strokeWidth={2.5} />
             </button>
           )}
         </div>

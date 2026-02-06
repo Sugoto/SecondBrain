@@ -118,13 +118,11 @@ export const LabeledPieChart = memo(function LabeledPieChart({
           },
           emphasis: {
             itemStyle: {
-              shadowBlur: 0,
-              shadowOffsetX: 4,
-              shadowOffsetY: 4,
-              shadowColor: borderColor,
+              // Just increase border width on hover, no shadow offset
+              borderWidth: 4,
             },
             scale: true,
-            scaleSize: 8,
+            scaleSize: 6,
           },
           data: data.map((item, index) => ({
             name: item.name,
