@@ -491,11 +491,20 @@ export function FinanceTracker({
 
   // Total expenses for current month only - full amount for purchases made this month
   // (excludes past prorations from previous months, includes future prorations from this month)
+  // This is independent of budgetTypeFilter - always shows current month total
   const totalExpenses = useMemo(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
-    return filteredTransactions
+    // Filter by time range without proration spreading, independent of budgetTypeFilter
+    const monthTransactions = filterByTimeRange(
+      transactions,
+      timeFilter,
+      customDateRange,
+      { disableProrationSpreading: true }
+    );
+    
+    return monthTransactions
       .filter((t) => {
         if (t.excluded_from_budget) return false;
         // Only include transactions actually made this month
@@ -503,7 +512,7 @@ export function FinanceTracker({
         return txnDate >= startOfMonth;
       })
       .reduce((sum, t) => sum + t.amount, 0); // Full amount, not prorated
-  }, [filteredTransactions]);
+  }, [transactions, timeFilter, customDateRange]);
 
   // Handler to update budget values
   const handleUpdateBudgets = async (
