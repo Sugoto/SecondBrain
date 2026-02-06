@@ -7,7 +7,19 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
     <textarea
       data-slot="textarea"
       className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        // Neo-brutalism: thick borders, sharp corners, bold styling
+        "placeholder:text-muted-foreground",
+        "flex field-sizing-content min-h-20 w-full rounded-lg",
+        "border-2 border-black dark:border-white bg-white dark:bg-black/20",
+        "px-3 py-2 text-base font-medium",
+        "shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]",
+        "transition-all outline-none",
+        "md:text-sm",
+        // Focus state - shift shadow
+        "focus-visible:translate-x-[-1px] focus-visible:translate-y-[-1px] focus-visible:shadow-[3px_3px_0_#1a1a1a] dark:focus-visible:shadow-[3px_3px_0_#FFFBF0]",
+        // Invalid state
+        "aria-invalid:border-destructive aria-invalid:shadow-[2px_2px_0_hsl(var(--destructive))]",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
