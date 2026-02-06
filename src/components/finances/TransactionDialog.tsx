@@ -295,11 +295,67 @@ export function TransactionDialog({
             const isWant = effectiveBudgetType === "want";
             const autoBudgetType = CATEGORY_BUDGET_TYPE[transaction.category ?? ""] ?? "want";
 
+            // Split categories into two rows
+            const topRowCategories = EXPENSE_CATEGORIES.slice(0, 5); // Food, Self Care, Travel, Entertainment, Shopping
+            const bottomRowCategories = EXPENSE_CATEGORIES.slice(5); // Bills, Investments
+
             return (
               <div className="space-y-2">
-                {/* Category buttons grid */}
-                <div className="grid grid-cols-4 gap-1.5">
-                  {EXPENSE_CATEGORIES.map(renderCategoryButton)}
+                {/* Category buttons - two rows */}
+                <div className="space-y-1.5">
+                  {/* Top row: 5 categories */}
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {topRowCategories.map(renderCategoryButton)}
+                  </div>
+                  {/* Bottom row: 2 categories centered side by side */}
+                  <div className="flex justify-center gap-1.5">
+                    {bottomRowCategories.map((cat) => {
+                      const IconComp = cat.icon;
+                      const isSelected = transaction.category === cat.name;
+                      const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
+                      const categoryPastelColor = CATEGORY_PASTEL_COLORS[cat.name] || "bg-pastel-blue";
+
+                      return (
+                        <button
+                          key={cat.name}
+                          onClick={() => {
+                            if (saving) return;
+                            const newCategory = isSelected ? null : cat.name;
+                            const currentIsExcluded = EXCLUDED_CATEGORIES.includes(
+                              transaction.category ?? ""
+                            );
+                            let newExcludedFromBudget =
+                              transaction.excluded_from_budget;
+                            if (isExcludedCategory && !isSelected) {
+                              newExcludedFromBudget = true;
+                            } else if (
+                              currentIsExcluded &&
+                              (isSelected || !isExcludedCategory)
+                            ) {
+                              newExcludedFromBudget = false;
+                            }
+                            onChange({
+                              ...transaction,
+                              category: newCategory,
+                              excluded_from_budget: newExcludedFromBudget,
+                              budget_type: null,
+                            });
+                          }}
+                          disabled={saving}
+                          className={`h-10 w-16 rounded-lg flex items-center justify-center border-2 transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
+                            } ${isSelected
+                              ? `${categoryPastelColor} border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]`
+                              : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 hover:border-black dark:hover:border-white"
+                            }`}
+                        >
+                          <IconComp
+                            className={`h-4 w-4 ${isSelected ? "text-black dark:text-white" : "text-muted-foreground"
+                              }`}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Need/Want toggle - fades in when category selected */}

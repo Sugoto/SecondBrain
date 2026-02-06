@@ -81,15 +81,13 @@ export const CATEGORY_PASTEL_COLORS: Record<string, string> = {
 const CATEGORY_COLOR = "#737373"; // Neutral gray for all categories
 
 export const EXPENSE_CATEGORIES: { name: string; icon: LucideIcon }[] = [
-  // Needs
+  { name: "Food", icon: UtensilsCrossed },
   { name: "Self Care", icon: HeartPulse },
+  { name: "Travel", icon: Car },
+  { name: "Entertainment", icon: Clapperboard },
+  { name: "Shopping", icon: ShoppingBag },
   { name: "Bills", icon: Receipt },
   { name: "Investments", icon: TrendingUp },
-  // Wants
-  { name: "Food", icon: UtensilsCrossed },
-  { name: "Shopping", icon: ShoppingBag },
-  { name: "Entertainment", icon: Clapperboard },
-  { name: "Travel", icon: Car },
 ];
 
 // Categories that should auto-enable "exclude from budget"
