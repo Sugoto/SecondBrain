@@ -1,6 +1,5 @@
 import { useMemo, memo } from "react";
 import type { Transaction } from "@/lib/supabase";
-import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
@@ -300,17 +299,17 @@ export const TrendsView = memo(function TrendsView({
 
   if (!hasCategories && !hasExpenses) {
     return (
-      <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
+      <div className="max-w-6xl mx-auto p-5 md:p-6 pt-4 space-y-5">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">
+          <div className="p-8 text-center rounded-xl border-2 border-dashed border-black/30 dark:border-white/30 bg-card">
+            <p className="text-sm font-medium text-muted-foreground">
               No transactions for this period
             </p>
-          </Card>
+          </div>
         </motion.div>
         <Footer />
       </div>
@@ -318,22 +317,22 @@ export const TrendsView = memo(function TrendsView({
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6 pt-4 space-y-4">
-      {/* Spending Area Chart - Pure SVG */}
+    <div className="max-w-6xl mx-auto p-5 md:p-6 pt-4 space-y-5">
+      {/* Spending Area Chart - Neo-brutalism */}
       {hasExpenses && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <Card className="p-4 overflow-hidden">
-            <h3 className="text-sm font-medium mb-3">
+          <div className="p-4 overflow-hidden rounded-xl border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
+            <h3 className="text-sm font-bold mb-3 text-foreground">
               {chartMode === "daily" ? "Last 14 Days" : "Last 6 Months"}
             </h3>
             <div className="h-48">
               <AreaChart data={chartData} theme={theme} />
             </div>
-          </Card>
+          </div>
         </motion.div>
       )}
 
@@ -344,10 +343,10 @@ export const TrendsView = memo(function TrendsView({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="p-4 space-y-4">
+          <div className="p-4 space-y-4 rounded-xl border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
             {/* Needs Pie Chart */}
             <div>
-              <h3 className="text-xs font-medium text-center mb-1 text-muted-foreground">
+              <h3 className="text-xs font-bold text-center mb-1 text-muted-foreground uppercase tracking-wide">
                 Needs
               </h3>
               <div className="h-48 flex items-center justify-center">
@@ -359,16 +358,16 @@ export const TrendsView = memo(function TrendsView({
                     size={180}
                   />
                 ) : (
-                  <p className="text-xs text-muted-foreground">No data</p>
+                  <p className="text-sm font-medium text-muted-foreground">No data</p>
                 )}
               </div>
             </div>
 
-            <div className="border-t border-border" />
+            <div className="border-t-2 border-black/10 dark:border-white/10" />
 
             {/* Wants Pie Chart */}
             <div>
-              <h3 className="text-xs font-medium text-center mb-1 text-muted-foreground">
+              <h3 className="text-xs font-bold text-center mb-1 text-muted-foreground uppercase tracking-wide">
                 Wants
               </h3>
               <div className="h-48 flex items-center justify-center">
@@ -380,11 +379,11 @@ export const TrendsView = memo(function TrendsView({
                     size={180}
                   />
                 ) : (
-                  <p className="text-xs text-muted-foreground">No data</p>
+                  <p className="text-sm font-medium text-muted-foreground">No data</p>
                 )}
               </div>
             </div>
-          </Card>
+          </div>
         </motion.div>
       )}
 
@@ -392,8 +391,8 @@ export const TrendsView = memo(function TrendsView({
       {EXPENSE_CATEGORIES.filter(
         (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
       ).length > 0 && (
-          <div className="space-y-1.5">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide px-1">
               Needs
             </h3>
             {EXPENSE_CATEGORIES.filter(
@@ -432,8 +431,8 @@ export const TrendsView = memo(function TrendsView({
       {EXPENSE_CATEGORIES.filter(
         (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
       ).length > 0 && (
-          <div className="space-y-1.5">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide px-1">
               Wants
             </h3>
             {EXPENSE_CATEGORIES.filter(
@@ -470,7 +469,7 @@ export const TrendsView = memo(function TrendsView({
 
       {/* Uncategorized - Needs */}
       {categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-3">
           <CategoryCard
             name="Uncategorized (Needs)"
             icon={null}
@@ -491,7 +490,7 @@ export const TrendsView = memo(function TrendsView({
 
       {/* Uncategorized - Wants */}
       {categoryTotalsByBudgetType.wants["Uncategorized"]?.count > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-3">
           <CategoryCard
             name="Uncategorized (Wants)"
             icon={null}

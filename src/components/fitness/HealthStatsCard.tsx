@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -83,22 +82,22 @@ export function HealthStatsEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-sm max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border-2 border-black dark:border-white shadow-[6px_6px_0_#1a1a1a] dark:shadow-[6px_6px_0_#FFFBF0]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-center gap-2 text-sm">
+        <DialogHeader className="pb-3 border-b-2 border-black dark:border-white -mx-6 -mt-6 px-6 pt-6 mb-4 bg-pastel-purple rounded-t-2xl">
+          <DialogTitle className="flex items-center gap-2 text-lg font-bold text-black dark:text-white">
             Edit Profile
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5">
           {/* All fields in one compact row */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-3">
             {/* Height */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-1 h-4">
-                <Ruler className="h-3 w-3" /> cm
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
+                <Ruler className="h-3.5 w-3.5" /> cm
               </label>
               <Input
                 type="number"
@@ -111,15 +110,15 @@ export function HealthStatsEditDialog({
                       : null,
                   }))
                 }
-                className="font-mono h-9 text-xs text-center"
+                className="font-mono h-10 text-sm text-center border-2 border-black dark:border-white rounded-lg font-bold"
                 placeholder="175"
               />
             </div>
 
             {/* Weight */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-1 h-4">
-                <Scale className="h-3 w-3" /> kg
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
+                <Scale className="h-3.5 w-3.5" /> kg
               </label>
               <Input
                 type="number"
@@ -132,15 +131,15 @@ export function HealthStatsEditDialog({
                       : null,
                   }))
                 }
-                className="font-mono h-9 text-xs text-center"
+                className="font-mono h-10 text-sm text-center border-2 border-black dark:border-white rounded-lg font-bold"
                 placeholder="70"
               />
             </div>
 
             {/* Age */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-1 h-4">
-                <Calendar className="h-3 w-3" /> yrs
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
+                <Calendar className="h-3.5 w-3.5" /> yrs
               </label>
               <Input
                 type="number"
@@ -151,15 +150,15 @@ export function HealthStatsEditDialog({
                     age: e.target.value ? parseFloat(e.target.value) : null,
                   }))
                 }
-                className="font-mono h-9 text-xs text-center"
+                className="font-mono h-10 text-sm text-center border-2 border-black dark:border-white rounded-lg font-bold"
                 placeholder="25"
               />
             </div>
 
             {/* Gender Toggle */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-1 h-4">
-                <User className="h-3 w-3" /> Sex
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground flex items-center gap-1 uppercase">
+                <User className="h-3.5 w-3.5" /> Sex
               </label>
               <button
                 type="button"
@@ -169,9 +168,9 @@ export function HealthStatsEditDialog({
                     gender: prev.gender === "male" ? "female" : "male",
                   }))
                 }
-                className="h-9 w-full rounded-md border border-border bg-muted flex items-center justify-center transition-colors hover:bg-accent"
+                className="h-10 w-full rounded-lg border-2 border-black dark:border-white bg-pastel-pink flex items-center justify-center transition-all hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
               >
-                <span className="text-sm font-medium text-foreground">
+                <span className="text-lg font-bold text-black dark:text-white">
                   {values.gender === "female" ? "♀" : "♂"}
                 </span>
               </button>
@@ -179,13 +178,13 @@ export function HealthStatsEditDialog({
           </div>
 
           {/* Save Button */}
-          <Button
+          <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-9 text-xs"
+            className="w-full h-12 rounded-xl text-sm font-bold transition-all border-2 border-black dark:border-white bg-pastel-green text-black shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_#1a1a1a] dark:hover:shadow-[4px_4px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

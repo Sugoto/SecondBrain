@@ -100,8 +100,8 @@ function SegmentedBudgetBar({
   };
 
   return (
-    <div className="sticky top-0 z-30 px-4 md:px-6 pt-2">
-      <div className="max-w-6xl mx-auto px-3 py-2 rounded-lg border border-border bg-card">
+    <div className="sticky top-0 z-30 px-5 md:px-6 pt-2">
+      <div className="max-w-6xl mx-auto px-3 py-3 rounded-xl border-2 border-black dark:border-white bg-pastel-green shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
         <div className="flex items-center gap-2">
           {/* Progress bars side by side - tappable to filter */}
           <div className="flex-1 grid grid-cols-2 gap-3">
@@ -124,16 +124,16 @@ function SegmentedBudgetBar({
             >
               <div className="flex items-center justify-between text-[10px]">
                 <span
-                  className={`font-medium ${budgetTypeFilter === "need" ? "text-foreground" : "text-muted-foreground"}`}
+                  className={`font-medium ${budgetTypeFilter === "need" ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"}`}
                 >
                   Needs
                 </span>
                 {isEditing ? (
                   <div className="flex items-center gap-0.5">
-                    <span className="font-mono font-medium text-foreground">
+                    <span className="font-mono font-medium text-black dark:text-white">
                       {formatCurrency(budgetInfo.needsSpent)}
                     </span>
-                    <span className="text-muted-foreground/50">/</span>
+                    <span className="text-black/50 dark:text-white/50">/</span>
                     <Input
                       type="number"
                       value={editingNeeds}
@@ -144,12 +144,12 @@ function SegmentedBudgetBar({
                     />
                   </div>
                 ) : (
-                  <span className="font-mono font-medium text-foreground">
+                  <span className="font-mono font-medium text-black dark:text-white">
                     {formatCurrency(budgetInfo.needsSpent)}
                   </span>
                 )}
               </div>
-              <div className="relative h-1.5 rounded-full overflow-hidden bg-muted">
+              <div className="relative h-2 rounded-full overflow-hidden bg-white/50 dark:bg-black/20 border border-black/20 dark:border-white/20">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(needsPercent, 100)}%` }}
@@ -158,7 +158,7 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.1,
                   }}
-                  className="h-full bg-foreground rounded-full"
+                  className="h-full bg-black dark:bg-white rounded-full"
                 />
               </div>
             </button>
@@ -182,16 +182,16 @@ function SegmentedBudgetBar({
             >
               <div className="flex items-center justify-between text-[10px]">
                 <span
-                  className={`font-medium ${budgetTypeFilter === "want" ? "text-foreground" : "text-muted-foreground"}`}
+                  className={`font-medium ${budgetTypeFilter === "want" ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"}`}
                 >
                   Wants
                 </span>
                 {isEditing ? (
                   <div className="flex items-center gap-0.5">
-                    <span className="font-mono font-medium text-foreground">
+                    <span className="font-mono font-medium text-black dark:text-white">
                       {formatCurrency(budgetInfo.wantsSpent)}
                     </span>
-                    <span className="text-muted-foreground/50">/</span>
+                    <span className="text-black/50 dark:text-white/50">/</span>
                     <Input
                       type="number"
                       value={editingWants}
@@ -202,12 +202,12 @@ function SegmentedBudgetBar({
                     />
                   </div>
                 ) : (
-                  <span className="font-mono font-medium text-foreground">
+                  <span className="font-mono font-medium text-black dark:text-white">
                     {formatCurrency(budgetInfo.wantsSpent)}
                   </span>
                 )}
               </div>
-              <div className="relative h-1.5 rounded-full overflow-hidden bg-muted">
+              <div className="relative h-2 rounded-full overflow-hidden bg-white/50 dark:bg-black/20 border border-black/20 dark:border-white/20">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
@@ -216,7 +216,7 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.2,
                   }}
-                  className="h-full bg-foreground rounded-full"
+                  className="h-full bg-black dark:bg-white rounded-full"
                 />
               </div>
             </button>
@@ -224,19 +224,19 @@ function SegmentedBudgetBar({
         </div>
 
         {/* Total Expenses row with edit button */}
-        <div className="flex items-center justify-between pt-1 text-[10px]">
+        <div className="flex items-center justify-between pt-1.5 text-[10px]">
           <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground">Total</span>
-            <span className="font-mono font-semibold text-foreground">
+            <span className="text-black/60 dark:text-white/60">Total</span>
+            <span className="font-mono font-bold text-black dark:text-white">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
           {isEditing ? (
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
               <button
                 onClick={saveEditing}
                 disabled={saving}
-                className="p-1 rounded hover:bg-accent text-foreground transition-colors"
+                className="p-1.5 rounded-md bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 text-black dark:text-white transition-colors hover:bg-black/5 dark:hover:bg-white/20"
                 title="Save"
               >
                 <Check className="h-3 w-3" />
@@ -244,7 +244,7 @@ function SegmentedBudgetBar({
               <button
                 onClick={cancelEditing}
                 disabled={saving}
-                className="p-1 rounded hover:bg-accent text-muted-foreground transition-colors"
+                className="p-1.5 rounded-md bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 transition-colors hover:bg-black/5 dark:hover:bg-white/20"
                 title="Cancel"
               >
                 <X className="h-3 w-3" />
@@ -253,7 +253,7 @@ function SegmentedBudgetBar({
           ) : (
             <button
               onClick={startEditing}
-              className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1.5 rounded-md bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors"
               title="Edit Budget"
             >
               <Pencil className="h-3 w-3" />
@@ -600,7 +600,7 @@ export function FinanceTracker({
         onDelete={deleteTransaction}
       />
 
-      {/* Mobile FAB */}
+      {/* Mobile FAB - Neo-brutalism style */}
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
@@ -608,12 +608,12 @@ export function FinanceTracker({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.95 }}
             onClick={openAddExpense}
-            className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-12 w-12 rounded-full bg-foreground text-background shadow-lg"
+            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-xl bg-pastel-pink border-2 border-black dark:border-white shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]"
             aria-label="Add expense"
           >
-            <Plus className="h-5 w-5" strokeWidth={2.5} />
+            <Plus className="h-6 w-6 text-black dark:text-white" strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>

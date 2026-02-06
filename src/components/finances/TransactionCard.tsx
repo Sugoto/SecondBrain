@@ -9,6 +9,7 @@ import {
   formatTime,
   formatCurrencyCompact,
   EXPENSE_CATEGORIES,
+  CATEGORY_PASTEL_COLORS,
   getTransactionBudgetType,
 } from "./constants";
 
@@ -25,6 +26,7 @@ export const TransactionCard = memo(function TransactionCard({
 }: TransactionCardProps) {
   const cat = EXPENSE_CATEGORIES.find((c) => c.name === txn.category);
   const CategoryIcon = cat?.icon;
+  const categoryPastelColor = CATEGORY_PASTEL_COLORS[txn.category ?? ""] || "bg-pastel-blue";
 
   const isExcluded = txn.excluded_from_budget;
 
@@ -47,29 +49,26 @@ export const TransactionCard = memo(function TransactionCard({
         delay: Math.min(index * 0.03, 0.3),
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      whileHover={{
-        y: isExcluded ? 0 : -1,
-      }}
       whileTap={{ scale: isExcluded ? 0.995 : 0.98 }}
       onClick={handleClick}
-      className={`group w-full flex items-center gap-2 rounded-lg px-3 py-2 border border-border text-left cursor-pointer relative overflow-hidden bg-card transition-colors ${isExcluded
-        ? "border-dashed opacity-40"
-        : "hover:bg-accent/50"
+      className={`group w-full flex items-center gap-3 rounded-xl px-3 py-2.5 border-2 text-left cursor-pointer relative overflow-hidden transition-all ${isExcluded
+        ? "border-dashed border-black/30 dark:border-white/30 opacity-50 bg-muted"
+        : "border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0]"
         }`}
     >
       {/* Category Icon */}
       {CategoryIcon && (
         <div
-          className={`shrink-0 w-8 h-8 rounded-md bg-muted flex items-center justify-center relative ${isExcluded ? "opacity-60" : ""
+          className={`shrink-0 w-9 h-9 rounded-lg ${categoryPastelColor} border-2 border-black dark:border-white flex items-center justify-center relative ${isExcluded ? "opacity-60 border-dashed" : ""
             }`}
         >
-          <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+          <CategoryIcon className="h-4 w-4 text-black dark:text-white" />
           {/* Need indicator - small icon badge */}
           {isNeed && !isExcluded && (
             <div
-              className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full flex items-center justify-center bg-muted border border-border"
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center bg-pastel-green border-2 border-black dark:border-white"
             >
-              <CheckCheck className="h-2 w-2 text-muted-foreground" />
+              <CheckCheck className="h-2 w-2 text-black dark:text-white" />
             </div>
           )}
         </div>
@@ -78,7 +77,7 @@ export const TransactionCard = memo(function TransactionCard({
       {/* Main content - Category as primary, Merchant as subtitle */}
       <div className="min-w-0 flex-1 relative z-10">
         <p
-          className={`font-semibold truncate text-xs flex items-center gap-1 ${isExcluded ? "text-muted-foreground/70" : "text-foreground"
+          className={`font-bold truncate text-sm flex items-center gap-1.5 ${isExcluded ? "text-muted-foreground" : "text-foreground"
             }`}
         >
           {txn.category || "Uncategorized"}
@@ -100,7 +99,7 @@ export const TransactionCard = memo(function TransactionCard({
           )}
         </p>
         <p
-          className={`text-[10px] truncate ${isExcluded ? "text-muted-foreground/50" : "text-muted-foreground"
+          className={`text-[10px] truncate font-medium ${isExcluded ? "text-muted-foreground/50" : "text-muted-foreground"
             }`}
         >
           {txn.merchant || "Unknown"} • {formatDate(txn.date)}
@@ -110,7 +109,7 @@ export const TransactionCard = memo(function TransactionCard({
 
       {/* Amount */}
       <span
-        className={`font-mono text-xs font-semibold shrink-0 text-right relative z-10 ${isExcluded
+        className={`font-mono text-sm font-bold shrink-0 text-right relative z-10 ${isExcluded
           ? "text-muted-foreground/50"
           : "text-foreground"
           }`}
@@ -119,10 +118,14 @@ export const TransactionCard = memo(function TransactionCard({
       </span>
 
       {/* Chevron */}
-      <ChevronRight
-        className={`h-3.5 w-3.5 shrink-0 transition-transform relative z-10 text-muted-foreground ${isExcluded ? "" : "group-hover:translate-x-0.5"
-          }`}
-      />
+      <div className={`shrink-0 w-7 h-7 rounded-md flex items-center justify-center relative z-10 ${isExcluded 
+        ? "bg-muted" 
+        : "bg-white dark:bg-white/10 border-2 border-black dark:border-white"}`}>
+        <ChevronRight
+          className={`h-4 w-4 transition-transform text-black dark:text-white ${isExcluded ? "opacity-50" : "group-hover:translate-x-0.5"
+            }`}
+        />
+      </div>
     </motion.button>
   );
 });

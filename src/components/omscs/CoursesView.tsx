@@ -9,7 +9,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -36,33 +35,33 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
     (details.analysis || details.pros?.length || details.cons?.length);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
+    <div className="overflow-hidden rounded-xl border-2 border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-3 py-2 hover:bg-accent/50 transition-colors"
+        className="w-full text-left px-4 py-3 hover:bg-pastel-yellow/30 transition-colors"
       >
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-xs text-foreground">
+              <p className="font-bold text-sm text-foreground">
                 {course.code}
               </p>
               {course.enrolled_semester && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-muted text-muted-foreground">
+                <span className="text-[10px] px-2 py-0.5 rounded-md font-bold bg-pastel-green border border-black dark:border-white text-black dark:text-white">
                   {course.final_grade || "In Progress"}
                 </span>
               )}
             </div>
-            <p className="text-[10px] truncate text-muted-foreground">
+            <p className="text-xs truncate text-muted-foreground font-medium">
               {course.name}
             </p>
           </div>
           <motion.div
             animate={{ rotate: expanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
-            className="shrink-0"
+            className="h-7 w-7 rounded-md bg-white dark:bg-white/10 border-2 border-black dark:border-white flex items-center justify-center shrink-0"
           >
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronDown className="h-4 w-4 text-black dark:text-white" />
           </motion.div>
         </div>
       </button>
@@ -76,17 +75,17 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-3 pb-3 pt-2 space-y-2 border-t border-border">
+            <div className="px-4 pb-4 pt-3 space-y-3 border-t-2 border-black/10 dark:border-white/10">
               {/* Details section - only if has details */}
               {hasDetails && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {/* Analysis */}
                   {details.analysis && (
-                    <div>
-                      <p className="text-[9px] uppercase tracking-wider mb-0.5 font-medium text-muted-foreground">
+                    <div className="p-3 rounded-lg bg-pastel-blue/50 border border-black/20 dark:border-white/20">
+                      <p className="text-[10px] uppercase tracking-wider mb-1 font-bold text-black/70 dark:text-white/70">
                         Analysis
                       </p>
-                      <p className="text-[10px] text-foreground">
+                      <p className="text-xs text-foreground font-medium">
                         {details.analysis}
                       </p>
                     </div>
@@ -94,17 +93,17 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
 
                   {/* Pros */}
                   {details.pros && details.pros.length > 0 && (
-                    <div>
-                      <p className="text-[9px] uppercase tracking-wider mb-0.5 font-medium flex items-center gap-1 text-muted-foreground">
-                        <ThumbsUp className="h-2.5 w-2.5" /> Pros
+                    <div className="p-3 rounded-lg bg-pastel-green/50 border border-black/20 dark:border-white/20">
+                      <p className="text-[10px] uppercase tracking-wider mb-1.5 font-bold flex items-center gap-1.5 text-black/70 dark:text-white/70">
+                        <ThumbsUp className="h-3 w-3" /> Pros
                       </p>
-                      <ul className="space-y-0.5">
+                      <ul className="space-y-1">
                         {details.pros.map((pro, i) => (
                           <li
                             key={i}
-                            className="text-[10px] flex items-start gap-1 text-foreground"
+                            className="text-xs flex items-start gap-1.5 text-foreground font-medium"
                           >
-                            <span className="text-muted-foreground">•</span>
+                            <span className="text-black/50 dark:text-white/50">•</span>
                             {pro}
                           </li>
                         ))}
@@ -114,17 +113,17 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
 
                   {/* Cons */}
                   {details.cons && details.cons.length > 0 && (
-                    <div>
-                      <p className="text-[9px] uppercase tracking-wider mb-0.5 font-medium flex items-center gap-1 text-muted-foreground">
-                        <ThumbsDown className="h-2.5 w-2.5" /> Cons
+                    <div className="p-3 rounded-lg bg-pastel-pink/50 border border-black/20 dark:border-white/20">
+                      <p className="text-[10px] uppercase tracking-wider mb-1.5 font-bold flex items-center gap-1.5 text-black/70 dark:text-white/70">
+                        <ThumbsDown className="h-3 w-3" /> Cons
                       </p>
-                      <ul className="space-y-0.5">
+                      <ul className="space-y-1">
                         {details.cons.map((con, i) => (
                           <li
                             key={i}
-                            className="text-[10px] flex items-start gap-1 text-foreground"
+                            className="text-xs flex items-start gap-1.5 text-foreground font-medium"
                           >
-                            <span className="text-muted-foreground">•</span>
+                            <span className="text-black/50 dark:text-white/50">•</span>
                             {con}
                           </li>
                         ))}
@@ -135,24 +134,24 @@ function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-3 pt-1">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit(course);
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-medium transition-colors text-muted-foreground hover:bg-accent"
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all border-2 border-black dark:border-white bg-white dark:bg-white/10 text-black dark:text-white hover:bg-pastel-blue hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
                 >
-                  <Pencil className="h-3 w-3" /> Edit
+                  <Pencil className="h-3.5 w-3.5" /> Edit
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete(course);
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-medium transition-colors text-muted-foreground hover:bg-accent"
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all border-2 border-black dark:border-white bg-white dark:bg-white/10 text-black dark:text-white hover:bg-pastel-pink hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
                 >
-                  <Trash2 className="h-3 w-3" /> Delete
+                  <Trash2 className="h-3.5 w-3.5" /> Delete
                 </button>
               </div>
             </div>
@@ -287,24 +286,22 @@ export function CoursesView() {
   const isEditing = editingCourse !== null;
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-5 space-y-4">
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Course Catalog ({courses.length})
         </h3>
-        <Button
-          size="sm"
-          variant="outline"
+        <button
           onClick={handleOpenAdd}
-          className="h-7 text-xs"
+          className="h-9 px-4 flex items-center gap-2 rounded-lg text-xs font-bold transition-all border-2 border-black dark:border-white bg-pastel-green text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none"
         >
-          <Plus className="h-3.5 w-3.5 mr-1" /> Add Course
-        </Button>
+          <Plus className="h-4 w-4" /> Add Course
+        </button>
       </div>
 
       {/* Course List */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {courses.map((course) => (
           <CourseCard
             key={course.id}
@@ -315,9 +312,11 @@ export function CoursesView() {
         ))}
 
         {courses.length === 0 && (
-          <p className="text-xs text-center py-8 text-muted-foreground">
-            No courses in catalog. Add one to get started!
-          </p>
+          <div className="text-center py-8 rounded-xl border-2 border-dashed border-black/30 dark:border-white/30">
+            <p className="text-sm font-medium text-muted-foreground">
+              No courses in catalog. Add one to get started!
+            </p>
+          </div>
         )}
       </div>
 
@@ -326,16 +325,16 @@ export function CoursesView() {
         open={isDialogOpen}
         onOpenChange={(open) => !open && handleCloseDialog()}
       >
-        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-sm">
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto rounded-2xl border-2 border-black dark:border-white shadow-[6px_6px_0_#1a1a1a] dark:shadow-[6px_6px_0_#FFFBF0]">
+          <DialogHeader className="border-b-2 border-black dark:border-white pb-4 mb-4 bg-pastel-purple -mx-6 -mt-6 px-6 pt-6 rounded-t-2xl">
+            <DialogTitle className="text-lg font-bold text-black dark:text-white">
               {isEditing ? "Edit Course" : "Add Course"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-muted-foreground font-medium">
+                <label className="text-xs text-muted-foreground font-bold uppercase tracking-wide">
                   Course Code
                 </label>
                 <Input
@@ -344,11 +343,11 @@ export function CoursesView() {
                     setFormData((p) => ({ ...p, code: e.target.value }))
                   }
                   placeholder="CS 6250"
-                  className="h-8 text-xs"
+                  className="h-10 text-sm font-medium border-2 border-black dark:border-white rounded-lg"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground font-medium">
+                <label className="text-xs text-muted-foreground font-bold uppercase tracking-wide">
                   Course Name
                 </label>
                 <Input
@@ -357,13 +356,13 @@ export function CoursesView() {
                     setFormData((p) => ({ ...p, name: e.target.value }))
                   }
                   placeholder="Computer Networks"
-                  className="h-8 text-xs"
+                  className="h-10 text-sm font-medium border-2 border-black dark:border-white rounded-lg"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground font-medium">
+              <label className="text-xs text-muted-foreground font-bold uppercase tracking-wide">
                 Analysis (optional)
               </label>
               <Textarea
@@ -373,13 +372,13 @@ export function CoursesView() {
                 }
                 placeholder="Brief overview of the course..."
                 rows={2}
-                className="text-xs"
+                className="text-sm font-medium border-2 border-black dark:border-white rounded-lg"
               />
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                <ThumbsUp className="h-2.5 w-2.5" /> Pros (one per line)
+              <label className="text-xs text-muted-foreground font-bold uppercase tracking-wide flex items-center gap-1.5">
+                <ThumbsUp className="h-3 w-3" /> Pros (one per line)
               </label>
               <Textarea
                 value={formData.pros}
@@ -388,13 +387,13 @@ export function CoursesView() {
                 }
                 placeholder="Great instructor&#10;Interesting projects&#10;Well organized"
                 rows={3}
-                className="text-xs"
+                className="text-sm font-medium border-2 border-black dark:border-white rounded-lg"
               />
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                <ThumbsDown className="h-2.5 w-2.5" /> Cons (one per line)
+              <label className="text-xs text-muted-foreground font-bold uppercase tracking-wide flex items-center gap-1.5">
+                <ThumbsDown className="h-3 w-3" /> Cons (one per line)
               </label>
               <Textarea
                 value={formData.cons}
@@ -403,23 +402,23 @@ export function CoursesView() {
                 }
                 placeholder="Heavy workload&#10;Tough exams&#10;Outdated material"
                 rows={3}
-                className="text-xs"
+                className="text-sm font-medium border-2 border-black dark:border-white rounded-lg"
               />
             </div>
 
-            <Button
+            <button
               onClick={isEditing ? handleUpdateCourse : handleAddCourse}
               disabled={saving || !formData.code || !formData.name}
-              className="w-full h-8 text-xs"
+              className="w-full h-12 rounded-xl text-sm font-bold transition-all border-2 border-black dark:border-white bg-pastel-green text-black shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_#1a1a1a] dark:hover:shadow-[4px_4px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin mx-auto" />
               ) : isEditing ? (
                 "Save Changes"
               ) : (
                 "Add Course"
               )}
-            </Button>
+            </button>
           </div>
         </DialogContent>
       </Dialog>

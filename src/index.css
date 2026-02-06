@@ -51,89 +51,105 @@
   --color-income: var(--income);
 }
 
-/* Light mode - Clean Monochrome Theme */
+/* Light mode - Neo-Brutalism Pastel Theme */
 :root {
-  --radius: 0.5rem;
-  /* Clean white background */
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.15 0 0);
-  /* Pure white cards */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
-  /* Neutral gray primary */
-  --primary: oklch(0.25 0 0);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.25 0 0);
-  --muted: oklch(0.94 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.94 0 0);
-  --accent-foreground: oklch(0.25 0 0);
-  /* Gray for destructive */
-  --destructive: oklch(0.45 0 0);
-  /* Subtle borders */
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.94 0 0);
-  --ring: oklch(0.25 0 0);
+  --radius: 0.75rem;
+  /* Warm cream background */
+  --background: #FDF6E3;
+  --foreground: #1a1a1a;
+  /* Pastel cards */
+  --card: #FFFBF0;
+  --card-foreground: #1a1a1a;
+  --popover: #FFFBF0;
+  --popover-foreground: #1a1a1a;
+  /* Bold black primary */
+  --primary: #1a1a1a;
+  --primary-foreground: #FFFBF0;
+  --secondary: #E8F5E9;
+  --secondary-foreground: #1a1a1a;
+  --muted: #F5F5F5;
+  --muted-foreground: #666666;
+  --accent: #FFE5EC;
+  --accent-foreground: #1a1a1a;
+  /* Bold red for destructive */
+  --destructive: #FF6B6B;
+  /* Thick black borders - neo-brutalism signature */
+  --border: #1a1a1a;
+  --input: #FFFBF0;
+  --ring: #1a1a1a;
 
-  /* Chart colors - monochrome palette */
-  --chart-1: oklch(0.2 0 0);
-  --chart-2: oklch(0.35 0 0);
-  --chart-3: oklch(0.5 0 0);
-  --chart-4: oklch(0.65 0 0);
-  --chart-5: oklch(0.8 0 0);
+  /* Neo-brutalism pastel palette */
+  --pastel-pink: #FFE5EC;
+  --pastel-blue: #E3F2FD;
+  --pastel-green: #E8F5E9;
+  --pastel-yellow: #FFF9C4;
+  --pastel-purple: #F3E5F5;
+  --pastel-orange: #FFF3E0;
 
-  /* Monochrome Stats */
-  --gold: oklch(0.25 0 0);
-  --health: oklch(0.35 0 0);
-  --mana: oklch(0.45 0 0);
-  --xp: oklch(0.55 0 0);
-  --expense: oklch(0.35 0 0);
-  --income: oklch(0.45 0 0);
+  /* Chart colors - pastel palette */
+  --chart-1: #FFB3BA;
+  --chart-2: #BAFFC9;
+  --chart-3: #BAE1FF;
+  --chart-4: #FFFFBA;
+  --chart-5: #FFDFba;
+
+  /* Stats with pastel colors */
+  --gold: #FFD93D;
+  --health: #FF6B6B;
+  --mana: #6BCBFF;
+  --xp: #95E1A3;
+  --expense: #FF6B6B;
+  --income: #95E1A3;
 }
 
-/* Dark mode - Clean Monochrome Theme */
+/* Dark mode - Neo-Brutalism Dark Theme */
 .dark {
-  /* True black background */
-  --background: oklch(0.08 0 0);
-  --foreground: oklch(0.95 0 0);
-  /* Dark gray cards */
-  --card: oklch(0.14 0 0);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.95 0 0);
-  /* Light gray primary */
-  --primary: oklch(0.9 0 0);
-  --primary-foreground: oklch(0.08 0 0);
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.92 0 0);
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.6 0 0);
-  --accent: oklch(0.2 0 0);
-  --accent-foreground: oklch(0.92 0 0);
-  /* Gray for destructive */
-  --destructive: oklch(0.55 0 0);
-  /* Subtle dark borders */
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.18 0 0);
-  --ring: oklch(0.9 0 0);
+  /* Dark navy background */
+  --background: #1a1a2e;
+  --foreground: #FFFBF0;
+  /* Darker cards with slight color */
+  --card: #252540;
+  --card-foreground: #FFFBF0;
+  --popover: #252540;
+  --popover-foreground: #FFFBF0;
+  /* Light primary for contrast */
+  --primary: #FFFBF0;
+  --primary-foreground: #1a1a2e;
+  --secondary: #2d4a3e;
+  --secondary-foreground: #FFFBF0;
+  --muted: #333355;
+  --muted-foreground: #a0a0b0;
+  --accent: #4a3040;
+  --accent-foreground: #FFFBF0;
+  /* Bright red for destructive */
+  --destructive: #FF6B6B;
+  /* White borders for dark mode neo-brutalism */
+  --border: #FFFBF0;
+  --input: #333355;
+  --ring: #FFFBF0;
 
-  /* Chart colors - monochrome for dark mode */
-  --chart-1: oklch(0.9 0 0);
-  --chart-2: oklch(0.75 0 0);
-  --chart-3: oklch(0.6 0 0);
-  --chart-4: oklch(0.45 0 0);
-  --chart-5: oklch(0.3 0 0);
+  /* Neo-brutalism dark pastel palette - deeper, richer tones */
+  --pastel-pink: #5C3D4A;
+  --pastel-blue: #2D4A5C;
+  --pastel-green: #3D5C4A;
+  --pastel-yellow: #5C5A3D;
+  --pastel-purple: #4A3D5C;
+  --pastel-orange: #5C4A3D;
 
-  /* Monochrome Stats */
-  --gold: oklch(0.9 0 0);
-  --health: oklch(0.75 0 0);
-  --mana: oklch(0.6 0 0);
-  --xp: oklch(0.85 0 0);
-  --expense: oklch(0.7 0 0);
-  --income: oklch(0.75 0 0);
+  /* Chart colors - vibrant for dark mode */
+  --chart-1: #FFB3BA;
+  --chart-2: #BAFFC9;
+  --chart-3: #BAE1FF;
+  --chart-4: #FFFFBA;
+  --chart-5: #FFDFba;
+
+  /* Stats - same vibrant pastels */
+  --gold: #FFD93D;
+  --health: #FF6B6B;
+  --mana: #6BCBFF;
+  --xp: #95E1A3;
+  --expense: #FF6B6B;
+  --income: #95E1A3;
 }
 
 @layer base {
@@ -188,15 +204,82 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Clean card style */
+  /* Neo-brutalism card style */
   .parchment {
     background: var(--card);
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 3px oklch(0 0 0 / 0.08);
+    border: 2px solid var(--border);
+    box-shadow: 4px 4px 0 var(--border);
   }
 
   .dark .parchment {
-    box-shadow: 0 1px 3px oklch(0 0 0 / 0.3);
+    box-shadow: 4px 4px 0 var(--border);
+  }
+
+  /* Neo-brutalism utilities - black borders in light mode, cream borders in dark */
+  .neo-brutal {
+    border: 2px solid #1a1a1a;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  .dark .neo-brutal {
+    border: 2px solid #FFFBF0;
+    box-shadow: 4px 4px 0 #FFFBF0;
+  }
+
+  .neo-brutal:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #1a1a1a;
+  }
+
+  .dark .neo-brutal:hover {
+    box-shadow: 6px 6px 0 #FFFBF0;
+  }
+
+  .neo-brutal:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #1a1a1a;
+  }
+
+  .dark .neo-brutal:active {
+    box-shadow: 2px 2px 0 #FFFBF0;
+  }
+
+  .neo-brutal-sm {
+    border: 2px solid #1a1a1a;
+    box-shadow: 3px 3px 0 #1a1a1a;
+  }
+
+  .dark .neo-brutal-sm {
+    border: 2px solid #FFFBF0;
+    box-shadow: 3px 3px 0 #FFFBF0;
+  }
+
+  /* Neo-brutalism pastel backgrounds - use CSS vars so they change in dark mode */
+  .bg-pastel-pink { background-color: var(--pastel-pink); }
+  .bg-pastel-blue { background-color: var(--pastel-blue); }
+  .bg-pastel-green { background-color: var(--pastel-green); }
+  .bg-pastel-yellow { background-color: var(--pastel-yellow); }
+  .bg-pastel-purple { background-color: var(--pastel-purple); }
+  .bg-pastel-orange { background-color: var(--pastel-orange); }
+
+  /* Dark mode text colors for pastel cards - use light text on dark pastels */
+  .dark .bg-pastel-pink,
+  .dark .bg-pastel-blue,
+  .dark .bg-pastel-green,
+  .dark .bg-pastel-yellow,
+  .dark .bg-pastel-purple,
+  .dark .bg-pastel-orange {
+    color: #FFFBF0;
+  }
+  
+  .dark .bg-pastel-pink *,
+  .dark .bg-pastel-blue *,
+  .dark .bg-pastel-green *,
+  .dark .bg-pastel-yellow *,
+  .dark .bg-pastel-purple *,
+  .dark .bg-pastel-orange * {
+    --tw-text-opacity: 1;
   }
 
   /* Optimized scroll containers for mobile */

@@ -62,18 +62,21 @@ export function DailyGoals() {
     });
   };
 
+  // Pastel colors for each goal
+  const goalColors = ["bg-pastel-pink", "bg-pastel-purple", "bg-pastel-orange"];
+
   return (
-    <div className="rounded-lg border border-border bg-card">
+    <div className="rounded-xl bg-pastel-yellow p-4 neo-brutal">
       {/* Header */}
-      <div className="px-3 py-2">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+      <div className="mb-3">
+        <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wide">
           Daily Goals
         </span>
       </div>
 
       {/* Goals list */}
-      <div className="divide-y divide-border">
-        {DAILY_GOALS.map((goal) => {
+      <div className="flex flex-col gap-2">
+        {DAILY_GOALS.map((goal, index) => {
           const isCompleted = completedGoals.has(goal.id);
 
           return (
@@ -81,26 +84,28 @@ export function DailyGoals() {
               key={goal.id}
               onClick={() => toggleGoal(goal.id)}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors",
-                "hover:bg-accent/50 active:bg-accent"
+                "w-full flex items-center gap-3 px-3 py-3 text-left rounded-lg border-2 border-black dark:border-white transition-all",
+                isCompleted ? "bg-white dark:bg-white/10" : goalColors[index % goalColors.length],
+                !isCompleted && "shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px]",
+                isCompleted && "opacity-60"
               )}
             >
               <div
                 className={cn(
-                  "h-4 w-4 rounded flex items-center justify-center transition-colors shrink-0",
+                  "h-6 w-6 rounded-md flex items-center justify-center transition-colors shrink-0 border-2 border-black dark:border-white",
                   isCompleted
-                    ? "bg-foreground text-background"
-                    : "border border-muted-foreground/30"
+                    ? "bg-black dark:bg-white text-white dark:text-black"
+                    : "bg-white dark:bg-white/10"
                 )}
               >
-                {isCompleted && <Check className="h-2.5 w-2.5" />}
+                {isCompleted && <Check className="h-4 w-4" />}
               </div>
               <span
                 className={cn(
-                  "text-xs transition-colors",
+                  "text-sm font-bold transition-colors",
                   isCompleted
-                    ? "text-muted-foreground line-through"
-                    : "text-foreground"
+                    ? "text-black/50 dark:text-white/50 line-through"
+                    : "text-black dark:text-white"
                 )}
               >
                 {goal.label}

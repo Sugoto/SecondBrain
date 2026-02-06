@@ -8,13 +8,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import {
   EXPENSE_CATEGORIES,
   EXCLUDED_CATEGORIES,
   formatCurrency,
   getTransactionBudgetType,
   CATEGORY_BUDGET_TYPE,
+  CATEGORY_PASTEL_COLORS,
 } from "./constants";
 import {
   CalendarRange,
@@ -221,17 +221,17 @@ export function TransactionDialog({
       onOpenChange={(open) => !open && !saving && onClose()}
     >
       <DialogContent
-        className="max-w-md w-[calc(100%-2rem)] rounded-xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border bg-background"
+        className="max-w-md w-[calc(100%-2rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-2 border-black dark:border-white bg-background shadow-[6px_6px_0_#1a1a1a] dark:shadow-[6px_6px_0_#FFFBF0]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        {/* Header */}
-        <DialogHeader className="shrink-0 px-5 pt-5 pb-4 border-b border-border">
-          <DialogTitle className="text-base font-semibold text-foreground">
+        {/* Header - uses category-specific pastel color */}
+        <DialogHeader className={`shrink-0 px-5 pt-5 pb-4 border-b-2 border-black dark:border-white ${transaction.category ? CATEGORY_PASTEL_COLORS[transaction.category] || "bg-pastel-blue" : "bg-pastel-blue"}`}>
+          <DialogTitle className="text-lg font-bold text-black dark:text-white">
             {transaction.category ||
               (isNew ? "New Expense" : "Edit Transaction")}
           </DialogTitle>
           {transaction.merchant && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-black/70 dark:text-white/70 font-medium">
               {transaction.merchant}
             </p>
           )}
@@ -244,6 +244,7 @@ export function TransactionDialog({
               const IconComp = cat.icon;
               const isSelected = transaction.category === cat.name;
               const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
+              const categoryPastelColor = CATEGORY_PASTEL_COLORS[cat.name] || "bg-pastel-blue";
 
               return (
                 <button
@@ -273,14 +274,14 @@ export function TransactionDialog({
                     });
                   }}
                   disabled={saving}
-                  className={`h-9 rounded-md flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
+                  className={`h-10 rounded-lg flex items-center justify-center border-2 transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
                     } ${isSelected
-                      ? "bg-foreground border-foreground"
-                      : "bg-muted border-border hover:bg-accent"
+                      ? `${categoryPastelColor} border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]`
+                      : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 hover:border-black dark:hover:border-white"
                     }`}
                 >
                   <IconComp
-                    className={`h-4 w-4 ${isSelected ? "text-background" : "text-muted-foreground"
+                    className={`h-4 w-4 ${isSelected ? "text-black dark:text-white" : "text-muted-foreground"
                       }`}
                   />
                 </button>
@@ -413,11 +414,11 @@ export function TransactionDialog({
           </div>
 
           {/* Date, Time & Prorate - Collapsible */}
-          <div className="rounded-lg border border-border overflow-hidden">
+          <div className="rounded-xl border-2 border-black dark:border-white overflow-hidden">
             <button
               type="button"
               onClick={() => setShowDatetime(!showDatetime)}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-foreground hover:bg-pastel-pink/50 transition-colors"
             >
               <span className="flex items-center gap-2">
                 <CalendarRange className="h-3.5 w-3.5" />
@@ -530,11 +531,11 @@ export function TransactionDialog({
           </div>
 
           {/* Advanced section - collapsible */}
-          <div className="rounded-lg border border-border overflow-hidden">
+          <div className="rounded-xl border-2 border-black dark:border-white overflow-hidden">
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-bold text-foreground hover:bg-pastel-purple/50 transition-colors"
             >
               <span className="flex items-center gap-2">
                 <span>Advanced</span>
@@ -609,7 +610,7 @@ export function TransactionDialog({
                         type="button"
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={saving || deleting}
-                        className="w-full mt-4 h-10 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+                        className="w-full mt-4 h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-bold border-2 border-black dark:border-white text-black/60 dark:text-white/60 transition-all hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-600 dark:hover:border-red-400 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
                       >
                         <Trash2 className="h-4 w-4" />
                         Delete Transaction
@@ -622,47 +623,46 @@ export function TransactionDialog({
           </div>
         </div>
 
-        {/* Fixed footer buttons */}
-        <div className="flex gap-3 p-5 shrink-0 border-t border-border">
-          <Button
-            variant="outline"
-            className="flex-1 h-11"
+        {/* Fixed footer buttons - neo-brutalism style */}
+        <div className="flex gap-3 p-5 shrink-0 border-t-2 border-black dark:border-white bg-pastel-yellow">
+          <button
             onClick={onClose}
             disabled={saving || deleting}
+            className="flex-1 h-12 rounded-xl bg-white border-2 border-black dark:border-white text-black font-bold text-sm transition-all hover:bg-pastel-pink disabled:opacity-50 flex items-center justify-center"
           >
             Cancel
-          </Button>
-          <Button
-            className="flex-1 h-11 font-semibold bg-foreground text-background hover:bg-foreground/90"
+          </button>
+          <button
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
+            className="flex-1 h-12 rounded-xl bg-pastel-green border-2 border-black dark:border-white text-black font-bold text-sm transition-all shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_#1a1a1a] dark:hover:shadow-[5px_5px_0_#FFFBF0] disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 flex items-center justify-center gap-2"
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (
               "Save"
             )}
-          </Button>
+          </button>
         </div>
       </DialogContent>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - neo-brutalism style */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-sm rounded-2xl">
+        <AlertDialogContent className="max-w-sm rounded-2xl border-2 border-black dark:border-white shadow-[5px_5px_0_#1a1a1a] dark:shadow-[5px_5px_0_#FFFBF0]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
-                <Trash2 className="h-4 w-4 text-destructive" />
+            <AlertDialogTitle className="flex items-center gap-3 text-lg font-bold">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 border-2 border-red-500 flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
               Delete Transaction
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-sm">
               Are you sure you want to delete this transaction
               {transaction.merchant && (
-                <span className="font-medium">
+                <span className="font-bold">
                   {" "}
                   from {transaction.merchant}
                 </span>
@@ -671,7 +671,12 @@ export function TransactionDialog({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel 
+              disabled={deleting}
+              className="rounded-xl border-2 border-black dark:border-white font-bold hover:bg-pastel-blue"
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (onDelete) {
@@ -680,7 +685,7 @@ export function TransactionDialog({
                 setShowDeleteConfirm(false);
               }}
               disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-xl border-2 border-red-600 bg-red-500 text-white font-bold hover:bg-red-600 shadow-[2px_2px_0_#991b1b] hover:shadow-[3px_3px_0_#991b1b]"
             >
               {deleting ? (
                 <>

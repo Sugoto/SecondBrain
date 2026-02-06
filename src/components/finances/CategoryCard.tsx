@@ -7,7 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { formatDate, formatCurrency } from "./constants";
+import { formatDate, formatCurrency, CATEGORY_PASTEL_COLORS } from "./constants";
 import { getMonthlyAmount } from "./utils";
 
 interface CategoryCardProps {
@@ -34,6 +34,8 @@ export const CategoryCard = memo(function CategoryCard({
   index = 0,
 }: CategoryCardProps) {
   const IconComp = icon || Receipt;
+  const categoryName = name.replace(" (Needs)", "").replace(" (Wants)", "");
+  const categoryPastelColor = CATEGORY_PASTEL_COLORS[categoryName] || "bg-pastel-blue";
 
   return (
     <motion.div
@@ -44,35 +46,35 @@ export const CategoryCard = memo(function CategoryCard({
         delay: index * 0.05,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="bg-card border rounded-lg overflow-hidden"
-      style={{ borderColor: "rgba(128, 128, 128, 0.1)" }}
+      className="bg-card border-2 border-black dark:border-white rounded-xl overflow-hidden shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
     >
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.99 }}
-        className="w-full flex items-center gap-2.5 p-2.5 transition-colors hover:bg-accent/50"
+        className="w-full flex items-center gap-3 p-3 transition-colors hover:bg-pastel-yellow/30"
       >
         <motion.div
           animate={{ scale: isExpanded ? 1.05 : 1 }}
           transition={{ duration: 0.2 }}
-          className="h-8 w-8 rounded-md bg-muted flex items-center justify-center"
+          className={`h-9 w-9 rounded-lg ${categoryPastelColor} border-2 border-black dark:border-white flex items-center justify-center`}
         >
-          <IconComp className="h-4 w-4 text-muted-foreground" />
+          <IconComp className="h-4 w-4 text-black dark:text-white" />
         </motion.div>
         <div className="flex-1 text-left min-w-0">
-          <p className="font-medium text-sm text-foreground truncate">{name}</p>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="font-bold text-sm text-foreground truncate">{name}</p>
+          <p className="text-xs text-muted-foreground font-medium">
             {count} transaction{count !== 1 ? "s" : ""}
           </p>
         </div>
-        <span className="font-mono text-sm font-semibold text-foreground">
+        <span className="font-mono text-sm font-bold text-foreground">
           {formatCurrency(total)}
         </span>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
+          className="h-7 w-7 rounded-md bg-white dark:bg-white/10 border-2 border-black dark:border-white flex items-center justify-center"
         >
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-4 w-4 text-black dark:text-white" />
         </motion.div>
       </motion.button>
 
@@ -85,7 +87,7 @@ export const CategoryCard = memo(function CategoryCard({
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-border/10 divide-y divide-border/10">
+            <div className="border-t-2 border-black/10 dark:border-white/10 divide-y-2 divide-black/5 dark:divide-white/5">
               {transactions.map((txn, i) => {
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
@@ -99,14 +101,14 @@ export const CategoryCard = memo(function CategoryCard({
                     transition={{ delay: i * 0.03, duration: 0.2 }}
                     whileTap={{ backgroundColor: "var(--accent)" }}
                     onClick={() => onTransactionClick(txn)}
-                    className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-accent/50 text-left ${isExcluded
-                      ? "opacity-40 grayscale-[60%] saturate-50"
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-pastel-pink/30 text-left ${isExcluded
+                      ? "opacity-40"
                       : ""
                       }`}
                   >
                     <div className="min-w-0 flex-1">
                       <p
-                        className={`text-xs font-medium truncate flex items-center gap-1 ${isExcluded ? "text-muted-foreground/70" : ""
+                        className={`text-sm font-bold truncate flex items-center gap-1.5 ${isExcluded ? "text-muted-foreground" : "text-foreground"
                           }`}
                       >
                         {txn.merchant || "Unknown"}
@@ -120,7 +122,7 @@ export const CategoryCard = memo(function CategoryCard({
                         )}
                       </p>
                       <p
-                        className={`text-[10px] ${isExcluded
+                        className={`text-xs font-medium ${isExcluded
                           ? "text-muted-foreground/50"
                           : "text-muted-foreground"
                           }`}
@@ -134,7 +136,7 @@ export const CategoryCard = memo(function CategoryCard({
                       </p>
                     </div>
                     <span
-                      className={`font-mono text-xs font-semibold ${isExcluded
+                      className={`font-mono text-sm font-bold ${isExcluded
                         ? "text-muted-foreground/50"
                         : "text-foreground"
                         }`}

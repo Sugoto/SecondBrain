@@ -34,27 +34,27 @@ export function HomePage() {
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <h1 className="text-sm font-semibold text-foreground">
-          Hi Sugoto,
+      {/* Header - Neo-brutalism style */}
+      <header className="flex items-center justify-between px-5 py-4">
+        <h1 className="text-xl font-bold text-foreground tracking-tight">
+          Hi Sugoto!
         </h1>
         <button
           onClick={toggle}
-          className="h-8 w-8 rounded-md flex items-center justify-center transition-colors hover:bg-accent active:bg-accent"
+          className="h-10 w-10 rounded-lg flex items-center justify-center neo-brutal-sm bg-pastel-yellow"
         >
           {theme === "dark" ? (
-            <Sun className="h-4 w-4 text-muted-foreground" />
+            <Sun className="h-5 w-5 text-black dark:text-white" />
           ) : (
-            <Moon className="h-4 w-4 text-muted-foreground" />
+            <Moon className="h-5 w-5 text-black dark:text-white" />
           )}
         </button>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 pb-20">
+      <main className="flex-1 overflow-y-auto p-5 pb-28">
         {/* Net Worth Widget */}
-        <div className="mb-4">
+        <div className="mb-8">
           <NetWorthCard
             netWorth={netWorth}
             onEdit={() => setEditDialogOpen(true)}
@@ -62,7 +62,7 @@ export function HomePage() {
         </div>
 
         {/* Nutrition Card */}
-        <div className="mb-4">
+        <div className="mb-8">
           <NutritionCard onEdit={() => setHealthDialogOpen(true)} />
         </div>
 

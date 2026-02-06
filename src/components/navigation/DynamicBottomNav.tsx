@@ -31,8 +31,8 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   }
 
   return createPortal(
-    <nav className="md:hidden fixed bottom-4 left-4 right-4 z-[9999] no-view-transition rounded-lg border border-border bg-card dark:bg-zinc-900 shadow-lg">
-      <div className="flex items-center h-12">
+    <nav className="md:hidden fixed bottom-4 left-5 right-5 z-[9999] no-view-transition rounded-xl bg-pastel-orange border-2 border-black dark:border-white shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]">
+      <div className="flex items-center h-14">
         {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
@@ -41,10 +41,10 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
               onViewChange(id);
             }}
             onPointerEnter={() => onPrefetch?.(id)}
-            className="flex flex-col items-center justify-center flex-1 h-full transition-colors hover:bg-accent active:bg-accent"
+            className="flex flex-col items-center justify-center flex-1 h-full transition-all hover:scale-110 active:scale-95"
           >
-            <Icon className="h-4 w-4 text-foreground dark:text-white" />
-            <span className="text-[9px] mt-0.5 font-medium uppercase tracking-wide text-foreground dark:text-white">
+            <Icon className="h-5 w-5 text-black dark:text-white" />
+            <span className="text-[9px] mt-0.5 font-bold uppercase tracking-wide text-black dark:text-white">
               {label}
             </span>
           </button>

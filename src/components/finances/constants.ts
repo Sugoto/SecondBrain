@@ -66,7 +66,18 @@ export function getTransactionBudgetType(
   return CATEGORY_BUDGET_TYPE[category ?? ""] ?? "want";
 }
 
-// Monochromatic category styling
+// Neo-brutalism pastel colors for each category
+export const CATEGORY_PASTEL_COLORS: Record<string, string> = {
+  "Self Care": "bg-pastel-pink",
+  Bills: "bg-pastel-orange",
+  Investments: "bg-pastel-green",
+  Food: "bg-pastel-yellow",
+  Shopping: "bg-pastel-blue",
+  Entertainment: "bg-pastel-purple",
+  Travel: "bg-pastel-green",
+};
+
+// Monochromatic category styling (legacy)
 const CATEGORY_COLOR = "#737373"; // Neutral gray for all categories
 
 export const EXPENSE_CATEGORIES: { name: string; icon: LucideIcon }[] = [

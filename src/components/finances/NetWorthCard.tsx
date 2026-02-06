@@ -32,18 +32,20 @@ export function NetWorthCard({ netWorth, onEdit }: NetWorthCardProps) {
   return (
     <button
       onClick={onEdit}
-      className="w-full rounded-lg border border-border bg-card p-3 text-left transition-colors hover:bg-accent/50 active:bg-accent"
+      className="w-full rounded-xl bg-pastel-green p-4 text-left neo-brutal"
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+          <p className="text-xs text-black/60 dark:text-white/60 font-bold uppercase tracking-wide mb-1">
             Net Worth
           </p>
-          <p className="text-base font-semibold text-foreground font-mono">
+          <p className="text-2xl font-bold text-black dark:text-white font-mono">
             <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
           </p>
         </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        <div className="h-10 w-10 rounded-lg bg-white dark:bg-white/10 flex items-center justify-center border-2 border-black dark:border-white">
+          <ChevronRight className="h-5 w-5 text-black dark:text-white" />
+        </div>
       </div>
     </button>
   );
@@ -119,18 +121,18 @@ export function NetWorthEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-xs max-h-[85vh] overflow-y-auto"
+        className="sm:max-w-sm max-h-[85vh] overflow-y-auto rounded-2xl border-2 border-black dark:border-white shadow-[6px_6px_0_#1a1a1a] dark:shadow-[6px_6px_0_#FFFBF0]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="pb-2">
-          <DialogTitle className="text-sm font-medium">Edit Assets</DialogTitle>
+        <DialogHeader className="pb-3 border-b-2 border-black dark:border-white -mx-6 -mt-6 px-6 pt-6 mb-4 bg-pastel-green rounded-t-2xl">
+          <DialogTitle className="text-lg font-bold text-black dark:text-white">Edit Assets</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {/* Asset Fields */}
           {ASSET_CATEGORIES.map((cat) => (
-            <div key={cat.key}>
-              <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+            <div key={cat.key} className="space-y-1.5">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
                 {cat.label}
               </label>
               <Input
@@ -142,7 +144,7 @@ export function NetWorthEditDialog({
                     [cat.key]: e.target.value,
                   }))
                 }
-                className="font-mono h-7 text-xs"
+                className="font-mono h-10 text-sm font-bold border-2 border-black dark:border-white rounded-lg"
               />
             </div>
           ))}
@@ -151,7 +153,7 @@ export function NetWorthEditDialog({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-7 text-xs font-medium rounded bg-foreground text-background transition-colors hover:bg-foreground/90 disabled:opacity-50 disabled:pointer-events-none mt-2"
+            className="w-full h-12 rounded-xl text-sm font-bold transition-all border-2 border-black dark:border-white bg-pastel-blue text-black shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_#1a1a1a] dark:hover:shadow-[4px_4px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {saving ? "Saving..." : "Save"}
           </button>

@@ -1,5 +1,4 @@
 import { useMemo, memo } from "react";
-import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { formatCurrency } from "./constants";
 import { getCurrentFDValue } from "./fdUtils";
@@ -58,7 +57,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
       transition={{ duration: 0.3, delay: 0.15 }}
       className="space-y-3"
     >
-      <Card className="p-4 border border-border bg-card">
+      <div className="p-4 rounded-xl border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
         <div className="relative h-48 flex items-center justify-center">
           <LabeledPieChart
             data={pieData}
@@ -66,7 +65,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
             formatValue={formatCurrency}
           />
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 });

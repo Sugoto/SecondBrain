@@ -14,7 +14,6 @@ import {
   Scale,
   ArrowUpDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import type { ShoppingItem } from "@/lib/supabase";
@@ -88,7 +87,7 @@ function ItemForm({
       onSubmit={handleSubmit}
       className="overflow-hidden"
     >
-      <div className="p-3 rounded-lg border border-border bg-card space-y-3">
+      <div className="p-4 rounded-xl border-2 border-black dark:border-white bg-pastel-blue shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] space-y-3">
         {/* Item name */}
         <Input
           placeholder="Item name"
@@ -178,23 +177,21 @@ function ItemForm({
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons - neo-brutalism style */}
         <div className="flex gap-2">
-          <Button
+          <button
             type="button"
-            variant="outline"
-            size="sm"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex-1 h-8"
+            className="flex-1 h-9 rounded-lg bg-white border-2 border-black dark:border-white text-black font-bold text-sm transition-all hover:bg-pastel-pink disabled:opacity-50 flex items-center justify-center gap-1"
           >
-            <X className="h-3.5 w-3.5 mr-1" />
+            <X className="h-3.5 w-3.5" />
             Cancel
-          </Button>
+          </button>
           <button
             type="submit"
             disabled={!name.trim() || isSubmitting}
-            className="flex-1 h-8 rounded-md bg-foreground text-background text-sm font-medium transition-colors hover:bg-foreground/90 disabled:opacity-50"
+            className="flex-1 h-9 rounded-lg bg-pastel-green border-2 border-black dark:border-white text-black text-sm font-bold transition-all shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
           >
             {isSubmitting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin mx-auto" />
@@ -206,17 +203,15 @@ function ItemForm({
 
         {/* Delete button (only in edit mode) */}
         {onDelete && (
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
             onClick={onDelete}
             disabled={isSubmitting}
-            className="w-full h-8 text-muted-foreground hover:text-foreground hover:bg-accent"
+            className="w-full h-9 rounded-lg bg-white border-2 border-black dark:border-white text-black/60 font-bold text-sm transition-all hover:bg-red-100 hover:text-red-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
           >
-            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+            <Trash2 className="h-3.5 w-3.5" />
             Delete Item
-          </Button>
+          </button>
         )}
       </div>
     </motion.form>
@@ -281,6 +276,9 @@ function ShoppingItemRow({
   // Cost per gram of protein (use cost per 100g since protein is per 100g)
   const costPerProtein = item.protein > 0 ? costPer100g / item.protein : 0;
 
+  // Calories per gram of protein
+  const caloriesPerProtein = item.protein > 0 ? item.calories / item.protein : 0;
+
   return (
     <motion.div
       layout
@@ -288,24 +286,26 @@ function ShoppingItemRow({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20, height: 0 }}
       transition={{ duration: 0.2 }}
-      className={`flex items-center gap-3 p-2.5 rounded-lg border border-border bg-card transition-all ${item.checked ? "opacity-60" : ""
+      className={`flex items-center gap-3 p-3 rounded-xl border-2 border-black dark:border-white bg-card transition-all ${item.checked 
+        ? "opacity-50 bg-muted" 
+        : "shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
         }`}
     >
       {/* Checkbox */}
       <button
         onClick={() => onToggle(item.id, !item.checked)}
-        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${item.checked
-          ? "bg-foreground border-foreground"
-          : "border-muted-foreground/30 hover:border-foreground"
+        className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${item.checked
+          ? "bg-black dark:bg-white border-black dark:border-white"
+          : "border-black dark:border-white bg-white dark:bg-white/10 hover:bg-pastel-green"
           }`}
       >
-        {item.checked && <Check className="h-3 w-3 text-background" />}
+        {item.checked && <Check className="h-4 w-4 text-white dark:text-black" />}
       </button>
 
       {/* Item details */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.name}</p>
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+        <p className="text-sm font-bold truncate">{item.name}</p>
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
           <span
             className="flex items-center gap-0.5"
             title={`${item.calories} kcal for ${weight}g`}
@@ -330,8 +330,15 @@ function ShoppingItemRow({
             className="flex items-center gap-0.5"
             title={`₹${costPerProtein.toFixed(2)} per gram of protein`}
           >
-            <span className="font-medium">₹/g</span>
+            <span className="font-bold">₹/g</span>
             {costPerProtein.toFixed(2)}
+          </span>
+          <span
+            className="flex items-center gap-0.5"
+            title={`${caloriesPerProtein.toFixed(1)} calories per gram of protein`}
+          >
+            <span className="font-bold">cal/g</span>
+            {caloriesPerProtein.toFixed(1)}
           </span>
         </div>
       </div>
@@ -339,7 +346,7 @@ function ShoppingItemRow({
       {/* Edit button */}
       <button
         onClick={() => onEdit(item)}
-        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+        className="p-2 rounded-lg border-2 border-black dark:border-white bg-white dark:bg-white/10 text-black dark:text-white hover:bg-pastel-pink transition-colors"
       >
         <Pencil className="h-3.5 w-3.5" />
       </button>
@@ -356,17 +363,19 @@ type SortOption =
   | "calories_asc"
   | "calories_desc"
   | "costPerProtein_asc"
-  | "costPerProtein_desc";
+  | "costPerProtein_desc"
+  | "caloriesPerProtein_asc"
+  | "caloriesPerProtein_desc";
 
 export function ShoppingList() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("costPerProtein_asc");
+  const [sortBy, setSortBy] = useState<SortOption>("caloriesPerProtein_asc");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("per100g");
 
   // Toggle sort for a given metric (cycles: none -> desc -> asc -> none)
   const toggleSort = (
-    metric: "calories" | "protein" | "cost" | "costPerProtein"
+    metric: "calories" | "protein" | "cost" | "costPerProtein" | "caloriesPerProtein"
   ) => {
     const descKey = `${metric}_desc` as SortOption;
     const ascKey = `${metric}_asc` as SortOption;
@@ -382,7 +391,7 @@ export function ShoppingList() {
 
   // Get sort indicator for a metric
   const getSortIndicator = (
-    metric: "calories" | "protein" | "cost" | "costPerProtein"
+    metric: "calories" | "protein" | "cost" | "costPerProtein" | "caloriesPerProtein"
   ) => {
     if (sortBy === `${metric}_desc`) return "↓";
     if (sortBy === `${metric}_asc`) return "↑";
@@ -447,7 +456,14 @@ export function ShoppingList() {
   const avgCostPerProtein =
     proteinTotal > 0 ? costPer100gTotal / proteinTotal : 0;
 
-  const displayTotals = { ...baseTotals, costPerProtein: avgCostPerProtein };
+  // Calculate average calories per protein for checked items
+  const caloriesTotal = items
+    .filter((item) => item.checked)
+    .reduce((acc, item) => acc + item.calories, 0);
+  const avgCaloriesPerProtein =
+    proteinTotal > 0 ? caloriesTotal / proteinTotal : 0;
+
+  const displayTotals = { ...baseTotals, costPerProtein: avgCostPerProtein, caloriesPerProtein: avgCaloriesPerProtein };
 
   // Sort items - calories & protein are always per 100g, only cost needs normalization
   const sortedItems = [...items].sort((a, b) => {
@@ -470,6 +486,10 @@ export function ShoppingList() {
     const costPerProteinA = a.protein > 0 ? costPer100gA / a.protein : Infinity;
     const costPerProteinB = b.protein > 0 ? costPer100gB / b.protein : Infinity;
 
+    // Calories per gram of protein
+    const caloriesPerProteinA = a.protein > 0 ? a.calories / a.protein : Infinity;
+    const caloriesPerProteinB = b.protein > 0 ? b.calories / b.protein : Infinity;
+
     switch (sortBy) {
       case "protein_asc":
         return proteinA - proteinB;
@@ -487,6 +507,10 @@ export function ShoppingList() {
         return costPerProteinA - costPerProteinB;
       case "costPerProtein_desc":
         return costPerProteinB - costPerProteinA;
+      case "caloriesPerProtein_asc":
+        return caloriesPerProteinA - caloriesPerProteinB;
+      case "caloriesPerProtein_desc":
+        return caloriesPerProteinB - caloriesPerProteinA;
       default:
         return 0;
     }
@@ -518,39 +542,39 @@ export function ShoppingList() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    <div className="flex flex-col h-full gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Shopping List</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wide">Shopping List</h3>
 
         <div className="flex items-center gap-2">
-          {/* Display mode toggle */}
-          <div className="flex rounded-md overflow-hidden text-[10px] border border-border">
+          {/* Display mode toggle - neo-brutalism style */}
+          <div className="flex rounded-lg overflow-hidden text-[10px] border-2 border-black dark:border-white">
             <button
               onClick={() => setDisplayMode("raw")}
-              className={`px-2 py-1 transition-colors ${displayMode === "raw"
-                ? "bg-foreground text-background"
-                : "hover:bg-muted"
+              className={`px-2 py-1.5 font-bold transition-colors ${displayMode === "raw"
+                ? "bg-pastel-blue text-black"
+                : "hover:bg-muted text-foreground"
                 }`}
             >
               Raw
             </button>
-            <div className="w-px bg-border" />
+            <div className="w-0.5 bg-black dark:bg-white" />
             <button
               onClick={() => setDisplayMode("per100g")}
-              className={`px-2 py-1 transition-colors ${displayMode === "per100g"
-                ? "bg-foreground text-background"
-                : "hover:bg-muted"
+              className={`px-2 py-1.5 font-bold transition-colors ${displayMode === "per100g"
+                ? "bg-pastel-blue text-black"
+                : "hover:bg-muted text-foreground"
                 }`}
             >
               /100g
             </button>
-            <div className="w-px bg-border" />
+            <div className="w-0.5 bg-black dark:bg-white" />
             <button
               onClick={() => setDisplayMode("perServe")}
-              className={`px-2 py-1 transition-colors ${displayMode === "perServe"
-                ? "bg-foreground text-background"
-                : "hover:bg-muted"
+              className={`px-2 py-1.5 font-bold transition-colors ${displayMode === "perServe"
+                ? "bg-pastel-blue text-black"
+                : "hover:bg-muted text-foreground"
                 }`}
             >
               /serve
@@ -558,34 +582,32 @@ export function ShoppingList() {
           </div>
 
           {!showAddForm && (
-            <Button
-              size="sm"
-              variant="outline"
+            <button
               onClick={() => setShowAddForm(true)}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex items-center justify-center rounded-lg border-2 border-black dark:border-white bg-pastel-pink shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] transition-all"
             >
-              <Plus className="h-4 w-4" />
-            </Button>
+              <Plus className="h-4 w-4 text-black dark:text-white" />
+            </button>
           )}
         </div>
       </div>
 
-      {/* Totals summary (only checked items) - clickable for sorting */}
-      <div className="grid grid-cols-4 gap-1.5 rounded-lg">
+      {/* Totals summary (only checked items) - neo-brutalism style */}
+      <div className="grid grid-cols-5 gap-1.5 p-3 rounded-xl bg-pastel-yellow border-2 border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
         <button
           onClick={() => toggleSort("calories")}
-          className={`text-center py-1 rounded-md transition-all ${sortBy.startsWith("calories")
-            ? "bg-accent"
-            : "hover:bg-accent/50"
+          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy === "calories_asc" || sortBy === "calories_desc"
+            ? "bg-white border-black dark:border-white"
+            : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-xs font-mono font-semibold text-foreground">
+          <p className="text-sm font-mono font-bold text-black">
             {Math.round(displayTotals.calories).toLocaleString()}
           </p>
-          <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             kcal
             {getSortIndicator("calories") ? (
-              <span className="text-foreground">
+              <span className="text-black">
                 {getSortIndicator("calories")}
               </span>
             ) : (
@@ -595,18 +617,18 @@ export function ShoppingList() {
         </button>
         <button
           onClick={() => toggleSort("protein")}
-          className={`text-center py-1 rounded-md transition-all ${sortBy.startsWith("protein")
-            ? "bg-accent"
-            : "hover:bg-accent/50"
+          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy.startsWith("protein")
+            ? "bg-white border-black dark:border-white"
+            : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-xs font-mono font-semibold text-foreground">
+          <p className="text-sm font-mono font-bold text-black">
             {Math.round(displayTotals.protein)}g
           </p>
-          <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             protein
             {getSortIndicator("protein") ? (
-              <span className="text-foreground">
+              <span className="text-black">
                 {getSortIndicator("protein")}
               </span>
             ) : (
@@ -616,18 +638,18 @@ export function ShoppingList() {
         </button>
         <button
           onClick={() => toggleSort("cost")}
-          className={`text-center py-1 rounded-md transition-all ${sortBy === "cost_asc" || sortBy === "cost_desc"
-            ? "bg-accent"
-            : "hover:bg-accent/50"
+          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy === "cost_asc" || sortBy === "cost_desc"
+            ? "bg-white border-black dark:border-white"
+            : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-xs font-mono font-semibold text-foreground">
+          <p className="text-sm font-mono font-bold text-black">
             ₹{Math.round(displayTotals.cost).toLocaleString()}
           </p>
-          <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             cost
             {getSortIndicator("cost") ? (
-              <span className="text-foreground">{getSortIndicator("cost")}</span>
+              <span className="text-black">{getSortIndicator("cost")}</span>
             ) : (
               <ArrowUpDown className="h-2 w-2 opacity-40" />
             )}
@@ -635,18 +657,18 @@ export function ShoppingList() {
         </button>
         <button
           onClick={() => toggleSort("costPerProtein")}
-          className={`text-center py-1 rounded-md transition-all ${sortBy.startsWith("costPerProtein")
-            ? "bg-accent"
-            : "hover:bg-accent/50"
+          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy.startsWith("costPerProtein")
+            ? "bg-white border-black dark:border-white"
+            : "border-transparent hover:bg-white/50"
             }`}
         >
-          <p className="text-xs font-mono font-semibold text-foreground">
+          <p className="text-sm font-mono font-bold text-black">
             ₹{displayTotals.costPerProtein.toFixed(2)}
           </p>
-          <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
             ₹/g
             {getSortIndicator("costPerProtein") ? (
-              <span className="text-foreground">
+              <span className="text-black">
                 {getSortIndicator("costPerProtein")}
               </span>
             ) : (
@@ -654,10 +676,28 @@ export function ShoppingList() {
             )}
           </p>
         </button>
+        <button
+          onClick={() => toggleSort("caloriesPerProtein")}
+          className={`text-center py-2 rounded-lg transition-all border-2 ${sortBy.startsWith("caloriesPerProtein")
+            ? "bg-white border-black dark:border-white"
+            : "border-transparent hover:bg-white/50"
+            }`}
+        >
+          <p className="text-sm font-mono font-bold text-black">
+            {displayTotals.caloriesPerProtein.toFixed(1)}
+          </p>
+          <p className="text-[9px] text-black/70 font-bold flex items-center justify-center gap-0.5 uppercase">
+            cal/g
+            {getSortIndicator("caloriesPerProtein") ? (
+              <span className="text-black">
+                {getSortIndicator("caloriesPerProtein")}
+              </span>
+            ) : (
+              <ArrowUpDown className="h-2 w-2 opacity-40" />
+            )}
+          </p>
+        </button>
       </div>
-
-      {/* Divider */}
-      <div className="h-px w-full bg-border" />
 
       {/* Add item form */}
       <AnimatePresence>
@@ -696,7 +736,7 @@ export function ShoppingList() {
       </AnimatePresence>
 
       {/* Items list */}
-      <div className="flex-1 min-h-0 space-y-2.5 overflow-y-auto">
+      <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto">
         <AnimatePresence mode="popLayout">
           {sortedItems
             .filter((item) => item.id !== editingItem?.id)
@@ -715,11 +755,11 @@ export function ShoppingList() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-6 text-muted-foreground"
+            className="text-center py-8 rounded-xl border-2 border-dashed border-black/30 dark:border-white/30"
           >
-            <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-30" />
-            <p className="text-xs">No items yet</p>
-            <p className="text-[10px] opacity-60">Tap + to add grocery items</p>
+            <ShoppingCart className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm font-bold">No items yet</p>
+            <p className="text-xs text-muted-foreground">Tap + to add grocery items</p>
           </motion.div>
         )}
       </div>
