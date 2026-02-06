@@ -117,43 +117,43 @@ const FundSection = memo(function FundSection({
         delay: index * 0.05,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="border-t-2 border-black/10 dark:border-white/10 first:border-t-0"
+      className="border-t border-black/10 dark:border-white/10 first:border-t-0"
     >
       {/* Fund Header */}
       <button
         onClick={onToggle}
-        className="w-full py-3 flex items-center gap-3 text-left hover:bg-pastel-yellow/30 transition-colors"
+        className="w-full py-2 flex items-center gap-2 text-left hover:bg-pastel-yellow/30 transition-colors"
       >
         {/* Trend indicator */}
-        <div className="h-7 w-7 rounded-md bg-pastel-blue border border-black/20 dark:border-white/20 flex items-center justify-center shrink-0">
+        <div className="h-5 w-5 rounded bg-pastel-blue border border-black/20 dark:border-white/20 flex items-center justify-center shrink-0">
           {isPositiveDay ? (
-            <TrendingUp className="h-3.5 w-3.5 text-black dark:text-white" />
+            <TrendingUp className="h-2.5 w-2.5 text-black dark:text-white" />
           ) : (
-            <TrendingDown className="h-3.5 w-3.5 text-black dark:text-white" />
+            <TrendingDown className="h-2.5 w-2.5 text-black dark:text-white" />
           )}
         </div>
 
         {/* Fund Name */}
         <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-sm truncate text-foreground">{fund.shortName}</h4>
+          <h4 className="font-bold text-xs truncate text-foreground">{fund.shortName}</h4>
         </div>
 
         {/* Current Value + Changes */}
         {hasInvestments && (
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-sm font-bold font-mono text-foreground">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs font-bold font-mono text-foreground">
               ₹
               {currentValue.toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
               })}
             </span>
-            <span className="text-xs font-mono font-medium text-muted-foreground">
+            <span className="text-[10px] font-mono font-medium text-muted-foreground">
               {isNetUp ? "+" : "-"}₹
               {Math.abs(netChange).toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
               })}
             </span>
-            <span className="text-[10px] font-mono text-muted-foreground">
+            <span className="text-[9px] font-mono text-muted-foreground">
               ({isPositiveDay ? "+" : "-"}₹
               {Math.abs(dailyChangeAmount).toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
@@ -165,7 +165,7 @@ const FundSection = memo(function FundSection({
 
         {/* Expand Icon */}
         <ChevronDown
-          className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""
+          className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""
             }`}
         />
       </button>
@@ -180,17 +180,17 @@ const FundSection = memo(function FundSection({
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div className="pb-4">
+            <div className="pb-3">
               {/* Full Name */}
-              <p className="text-xs text-muted-foreground font-medium truncate mb-3">
+              <p className="text-[10px] text-muted-foreground font-medium truncate mb-2">
                 {fund.fullName}
               </p>
 
               {/* Sparkline */}
               <svg
                 width="100%"
-                height="28"
-                className="mb-4"
+                height="20"
+                className="mb-2"
                 viewBox="0 0 100 28"
                 preserveAspectRatio="none"
               >
@@ -221,7 +221,7 @@ const FundSection = memo(function FundSection({
               </svg>
 
               {/* Period Returns */}
-              <div className="flex items-center mb-4 p-2 rounded-lg bg-pastel-purple/30 border border-black/10 dark:border-white/10">
+              <div className="flex items-center mb-2 p-1.5 rounded-md bg-pastel-purple/30 border border-black/10 dark:border-white/10">
                 {[
                   { label: "1D", value: fund.dailyChangePercent },
                   { label: "1M", value: fund.monthChangePercent },
@@ -231,32 +231,32 @@ const FundSection = memo(function FundSection({
                 ].map((period, idx) => (
                   <div key={period.label} className="flex items-center flex-1">
                     <div className="flex-1 text-center">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase">
                         {period.label}
                       </p>
-                      <p className="text-xs font-mono font-bold text-foreground">
+                      <p className="text-[10px] font-mono font-bold text-foreground">
                         {period.value >= 0 ? "+" : ""}
                         {period.value.toFixed(1)}%
                       </p>
                     </div>
-                    {idx < 4 && <div className="w-0.5 h-6 bg-black/10 dark:bg-white/10" />}
+                    {idx < 4 && <div className="w-px h-5 bg-black/10 dark:bg-white/10" />}
                   </div>
                 ))}
               </div>
 
               {/* Existing Investments */}
               {hasInvestments && (
-                <div className="space-y-2 mb-4">
+                <div className="space-y-1.5 mb-2">
                   {investments.map((inv) => (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-pastel-green/30 border border-black/10 dark:border-white/10"
+                      className="flex items-center justify-between py-1.5 px-2 rounded-md bg-pastel-green/30 border border-black/10 dark:border-white/10"
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-mono font-bold text-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-foreground">
                           ₹{inv.amount.toLocaleString("en-IN")}
                         </span>
-                        <span className="text-xs text-muted-foreground font-medium">
+                        <span className="text-[10px] text-muted-foreground font-medium">
                           {new Date(inv.date).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
@@ -269,9 +269,9 @@ const FundSection = memo(function FundSection({
                           e.stopPropagation();
                           onDeleteInvestment(inv.id);
                         }}
-                        className="p-1.5 rounded-md hover:bg-pastel-pink border border-transparent hover:border-black/20 text-muted-foreground hover:text-foreground transition-all"
+                        className="p-1 rounded hover:bg-pastel-pink border border-transparent hover:border-black/20 text-muted-foreground hover:text-foreground transition-all"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-2.5 w-2.5" />
                       </button>
                     </div>
                   ))}
@@ -279,20 +279,20 @@ const FundSection = memo(function FundSection({
               )}
 
               {/* Add Investment Form */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Input
                   type="number"
                   value={investAmount}
                   onChange={(e) => setInvestAmount(e.target.value)}
                   placeholder="₹"
-                  className="h-9 text-sm font-mono flex-1 border-2 border-black dark:border-white rounded-lg"
+                  className="h-7 text-xs font-mono flex-1 border-[1.5px] border-black dark:border-white rounded-md"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <Input
                   type="date"
                   value={investDate}
                   onChange={(e) => setInvestDate(e.target.value)}
-                  className="h-9 text-sm w-32 border-2 border-black dark:border-white rounded-lg"
+                  className="h-7 text-xs w-28 border-[1.5px] border-black dark:border-white rounded-md"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <button
@@ -301,9 +301,9 @@ const FundSection = memo(function FundSection({
                     handleInvest();
                   }}
                   disabled={adding}
-                  className="h-9 w-9 flex items-center justify-center rounded-lg border-2 border-black dark:border-white bg-pastel-green text-black shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50"
+                  className="h-7 w-7 flex items-center justify-center rounded-md border-[1.5px] border-black dark:border-white bg-pastel-green text-black shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50"
                 >
-                  {adding ? "..." : <Plus className="h-4 w-4" />}
+                  {adding ? "..." : <Plus className="h-3 w-3" />}
                 </button>
               </div>
             </div>
@@ -421,18 +421,18 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
 
   if (error && funds.length === 0) {
     return (
-      <div className="space-y-3">
-        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+      <div className="space-y-2">
+        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
           Mutual Funds
         </h3>
-        <div className="p-4 rounded-xl border-2 border-dashed border-black/30 dark:border-white/30">
-          <div className="text-center py-2">
-            <p className="text-sm font-medium text-muted-foreground mb-2">
+        <div className="p-3 rounded-lg border-[1.5px] border-dashed border-black/30 dark:border-white/30">
+          <div className="text-center py-1">
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">
               Failed to load mutual fund data
             </p>
             <button
               onClick={refresh}
-              className="text-sm font-bold text-foreground hover:underline"
+              className="text-xs font-bold text-foreground hover:underline"
             >
               Try again
             </button>
@@ -443,15 +443,15 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
           Mutual Funds
         </h3>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {lastUpdated && (
-            <p className="text-xs font-medium text-muted-foreground">
+            <p className="text-[10px] font-medium text-muted-foreground">
               {lastUpdated.toLocaleTimeString("en-IN", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -462,11 +462,11 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
             onClick={refresh}
             disabled={isRefetching}
             whileTap={{ scale: 0.9 }}
-            className="h-8 w-8 flex items-center justify-center rounded-lg border-2 border-black dark:border-white bg-pastel-blue text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_#1a1a1a] dark:hover:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50"
+            className="h-6 w-6 flex items-center justify-center rounded-md border-[1.5px] border-black dark:border-white bg-pastel-blue text-black dark:text-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw
-              className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""
+              className={`h-3 w-3 ${isRefetching ? "animate-spin" : ""
                 }`}
             />
           </motion.button>
@@ -474,29 +474,29 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
       </div>
 
       {/* Single Collapsible Card */}
-      <div className="overflow-hidden rounded-xl border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
+      <div className="overflow-hidden rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
         {/* Summary Header - Clickable to expand */}
         <button
           onClick={() => setIsCardExpanded(!isCardExpanded)}
-          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-pastel-yellow/30 transition-colors"
+          className="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-pastel-yellow/30 transition-colors"
         >
-          <span className="text-base font-bold font-mono text-foreground">
+          <span className="text-sm font-bold font-mono text-foreground">
             ₹
             {portfolioTotals.current.toLocaleString("en-IN", {
               maximumFractionDigits: 0,
             })}
           </span>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {hasPortfolio && (
               <>
-                <span className="text-sm font-mono font-medium text-muted-foreground">
+                <span className="text-xs font-mono font-medium text-muted-foreground">
                   {isNetUp ? "+" : "-"}₹
                   {Math.abs(netChange).toLocaleString("en-IN", {
                     maximumFractionDigits: 0,
                   })}
                 </span>
-                <span className="text-xs font-mono text-muted-foreground">
+                <span className="text-[10px] font-mono text-muted-foreground">
                   ({isPortfolioUp ? "+" : "-"}₹
                   {Math.abs(portfolioTotals.dailyChange).toLocaleString(
                     "en-IN",
@@ -508,9 +508,9 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
                 </span>
               </>
             )}
-            <div className="h-7 w-7 rounded-md bg-white dark:bg-white/10 border-2 border-black dark:border-white flex items-center justify-center">
+            <div className="h-5 w-5 rounded flex items-center justify-center border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10">
               <ChevronDown
-                className={`h-4 w-4 text-black dark:text-white transition-transform ${isCardExpanded ? "rotate-180" : ""
+                className={`h-3 w-3 text-black dark:text-white transition-transform ${isCardExpanded ? "rotate-180" : ""
                   }`}
               />
             </div>
@@ -527,9 +527,9 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
               transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="overflow-hidden"
             >
-              <div className="px-4 pb-4">
+              <div className="px-3 pb-3">
                 {/* Divider */}
-                <div className="h-0.5 bg-black/10 dark:bg-white/10 mb-3" />
+                <div className="h-px bg-black/10 dark:bg-white/10 mb-2" />
 
                 {/* Fund List */}
                 {funds.length > 0 ? (
@@ -550,8 +550,8 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
                     ))}
                   </div>
                 ) : (
-                  <div className="py-4 text-center">
-                    <p className="text-sm font-medium text-muted-foreground">
+                  <div className="py-3 text-center">
+                    <p className="text-xs font-medium text-muted-foreground">
                       No funds in watchlist
                     </p>
                   </div>

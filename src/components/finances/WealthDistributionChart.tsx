@@ -55,14 +55,15 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay: 0.15 }}
-      className="space-y-3"
+      className="space-y-2"
     >
-      <div className="p-4 rounded-xl border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
-        <div className="relative h-48 flex items-center justify-center">
+      <div className="p-3 rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+        <div className="relative h-40 flex items-center justify-center">
           <LabeledPieChart
             data={pieData}
             theme={theme}
             formatValue={formatCurrency}
+            size={160}
           />
         </div>
       </div>

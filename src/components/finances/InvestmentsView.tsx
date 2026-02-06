@@ -31,7 +31,7 @@ export function InvestmentsView() {
   );
 
   return (
-    <div className="pb-4 pt-4 px-4">
+    <div className="pb-3 pt-3 px-3">
       <NetWorthCard
         netWorth={netWorth}
         onEdit={() => setEditDialogOpen(true)}
@@ -44,7 +44,7 @@ export function InvestmentsView() {
         onUpdate={updateUserStats}
       />
 
-      <div className="max-w-6xl mx-auto pt-4 flex flex-col gap-6">
+      <div className="max-w-6xl mx-auto pt-3 flex flex-col gap-3">
         <WealthDistributionChart userStats={userStats} theme={theme} mutualFundsValue={mfPortfolioValue} />
 
         <MutualFundWatchlist theme={theme} />

@@ -21,22 +21,22 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
   const epfPercent = total > 0 ? (epf / total) * 100 : 0;
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+    <div className="space-y-2">
+      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
         Provident Funds
       </h3>
-      <div className="overflow-hidden rounded-xl border-2 border-black dark:border-white bg-card shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]">
+      <div className="overflow-hidden rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
         {/* Summary Header - Clickable to expand */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-4 py-3 flex items-center justify-between text-left transition-colors hover:bg-pastel-yellow/30"
+          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors hover:bg-pastel-yellow/30"
         >
-          <span className="text-base font-bold font-mono text-foreground">
+          <span className="text-sm font-bold font-mono text-foreground">
             ₹{total.toLocaleString("en-IN")}
           </span>
-          <div className="h-7 w-7 rounded-md bg-white dark:bg-white/10 border-2 border-black dark:border-white flex items-center justify-center">
+          <div className="h-5 w-5 rounded flex items-center justify-center border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10">
             <ChevronDown
-              className={`h-4 w-4 text-black dark:text-white transition-transform ${isExpanded ? "rotate-180" : ""}`}
+              className={`h-3 w-3 text-black dark:text-white transition-transform ${isExpanded ? "rotate-180" : ""}`}
             />
           </div>
         </button>
@@ -51,12 +51,12 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
               transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="overflow-hidden"
             >
-              <div className="px-4 pb-4">
+              <div className="px-3 pb-3">
                 {/* Divider */}
-                <div className="h-0.5 bg-black/10 dark:bg-white/10 mb-4" />
+                <div className="h-px bg-black/10 dark:bg-white/10 mb-2" />
 
                 {/* Progress Bar */}
-                <div className="h-3 rounded-full overflow-hidden flex bg-white dark:bg-white/10 border-2 border-black/20 dark:border-white/20 mb-3">
+                <div className="h-2 rounded-full overflow-hidden flex bg-white dark:bg-white/10 border border-black/20 dark:border-white/20 mb-2">
                   {ppf > 0 && (
                     <div
                       className="h-full bg-black dark:bg-white"
@@ -77,20 +77,20 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
                 {/* Labels */}
                 <div className="flex items-center justify-between">
                   {ppf > 0 && (
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-pastel-blue/50 border border-black/10 dark:border-white/10">
-                      <div className="w-3 h-3 rounded-md bg-black dark:bg-white" />
-                      <span className="text-xs font-bold text-muted-foreground">PPF</span>
-                      <span className="text-sm font-mono font-bold text-foreground">₹{ppf.toLocaleString("en-IN")}</span>
+                    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-pastel-blue/50 border border-black/10 dark:border-white/10">
+                      <div className="w-2 h-2 rounded bg-black dark:bg-white" />
+                      <span className="text-[10px] font-bold text-muted-foreground">PPF</span>
+                      <span className="text-xs font-mono font-bold text-foreground">₹{ppf.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   {epf > 0 && (
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-pastel-purple/50 border border-black/10 dark:border-white/10">
+                    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-pastel-purple/50 border border-black/10 dark:border-white/10">
                       <div
-                        className="w-3 h-3 rounded-md"
+                        className="w-2 h-2 rounded"
                         style={{ background: isDark ? "#71717a" : "#a1a1aa" }}
                       />
-                      <span className="text-xs font-bold text-muted-foreground">EPF</span>
-                      <span className="text-sm font-mono font-bold text-foreground">₹{epf.toLocaleString("en-IN")}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground">EPF</span>
+                      <span className="text-xs font-mono font-bold text-foreground">₹{epf.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                 </div>

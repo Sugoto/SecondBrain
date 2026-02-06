@@ -27,6 +27,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.remove('dark')
     }
     localStorage.setItem('theme', theme)
+
+    // Update theme-color meta tag for Android status bar
+    const themeColor = theme === 'dark' ? '#1a1a2e' : '#FDF6E3'
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', themeColor)
+    }
   }, [theme])
 
   const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
