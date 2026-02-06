@@ -94,6 +94,7 @@ export function filterByTimeRange(
   transactions: Transaction[],
   timeFilter: TimeFilter,
   customRange?: DateRange,
+  options?: { disableProrationSpreading?: boolean },
 ): Transaction[] {
   const { today, startOfWeek, startOfMonth } = getDateRanges();
 
@@ -119,7 +120,9 @@ export function filterByTimeRange(
     }
 
     // For prorated transactions in "month" view, check if proration period overlaps
+    // (unless proration spreading is disabled)
     if (
+      !options?.disableProrationSpreading &&
       timeFilter === "month" &&
       txn.prorate_months &&
       txn.prorate_months > 1
@@ -172,12 +175,13 @@ export type CategoryTotal = {
 export function getCategoryTotals(
   transactions: Transaction[],
   timeFilter: TimeFilter,
-  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange },
+  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange; disableProrationSpreading?: boolean },
 ): Record<string, CategoryTotal> {
   const filtered = filterByTimeRange(
     transactions,
     timeFilter,
     options?.customRange,
+    { disableProrationSpreading: options?.disableProrationSpreading },
   );
 
   const totals: Record<string, CategoryTotal> = {};
@@ -194,8 +198,9 @@ export function getCategoryTotals(
 
     const cat = txn.category || "Uncategorized";
     if (totals[cat]) {
-      // Use prorated amount for totals
-      totals[cat].total += getMonthlyAmount(txn);
+      // Use full amount when proration spreading is disabled, otherwise prorated amount
+      const amount = options?.disableProrationSpreading ? txn.amount : getMonthlyAmount(txn);
+      totals[cat].total += amount;
       totals[cat].count += 1;
       totals[cat].transactions.push(txn);
     }
@@ -214,12 +219,13 @@ export type CategoryTotalsByBudgetType = {
 export function getCategoryTotalsByBudgetType(
   transactions: Transaction[],
   timeFilter: TimeFilter,
-  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange },
+  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange; disableProrationSpreading?: boolean },
 ): CategoryTotalsByBudgetType {
   const filtered = filterByTimeRange(
     transactions,
     timeFilter,
     options?.customRange,
+    { disableProrationSpreading: options?.disableProrationSpreading },
   );
 
   const result: CategoryTotalsByBudgetType = {
@@ -247,7 +253,9 @@ export function getCategoryTotalsByBudgetType(
     const bucket = budgetType === "need" ? result.needs : result.wants;
 
     if (bucket[cat]) {
-      bucket[cat].total += getMonthlyAmount(txn);
+      // Use full amount when proration spreading is disabled, otherwise prorated amount
+      const amount = options?.disableProrationSpreading ? txn.amount : getMonthlyAmount(txn);
+      bucket[cat].total += amount;
       bucket[cat].count += 1;
       bucket[cat].transactions.push(txn);
     }

@@ -11,7 +11,6 @@ import {
 import { CategoryCard } from "./CategoryCard";
 import { Footer } from "./Footer";
 import type { CategoryTotal, CategoryTotalsByBudgetType } from "./utils";
-import { getMonthlyAmount, isProratedInMonth } from "./utils";
 import type { ChartMode } from "./types";
 import { useTheme } from "@/hooks/useTheme";
 import { LabeledPieChart } from "@/components/shared";
@@ -221,6 +220,7 @@ export const TrendsView = memo(function TrendsView({
   }, [transactions]);
 
   // Monthly spending data for the last 6 months
+  // Note: Uses actual transaction dates and full amounts (no proration) to show true spending trends
   const monthlyData = useMemo(() => {
     const months: { month: string; label: string; total: number }[] = [];
     const now = new Date();
@@ -233,14 +233,11 @@ export const TrendsView = memo(function TrendsView({
         .filter((t) => {
           if (t.excluded_from_budget) return false;
 
-          if (t.prorate_months && t.prorate_months > 1) {
-            return isProratedInMonth(t, monthStart);
-          }
-
+          // Use actual transaction date only (no proration spreading)
           const txnDate = new Date(t.date);
           return txnDate >= monthStart && txnDate <= monthEnd;
         })
-        .reduce((sum, t) => sum + getMonthlyAmount(t), 0);
+        .reduce((sum, t) => sum + t.amount, 0); // Full amount, not prorated
 
       const label = monthStart.toLocaleDateString("en-IN", { month: "short" });
       months.push({

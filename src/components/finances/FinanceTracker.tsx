@@ -449,20 +449,24 @@ export function FinanceTracker({
   }, [transactions, timeFilter, customDateRange, budgetTypeFilter]);
 
   // Category totals for display (includes all transactions)
+  // Proration spreading is disabled - only show transactions from the actual selected period
   const categoryTotals = useMemo(
     () =>
       getCategoryTotals(transactions, timeFilter, {
         customRange: customDateRange,
+        disableProrationSpreading: true,
       }),
     [transactions, timeFilter, customDateRange]
   );
 
   // Category totals grouped by budget type (considers manual overrides)
+  // Proration spreading is disabled - only show transactions from the actual selected period
   const categoryTotalsByBudgetType = useMemo(
     () =>
       getCategoryTotalsByBudgetType(transactions, timeFilter, {
         excludeBudgetExcluded: true,
         customRange: customDateRange,
+        disableProrationSpreading: true,
       }),
     [transactions, timeFilter, customDateRange]
   );
