@@ -26,7 +26,7 @@ interface TrendsViewProps {
   onTransactionClick: (txn: Transaction) => void;
 }
 
-// ECharts Area Chart - performant canvas-based rendering
+// ECharts Area Chart - Neo-brutalism style
 const AreaChart = memo(function AreaChart({
   data,
   theme,
@@ -36,9 +36,14 @@ const AreaChart = memo(function AreaChart({
 }) {
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
-    const textColor = isDark ? "#a1a1aa" : "#71717a";
-    const gridColor = isDark ? "#3f3f46" : "#e4e4e7";
-    const lineColor = isDark ? "#a1a1aa" : "#525252";
+    const textColor = isDark ? "#FFFBF0" : "#1a1a1a";
+    const borderColor = isDark ? "#FFFBF0" : "#1a1a1a";
+    const gridColor = isDark ? "rgba(255, 251, 240, 0.2)" : "rgba(26, 26, 26, 0.15)";
+    
+    // Neo-brutalism pastel for the line and area
+    const lineColor = isDark ? "#FFE5EC" : "#1a1a1a"; // Pink in dark, black in light
+    const areaColorStart = isDark ? "rgba(255, 229, 236, 0.4)" : "rgba(212, 237, 218, 0.6)"; // Pink/Green pastel
+    const areaColorEnd = isDark ? "rgba(255, 229, 236, 0)" : "rgba(212, 237, 218, 0)";
 
     // Format labels for x-axis (show only day part)
     const xLabels = data.map((d) => d.label.split(" ")[1] || d.label);
@@ -47,28 +52,25 @@ const AreaChart = memo(function AreaChart({
     return {
       tooltip: {
         trigger: "axis",
-        backgroundColor: isDark
-          ? "rgba(24, 24, 27, 0.9)"
-          : "rgba(255, 255, 255, 0.95)",
-        borderColor: isDark
-          ? "rgba(63, 63, 70, 0.5)"
-          : "rgba(228, 228, 231, 0.6)",
-        borderWidth: 1,
-        padding: [10, 14],
+        backgroundColor: isDark ? "#1a1a2e" : "#FDF6E3",
+        borderColor: borderColor,
+        borderWidth: 2,
+        padding: [12, 16],
         textStyle: {
-          color: isDark ? "#fafafa" : "#18181b",
+          color: textColor,
           fontSize: 12,
+          fontWeight: 600,
         },
         extraCssText: `
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          border-radius: 12px;
+          box-shadow: 4px 4px 0 ${borderColor};
         `,
         axisPointer: {
           type: "line",
           lineStyle: {
-            color: isDark ? "rgba(161, 161, 170, 0.4)" : "rgba(82, 82, 91, 0.3)",
-            width: 1,
-            type: "dashed",
+            color: borderColor,
+            width: 2,
+            type: "solid",
           },
         },
         formatter: (params) => {
@@ -76,27 +78,28 @@ const AreaChart = memo(function AreaChart({
           if (!p.length) return "";
           const idx = p[0].dataIndex;
           const item = data[idx];
-          return `<div style="font-weight:500">${item.label}</div>
-                  <div style="color:${isDark ? "#fafafa" : "#18181b"}">₹${item.total.toLocaleString("en-IN")}</div>`;
+          return `<div style="font-weight:700;font-size:13px">${item.label}</div>
+                  <div style="font-weight:600;margin-top:4px">₹${item.total.toLocaleString("en-IN")}</div>`;
         },
       },
       grid: {
-        left: 45,
-        right: 10,
-        top: 10,
-        bottom: 30,
+        left: 50,
+        right: 15,
+        top: 15,
+        bottom: 35,
         containLabel: false,
       },
       xAxis: {
         type: "category",
         data: xLabels,
         axisLine: {
-          lineStyle: { color: gridColor },
+          lineStyle: { color: borderColor, width: 2 },
         },
         axisTick: { show: false },
         axisLabel: {
           color: textColor,
           fontSize: 10,
+          fontWeight: 600,
           interval: Math.ceil(data.length / 7) - 1,
         },
       },
@@ -104,19 +107,20 @@ const AreaChart = memo(function AreaChart({
         type: "value",
         axisLine: {
           show: true,
-          lineStyle: { color: gridColor },
+          lineStyle: { color: borderColor, width: 2 },
         },
         axisTick: { show: false },
         splitLine: {
           lineStyle: {
             color: gridColor,
-            type: "dashed",
-            opacity: 0.6,
+            type: "solid",
+            width: 1,
           },
         },
         axisLabel: {
           color: textColor,
           fontSize: 10,
+          fontWeight: 600,
           formatter: (value: number) =>
             value >= 1000 ? `₹${(value / 1000).toFixed(0)}k` : `₹${value}`,
         },
@@ -126,15 +130,15 @@ const AreaChart = memo(function AreaChart({
           type: "line",
           data: values,
           smooth: false,
-          symbol: "circle",
-          symbolSize: 8,
+          symbol: "rect", // Square symbols for neo-brutalism
+          symbolSize: 10,
           itemStyle: {
-            color: lineColor,
-            borderColor: isDark ? "#18181b" : "#ffffff",
+            color: isDark ? "#D4EDDA" : "#FFE5EC", // Pastel green/pink
+            borderColor: borderColor,
             borderWidth: 2,
           },
           lineStyle: {
-            width: 2.5,
+            width: 3,
             color: lineColor,
           },
           areaStyle: {
@@ -145,15 +149,21 @@ const AreaChart = memo(function AreaChart({
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: isDark ? "rgba(161, 161, 170, 0.3)" : "rgba(82, 82, 91, 0.2)" },
-                { offset: 1, color: isDark ? "rgba(161, 161, 170, 0)" : "rgba(82, 82, 91, 0)" },
+                { offset: 0, color: areaColorStart },
+                { offset: 1, color: areaColorEnd },
               ],
             },
           },
           emphasis: {
-            scale: 1.5,
+            scale: 1.8,
+            itemStyle: {
+              shadowBlur: 0,
+              shadowOffsetX: 3,
+              shadowOffsetY: 3,
+              shadowColor: borderColor,
+            },
           },
-          animationDuration: 800,
+          animationDuration: 600,
           animationEasing: "cubicOut",
         },
       ],

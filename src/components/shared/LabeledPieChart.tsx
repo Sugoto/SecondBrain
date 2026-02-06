@@ -34,37 +34,39 @@ export const LabeledPieChart = memo(function LabeledPieChart({
 
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
-    const textColor = isDark ? "#a1a1aa" : "#71717a";
+    const textColor = isDark ? "#FFFBF0" : "#1a1a1a";
+    const borderColor = isDark ? "#FFFBF0" : "#1a1a1a";
+
+    // Neo-brutalism pastel colors for pie segments
+    const pastelColors = [
+      "#FFE5EC", // pink
+      "#FFF3CD", // yellow
+      "#D4EDDA", // green
+      "#CCE5FF", // blue
+      "#E2D9F3", // purple
+      "#FFE5D0", // orange
+    ];
 
     return {
       tooltip: {
         trigger: "item",
-        backgroundColor: isDark
-          ? "rgba(24, 24, 27, 0.8)"
-          : "rgba(255, 255, 255, 0.85)",
-        borderColor: isDark
-          ? "rgba(63, 63, 70, 0.5)"
-          : "rgba(228, 228, 231, 0.6)",
-        borderWidth: 1,
-        padding: [10, 14],
+        backgroundColor: isDark ? "#1a1a2e" : "#FDF6E3",
+        borderColor: borderColor,
+        borderWidth: 2,
+        padding: [12, 16],
         textStyle: {
-          color: isDark ? "#fafafa" : "#18181b",
+          color: textColor,
           fontSize: 12,
+          fontWeight: 600,
         },
         extraCssText: `
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
           border-radius: 12px;
-          box-shadow: ${
-            isDark
-              ? "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
-              : "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)"
-          };
+          box-shadow: 4px 4px 0 ${borderColor};
         `,
         formatter: (params) => {
           const p = params as { name: string; value: number; percent: number };
-          return `<div style="font-weight:500">${p.name}</div>
-           <div style="color:${textColor}">${formatValue(p.value)} (${p.percent.toFixed(0)}%)</div>`;
+          return `<div style="font-weight:700;font-size:13px">${p.name}</div>
+           <div style="font-weight:600;margin-top:4px">${formatValue(p.value)} (${p.percent.toFixed(0)}%)</div>`;
         },
       },
       series: [
@@ -74,9 +76,9 @@ export const LabeledPieChart = memo(function LabeledPieChart({
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
           itemStyle: {
-            borderRadius: 4,
-            borderColor: isDark ? "#27272a" : "#ffffff",
-            borderWidth: 2,
+            borderRadius: 0, // Sharp corners for neo-brutalism
+            borderColor: borderColor,
+            borderWidth: 2.5,
           },
           label: {
             show: true,
@@ -88,13 +90,13 @@ export const LabeledPieChart = memo(function LabeledPieChart({
             },
             rich: {
               name: {
-                fontSize: 9,
-                fontWeight: 500,
+                fontSize: 10,
+                fontWeight: 700,
                 color: textColor,
               },
               percent: {
-                fontSize: 9,
-                fontWeight: 600,
+                fontSize: 11,
+                fontWeight: 800,
               },
             },
             color: textColor,
@@ -102,12 +104,13 @@ export const LabeledPieChart = memo(function LabeledPieChart({
           },
           labelLine: {
             show: true,
-            length: 10,
-            length2: 8,
-            smooth: 0.2,
+            length: 12,
+            length2: 10,
+            smooth: 0,
             lineStyle: {
-              width: 1.5,
+              width: 2,
               type: "solid",
+              color: borderColor,
             },
           },
           labelLayout: {
@@ -115,45 +118,37 @@ export const LabeledPieChart = memo(function LabeledPieChart({
           },
           emphasis: {
             itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: "rgba(0, 0, 0, 0.2)",
+              shadowBlur: 0,
+              shadowOffsetX: 4,
+              shadowOffsetY: 4,
+              shadowColor: borderColor,
             },
             scale: true,
-            scaleSize: 6,
+            scaleSize: 8,
           },
-          data: data.map((item) => ({
+          data: data.map((item, index) => ({
             name: item.name,
             value: item.value,
             itemStyle: {
-              color: {
-                type: "linear",
-                x: 0,
-                y: 0,
-                x2: 1,
-                y2: 1,
-                colorStops: [
-                  { offset: 0, color: item.color },
-                  { offset: 1, color: adjustColorOpacity(item.color, 0.7) },
-                ],
-              },
+              // Use pastel colors or fall back to item color
+              color: pastelColors[index % pastelColors.length] || item.color,
             },
             label: {
               rich: {
                 percent: {
-                  color: item.color,
+                  color: isDark ? pastelColors[index % pastelColors.length] : "#1a1a1a",
                 },
               },
             },
             labelLine: {
               lineStyle: {
-                color: adjustColorOpacity(item.color, 0.6),
+                color: borderColor,
               },
             },
           })),
           animationType: "scale",
-          animationEasing: "elasticOut",
-          animationDelay: (_idx: number) => _idx * 50,
+          animationEasing: "cubicOut",
+          animationDelay: (_idx: number) => _idx * 60,
         },
       ],
     };
@@ -172,18 +167,5 @@ export const LabeledPieChart = memo(function LabeledPieChart({
     />
   );
 });
-
-// Helper to adjust color opacity (works with hex colors)
-function adjustColorOpacity(hex: string, opacity: number): string {
-  // Remove # if present
-  const cleanHex = hex.replace("#", "");
-
-  // Parse RGB values
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
-
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-}
 
 export default LabeledPieChart;
