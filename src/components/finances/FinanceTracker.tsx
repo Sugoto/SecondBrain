@@ -432,7 +432,16 @@ export function FinanceTracker({
 
   // Derived data
   const filteredTransactions = useMemo(() => {
-    let result = filterByTimeRange(transactions, timeFilter, customDateRange);
+    // When filtering by budget type (needs/wants), include past prorations
+    // Otherwise, only show transactions from the actual selected period
+    const disableProrationSpreading = !budgetTypeFilter;
+    
+    let result = filterByTimeRange(
+      transactions,
+      timeFilter,
+      customDateRange,
+      { disableProrationSpreading }
+    );
 
     // Apply budget type filter if active
     if (budgetTypeFilter) {
