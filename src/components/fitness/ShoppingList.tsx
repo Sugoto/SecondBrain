@@ -373,19 +373,19 @@ export function ShoppingList() {
   const [sortBy, setSortBy] = useState<SortOption>("caloriesPerProtein_asc");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("per100g");
 
-  // Toggle sort for a given metric (cycles: none -> desc -> asc -> none)
+  // Toggle sort for a given metric (cycles: none -> asc -> desc -> none)
   const toggleSort = (
     metric: "calories" | "protein" | "cost" | "costPerProtein" | "caloriesPerProtein"
   ) => {
-    const descKey = `${metric}_desc` as SortOption;
     const ascKey = `${metric}_asc` as SortOption;
+    const descKey = `${metric}_desc` as SortOption;
 
-    if (sortBy === descKey) {
-      setSortBy(ascKey);
-    } else if (sortBy === ascKey) {
+    if (sortBy === ascKey) {
+      setSortBy(descKey);
+    } else if (sortBy === descKey) {
       setSortBy("none");
     } else {
-      setSortBy(descKey);
+      setSortBy(ascKey);
     }
   };
 
