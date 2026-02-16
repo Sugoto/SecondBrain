@@ -26,7 +26,7 @@ const TrendsView = lazy(() =>
   import("./TrendsView").then((m) => ({ default: m.TrendsView }))
 );
 
-import type { TimeFilter, ActiveView, ChartMode, DateRange } from "./types";
+import type { TimeFilter, ActiveView, DateRange } from "./types";
 import {
   filterByTimeRange,
   sortTransactions,
@@ -311,7 +311,6 @@ export function FinanceTracker({
   >(null);
 
   // UI state
-  const [chartMode, setChartMode] = useState<ChartMode>("daily");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   // Dialog state - consolidated
@@ -553,10 +552,8 @@ export function FinanceTracker({
                 <DateFilter
                   activeView={activeView}
                   timeFilter={timeFilter}
-                  chartMode={chartMode}
                   customDateRange={customDateRange}
                   onTimeFilterChange={setTimeFilter}
-                  onChartModeChange={setChartMode}
                   onCustomDateRangeChange={setCustomDateRange}
                 />
               ) : undefined
@@ -600,8 +597,6 @@ export function FinanceTracker({
             <motion.div key="trends" {...VIEW_ANIMATION}>
               <Suspense fallback={null}>
                 <TrendsView
-                  transactions={transactions}
-                  chartMode={chartMode}
                   categoryTotals={categoryTotals}
                   categoryTotalsByBudgetType={categoryTotalsByBudgetType}
                   expandedCategory={expandedCategory}

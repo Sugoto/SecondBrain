@@ -15,15 +15,13 @@ import {
   isSameMonth,
   subMonths,
 } from "date-fns";
-import type { TimeFilter, ChartMode, ActiveView, DateRange } from "./types";
+import type { TimeFilter, ActiveView, DateRange } from "./types";
 
 interface DateFilterProps {
   activeView: ActiveView;
   timeFilter: TimeFilter;
-  chartMode: ChartMode;
   customDateRange: DateRange;
   onTimeFilterChange: (filter: TimeFilter) => void;
-  onChartModeChange: (mode: ChartMode) => void;
   onCustomDateRangeChange: (range: DateRange) => void;
 }
 
@@ -50,10 +48,8 @@ function getRecentMonths() {
 export function DateFilter({
   activeView,
   timeFilter,
-  chartMode,
   customDateRange,
   onTimeFilterChange,
-  onChartModeChange,
   onCustomDateRangeChange,
 }: DateFilterProps) {
   const [filterOpen, setFilterOpen] = useState(false);
@@ -129,7 +125,8 @@ export function DateFilter({
     return format(now, "MMM");
   };
 
-  const isTrendsView = activeView === "trends";
+  // No date filter needed for trends view
+  if (activeView === "trends") return null;
 
   return (
     <Popover
@@ -153,31 +150,7 @@ export function DateFilter({
         className="w-auto p-0 rounded-xl border-2 border-black dark:border-white bg-background shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]" 
         align="end"
       >
-        {isTrendsView ? (
-          // Trends view: Daily/Monthly toggle - Neo-brutalism
-          <div className="p-4">
-            <p className="text-sm font-bold mb-3 text-foreground">Chart View</p>
-            <div className="flex items-center gap-2">
-              {(["daily", "monthly"] as ChartMode[]).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => {
-                    onChartModeChange(mode);
-                    setFilterOpen(false);
-                  }}
-                  className={`h-9 flex-1 text-sm font-bold rounded-lg transition-all duration-100 px-4 border-2 ${chartMode === mode
-                      ? "bg-pastel-purple border-black dark:border-white text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
-                      : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 text-muted-foreground hover:border-black dark:hover:border-white hover:text-foreground"
-                    }`}
-                >
-                  {mode === "daily" ? "Daily" : "Monthly"}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          // Unified time filter view - Neo-brutalism
-          <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4">
             {/* Quick filters */}
             <div>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Quick select</p>
@@ -243,7 +216,6 @@ export function DateFilter({
               )}
             </div>
           </div>
-        )}
       </PopoverContent>
     </Popover>
   );
