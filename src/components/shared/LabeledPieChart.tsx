@@ -16,6 +16,7 @@ interface LabeledPieChartProps {
   outerRadius?: number | string;
   labelThreshold?: number;
   formatValue?: (value: number) => string;
+  formatLabel?: (name: string, value: number) => string;
 }
 
 export const LabeledPieChart = memo(function LabeledPieChart({
@@ -26,6 +27,7 @@ export const LabeledPieChart = memo(function LabeledPieChart({
   outerRadius = "40%",
   labelThreshold = 0,
   formatValue = (v) => `₹${v.toLocaleString("en-IN")}`,
+  formatLabel,
 }: LabeledPieChartProps) {
   const total = useMemo(
     () => data.reduce((sum, d) => sum + d.value, 0),
@@ -84,9 +86,10 @@ export const LabeledPieChart = memo(function LabeledPieChart({
             show: true,
             position: "outside",
             formatter: (params) => {
-              const p = params as { name: string; percent: number };
+              const p = params as { name: string; value: number; percent: number };
               if (p.percent < labelThreshold * 100) return "";
-              return `{name|${p.name}}\n{percent|${p.percent.toFixed(0)}%}`;
+              const detail = formatLabel ? formatLabel(p.name, p.value) : `${p.percent.toFixed(0)}%`;
+              return `{name|${p.name}}\n{percent|${detail}}`;
             },
             rich: {
               name: {
@@ -124,17 +127,18 @@ export const LabeledPieChart = memo(function LabeledPieChart({
             scale: true,
             scaleSize: 6,
           },
-          data: data.map((item, index) => ({
+          data: data.map((item, index) => {
+            const color = item.color || pastelColors[index % pastelColors.length];
+            return {
             name: item.name,
             value: item.value,
             itemStyle: {
-              // Use pastel colors or fall back to item color
-              color: pastelColors[index % pastelColors.length] || item.color,
+              color,
             },
             label: {
               rich: {
                 percent: {
-                  color: isDark ? pastelColors[index % pastelColors.length] : "#1a1a1a",
+                  color: isDark ? color : "#1a1a1a",
                 },
               },
             },
@@ -143,14 +147,14 @@ export const LabeledPieChart = memo(function LabeledPieChart({
                 color: borderColor,
               },
             },
-          })),
+          }; }),
           animationType: "scale",
           animationEasing: "cubicOut",
           animationDelay: (_idx: number) => _idx * 60,
         },
       ],
     };
-  }, [data, theme, innerRadius, outerRadius, labelThreshold, formatValue]);
+  }, [data, theme, innerRadius, outerRadius, labelThreshold, formatValue, formatLabel]);
 
   // Don't render if no valid data
   if (!data || data.length === 0 || total === 0) return null;

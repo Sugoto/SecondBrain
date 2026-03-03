@@ -18,6 +18,7 @@ import { HomePage } from "./components/home/HomePage";
 import { FinanceTracker } from "./components/finances";
 import { HealthTracker } from "./components/fitness/FitnessTracker";
 import { OmscsTracker } from "./components/omscs/OmscsTracker";
+import { TimeTracker } from "./components/time/TimeTracker";
 
 function AppContent() {
   const {
@@ -98,6 +99,9 @@ function AppContent() {
             onViewChange={navigateHealthView}
             onGoHome={goHome}
           />
+        )}
+        {currentSection === "time" && (
+          <TimeTracker onGoHome={goHome} />
         )}
       </div>
 

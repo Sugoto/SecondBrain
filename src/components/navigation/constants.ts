@@ -9,6 +9,7 @@ import {
   Calculator,
   BookOpen,
   CalendarDays,
+  Clock,
 } from "lucide-react";
 import type { NavItem } from "./DynamicBottomNav";
 
@@ -17,6 +18,7 @@ export const HOME_NAV_ITEMS: NavItem[] = [
   { id: "omscs", icon: GraduationCap, label: "OMSCS" },
   { id: "finances", icon: Wallet, label: "Finances" },
   { id: "fitness", icon: Activity, label: "Health" },
+  { id: "time", icon: Clock, label: "Time" },
 ];
 
 // Finance tracker nav items

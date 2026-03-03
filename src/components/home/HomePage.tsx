@@ -9,6 +9,7 @@ import { NetWorthCard, NetWorthEditDialog } from "@/components/finances/NetWorth
 import { NutritionCard } from "@/components/fitness/NutritionCard";
 import { HealthStatsEditDialog } from "@/components/fitness/HealthStatsCard";
 import { calculateNetWorth } from "@/components/finances/utils";
+import { FreeTimeCard } from "@/components/home/FreeTimeCard";
 
 export function HomePage() {
   const { theme, toggle } = useTheme();
@@ -59,6 +60,11 @@ export function HomePage() {
             netWorth={netWorth}
             onEdit={() => setEditDialogOpen(true)}
           />
+        </div>
+
+        {/* Free Time Today */}
+        <div className="mb-5">
+          <FreeTimeCard />
         </div>
 
         {/* Nutrition Card */}

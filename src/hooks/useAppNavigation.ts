@@ -27,7 +27,7 @@ function parseHash(hash: string): NavigationState | null {
   const parts = hash.split("/");
   const section = parts[0] as AppSection;
 
-  if (!["home", "omscs", "finances", "fitness"].includes(section)) {
+  if (!["home", "omscs", "finances", "fitness", "time"].includes(section)) {
     return null;
   }
 
@@ -54,6 +54,7 @@ function toHash(state: NavigationState): string {
   if (state.section === "finances") return `#finances/${state.financeView}`;
   if (state.section === "fitness") return `#fitness/${state.healthView}`;
   if (state.section === "omscs") return `#omscs/${state.omscsView}`;
+  if (state.section === "time") return "#time";
   return `#${state.section}`;
 }
 
