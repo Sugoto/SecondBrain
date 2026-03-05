@@ -5,13 +5,12 @@ import { getCurrentFDValue } from "./fdUtils";
 import type { UserStats } from "@/lib/supabase";
 import { LabeledPieChart } from "@/components/shared";
 
-// Asset categories with monochromatic colors
 const ASSET_CONFIG = [
-  { key: "bank_savings" as const, label: "Bank Savings", color: "#171717" },
-  { key: "fixed_deposits" as const, label: "Fixed Deposits", color: "#404040" },
-  { key: "mutual_funds" as const, label: "Mutual Funds", color: "#525252" },
-  { key: "ppf" as const, label: "PPF", color: "#737373" },
-  { key: "epf" as const, label: "EPF", color: "#a3a3a3" },
+  { key: "bank_savings" as const, label: "Bank Savings" },
+  { key: "fixed_deposits" as const, label: "Fixed Deposits" },
+  { key: "mutual_funds" as const, label: "Mutual Funds" },
+  { key: "ppf" as const, label: "PPF" },
+  { key: "epf" as const, label: "EPF" },
 ] as const;
 
 interface WealthDistributionChartProps {
@@ -41,7 +40,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
       return {
         name: asset.label,
         value,
-        color: asset.color,
+        color: "",
       };
     }).filter((item) => item.value > 0);
   }, [userStats, mutualFundsValue]);

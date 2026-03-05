@@ -58,6 +58,7 @@ export function HomePage() {
         <div className="mb-5">
           <NetWorthCard
             netWorth={netWorth}
+            monthlyIncome={userStats?.monthly_income ?? null}
             onEdit={() => setEditDialogOpen(true)}
           />
         </div>

@@ -8,6 +8,8 @@ import { WealthDistributionChart } from "./WealthDistributionChart";
 import { MutualFundWatchlist } from "./MutualFundWatchlist";
 import { FixedDepositsSection } from "./FixedDepositsSection";
 import { ProvidentFundSection } from "./ProvidentFundSection";
+import { CostCalculator } from "./CostCalculator";
+import { SalaryChart } from "./SalaryChart";
 import { calculateNetWorth } from "./utils";
 
 export function InvestmentsView() {
@@ -30,10 +32,13 @@ export function InvestmentsView() {
     [userStats, mfPortfolioValue]
   );
 
+  const dailySalary = userStats?.monthly_income ? userStats.monthly_income / 22 : 0;
+
   return (
     <div className="pb-3 pt-3 px-3">
       <NetWorthCard
         netWorth={netWorth}
+        monthlyIncome={userStats?.monthly_income ?? null}
         onEdit={() => setEditDialogOpen(true)}
       />
 
@@ -45,6 +50,8 @@ export function InvestmentsView() {
       />
 
       <div className="max-w-6xl mx-auto pt-3 flex flex-col gap-3">
+        <SalaryChart theme={theme} />
+
         <WealthDistributionChart userStats={userStats} theme={theme} mutualFundsValue={mfPortfolioValue} />
 
         <MutualFundWatchlist theme={theme} />
@@ -52,6 +59,8 @@ export function InvestmentsView() {
         <FixedDepositsSection userStats={userStats} />
 
         <ProvidentFundSection userStats={userStats} theme={theme} />
+
+        {dailySalary > 0 && <CostCalculator dailySalary={dailySalary} />}
 
         <Footer />
       </div>

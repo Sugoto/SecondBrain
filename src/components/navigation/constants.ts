@@ -23,7 +23,7 @@ export const HOME_NAV_ITEMS: NavItem[] = [
 
 // Finance tracker nav items
 export const FINANCE_NAV_ITEMS: NavItem[] = [
-  { id: "investments", icon: Landmark, label: "Investments" },
+  { id: "investments", icon: Landmark, label: "Assets" },
   { id: "expenses", icon: Receipt, label: "Expenses" },
   { id: "trends", icon: TrendingUp, label: "Trends" },
 ];

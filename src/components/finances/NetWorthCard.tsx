@@ -25,10 +25,13 @@ type AssetKey = (typeof ASSET_CATEGORIES)[number]["key"];
 
 interface NetWorthCardProps {
   netWorth: number;
+  monthlyIncome: number | null;
   onEdit: () => void;
 }
 
-export function NetWorthCard({ netWorth, onEdit }: NetWorthCardProps) {
+export function NetWorthCard({ netWorth, monthlyIncome, onEdit }: NetWorthCardProps) {
+  const dailySalary = monthlyIncome ? Math.round(monthlyIncome / 22) : null;
+
   return (
     <button
       onClick={onEdit}
@@ -39,9 +42,16 @@ export function NetWorthCard({ netWorth, onEdit }: NetWorthCardProps) {
           <p className="text-[10px] text-black/60 dark:text-white/60 font-bold uppercase tracking-wide mb-0.5">
             Net Worth
           </p>
-          <p className="text-xl font-bold text-black dark:text-white font-mono">
-            <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
-          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-xl font-bold text-black dark:text-white font-mono">
+              <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
+            </p>
+            {dailySalary && (
+              <span className="text-xs font-bold font-mono text-green-700 dark:text-green-400">
+                +{formatCurrency(dailySalary)}/d
+              </span>
+            )}
+          </div>
         </div>
         <div className="h-7 w-7 rounded-md bg-white dark:bg-white/10 flex items-center justify-center border-[1.5px] border-black dark:border-white">
           <ChevronRight className="h-3.5 w-3.5 text-black dark:text-white" />
@@ -71,6 +81,7 @@ export function NetWorthEditDialog({
     ppf: "0",
     epf: "0",
   });
+  const [monthlySalary, setMonthlySalary] = useState("0");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -82,6 +93,7 @@ export function NetWorthEditDialog({
         ppf: (userStats.ppf || 0).toString(),
         epf: (userStats.epf || 0).toString(),
       });
+      setMonthlySalary((userStats.monthly_income || 0).toString());
     }
   }, [open, userStats]);
 
@@ -99,6 +111,7 @@ export function NetWorthEditDialog({
         mutual_funds: parseFloat(values.mutual_funds) || 0,
         ppf: parseFloat(values.ppf) || 0,
         epf: parseFloat(values.epf) || 0,
+        monthly_income: parseFloat(monthlySalary) || 0,
       };
 
       const { error } = await supabase
@@ -148,6 +161,19 @@ export function NetWorthEditDialog({
               />
             </div>
           ))}
+
+          {/* Monthly Salary */}
+          <div className="space-y-1 pt-1 border-t border-black/10 dark:border-white/10">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+              Monthly Salary
+            </label>
+            <Input
+              type="number"
+              value={monthlySalary}
+              onChange={(e) => setMonthlySalary(e.target.value)}
+              className="font-mono h-7 text-xs font-bold border-[1.5px] border-black dark:border-white rounded-md"
+            />
+          </div>
 
           {/* Save Button */}
           <button
