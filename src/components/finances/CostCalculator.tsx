@@ -45,7 +45,7 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
         Cost Calculator
       </h3>
-      <div className="rounded-lg border-[1.5px] border-black dark:border-white bg-pastel-yellow p-3 shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+      <div className="rounded-xl border border-border bg-card p-3">
 
       <Input
         type="number"
@@ -54,20 +54,20 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
         placeholder="Item cost"
         value={cost}
         onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
-        className="font-mono h-8 text-xs font-bold border-[1.5px] border-black dark:border-white rounded-md bg-white mb-3"
+        className="font-mono h-8 text-xs font-bold border border-border rounded-lg bg-muted mb-3"
       />
 
       {/* Period mode tabs */}
-      <div className="flex rounded-md overflow-hidden border-[1.5px] border-black dark:border-white text-[10px] mb-2">
+      <div className="flex rounded-lg overflow-hidden border border-border text-[10px] mb-2">
         {(["months", "years"] as const).map((mode) => (
           <button
             key={mode}
             onClick={() => { setPeriodMode(mode); setSliderValue(1); }}
             className={`flex-1 px-2 py-1.5 font-bold transition-colors capitalize ${
               periodMode === mode
-                ? "bg-black text-white dark:bg-white dark:text-black"
-                : "bg-white text-black hover:bg-black/5"
-            } ${mode === "years" ? "border-l-[1.5px] border-black dark:border-white" : ""}`}
+                ? "bg-foreground text-background"
+                : "bg-card text-muted-foreground hover:bg-muted"
+            } ${mode === "years" ? "border-l border-border" : ""}`}
           >
             {mode}
           </button>
@@ -77,8 +77,8 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
       {/* Slider */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[9px] font-bold text-black/50 uppercase">Spread over</span>
-          <span className="text-xs font-bold font-mono text-black">{periodLabel}</span>
+          <span className="text-[9px] font-bold text-muted-foreground uppercase">Spread over</span>
+          <span className="text-xs font-bold font-mono text-foreground">{periodLabel}</span>
         </div>
         <input
           type="range"
@@ -87,9 +87,9 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
           step={1}
           value={sliderValue}
           onChange={(e) => setSliderValue(parseInt(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-black bg-white border border-black/20"
+          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-foreground bg-muted border border-border"
         />
-        <div className="flex justify-between text-[8px] text-black/40 font-mono mt-0.5">
+        <div className="flex justify-between text-[8px] text-muted-foreground font-mono mt-0.5">
           {Array.from({ length: periodMode === "months" ? 12 : 10 }, (_, i) => (
             <span key={i + 1}>{i + 1}</span>
           ))}
@@ -97,17 +97,17 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <div className="text-center p-2 rounded-md bg-white border-[1.5px] border-black dark:border-white">
-          <p className="text-sm font-bold font-mono text-black">{result ? formatCurrency(result.perDay) : "₹0"}</p>
-          <p className="text-[8px] font-bold text-black/50 uppercase">per day</p>
+        <div className="text-center p-2 rounded-lg bg-muted border border-border">
+          <p className="text-sm font-bold font-mono text-foreground">{result ? formatCurrency(result.perDay) : "₹0"}</p>
+          <p className="text-[8px] font-bold text-muted-foreground uppercase">per day</p>
         </div>
-        <div className="text-center p-2 rounded-md bg-white border-[1.5px] border-black dark:border-white">
-          <p className="text-sm font-bold font-mono text-black">{result ? formatWorkTime(result.workHoursToEarn) : "0h"}</p>
-          <p className="text-[8px] font-bold text-black/50 uppercase">work time</p>
+        <div className="text-center p-2 rounded-lg bg-muted border border-border">
+          <p className="text-sm font-bold font-mono text-foreground">{result ? formatWorkTime(result.workHoursToEarn) : "0h"}</p>
+          <p className="text-[8px] font-bold text-muted-foreground uppercase">work time</p>
         </div>
-        <div className="text-center p-2 rounded-md bg-white border-[1.5px] border-black dark:border-white">
-          <p className="text-sm font-bold font-mono text-black">{result ? `${result.pctOfDaily.toFixed(1)}%` : "0%"}</p>
-          <p className="text-[8px] font-bold text-black/50 uppercase">of daily pay</p>
+        <div className="text-center p-2 rounded-lg bg-muted border border-border">
+          <p className="text-sm font-bold font-mono text-foreground">{result ? `${result.pctOfDaily.toFixed(1)}%` : "0%"}</p>
+          <p className="text-[8px] font-bold text-muted-foreground uppercase">of daily pay</p>
         </div>
       </div>
     </div>

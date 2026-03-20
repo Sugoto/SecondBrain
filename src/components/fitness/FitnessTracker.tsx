@@ -60,9 +60,9 @@ export function HealthTracker({
   });
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col">
       {/* Header with TopTabs */}
-      <header className="shrink-0 bg-background">
+      <header className="shrink-0 vercel-header pb-3">
         <TopTabs
           navItems={HEALTH_NAV_ITEMS}
           activeView={activeView}

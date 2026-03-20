@@ -31,23 +31,24 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   }
 
   return createPortal(
-    <nav 
-      className="md:hidden fixed left-5 right-5 z-[9999] no-view-transition rounded-xl bg-pastel-orange border-2 border-black dark:border-white shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]"
+    <nav
+      className="md:hidden fixed left-5 right-5 z-[9999] no-view-transition rounded-2xl border border-neutral-200/50 bg-white/80 shadow-lg shadow-black/5 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80"
       style={{ bottom: "max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem))" }}
     >
-      <div className="flex items-center h-14">
+      <div className="flex h-14 items-center">
         {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
+            type="button"
             onClick={() => {
               hapticSelection();
               onViewChange(id);
             }}
             onPointerEnter={() => onPrefetch?.(id)}
-            className="flex flex-col items-center justify-center flex-1 h-full transition-all hover:scale-110 active:scale-95"
+            className="flex h-full flex-1 flex-col items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-muted/80 active:scale-95 dark:text-neutral-400"
           >
-            <Icon className="h-5 w-5 text-black dark:text-white" />
-            <span className="text-[9px] mt-0.5 font-bold uppercase tracking-wide text-black dark:text-white">
+            <Icon className="h-5 w-5" />
+            <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide">
               {label}
             </span>
           </button>

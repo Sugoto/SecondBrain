@@ -139,35 +139,35 @@ export function SemesterView() {
 
   return (
     <div className="p-3 space-y-3">
-      {/* Timetable - Neo-brutalism (compact) */}
-      <div className="rounded-lg overflow-hidden border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
-        {/* Table Header */}
-        <div className="grid grid-cols-[1fr_44px_44px] gap-1.5 px-2.5 py-2 text-[9px] font-bold uppercase tracking-wider items-center border-b-[1.5px] border-black dark:border-white bg-pastel-blue">
+      <div className="rounded-xl overflow-hidden border border-border bg-card">
+        <div className="grid grid-cols-[1fr_44px_44px] gap-1.5 px-2.5 py-2 text-[11px] font-medium uppercase tracking-wider items-center border-b border-border bg-muted text-muted-foreground">
           <button
+            type="button"
             onClick={() => handleSort("name")}
-            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
+            className="flex items-center gap-0.5 text-left text-foreground hover:text-foreground/80 transition-colors rounded-md -mx-1 px-1 py-0.5 hover:bg-accent/50"
           >
             <span>Course</span>
             <SortIcon columnKey="name" />
           </button>
           <button
+            type="button"
             onClick={() => handleSort("startDate")}
-            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
+            className="flex items-center gap-0.5 text-left text-foreground hover:text-foreground/80 transition-colors rounded-md -mx-1 px-1 py-0.5 hover:bg-accent/50"
           >
             <span>Start</span>
             <SortIcon columnKey="startDate" />
           </button>
           <button
+            type="button"
             onClick={() => handleSort("endDate")}
-            className="flex items-center gap-0.5 hover:opacity-80 transition-opacity text-left text-black dark:text-white"
+            className="flex items-center gap-0.5 text-left text-foreground hover:text-foreground/80 transition-colors rounded-md -mx-1 px-1 py-0.5 hover:bg-accent/50"
           >
             <span>End</span>
             <SortIcon columnKey="endDate" />
           </button>
         </div>
 
-        {/* Table Body */}
-        <div className="divide-y divide-black/10 dark:divide-white/10">
+        <div className="divide-y divide-border">
           {sortedAssignments.map((assignment) => {
             const rowId = getRowId(assignment);
             const isCompleted = completedAssignments.has(rowId);
@@ -178,29 +178,36 @@ export function SemesterView() {
             return (
               <div
                 key={rowId}
+                role="button"
+                tabIndex={0}
                 onClick={() => toggleCompleted(rowId)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleCompleted(rowId);
+                  }
+                }}
                 className={cn(
                   "grid grid-cols-[1fr_44px_44px] gap-1.5 px-2.5 py-1.5 text-[10px] transition-colors items-center cursor-pointer",
-                  "hover:bg-pastel-yellow/50 active:bg-pastel-yellow",
-                  isActive && !isCompleted && "bg-pastel-green/30",
+                  "hover:bg-muted active:bg-accent",
+                  isActive && !isCompleted && "bg-emerald-50 dark:bg-emerald-950/20",
                   isDimmed && "opacity-50"
                 )}
               >
-                {/* Assignment Name with checkbox */}
                 <div className="min-w-0 flex items-center gap-2">
                   <div
                     className={cn(
-                      "h-4 w-4 rounded flex items-center justify-center shrink-0 transition-colors border-[1.5px]",
+                      "h-4 w-4 rounded flex items-center justify-center shrink-0 transition-colors border border-border",
                       isCompleted
-                        ? "bg-black dark:bg-white border-black dark:border-white text-white dark:text-black"
-                        : "border-black/30 dark:border-white/30 bg-white dark:bg-white/10"
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-card"
                     )}
                   >
                     {isCompleted && <Check className="h-2.5 w-2.5" />}
                   </div>
                   <span
                     className={cn(
-                      "truncate font-bold",
+                      "truncate font-semibold",
                       isCompleted ? "text-muted-foreground line-through" : "text-foreground"
                     )}
                     title={assignment.name}
@@ -209,19 +216,11 @@ export function SemesterView() {
                   </span>
                 </div>
 
-                {/* Start Date */}
-                <span className={cn(
-                  "text-[9px] font-mono font-medium",
-                  isCompleted ? "text-muted-foreground" : "text-muted-foreground"
-                )}>
+                <span className="text-[9px] font-mono font-medium text-muted-foreground">
                   {assignment.startDate}
                 </span>
 
-                {/* End Date */}
-                <span className={cn(
-                  "text-[9px] font-mono font-medium",
-                  isCompleted ? "text-muted-foreground" : "text-muted-foreground"
-                )}>
+                <span className="text-[9px] font-mono font-medium text-muted-foreground">
                   {assignment.endDate}
                 </span>
               </div>

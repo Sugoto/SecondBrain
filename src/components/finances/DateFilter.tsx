@@ -125,7 +125,6 @@ export function DateFilter({
     return format(now, "MMM");
   };
 
-  // No date filter needed for trends view
   if (activeView === "trends") return null;
 
   return (
@@ -140,14 +139,14 @@ export function DateFilter({
     >
       <PopoverTrigger asChild>
         <button
-          className="h-7 px-2 rounded-md flex items-center gap-1.5 transition-all border-[1.5px] border-black dark:border-white bg-pastel-yellow text-black dark:text-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none"
+          className="h-7 px-2 rounded-lg flex items-center gap-1.5 transition-colors border border-border bg-card text-foreground hover:bg-muted"
         >
           <CalendarDays className="h-3 w-3" />
           <span className="text-[10px] font-bold">{getFilterLabel()}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-auto p-0 rounded-xl border-2 border-black dark:border-white bg-background shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]" 
+        className="w-auto p-0 rounded-xl border border-border bg-background shadow-xl" 
         align="end"
       >
         <div className="p-4 space-y-4">
@@ -162,9 +161,9 @@ export function DateFilter({
                       onTimeFilterChange(filter);
                       setFilterOpen(false);
                     }}
-                    className={`h-8 flex-1 text-xs font-bold rounded-lg transition-all duration-100 border-2 ${timeFilter === filter
-                        ? "bg-pastel-green border-black dark:border-white text-black dark:text-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
-                        : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 text-muted-foreground hover:border-black dark:hover:border-white hover:text-foreground"
+                    className={`h-8 flex-1 text-xs font-bold rounded-lg transition-all duration-100 border ${timeFilter === filter
+                        ? "bg-foreground border-foreground text-background"
+                        : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                   >
                     {TIME_LABELS[filter]}
@@ -181,7 +180,7 @@ export function DateFilter({
                   <button
                     key={month.label}
                     onClick={() => handleMonthSelect(month.date)}
-                    className="h-8 text-xs font-bold rounded-lg border-2 border-black/30 dark:border-white/30 bg-white dark:bg-white/10 text-foreground transition-all hover:border-black dark:hover:border-white hover:bg-pastel-blue hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0]"
+                    className="h-8 text-xs font-bold rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-muted"
                   >
                     {month.shortLabel}
                   </button>
@@ -190,7 +189,7 @@ export function DateFilter({
             </div>
 
             {/* Calendar for custom range */}
-            <div className="border-t-2 border-black/10 dark:border-white/10 pt-4">
+            <div className="border-t border-border pt-4">
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
                 {pendingRange.from
                   ? `From ${format(pendingRange.from, "d MMM")} — pick end`
@@ -204,12 +203,12 @@ export function DateFilter({
                 fromYear={2020}
                 toYear={new Date().getFullYear()}
                 defaultMonth={customDateRange?.from || new Date()}
-                className="rounded-xl border-2 border-black dark:border-white"
+                className="rounded-xl border border-border"
               />
               {pendingRange.from && (
                 <button
                   onClick={() => setPendingRange({})}
-                  className="w-full h-8 mt-3 text-xs font-bold rounded-lg border-2 border-black/30 dark:border-white/30 bg-white dark:bg-white/10 text-muted-foreground transition-all hover:border-black dark:hover:border-white hover:bg-pastel-pink hover:text-foreground"
+                  className="w-full h-8 mt-3 text-xs font-bold rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   Clear selection
                 </button>
@@ -220,4 +219,3 @@ export function DateFilter({
     </Popover>
   );
 }
-

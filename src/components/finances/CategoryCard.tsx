@@ -46,19 +46,19 @@ export const CategoryCard = memo(function CategoryCard({
         delay: index * 0.05,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="bg-card border-[1.5px] border-black dark:border-white rounded-lg overflow-hidden shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0]"
+      className="bg-card border border-border rounded-xl overflow-hidden"
     >
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.99 }}
-        className="w-full flex items-center gap-2 p-2 transition-colors hover:bg-pastel-yellow/30"
+        className="w-full flex items-center gap-2 p-2 transition-colors hover:bg-muted"
       >
         <motion.div
           animate={{ scale: isExpanded ? 1.05 : 1 }}
           transition={{ duration: 0.2 }}
-          className={`h-7 w-7 rounded-md ${categoryPastelColor} border-[1.5px] border-black dark:border-white flex items-center justify-center`}
+          className={`h-7 w-7 rounded-lg ${categoryPastelColor} border border-border flex items-center justify-center`}
         >
-          <IconComp className="h-3 w-3 text-black dark:text-white" />
+          <IconComp className="h-3 w-3 text-foreground" />
         </motion.div>
         <div className="flex-1 text-left min-w-0">
           <p className="font-bold text-xs text-foreground truncate">{name}</p>
@@ -72,9 +72,9 @@ export const CategoryCard = memo(function CategoryCard({
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="h-5 w-5 rounded flex items-center justify-center border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10"
+          className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted"
         >
-          <ChevronRight className="h-3 w-3 text-black dark:text-white" />
+          <ChevronRight className="h-3 w-3 text-foreground" />
         </motion.div>
       </motion.button>
 
@@ -87,7 +87,7 @@ export const CategoryCard = memo(function CategoryCard({
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/5 dark:divide-white/5">
+            <div className="border-t border-border divide-y divide-border/50">
               {transactions.map((txn, i) => {
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
@@ -101,7 +101,7 @@ export const CategoryCard = memo(function CategoryCard({
                     transition={{ delay: i * 0.03, duration: 0.2 }}
                     whileTap={{ backgroundColor: "var(--accent)" }}
                     onClick={() => onTransactionClick(txn)}
-                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-pastel-pink/30 text-left ${isExcluded
+                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-muted text-left ${isExcluded
                       ? "opacity-40"
                       : ""
                       }`}

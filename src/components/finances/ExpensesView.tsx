@@ -5,8 +5,7 @@ import { TransactionCard } from "./TransactionCard";
 import { Footer } from "./Footer";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-// Compact row height for neo-brutalism cards (card height + gap for shadow + spacing)
-const ROW_HEIGHT = 56;
+const ROW_HEIGHT = 52;
 const OVERSCAN = 5;
 
 interface ExpensesViewProps {
@@ -42,7 +41,7 @@ export const ExpensesView = memo(function ExpensesView({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="p-8 text-center rounded-xl border-2 border-dashed border-black/30 dark:border-white/30 bg-card">
+          <div className="p-8 text-center rounded-xl border border-dashed border-border bg-card">
             <p className="text-muted-foreground font-medium">
               No transactions for this period
             </p>
@@ -65,7 +64,6 @@ export const ExpensesView = memo(function ExpensesView({
             height: `${virtualizer.getTotalSize()}px`,
             width: "100%",
             position: "relative",
-            paddingRight: "4px", // Extra space for shadow on right
           }}
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
@@ -80,7 +78,7 @@ export const ExpensesView = memo(function ExpensesView({
                   right: 0,
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
-                  paddingBottom: "8px", // Space between cards for shadow
+                  paddingBottom: "4px",
                 }}
               >
                 <TransactionCard

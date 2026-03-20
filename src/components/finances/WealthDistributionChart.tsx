@@ -16,7 +16,7 @@ const ASSET_CONFIG = [
 interface WealthDistributionChartProps {
   userStats: UserStats | null;
   theme: "light" | "dark";
-  mutualFundsValue?: number; // Real-time MF portfolio value
+  mutualFundsValue?: number;
 }
 
 export const WealthDistributionChart = memo(function WealthDistributionChart({
@@ -30,7 +30,6 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
     return ASSET_CONFIG.map((asset) => {
       let value = userStats[asset.key] || 0;
       
-      // Use real-time values for FD and MF
       if (asset.key === "fixed_deposits") {
         value = getCurrentFDValue(userStats.fixed_deposits || 0);
       } else if (asset.key === "mutual_funds" && mutualFundsValue !== undefined) {
@@ -56,7 +55,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
       transition={{ duration: 0.3, delay: 0.15 }}
       className="space-y-2"
     >
-      <div className="p-3 rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+      <div className="p-3 rounded-xl border border-border bg-card">
         <div className="relative h-40 flex items-center justify-center">
           <LabeledPieChart
             data={pieData}

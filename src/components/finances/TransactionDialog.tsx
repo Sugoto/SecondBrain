@@ -44,14 +44,11 @@ interface TransactionDialogProps {
   onDelete?: (transaction: Transaction) => void;
 }
 
-// Safe math expression evaluator (no eval)
 function evaluateExpression(expr: string): number | null {
-  // Remove whitespace and validate characters
   const cleaned = expr.replace(/\s/g, "");
   if (!/^[\d+\-*/.()]+$/.test(cleaned)) return null;
 
   try {
-    // Tokenize
     const tokens: (number | string)[] = [];
     let numBuffer = "";
 
@@ -68,7 +65,6 @@ function evaluateExpression(expr: string): number | null {
     }
     if (numBuffer) tokens.push(parseFloat(numBuffer));
 
-    // Simple shunting-yard for +, -, *, /
     const precedence: Record<string, number> = {
       "+": 1,
       "-": 1,
@@ -105,7 +101,7 @@ function evaluateExpression(expr: string): number | null {
         ops.push(token);
       } else if (token === ")") {
         while (ops.length && ops[ops.length - 1] !== "(") applyOp();
-        ops.pop(); // Remove "("
+        ops.pop();
       } else if (precedence[token]) {
         while (
           ops.length &&
@@ -141,24 +137,21 @@ export function TransactionDialog({
   const [amountInput, setAmountInput] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Reset state when transaction changes using useEffect (proper pattern)
   useEffect(() => {
     if (transaction) {
       setAmountInput(
         transaction.amount === 0 ? "" : transaction.amount.toString()
       );
     }
-  }, [transaction?.id]); // Only reset when transaction ID changes
+  }, [transaction?.id]);
 
   if (!transaction) return null;
 
-  // Check if input contains a math expression
   const isExpression = /[+\-*/]/.test(amountInput);
   const evaluatedAmount = isExpression ? evaluateExpression(amountInput) : null;
 
   const handleAmountInputChange = (value: string) => {
     setAmountInput(value);
-    // If it's just a number, update immediately
     const num = parseFloat(value);
     if (!isNaN(num) && !isExpression) {
       onChange({ ...transaction, amount: num });
@@ -170,7 +163,6 @@ export function TransactionDialog({
       onChange({ ...transaction, amount: evaluatedAmount });
       setAmountInput(evaluatedAmount.toString());
     } else if (amountInput === "") {
-      // Keep amount as 0 if empty, don't show "0" in input
       onChange({ ...transaction, amount: 0 });
     }
   };
@@ -189,20 +181,17 @@ export function TransactionDialog({
     }
     const parsed = parseInt(value, 10);
     if (isNaN(parsed)) return;
-    // Clamp between 1 and 60
     const clamped = Math.min(60, Math.max(1, parsed));
     onChange({ ...transaction, prorate_months: clamped });
   };
 
   const handleProrateBlur = () => {
-    // Normalize to null if 1 or less (no proration needed)
     if (transaction.prorate_months && transaction.prorate_months <= 1) {
       onChange({ ...transaction, prorate_months: null });
     }
   };
 
   const handleTimeChange = (value: string) => {
-    // Handle empty value gracefully
     onChange({
       ...transaction,
       time: value ? value + ":00" : null,
@@ -215,17 +204,17 @@ export function TransactionDialog({
       onOpenChange={(open) => !open && !saving && onClose()}
     >
       <DialogContent
-        className="max-w-md w-[calc(100%-2rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-2 border-black dark:border-white bg-background shadow-[6px_6px_0_#1a1a1a] dark:shadow-[6px_6px_0_#FFFBF0]"
+        className="max-w-md w-[calc(100%-2rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border bg-background shadow-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        {/* Header - uses category-specific pastel color */}
-        <DialogHeader className={`shrink-0 px-5 pt-5 pb-4 border-b-2 border-black dark:border-white ${transaction.category ? CATEGORY_PASTEL_COLORS[transaction.category] || "bg-pastel-blue" : "bg-pastel-blue"}`}>
-          <DialogTitle className="text-lg font-bold text-black dark:text-white">
+        {/* Header */}
+        <DialogHeader className={`shrink-0 px-5 pt-5 pb-4 border-b border-border bg-muted`}>
+          <DialogTitle className="text-lg font-bold text-foreground">
             {transaction.category ||
               (isNew ? "New Expense" : "Edit Transaction")}
           </DialogTitle>
           {transaction.merchant && (
-            <p className="text-sm text-black/70 dark:text-white/70 font-medium">
+            <p className="text-sm text-muted-foreground font-medium">
               {transaction.merchant}
             </p>
           )}
@@ -263,19 +252,18 @@ export function TransactionDialog({
                       ...transaction,
                       category: newCategory,
                       excluded_from_budget: newExcludedFromBudget,
-                      // Reset budget_type to auto when category changes
                       budget_type: null,
                     });
                   }}
                   disabled={saving}
-                  className={`h-10 rounded-lg flex items-center justify-center border-2 transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
+                  className={`h-10 rounded-lg flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
                     } ${isSelected
-                      ? `${categoryPastelColor} border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]`
-                      : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 hover:border-black dark:hover:border-white"
+                      ? `${categoryPastelColor} border-foreground`
+                      : "bg-card border-border hover:bg-muted"
                     }`}
                 >
                   <IconComp
-                    className={`h-4 w-4 ${isSelected ? "text-black dark:text-white" : "text-muted-foreground"
+                    className={`h-4 w-4 ${isSelected ? "text-foreground" : "text-muted-foreground"
                       }`}
                   />
                 </button>
@@ -289,19 +277,15 @@ export function TransactionDialog({
             const isWant = effectiveBudgetType === "want";
             const autoBudgetType = CATEGORY_BUDGET_TYPE[transaction.category ?? ""] ?? "want";
 
-            // Split categories into two rows
-            const topRowCategories = EXPENSE_CATEGORIES.slice(0, 5); // Food, Self Care, Travel, Entertainment, Shopping
-            const bottomRowCategories = EXPENSE_CATEGORIES.slice(5); // Bills, Investments
+            const topRowCategories = EXPENSE_CATEGORIES.slice(0, 5);
+            const bottomRowCategories = EXPENSE_CATEGORIES.slice(5);
 
             return (
               <div className="space-y-2">
-                {/* Category buttons - two rows */}
                 <div className="space-y-1.5">
-                  {/* Top row: 5 categories */}
                   <div className="grid grid-cols-5 gap-1.5">
                     {topRowCategories.map(renderCategoryButton)}
                   </div>
-                  {/* Bottom row: 2 categories centered side by side */}
                   <div className="flex justify-center gap-1.5">
                     {bottomRowCategories.map((cat) => {
                       const IconComp = cat.icon;
@@ -336,14 +320,14 @@ export function TransactionDialog({
                             });
                           }}
                           disabled={saving}
-                          className={`h-10 w-16 rounded-lg flex items-center justify-center border-2 transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
+                          className={`h-10 w-16 rounded-lg flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
                             } ${isSelected
-                              ? `${categoryPastelColor} border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]`
-                              : "bg-white dark:bg-white/10 border-black/30 dark:border-white/30 hover:border-black dark:hover:border-white"
+                              ? `${categoryPastelColor} border-foreground`
+                              : "bg-card border-border hover:bg-muted"
                             }`}
                         >
                           <IconComp
-                            className={`h-4 w-4 ${isSelected ? "text-black dark:text-white" : "text-muted-foreground"
+                            className={`h-4 w-4 ${isSelected ? "text-foreground" : "text-muted-foreground"
                               }`}
                           />
                         </button>
@@ -352,7 +336,7 @@ export function TransactionDialog({
                   </div>
                 </div>
 
-                {/* Need/Want toggle - fades in when category selected */}
+                {/* Need/Want toggle */}
                 <AnimatePresence>
                   {transaction.category && (
                     <motion.div
@@ -372,7 +356,6 @@ export function TransactionDialog({
                           checked={isWant}
                           onCheckedChange={(checked) => {
                             const newType = checked ? "want" : "need";
-                            // If matches auto, clear override
                             const newBudgetType = newType === autoBudgetType ? null : newType;
                             onChange({ ...transaction, budget_type: newBudgetType });
                           }}
@@ -412,7 +395,6 @@ export function TransactionDialog({
                 onBlur={handleAmountBlur}
                 onKeyDown={handleAmountKeyDown}
                 onFocus={(e) => {
-                  // If empty or "0", select all so user can type fresh
                   if (!amountInput) {
                     setAmountInput(
                       transaction.amount === 0
@@ -420,12 +402,10 @@ export function TransactionDialog({
                         : transaction.amount.toString()
                     );
                   }
-                  // Select all text for easy replacement
                   setTimeout(() => e.target.select(), 0);
                 }}
                 disabled={saving}
               />
-              {/* Show evaluated result for expressions */}
               {isExpression && (
                 <div
                   className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm font-mono font-semibold ${evaluatedAmount !== null ? "text-foreground" : "text-destructive"
@@ -547,13 +527,13 @@ export function TransactionDialog({
             />
           </div>
 
-          {/* Delete button - only show for existing transactions */}
+          {/* Delete button */}
           {!isNew && onDelete && (
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={saving || deleting}
-              className="w-full h-10 rounded-lg flex items-center justify-center gap-2 text-xs font-bold border-2 border-black dark:border-white text-black/60 dark:text-white/60 transition-all hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-600 dark:hover:border-red-400 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full h-10 rounded-lg flex items-center justify-center gap-2 text-xs font-bold border border-border text-muted-foreground transition-all hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete Transaction
@@ -561,19 +541,19 @@ export function TransactionDialog({
           )}
         </div>
 
-        {/* Fixed footer buttons - neo-brutalism style */}
-        <div className="flex gap-3 p-5 shrink-0 border-t-2 border-black dark:border-white bg-pastel-yellow">
+        {/* Fixed footer buttons */}
+        <div className="flex gap-3 p-5 shrink-0 border-t border-border bg-muted">
           <button
             onClick={onClose}
             disabled={saving || deleting}
-            className="flex-1 h-12 rounded-xl bg-white border-2 border-black dark:border-white text-black font-bold text-sm transition-all hover:bg-pastel-pink disabled:opacity-50 flex items-center justify-center"
+            className="flex-1 h-12 rounded-xl bg-card border border-border text-foreground font-bold text-sm transition-colors hover:bg-muted disabled:opacity-50 flex items-center justify-center"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
-            className="flex-1 h-12 rounded-xl bg-pastel-green border-2 border-black dark:border-white text-black font-bold text-sm transition-all shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_#1a1a1a] dark:hover:shadow-[5px_5px_0_#FFFBF0] disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 flex items-center justify-center gap-2"
+            className="flex-1 h-12 rounded-xl bg-foreground text-background font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {saving ? (
               <>
@@ -587,12 +567,12 @@ export function TransactionDialog({
         </div>
       </DialogContent>
 
-      {/* Delete Confirmation Modal - neo-brutalism style */}
+      {/* Delete Confirmation Modal */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-sm rounded-2xl border-2 border-black dark:border-white shadow-[5px_5px_0_#1a1a1a] dark:shadow-[5px_5px_0_#FFFBF0]">
+        <AlertDialogContent className="max-w-sm rounded-2xl border border-border shadow-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-3 text-lg font-bold">
-              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 border-2 border-red-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center justify-center">
                 <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
               Delete Transaction
@@ -611,7 +591,7 @@ export function TransactionDialog({
           <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel 
               disabled={deleting}
-              className="rounded-xl border-2 border-black dark:border-white font-bold hover:bg-pastel-blue"
+              className="rounded-xl border border-border font-bold hover:bg-muted"
             >
               Cancel
             </AlertDialogCancel>
@@ -623,7 +603,7 @@ export function TransactionDialog({
                 setShowDeleteConfirm(false);
               }}
               disabled={deleting}
-              className="rounded-xl border-2 border-red-600 bg-red-500 text-white font-bold hover:bg-red-600 shadow-[2px_2px_0_#991b1b] hover:shadow-[3px_3px_0_#991b1b]"
+              className="rounded-xl border border-red-600 bg-red-500 text-white font-bold hover:bg-red-600"
             >
               {deleting ? (
                 <>

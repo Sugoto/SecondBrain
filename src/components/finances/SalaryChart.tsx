@@ -16,27 +16,27 @@ interface SalaryChartProps {
 export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps) {
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
-    const textColor = isDark ? "#FFFBF0" : "#1a1a1a";
-    const borderColor = isDark ? "#FFFBF0" : "#1a1a1a";
-    const lineColor = isDark ? "#95E1A3" : "#1a1a1a";
-    const areaStart = isDark ? "rgba(149, 225, 163, 0.3)" : "rgba(212, 237, 218, 0.6)";
-    const areaEnd = isDark ? "rgba(149, 225, 163, 0)" : "rgba(212, 237, 218, 0)";
+    const textColor = isDark ? "#a3a3a3" : "#525252";
+    const borderColor = isDark ? "#262626" : "#e5e5e5";
+    const lineColor = "#6366f1";
+    const areaStart = "rgba(99,102,241,0.3)";
+    const areaEnd = "rgba(99,102,241,0)";
 
     return {
       grid: { left: 40, right: 15, top: 15, bottom: 30, containLabel: false },
       xAxis: {
         type: "category",
         data: SALARY_DATA.map((d) => d.label),
-        axisLine: { lineStyle: { color: borderColor, width: 2 } },
+        axisLine: { lineStyle: { color: borderColor, width: 1 } },
         axisTick: { show: false },
         axisLabel: { color: textColor, fontSize: 9, fontWeight: 600 },
       },
       yAxis: {
         type: "value",
         min: 0,
-        axisLine: { show: true, lineStyle: { color: borderColor, width: 2 } },
+        axisLine: { show: true, lineStyle: { color: borderColor, width: 1 } },
         axisTick: { show: false },
-        splitLine: { lineStyle: { color: isDark ? "rgba(255,251,240,0.1)" : "rgba(26,26,26,0.1)", type: "solid" } },
+        splitLine: { lineStyle: { color: borderColor, type: "solid" } },
         axisLabel: {
           color: textColor,
           fontSize: 9,
@@ -49,10 +49,10 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
           type: "line",
           data: SALARY_DATA.map((d) => d.lpa),
           smooth: false,
-          symbol: "rect",
-          symbolSize: 8,
-          itemStyle: { color: isDark ? "#D4EDDA" : "#FFE5EC", borderColor, borderWidth: 2 },
-          lineStyle: { width: 3, color: lineColor },
+          symbol: "circle",
+          symbolSize: 6,
+          itemStyle: { color: lineColor, borderColor: lineColor, borderWidth: 2 },
+          lineStyle: { width: 2, color: lineColor },
           areaStyle: {
             color: {
               type: "linear",
@@ -67,7 +67,7 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
             show: true,
             position: "top",
             formatter: (params) => `${(params as { value: number }).value}L`,
-            color: textColor,
+            color: isDark ? "#fafafa" : "#0a0a0a",
             fontSize: 10,
             fontWeight: 700,
           },
@@ -79,8 +79,8 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
   }, [theme]);
 
   return (
-    <div className="p-3 rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
-      <p className="text-[10px] font-bold text-black/60 dark:text-white/60 uppercase tracking-wide mb-1">
+    <div className="p-3 rounded-xl border border-border bg-card">
+      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">
         Salary Progression
       </p>
       <div className="h-36">

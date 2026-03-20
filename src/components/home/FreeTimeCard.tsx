@@ -1,23 +1,32 @@
 import { useMemo } from "react";
-import { LabeledPieChart } from "@/components/shared";
+import { Clock } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import { cn } from "@/lib/utils";
 
 const HOURS_IN_DAY = 24;
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 const STORAGE_KEY = "time-tracker";
 const SCHEMA_VERSION = 5;
 
-const BLOCK_COLORS: Record<string, string> = {
-  sleep: "#E2D9F3",
-  work: "#CCE5FF",
-  study: "#CCE5FF",
-  cooking: "#FFF3CD",
-  chores: "#FFE5EC",
-  exercise: "#D4EDDA",
+const BLOCK_COLORS_DARK: Record<string, string> = {
+  sleep: "#6366f1",
+  work: "#8b5cf6",
+  study: "#a78bfa",
+  cooking: "#c084fc",
+  chores: "#a855f7",
+  exercise: "#7c3aed",
 };
-const FREE_COLOR = "#FFFFFF";
-const DEFAULT_COLOR = "#FFE5D0";
+
+const BLOCK_COLORS_LIGHT: Record<string, string> = {
+  sleep: "#818cf8",
+  work: "#a78bfa",
+  study: "#c4b5fd",
+  cooking: "#d8b4fe",
+  chores: "#c084fc",
+  exercise: "#8b5cf6",
+};
+
+const DEFAULT_COLOR_DARK = "#4f46e5";
+const DEFAULT_COLOR_LIGHT = "#a5b4fc";
 
 interface BlockInfo {
   id: string;
@@ -62,36 +71,73 @@ export function FreeTimeCard() {
 
   if (!data) return null;
 
-  const pieData = [
+  const isDark = theme === "dark";
+  const colors = isDark ? BLOCK_COLORS_DARK : BLOCK_COLORS_LIGHT;
+  const defaultColor = isDark ? DEFAULT_COLOR_DARK : DEFAULT_COLOR_LIGHT;
+
+  const segments = [
     ...data.blocks.map((b) => ({
-      name: b.label,
-      value: b.hours,
-      color: BLOCK_COLORS[b.id] || DEFAULT_COLOR,
+      id: b.id,
+      label: b.label,
+      hours: b.hours,
+      pct: (b.hours / HOURS_IN_DAY) * 100,
+      color: colors[b.id] || defaultColor,
     })),
     ...(data.freeTime > 0
-      ? [{ name: "Free", value: data.freeTime, color: FREE_COLOR }]
+      ? [{
+          id: "free",
+          label: "Free",
+          hours: data.freeTime,
+          pct: (data.freeTime / HOURS_IN_DAY) * 100,
+          color: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)",
+        }]
       : []),
   ];
 
   return (
-    <div className={cn(
-      "w-full rounded-lg p-3 neo-brutal-sm",
-      data.freeTime > 0 ? "bg-pastel-purple" : "bg-pastel-pink"
-    )}>
-      <p className="text-[10px] text-black/60 dark:text-white/60 font-bold uppercase tracking-wide mb-0.5">
-        Free Time Today
-      </p>
-      <p className="text-xl font-bold text-black dark:text-white font-mono">
-        {formatHours(data.freeTime)}
-      </p>
-      <div className="flex items-center justify-center -mt-2">
-        <LabeledPieChart
-          data={pieData}
-          theme={theme}
-          formatValue={(v) => formatHours(v)}
-          formatLabel={(_name, value) => formatHours(value)}
-          size={180}
-        />
+    <div className="vercel-card vercel-glow px-5 py-4">
+      <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center gap-2">
+          <div className="h-6 w-6 rounded-lg bg-violet-500/10 dark:bg-violet-400/10 flex items-center justify-center">
+            <Clock className="h-3 w-3 text-violet-600 dark:text-violet-400" />
+          </div>
+          <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+            Free Time
+          </span>
+        </div>
+        <span className="text-xl font-bold text-neutral-900 dark:text-white font-mono tracking-tighter">
+          {formatHours(data.freeTime)}
+        </span>
+      </div>
+
+      {/* Stacked bar */}
+      <div className="h-3 rounded-full overflow-hidden flex bg-neutral-100 dark:bg-white/5">
+        {segments.map((seg) => (
+          <div
+            key={seg.id}
+            className="h-full first:rounded-l-full last:rounded-r-full transition-all duration-500"
+            style={{ width: `${seg.pct}%`, backgroundColor: seg.color }}
+            title={`${seg.label}: ${formatHours(seg.hours)}`}
+          />
+        ))}
+      </div>
+
+      {/* Legend row */}
+      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2.5">
+        {segments.filter((s) => s.pct >= 4).map((seg) => (
+          <div key={seg.id} className="flex items-center gap-1.5">
+            <div
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: seg.color }}
+            />
+            <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400">
+              {seg.label}
+            </span>
+            <span className="text-[10px] font-mono font-semibold text-neutral-700 dark:text-neutral-300">
+              {formatHours(seg.hours)}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

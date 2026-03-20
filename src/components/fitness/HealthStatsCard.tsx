@@ -82,11 +82,11 @@ export function HealthStatsEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-xs max-h-[90vh] overflow-y-auto rounded-xl border-[1.5px] border-black dark:border-white shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]"
+        className="sm:max-w-xs max-h-[90vh] overflow-y-auto rounded-2xl border border-border shadow-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="pb-2 border-b-[1.5px] border-black dark:border-white -mx-5 -mt-5 px-4 pt-4 mb-3 bg-pastel-purple rounded-t-xl">
-          <DialogTitle className="flex items-center gap-1.5 text-sm font-bold text-black dark:text-white">
+        <DialogHeader className="pb-2 border-b border-border -mx-5 -mt-5 px-4 pt-4 mb-3 bg-muted rounded-t-2xl">
+          <DialogTitle className="flex items-center gap-1.5 text-sm font-bold text-foreground">
             Edit Profile
           </DialogTitle>
         </DialogHeader>
@@ -110,7 +110,7 @@ export function HealthStatsEditDialog({
                       : null,
                   }))
                 }
-                className="font-mono h-7 text-xs text-center border-[1.5px] border-black dark:border-white rounded-md font-bold"
+                className="font-mono h-7 text-xs text-center border border-border rounded-lg font-bold"
                 placeholder="175"
               />
             </div>
@@ -131,7 +131,7 @@ export function HealthStatsEditDialog({
                       : null,
                   }))
                 }
-                className="font-mono h-7 text-xs text-center border-[1.5px] border-black dark:border-white rounded-md font-bold"
+                className="font-mono h-7 text-xs text-center border border-border rounded-lg font-bold"
                 placeholder="70"
               />
             </div>
@@ -150,7 +150,7 @@ export function HealthStatsEditDialog({
                     age: e.target.value ? parseFloat(e.target.value) : null,
                   }))
                 }
-                className="font-mono h-7 text-xs text-center border-[1.5px] border-black dark:border-white rounded-md font-bold"
+                className="font-mono h-7 text-xs text-center border border-border rounded-lg font-bold"
                 placeholder="25"
               />
             </div>
@@ -168,9 +168,9 @@ export function HealthStatsEditDialog({
                     gender: prev.gender === "male" ? "female" : "male",
                   }))
                 }
-                className="h-7 w-full rounded-md border-[1.5px] border-black dark:border-white bg-pastel-pink flex items-center justify-center transition-all hover:shadow-[1.5px_1.5px_0_#1a1a1a] dark:hover:shadow-[1.5px_1.5px_0_#FFFBF0]"
+                className="h-7 w-full rounded-lg border border-border bg-muted flex items-center justify-center transition-colors hover:bg-accent"
               >
-                <span className="text-sm font-bold text-black dark:text-white">
+                <span className="text-sm font-bold text-foreground">
                   {values.gender === "female" ? "♀" : "♂"}
                 </span>
               </button>
@@ -181,7 +181,7 @@ export function HealthStatsEditDialog({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-9 rounded-lg text-xs font-bold transition-all border-[1.5px] border-black dark:border-white bg-pastel-green text-black shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2.5px_2.5px_0_#1a1a1a] dark:hover:shadow-[2.5px_2.5px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-9 rounded-lg text-xs font-bold transition-colors bg-foreground text-background hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

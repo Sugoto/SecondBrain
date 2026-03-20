@@ -42,7 +42,6 @@ const FundSection = memo(function FundSection({
   const [investDate, setInvestDate] = useState("");
   const [adding, setAdding] = useState(false);
 
-  // Memoize investment stats to avoid recalculation
   const investmentStats = useMemo(() => {
     const totalUnits = investments.reduce((sum, i) => sum + i.units, 0);
     const totalInvested = investments.reduce((sum, i) => sum + i.amount, 0);
@@ -66,10 +65,8 @@ const FundSection = memo(function FundSection({
 
   const { currentValue, netChange, dailyChangeAmount, hasInvestments, isNetUp, isPositiveDay } = investmentStats;
 
-  // Sparkline color based on daily performance
-  const dayColor = isPositiveDay ? "#737373" : "#737373"; // Monochromatic
+  const dayColor = isPositiveDay ? "#737373" : "#737373";
 
-  // Memoize sparkline calculation - O(n) instead of O(n²)
   const sparklinePath = useMemo(() => {
     const history = fund.navHistory;
     if (history.length === 0) return "";
@@ -117,19 +114,19 @@ const FundSection = memo(function FundSection({
         delay: index * 0.05,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      className="border-t border-black/10 dark:border-white/10 first:border-t-0"
+      className="border-t border-border first:border-t-0"
     >
       {/* Fund Header */}
       <button
         onClick={onToggle}
-        className="w-full py-2 flex items-center gap-2 text-left hover:bg-pastel-yellow/30 transition-colors"
+        className="w-full py-2 flex items-center gap-2 text-left hover:bg-muted transition-colors"
       >
         {/* Trend indicator */}
-        <div className="h-5 w-5 rounded bg-pastel-blue border border-black/20 dark:border-white/20 flex items-center justify-center shrink-0">
+        <div className="h-5 w-5 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
           {isPositiveDay ? (
-            <TrendingUp className="h-2.5 w-2.5 text-black dark:text-white" />
+            <TrendingUp className="h-2.5 w-2.5 text-foreground" />
           ) : (
-            <TrendingDown className="h-2.5 w-2.5 text-black dark:text-white" />
+            <TrendingDown className="h-2.5 w-2.5 text-foreground" />
           )}
         </div>
 
@@ -221,7 +218,7 @@ const FundSection = memo(function FundSection({
               </svg>
 
               {/* Period Returns */}
-              <div className="flex items-center mb-2 p-1.5 rounded-md bg-pastel-purple/30 border border-black/10 dark:border-white/10">
+              <div className="flex items-center mb-2 p-1.5 rounded-lg bg-muted/50 border border-border">
                 {[
                   { label: "1D", value: fund.dailyChangePercent },
                   { label: "1M", value: fund.monthChangePercent },
@@ -239,7 +236,7 @@ const FundSection = memo(function FundSection({
                         {period.value.toFixed(1)}%
                       </p>
                     </div>
-                    {idx < 4 && <div className="w-px h-5 bg-black/10 dark:bg-white/10" />}
+                    {idx < 4 && <div className="w-px h-5 bg-border" />}
                   </div>
                 ))}
               </div>
@@ -250,7 +247,7 @@ const FundSection = memo(function FundSection({
                   {investments.map((inv) => (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between py-1.5 px-2 rounded-md bg-pastel-green/30 border border-black/10 dark:border-white/10"
+                      className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/50 border border-border"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono font-bold text-foreground">
@@ -269,7 +266,7 @@ const FundSection = memo(function FundSection({
                           e.stopPropagation();
                           onDeleteInvestment(inv.id);
                         }}
-                        className="p-1 rounded hover:bg-pastel-pink border border-transparent hover:border-black/20 text-muted-foreground hover:text-foreground transition-all"
+                        className="p-1 rounded-lg hover:bg-accent border border-transparent hover:border-border text-muted-foreground hover:text-foreground transition-all"
                       >
                         <Trash2 className="h-2.5 w-2.5" />
                       </button>
@@ -285,14 +282,14 @@ const FundSection = memo(function FundSection({
                   value={investAmount}
                   onChange={(e) => setInvestAmount(e.target.value)}
                   placeholder="₹"
-                  className="h-7 text-xs font-mono flex-1 border-[1.5px] border-black dark:border-white rounded-md"
+                  className="h-7 text-xs font-mono flex-1 border border-border rounded-lg"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <Input
                   type="date"
                   value={investDate}
                   onChange={(e) => setInvestDate(e.target.value)}
-                  className="h-7 text-xs w-28 border-[1.5px] border-black dark:border-white rounded-md"
+                  className="h-7 text-xs w-28 border border-border rounded-lg"
                   onClick={(e) => e.stopPropagation()}
                 />
                 <button
@@ -301,7 +298,7 @@ const FundSection = memo(function FundSection({
                     handleInvest();
                   }}
                   disabled={adding}
-                  className="h-7 w-7 flex items-center justify-center rounded-md border-[1.5px] border-black dark:border-white bg-pastel-green text-black shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50"
+                  className="h-7 w-7 flex items-center justify-center rounded-lg border border-border bg-foreground text-background hover:opacity-90 transition-all disabled:opacity-50"
                 >
                   {adding ? "..." : <Plus className="h-3 w-3" />}
                 </button>
@@ -325,7 +322,6 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
-  // Memoize investments to prevent dependency array changes
   const investments = useMemo(() => userStats?.investments || [], [userStats?.investments]);
 
   const handleToggle = useCallback((schemeCode: number) => {
@@ -373,7 +369,6 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
     }
   }, [deleteInvestment]);
 
-  // Memoize investments lookup by fund to avoid array recreation
   const investmentsByFund = useMemo(() => {
     const map = new Map<number, Investment[]>();
     for (const inv of investments) {
@@ -387,7 +382,6 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
   const getInvestmentsForFund = useCallback((schemeCode: number) =>
     investmentsByFund.get(schemeCode) || [], [investmentsByFund]);
 
-  // Memoize portfolio totals calculation
   const portfolioTotals = useMemo(() => {
     let invested = 0;
     let current = 0;
@@ -425,7 +419,7 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
           Mutual Funds
         </h3>
-        <div className="p-3 rounded-lg border-[1.5px] border-dashed border-black/30 dark:border-white/30">
+        <div className="p-3 rounded-xl border border-dashed border-border">
           <div className="text-center py-1">
             <p className="text-xs font-medium text-muted-foreground mb-1.5">
               Failed to load mutual fund data
@@ -462,7 +456,7 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
             onClick={refresh}
             disabled={isRefetching}
             whileTap={{ scale: 0.9 }}
-            className="h-6 w-6 flex items-center justify-center rounded-md border-[1.5px] border-black dark:border-white bg-pastel-blue text-black dark:text-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50"
+            className="h-6 w-6 flex items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-muted disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw
@@ -474,11 +468,11 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
       </div>
 
       {/* Single Collapsible Card */}
-      <div className="overflow-hidden rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
-        {/* Summary Header - Clickable to expand */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        {/* Summary Header */}
         <button
           onClick={() => setIsCardExpanded(!isCardExpanded)}
-          className="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-pastel-yellow/30 transition-colors"
+          className="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-muted transition-colors"
         >
           <span className="text-sm font-bold font-mono text-foreground">
             ₹
@@ -508,9 +502,9 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
                 </span>
               </>
             )}
-            <div className="h-5 w-5 rounded flex items-center justify-center border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10">
+            <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
               <ChevronDown
-                className={`h-3 w-3 text-black dark:text-white transition-transform ${isCardExpanded ? "rotate-180" : ""
+                className={`h-3 w-3 text-foreground transition-transform ${isCardExpanded ? "rotate-180" : ""
                   }`}
               />
             </div>
@@ -528,10 +522,8 @@ export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps)
               className="overflow-hidden"
             >
               <div className="px-3 pb-3">
-                {/* Divider */}
-                <div className="h-px bg-black/10 dark:bg-white/10 mb-2" />
+                <div className="h-px bg-border mb-2" />
 
-                {/* Fund List */}
                 {funds.length > 0 ? (
                   <div>
                     {funds.map((fund, index) => (

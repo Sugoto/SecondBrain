@@ -21,27 +21,26 @@ export const TopTabs = memo(function TopTabs({
   rightContent,
 }: TopTabsProps) {
   return (
-    <div className="flex flex-col px-4 pt-2 pb-1.5 h-[72px]">
+    <div className="flex h-[72px] flex-col px-4 pb-1.5 pt-2">
       {/* Header row */}
-      <div className="flex items-center gap-2 mb-2 h-6">
+      <div className="mb-2 flex min-h-8 items-center gap-2">
         {/* Back button */}
         <button
+          type="button"
           onClick={onGoHome}
-          className="h-6 w-6 rounded-md flex items-center justify-center border-[1.5px] border-black dark:border-white bg-pastel-pink transition-all hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[1.5px_1.5px_0_#1a1a1a] dark:hover:shadow-[1.5px_1.5px_0_#FFFBF0]"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background transition-colors hover:bg-muted active:scale-95"
         >
-          <ChevronLeft className="h-3 w-3 text-black dark:text-white" />
+          <ChevronLeft className="h-4 w-4 text-foreground" />
         </button>
 
         {/* Title */}
-        <h1 className="text-sm font-bold text-foreground flex-1">
-          {title}
-        </h1>
+        <h1 className="flex-1 text-sm font-semibold text-foreground">{title}</h1>
 
         {/* Right content */}
         {rightContent}
       </div>
 
-      {/* Full-width tabs - neo-brutalism style (compact) */}
+      {/* Tabs */}
       <div className="flex items-center gap-1.5">
         {navItems.map(({ id, label }) => {
           const isActive = activeView === id;
@@ -49,12 +48,13 @@ export const TopTabs = memo(function TopTabs({
           return (
             <button
               key={id}
+              type="button"
               onClick={() => onViewChange(id)}
               className={cn(
-                "flex-1 px-2 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide transition-all border-[1.5px]",
+                "flex-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-colors",
                 isActive
-                  ? "bg-pastel-purple border-black dark:border-white text-black dark:text-white shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0]"
-                  : "bg-transparent border-transparent text-muted-foreground hover:text-foreground"
+                  ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {label}

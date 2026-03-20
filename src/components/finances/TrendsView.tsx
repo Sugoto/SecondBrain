@@ -29,7 +29,6 @@ export const TrendsView = memo(function TrendsView({
 }: TrendsViewProps) {
   const { theme } = useTheme();
 
-  // Pie chart data for Needs
   const needsPieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
       (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
@@ -50,7 +49,6 @@ export const TrendsView = memo(function TrendsView({
     return data;
   }, [categoryTotalsByBudgetType]);
 
-  // Pie chart data for Wants
   const wantsPieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
       (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
@@ -83,7 +81,7 @@ export const TrendsView = memo(function TrendsView({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="p-6 text-center rounded-lg border-[1.5px] border-dashed border-black/30 dark:border-white/30 bg-card">
+          <div className="p-6 text-center rounded-xl border border-dashed border-border bg-card">
             <p className="text-xs font-medium text-muted-foreground">
               No transactions for this period
             </p>
@@ -122,14 +120,13 @@ export const TrendsView = memo(function TrendsView({
             Needs
           </h3>
 
-          {/* Needs Pie Chart */}
           {needsPieData.length > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="p-3 rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+              <div className="p-3 rounded-xl border border-border bg-card">
                 <div className="h-40 flex items-center justify-center">
                   <LabeledPieChart
                     data={needsPieData}
@@ -142,7 +139,6 @@ export const TrendsView = memo(function TrendsView({
             </motion.div>
           )}
 
-          {/* Needs Category Cards */}
           {needsCategories.map((cat, index) => {
             const data = categoryTotalsByBudgetType.needs[cat.name];
             return (
@@ -165,7 +161,6 @@ export const TrendsView = memo(function TrendsView({
             );
           })}
 
-          {/* Uncategorized Needs */}
           {hasNeedsUncategorized && (
             <CategoryCard
               name="Uncategorized (Needs)"
@@ -193,14 +188,13 @@ export const TrendsView = memo(function TrendsView({
             Wants
           </h3>
 
-          {/* Wants Pie Chart */}
           {wantsPieData.length > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <div className="p-3 rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+              <div className="p-3 rounded-xl border border-border bg-card">
                 <div className="h-40 flex items-center justify-center">
                   <LabeledPieChart
                     data={wantsPieData}
@@ -213,7 +207,6 @@ export const TrendsView = memo(function TrendsView({
             </motion.div>
           )}
 
-          {/* Wants Category Cards */}
           {wantsCategories.map((cat, index) => {
             const data = categoryTotalsByBudgetType.wants[cat.name];
             return (
@@ -236,7 +229,6 @@ export const TrendsView = memo(function TrendsView({
             );
           })}
 
-          {/* Uncategorized Wants */}
           {hasWantsUncategorized && (
             <CategoryCard
               name="Uncategorized (Wants)"

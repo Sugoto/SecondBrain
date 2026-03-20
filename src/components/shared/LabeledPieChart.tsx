@@ -36,39 +36,36 @@ export const LabeledPieChart = memo(function LabeledPieChart({
 
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
-    const textColor = isDark ? "#FFFBF0" : "#1a1a1a";
-    const borderColor = isDark ? "#FFFBF0" : "#1a1a1a";
+    const textColor = isDark ? "#a3a3a3" : "#525252";
+    const borderColor = isDark ? "#262626" : "#e5e5e5";
+    const bgColor = isDark ? "#0a0a0a" : "#fafafa";
 
-    // Neo-brutalism pastel colors for pie segments
-    const pastelColors = [
-      "#FFE5EC", // pink
-      "#FFF3CD", // yellow
-      "#D4EDDA", // green
-      "#CCE5FF", // blue
-      "#E2D9F3", // purple
-      "#FFE5D0", // orange
+    const defaultColors = [
+      "#6366f1",
+      "#8b5cf6",
+      "#a855f7",
+      "#06b6d4",
+      "#14b8a6",
+      "#f59e0b",
     ];
 
     return {
       tooltip: {
         trigger: "item",
-        backgroundColor: isDark ? "#1a1a2e" : "#FDF6E3",
-        borderColor: borderColor,
-        borderWidth: 2,
+        backgroundColor: isDark ? "#141414" : "#ffffff",
+        borderColor,
+        borderWidth: 1,
         padding: [12, 16],
         textStyle: {
-          color: textColor,
+          color: isDark ? "#fafafa" : "#0a0a0a",
           fontSize: 12,
-          fontWeight: 600,
+          fontWeight: 500,
         },
-        extraCssText: `
-          border-radius: 12px;
-          box-shadow: 4px 4px 0 ${borderColor};
-        `,
+        extraCssText: `border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,${isDark ? "0.4" : "0.08"});`,
         formatter: (params) => {
           const p = params as { name: string; value: number; percent: number };
-          return `<div style="font-weight:700;font-size:13px">${p.name}</div>
-           <div style="font-weight:600;margin-top:4px">${formatValue(p.value)} (${p.percent.toFixed(0)}%)</div>`;
+          return `<div style="font-weight:600;font-size:13px">${p.name}</div>
+           <div style="font-weight:500;margin-top:4px;color:${textColor}">${formatValue(p.value)} (${p.percent.toFixed(0)}%)</div>`;
         },
       },
       series: [
@@ -78,9 +75,9 @@ export const LabeledPieChart = memo(function LabeledPieChart({
           center: ["50%", "50%"],
           avoidLabelOverlap: true,
           itemStyle: {
-            borderRadius: 0, // Sharp corners for neo-brutalism
-            borderColor: borderColor,
-            borderWidth: 2.5,
+            borderRadius: 4,
+            borderColor: bgColor,
+            borderWidth: 2,
           },
           label: {
             show: true,
@@ -94,12 +91,12 @@ export const LabeledPieChart = memo(function LabeledPieChart({
             rich: {
               name: {
                 fontSize: 10,
-                fontWeight: 700,
+                fontWeight: 600,
                 color: textColor,
               },
               percent: {
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 700,
               },
             },
             color: textColor,
@@ -109,11 +106,11 @@ export const LabeledPieChart = memo(function LabeledPieChart({
             show: true,
             length: 12,
             length2: 10,
-            smooth: 0,
+            smooth: 0.2,
             lineStyle: {
-              width: 2,
+              width: 1,
               type: "solid",
-              color: borderColor,
+              color: isDark ? "#404040" : "#d4d4d4",
             },
           },
           labelLayout: {
@@ -121,30 +118,29 @@ export const LabeledPieChart = memo(function LabeledPieChart({
           },
           emphasis: {
             itemStyle: {
-              // Just increase border width on hover, no shadow offset
-              borderWidth: 4,
+              borderWidth: 3,
+              shadowBlur: 10,
+              shadowColor: "rgba(0,0,0,0.15)",
             },
             scale: true,
             scaleSize: 6,
           },
           data: data.map((item, index) => {
-            const color = item.color || pastelColors[index % pastelColors.length];
+            const color = item.color || defaultColors[index % defaultColors.length];
             return {
             name: item.name,
             value: item.value,
-            itemStyle: {
-              color,
-            },
+            itemStyle: { color },
             label: {
               rich: {
                 percent: {
-                  color: isDark ? color : "#1a1a1a",
+                  color: isDark ? color : "#0a0a0a",
                 },
               },
             },
             labelLine: {
               lineStyle: {
-                color: borderColor,
+                color: isDark ? "#404040" : "#d4d4d4",
               },
             },
           }; }),
@@ -156,7 +152,6 @@ export const LabeledPieChart = memo(function LabeledPieChart({
     };
   }, [data, theme, innerRadius, outerRadius, labelThreshold, formatValue, formatLabel]);
 
-  // Don't render if no valid data
   if (!data || data.length === 0 || total === 0) return null;
 
   return (

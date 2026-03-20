@@ -21,7 +21,6 @@ import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
 import { InvestmentsView } from "./InvestmentsView";
 
-// Lazy load TrendsView since it imports heavy Recharts (~420KB)
 const TrendsView = lazy(() =>
   import("./TrendsView").then((m) => ({ default: m.TrendsView }))
 );
@@ -54,13 +53,11 @@ function SegmentedBudgetBar({
   const [editingWants, setEditingWants] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Wants progress
   const wantsPercent =
     budgetInfo.wantsBudget > 0
       ? (budgetInfo.wantsSpent / budgetInfo.wantsBudget) * 100
       : 0;
 
-  // Needs progress
   const needsPercent =
     budgetInfo.needsBudget > 0
       ? (budgetInfo.needsSpent / budgetInfo.needsBudget) * 100
@@ -101,9 +98,9 @@ function SegmentedBudgetBar({
 
   return (
     <div className="sticky top-0 z-30 px-4 md:px-5 pt-1.5">
-      <div className="max-w-6xl mx-auto px-3 py-2 rounded-lg border-[1.5px] border-black dark:border-white bg-pastel-green shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
+      <div className="max-w-6xl mx-auto px-3 py-2 rounded-xl border border-border bg-card">
         <div className="flex items-center gap-2">
-          {/* Progress bars side by side - tappable to filter */}
+          {/* Progress bars side by side */}
           <div className="flex-1 grid grid-cols-2 gap-3">
             {/* Needs progress bar */}
             <button
@@ -120,38 +117,38 @@ function SegmentedBudgetBar({
                 : budgetTypeFilter === "want"
                   ? "opacity-40"
                   : budgetTypeFilter === "need"
-                    ? "bg-white/40 dark:bg-black/20"
-                    : "hover:bg-white/30 dark:hover:bg-black/10"
+                    ? "bg-accent"
+                    : "hover:bg-muted"
                 }`}
             >
               <div className="flex items-center justify-between">
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wide ${budgetTypeFilter === "need" ? "text-black dark:text-white" : "text-black/70 dark:text-white/70"}`}
+                  className={`text-[10px] font-bold uppercase tracking-wide ${budgetTypeFilter === "need" ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   Needs
                 </span>
                 {isEditing ? (
                   <div className="flex items-center gap-0.5">
-                    <span className="font-mono text-[10px] font-bold text-black dark:text-white">
+                    <span className="font-mono text-[10px] font-bold text-foreground">
                       {formatCurrency(budgetInfo.needsSpent)}
                     </span>
-                    <span className="text-black/50 dark:text-white/50 font-bold text-[10px]">/</span>
+                    <span className="text-muted-foreground font-bold text-[10px]">/</span>
                     <Input
                       type="number"
                       value={editingNeeds}
                       onChange={(e) => setEditingNeeds(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-14 text-[9px] font-mono font-bold text-right px-1 border-[1.5px] border-black dark:border-white rounded"
+                      className="h-4 w-14 text-[9px] font-mono font-bold text-right px-1 border border-border rounded"
                       disabled={saving}
                     />
                   </div>
                 ) : (
-                  <span className="font-mono text-[10px] font-bold text-black dark:text-white">
+                  <span className="font-mono text-[10px] font-bold text-foreground">
                     {formatCurrency(budgetInfo.needsSpent)}
                   </span>
                 )}
               </div>
-              <div className="relative h-2 rounded overflow-hidden bg-white dark:bg-black/30 border-[1.5px] border-black dark:border-white">
+              <div className="relative h-2 rounded overflow-hidden bg-muted">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(needsPercent, 100)}%` }}
@@ -160,7 +157,7 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.1,
                   }}
-                  className="h-full bg-black dark:bg-white"
+                  className="h-full bg-foreground"
                 />
               </div>
             </button>
@@ -180,38 +177,38 @@ function SegmentedBudgetBar({
                 : budgetTypeFilter === "need"
                   ? "opacity-40"
                   : budgetTypeFilter === "want"
-                    ? "bg-white/40 dark:bg-black/20"
-                    : "hover:bg-white/30 dark:hover:bg-black/10"
+                    ? "bg-accent"
+                    : "hover:bg-muted"
                 }`}
             >
               <div className="flex items-center justify-between">
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wide ${budgetTypeFilter === "want" ? "text-black dark:text-white" : "text-black/70 dark:text-white/70"}`}
+                  className={`text-[10px] font-bold uppercase tracking-wide ${budgetTypeFilter === "want" ? "text-foreground" : "text-muted-foreground"}`}
                 >
                   Wants
                 </span>
                 {isEditing ? (
                   <div className="flex items-center gap-0.5">
-                    <span className="font-mono text-[10px] font-bold text-black dark:text-white">
+                    <span className="font-mono text-[10px] font-bold text-foreground">
                       {formatCurrency(budgetInfo.wantsSpent)}
                     </span>
-                    <span className="text-black/50 dark:text-white/50 font-bold text-[10px]">/</span>
+                    <span className="text-muted-foreground font-bold text-[10px]">/</span>
                     <Input
                       type="number"
                       value={editingWants}
                       onChange={(e) => setEditingWants(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-14 text-[9px] font-mono font-bold text-right px-1 border-[1.5px] border-black dark:border-white rounded"
+                      className="h-4 w-14 text-[9px] font-mono font-bold text-right px-1 border border-border rounded"
                       disabled={saving}
                     />
                   </div>
                 ) : (
-                  <span className="font-mono text-[10px] font-bold text-black dark:text-white">
+                  <span className="font-mono text-[10px] font-bold text-foreground">
                     {formatCurrency(budgetInfo.wantsSpent)}
                   </span>
                 )}
               </div>
-              <div className="relative h-2 rounded overflow-hidden bg-white dark:bg-black/30 border-[1.5px] border-black dark:border-white">
+              <div className="relative h-2 rounded overflow-hidden bg-muted">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
@@ -220,7 +217,7 @@ function SegmentedBudgetBar({
                     ease: [0.25, 0.46, 0.45, 0.94],
                     delay: 0.2,
                   }}
-                  className="h-full bg-black dark:bg-white"
+                  className="h-full bg-foreground"
                 />
               </div>
             </button>
@@ -230,8 +227,8 @@ function SegmentedBudgetBar({
         {/* Total Expenses row with edit button */}
         <div className="flex items-center justify-between pt-1.5 mt-1.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-black/70 dark:text-white/70">Total</span>
-            <span className="font-mono text-xs font-bold text-black dark:text-white">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Total</span>
+            <span className="font-mono text-xs font-bold text-foreground">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
@@ -240,7 +237,7 @@ function SegmentedBudgetBar({
               <button
                 onClick={saveEditing}
                 disabled={saving}
-                className="h-5 w-5 rounded flex items-center justify-center bg-pastel-blue border-[1.5px] border-black dark:border-white text-black dark:text-white transition-all shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50"
+                className="h-5 w-5 rounded-lg flex items-center justify-center bg-muted border border-border text-foreground transition-colors hover:bg-accent disabled:opacity-50"
                 title="Save"
               >
                 <Check className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -248,7 +245,7 @@ function SegmentedBudgetBar({
               <button
                 onClick={cancelEditing}
                 disabled={saving}
-                className="h-5 w-5 rounded flex items-center justify-center bg-pastel-pink border-[1.5px] border-black dark:border-white text-black dark:text-white transition-all shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50"
+                className="h-5 w-5 rounded-lg flex items-center justify-center bg-muted border border-border text-foreground transition-colors hover:bg-accent disabled:opacity-50"
                 title="Cancel"
               >
                 <X className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -257,7 +254,7 @@ function SegmentedBudgetBar({
           ) : (
             <button
               onClick={startEditing}
-              className="h-5 w-5 rounded flex items-center justify-center bg-white dark:bg-white/10 border-[1.5px] border-black dark:border-white text-black dark:text-white transition-all shadow-[1.5px_1.5px_0_#1a1a1a] dark:shadow-[1.5px_1.5px_0_#FFFBF0] hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[2px_2px_0_#1a1a1a] dark:hover:shadow-[2px_2px_0_#FFFBF0] hover:bg-pastel-yellow active:translate-x-0 active:translate-y-0 active:shadow-none"
+              className="h-5 w-5 rounded-lg flex items-center justify-center bg-muted border border-border text-foreground transition-colors hover:bg-accent"
               title="Edit Budget"
             >
               <Pencil className="h-2.5 w-2.5" strokeWidth={2.5} />
@@ -269,7 +266,6 @@ function SegmentedBudgetBar({
   );
 }
 
-// Constants outside component to avoid recreation
 const VIEWS = ["investments", "expenses", "trends"] as const;
 
 const VIEW_ANIMATION = {
@@ -279,7 +275,6 @@ const VIEW_ANIMATION = {
   transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] as const },
 };
 
-// Dialog state type
 type DialogState = {
   transaction: Transaction;
   mode: "new" | "edit";
@@ -296,31 +291,25 @@ export function FinanceTracker({
   onViewChange,
   onGoHome,
 }: FinanceTrackerProps) {
-  // Data from React Query cache
   const { transactions, addToCache, updateInCache, removeFromCache } =
     useExpenseData();
 
-  // User stats for budget values
   const { userStats, updateUserStats } = useUserStats();
 
-  // Filter state
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
   const [budgetTypeFilter, setBudgetTypeFilter] = useState<
     "need" | "want" | null
   >(null);
 
-  // UI state
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  // Dialog state - consolidated
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const { theme } = useTheme();
 
-  // Swipe navigation for mobile (no View Transitions - Framer Motion handles animations)
   const swipeHandlers = useSwipeNavigation({
     views: VIEWS,
     currentView: activeView,
@@ -383,7 +372,6 @@ export function FinanceTracker({
       toast.error(
         isNew ? "Failed to add expense" : "Failed to update transaction"
       );
-      // Don't close dialog on error - let user retry
     } finally {
       setSaving(false);
     }
@@ -429,10 +417,7 @@ export function FinanceTracker({
     }
   }
 
-  // Derived data
   const filteredTransactions = useMemo(() => {
-    // When filtering by budget type (needs/wants), include past prorations
-    // Otherwise, only show transactions from the actual selected period
     const disableProrationSpreading = !budgetTypeFilter;
     
     let result = filterByTimeRange(
@@ -442,7 +427,6 @@ export function FinanceTracker({
       { disableProrationSpreading }
     );
 
-    // Apply budget type filter if active
     if (budgetTypeFilter) {
       result = result.filter((t) => {
         const txnBudgetType = getTransactionBudgetType(
@@ -456,8 +440,6 @@ export function FinanceTracker({
     return sortTransactions(result, "date", "desc");
   }, [transactions, timeFilter, customDateRange, budgetTypeFilter]);
 
-  // Category totals for display (includes all transactions)
-  // Proration spreading is disabled - only show transactions from the actual selected period
   const categoryTotals = useMemo(
     () =>
       getCategoryTotals(transactions, timeFilter, {
@@ -467,8 +449,6 @@ export function FinanceTracker({
     [transactions, timeFilter, customDateRange]
   );
 
-  // Category totals grouped by budget type (considers manual overrides)
-  // Proration spreading is disabled - only show transactions from the actual selected period
   const categoryTotalsByBudgetType = useMemo(
     () =>
       getCategoryTotalsByBudgetType(transactions, timeFilter, {
@@ -479,7 +459,6 @@ export function FinanceTracker({
     [transactions, timeFilter, customDateRange]
   );
 
-  // Budget type info - calculates needs vs wants spending for current month
   const budgetTypeInfo = useMemo(() => {
     return calculateBudgetTypeInfo(
       transactions,
@@ -488,14 +467,10 @@ export function FinanceTracker({
     );
   }, [transactions, userStats?.needs_budget, userStats?.wants_budget]);
 
-  // Total expenses for current month only - full amount for purchases made this month
-  // (excludes past prorations from previous months, includes future prorations from this month)
-  // This is independent of budgetTypeFilter - always shows current month total
   const totalExpenses = useMemo(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
-    // Filter by time range without proration spreading, independent of budgetTypeFilter
     const monthTransactions = filterByTimeRange(
       transactions,
       timeFilter,
@@ -506,14 +481,12 @@ export function FinanceTracker({
     return monthTransactions
       .filter((t) => {
         if (t.excluded_from_budget) return false;
-        // Only include transactions actually made this month
         const txnDate = new Date(t.date);
         return txnDate >= startOfMonth;
       })
-      .reduce((sum, t) => sum + t.amount, 0); // Full amount, not prorated
+      .reduce((sum, t) => sum + t.amount, 0);
   }, [transactions, timeFilter, customDateRange]);
 
-  // Handler to update budget values
   const handleUpdateBudgets = async (
     needsBudget: number,
     wantsBudget: number
@@ -527,7 +500,6 @@ export function FinanceTracker({
 
     if (updateError) throw updateError;
 
-    // Update local cache
     updateUserStats({
       ...userStats,
       needs_budget: needsBudget,
@@ -536,11 +508,9 @@ export function FinanceTracker({
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
-      {/* Header with TopTabs - Fixed on mobile */}
-      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20 bg-background">
+    <div className="h-[100dvh] flex flex-col overflow-hidden">
+      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20 vercel-header pb-3">
         <div className="max-w-6xl mx-auto">
-          {/* Top Tabs Navigation with Date Filter */}
           <TopTabs
             navItems={FINANCE_NAV_ITEMS}
             activeView={activeView}
@@ -562,12 +532,10 @@ export function FinanceTracker({
         </div>
       </header>
 
-      {/* Main Content - with top padding for fixed header with tabs on mobile */}
       <main
         className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-4 md:pb-0 pt-[88px] md:pt-0"
         {...swipeHandlers}
       >
-        {/* Sticky Segmented Budget Bar - only on expenses view */}
         {activeView === "expenses" && (
           <SegmentedBudgetBar
             budgetInfo={budgetTypeInfo}
@@ -609,7 +577,6 @@ export function FinanceTracker({
         </AnimatePresence>
       </main>
 
-      {/* Transaction Dialog */}
       <TransactionDialog
         transaction={dialogState?.transaction ?? null}
         isNew={dialogState?.mode === "new"}
@@ -621,7 +588,7 @@ export function FinanceTracker({
         onDelete={deleteTransaction}
       />
 
-      {/* Mobile FAB - Neo-brutalism style (compact) */}
+      {/* Mobile FAB */}
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
@@ -631,10 +598,10 @@ export function FinanceTracker({
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             whileTap={{ scale: 0.95 }}
             onClick={openAddExpense}
-            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-11 w-11 rounded-lg bg-pastel-pink border-[1.5px] border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]"
+            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-11 w-11 rounded-full bg-foreground text-background shadow-lg"
             aria-label="Add expense"
           >
-            <Plus className="h-5 w-5 text-black dark:text-white" strokeWidth={2.5} />
+            <Plus className="h-5 w-5" strokeWidth={2.5} />
           </motion.button>
         )}
       </AnimatePresence>

@@ -50,46 +50,46 @@ export function NutritionCard({ onEdit }: NutritionCardProps) {
   return (
     <button
       onClick={onEdit}
-      className="w-full text-left rounded-lg bg-pastel-blue p-3 neo-brutal-sm"
+      className="w-full text-left rounded-xl bg-card border border-border p-3 transition-colors hover:bg-muted"
     >
       <div className="space-y-2">
         {/* Header Row: Calories */}
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-xs font-mono text-black/40 dark:text-white/40 line-through">
+            <span className="text-xs font-mono text-muted-foreground line-through">
               {formatNumber(tdee.tdee)}
             </span>
-            <span className="text-xl font-bold font-mono text-black dark:text-white">
+            <span className="text-xl font-bold font-mono text-foreground">
               {formatNumber(tdee.targetCalories)}
             </span>
-            <span className="text-xs text-black/70 dark:text-white/70 font-bold">kcal</span>
+            <span className="text-xs text-muted-foreground font-bold">kcal</span>
           </div>
-          <div className="h-7 w-7 rounded-md bg-white dark:bg-white/10 flex items-center justify-center border-[1.5px] border-black dark:border-white">
-            <ChevronRight className="h-3.5 w-3.5 text-black dark:text-white" />
+          <div className="h-7 w-7 rounded-md bg-muted flex items-center justify-center border border-border">
+            <ChevronRight className="h-3.5 w-3.5 text-foreground" />
           </div>
         </div>
 
         {/* Macros + Water Row */}
         <div className="grid grid-cols-4 gap-1.5">
-          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-md bg-white dark:bg-white/10 border-[1.5px] border-black dark:border-white">
-            <Beef className="h-3 w-3 text-black dark:text-white shrink-0" />
-            <p className="text-xs font-bold font-mono text-black dark:text-white">{tdee.protein}g</p>
-            <p className="text-[8px] text-black/70 dark:text-white/70 font-bold uppercase">Protein</p>
+          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-lg bg-muted border border-border">
+            <Beef className="h-3 w-3 text-foreground shrink-0" />
+            <p className="text-xs font-bold font-mono text-foreground">{tdee.protein}g</p>
+            <p className="text-[8px] text-muted-foreground font-bold uppercase">Protein</p>
           </div>
-          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-md bg-white dark:bg-white/10 border-[1.5px] border-black dark:border-white">
-            <Wheat className="h-3 w-3 text-black dark:text-white shrink-0" />
-            <p className="text-xs font-bold font-mono text-black dark:text-white">{tdee.carbs}g</p>
-            <p className="text-[8px] text-black/70 dark:text-white/70 font-bold uppercase">Carbs</p>
+          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-lg bg-muted border border-border">
+            <Wheat className="h-3 w-3 text-foreground shrink-0" />
+            <p className="text-xs font-bold font-mono text-foreground">{tdee.carbs}g</p>
+            <p className="text-[8px] text-muted-foreground font-bold uppercase">Carbs</p>
           </div>
-          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-md bg-white dark:bg-white/10 border-[1.5px] border-black dark:border-white">
-            <Droplet className="h-3 w-3 text-black dark:text-white shrink-0" />
-            <p className="text-xs font-bold font-mono text-black dark:text-white">{tdee.fat}g</p>
-            <p className="text-[8px] text-black/70 dark:text-white/70 font-bold uppercase">Fat</p>
+          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-lg bg-muted border border-border">
+            <Droplet className="h-3 w-3 text-foreground shrink-0" />
+            <p className="text-xs font-bold font-mono text-foreground">{tdee.fat}g</p>
+            <p className="text-[8px] text-muted-foreground font-bold uppercase">Fat</p>
           </div>
-          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-md bg-white dark:bg-white/10 border-[1.5px] border-black dark:border-white">
-            <GlassWater className="h-3 w-3 text-black dark:text-white shrink-0" />
-            <p className="text-xs font-bold font-mono text-black dark:text-white">{waterLiters.toFixed(1)}L</p>
-            <p className="text-[8px] text-black/70 dark:text-white/70 font-bold uppercase">Water</p>
+          <div className="flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-lg bg-muted border border-border">
+            <GlassWater className="h-3 w-3 text-foreground shrink-0" />
+            <p className="text-xs font-bold font-mono text-foreground">{waterLiters.toFixed(1)}L</p>
+            <p className="text-[8px] text-muted-foreground font-bold uppercase">Water</p>
           </div>
         </div>
       </div>

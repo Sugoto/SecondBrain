@@ -122,15 +122,15 @@ export function TimeTracker({ onGoHome }: TimeTrackerProps) {
   }, []);
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <header className="shrink-0 bg-background px-4 pt-2 pb-3">
+      <header className="shrink-0 vercel-header px-4 pt-2 pb-4">
         <div className="flex items-center gap-2 h-6">
           <button
             onClick={onGoHome}
-            className="h-6 w-6 rounded-md flex items-center justify-center border-[1.5px] border-black dark:border-white bg-pastel-pink transition-all hover:translate-x-[-0.5px] hover:translate-y-[-0.5px] hover:shadow-[1.5px_1.5px_0_#1a1a1a] dark:hover:shadow-[1.5px_1.5px_0_#FFFBF0]"
+            className="h-6 w-6 rounded-lg flex items-center justify-center border border-border bg-muted transition-colors hover:bg-accent"
           >
-            <ChevronLeft className="h-3 w-3 text-black dark:text-white" />
+            <ChevronLeft className="h-3 w-3 text-foreground" />
           </button>
           <h1 className="text-sm font-bold text-foreground flex-1">
             Weekly Time
@@ -141,27 +141,30 @@ export function TimeTracker({ onGoHome }: TimeTrackerProps) {
       <main className="flex-1 overflow-y-auto p-4 pb-8 space-y-4">
         {/* Free time hero card */}
         <div className={cn(
-          "p-4 rounded-lg border-[1.5px] border-black dark:border-white shadow-[3px_3px_0_#1a1a1a] dark:shadow-[3px_3px_0_#FFFBF0]",
-          freeTime > 0 ? "bg-pastel-green" : "bg-pastel-pink"
+          "p-4 rounded-xl border border-border bg-card",
+          freeTime <= 0 && "border-red-300 dark:border-red-800"
         )}>
-          <p className="text-[10px] font-bold text-black/60 dark:text-foreground/60 uppercase tracking-wide mb-1">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">
             Free Time This Week
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold font-mono text-black dark:text-foreground">
+            <span className={cn(
+              "text-3xl font-bold font-mono",
+              freeTime > 0 ? "text-foreground" : "text-red-500"
+            )}>
               {formatHours(freeTime)}
             </span>
-            <span className="text-xs font-bold text-black/50 dark:text-foreground/50">
+            <span className="text-xs font-bold text-muted-foreground">
               ≈ {formatPerDay(freeTime)} / day
             </span>
           </div>
-          <p className="text-[10px] text-black/50 dark:text-foreground/50 font-medium mt-1">
+          <p className="text-[10px] text-muted-foreground font-medium mt-1">
             {formatHours(allocated)} allocated of {HOURS_IN_WEEK}h
           </p>
         </div>
 
         {/* Visual bar */}
-        <div className="rounded-lg border-[1.5px] border-black dark:border-white overflow-hidden h-5 flex bg-muted">
+        <div className="rounded-lg border border-border overflow-hidden h-5 flex bg-muted">
           {blocks.map((block) => {
             const hrs = totalHours(block);
             const pct = (hrs / HOURS_IN_WEEK) * 100;
@@ -196,24 +199,24 @@ export function TimeTracker({ onGoHome }: TimeTrackerProps) {
                   setEditingId(block.id);
                 }}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-lg border-[1.5px] border-black dark:border-white shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] text-left transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0.5px_0.5px_0_#1a1a1a] dark:active:shadow-[0.5px_0.5px_0_#FFFBF0]",
+                  "flex items-center gap-3 p-3 rounded-xl border border-border bg-card shadow-sm text-left transition-colors hover:bg-muted",
                   block.color
                 )}
               >
                 <span className="text-lg">{block.emoji}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-black dark:text-foreground truncate">
+                  <p className="text-xs font-bold text-foreground truncate">
                     {block.label}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-bold font-mono text-black dark:text-foreground">
+                  <span className="text-sm font-bold font-mono text-foreground">
                     {formatHours(today)}
                   </span>
-                  <span className="text-[10px] font-bold font-mono text-black/40 dark:text-foreground/40">
+                  <span className="text-[10px] font-bold font-mono text-muted-foreground">
                     / {formatHours(weekly)}
                   </span>
-                  <ChevronRight className="h-3 w-3 text-black/40 dark:text-foreground/40" />
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 </div>
               </button>
             );
@@ -229,14 +232,14 @@ export function TimeTracker({ onGoHome }: TimeTrackerProps) {
       <Dialog open={!!editingBlock} onOpenChange={(open) => !open && setEditingId(null)}>
         {editingBlock && (
           <DialogContent
-            className="sm:max-w-xs rounded-xl border-[1.5px] border-black dark:border-white shadow-[4px_4px_0_#1a1a1a] dark:shadow-[4px_4px_0_#FFFBF0]"
+            className="sm:max-w-xs rounded-2xl border border-border shadow-xl"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <DialogHeader className={cn(
-              "pb-2 border-b-[1.5px] border-black dark:border-white -mx-5 -mt-5 px-4 pt-4 mb-3 rounded-t-xl",
+              "pb-2 border-b border-border -mx-5 -mt-5 px-4 pt-4 mb-3 rounded-t-2xl",
               editingBlock.color
             )}>
-              <DialogTitle className="text-sm font-bold text-black dark:text-foreground flex items-center gap-2">
+              <DialogTitle className="text-sm font-bold text-foreground flex items-center gap-2">
                 <span>{editingBlock.emoji}</span>
                 {editingBlock.label}
                 <span className="ml-auto font-mono text-xs">
@@ -255,12 +258,12 @@ export function TimeTracker({ onGoHome }: TimeTrackerProps) {
                     key={day}
                     onClick={() => setActiveDay(day)}
                     className={cn(
-                      "h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold border-[1.5px] transition-all",
+                      "h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold border transition-colors",
                       isActive
-                        ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black scale-110"
+                        ? "border-foreground bg-foreground text-background scale-110"
                         : hasHours
-                          ? "border-black dark:border-white bg-pastel-green text-black dark:text-foreground"
-                          : "border-black/30 dark:border-white/30 text-muted-foreground"
+                          ? "border-border bg-muted text-foreground"
+                          : "border-border/50 text-muted-foreground"
                     )}
                   >
                     {DAYS[i]}

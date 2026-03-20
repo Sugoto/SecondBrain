@@ -5,8 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const toggleVariants = cva(
-  // Neo-brutalism: thick borders, bold styling, offset shadows
-  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-bold border-2 border-black dark:border-white bg-white dark:bg-black/20 shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0] hover:bg-pastel-yellow/50 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-pastel-blue data-[state=on]:text-black [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none transition-all focus-visible:translate-x-[-1px] focus-visible:translate-y-[-1px] focus-visible:shadow-[3px_3px_0_#1a1a1a] dark:focus-visible:shadow-[3px_3px_0_#FFFBF0] active:translate-x-0 active:translate-y-0 active:shadow-none whitespace-nowrap",
+  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium border border-border bg-card text-foreground hover:bg-muted disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-foreground data-[state=on]:text-background [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none transition-colors focus-visible:ring-1 focus-visible:ring-ring whitespace-nowrap",
   {
     variants: {
       variant: {

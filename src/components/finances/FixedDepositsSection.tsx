@@ -14,7 +14,6 @@ export function FixedDepositsSection({
   const [isExpanded, setIsExpanded] = useState(false);
   const principal = userStats?.fixed_deposits ?? 0;
 
-  // Calculate current and maturity values for all FDs using shared utility
   const fdCalculations = useMemo(
     () => calculateFDValues(principal),
     [principal]
@@ -22,7 +21,6 @@ export function FixedDepositsSection({
 
   if (principal === 0 || fdCalculations.length === 0) return null;
 
-  // Total current value across all FDs
   const totalCurrentValue = fdCalculations.reduce(
     (sum, fd) => sum + fd.currentValue,
     0
@@ -37,11 +35,11 @@ export function FixedDepositsSection({
       <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
         Fixed Deposits
       </h3>
-      <div className="overflow-hidden rounded-lg border-[1.5px] border-black dark:border-white bg-card shadow-[2px_2px_0_#1a1a1a] dark:shadow-[2px_2px_0_#FFFBF0]">
-        {/* Summary Header - Clickable to expand */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        {/* Summary Header */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors hover:bg-pastel-yellow/30"
+          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors hover:bg-muted"
         >
           <span className="text-sm font-bold font-mono text-foreground">
             ₹{Math.round(totalCurrentValue).toLocaleString("en-IN")}
@@ -50,9 +48,9 @@ export function FixedDepositsSection({
             <span className="text-xs font-mono font-medium text-muted-foreground">
               +₹{Math.round(totalInterestEarned).toLocaleString("en-IN")}
             </span>
-            <div className="h-5 w-5 rounded flex items-center justify-center border-[1.5px] border-black dark:border-white bg-white dark:bg-white/10">
+            <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
               <ChevronDown
-                className={`h-3 w-3 text-black dark:text-white transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                className={`h-3 w-3 text-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
               />
             </div>
           </div>
@@ -69,15 +67,13 @@ export function FixedDepositsSection({
               className="overflow-hidden"
             >
               <div className="px-3 pb-3">
-                {/* Divider */}
-                <div className="h-px bg-black/10 dark:bg-white/10 mb-2" />
+                <div className="h-px bg-border mb-2" />
 
-                {/* FD Details */}
                 <div className="space-y-2">
                   {fdCalculations.map((fd, index) => (
                     <div
                       key={index}
-                      className="py-2 px-2 rounded-md bg-pastel-green/50 border border-black/20 dark:border-white/20"
+                      className="py-2 px-2 rounded-lg bg-muted/50 border border-border"
                     >
                       {/* Bank & Rate */}
                       <div className="flex items-center justify-between mb-2">
@@ -89,7 +85,7 @@ export function FixedDepositsSection({
 
                       {/* Values Grid */}
                       <div className="grid grid-cols-3 gap-1.5 text-center">
-                        <div className="p-1.5 rounded bg-white dark:bg-white/10 border border-black/10 dark:border-white/10">
+                        <div className="p-1.5 rounded-lg bg-card border border-border">
                           <p className="text-[9px] font-bold text-muted-foreground uppercase">
                             Principal
                           </p>
@@ -97,7 +93,7 @@ export function FixedDepositsSection({
                             ₹{fd.principal.toLocaleString("en-IN")}
                           </p>
                         </div>
-                        <div className="p-1.5 rounded bg-white dark:bg-white/10 border border-black/10 dark:border-white/10">
+                        <div className="p-1.5 rounded-lg bg-card border border-border">
                           <p className="text-[9px] font-bold text-muted-foreground uppercase">
                             Current
                           </p>
@@ -108,7 +104,7 @@ export function FixedDepositsSection({
                             )}
                           </p>
                         </div>
-                        <div className="p-1.5 rounded bg-white dark:bg-white/10 border border-black/10 dark:border-white/10">
+                        <div className="p-1.5 rounded-lg bg-card border border-border">
                           <p className="text-[9px] font-bold text-muted-foreground uppercase">
                             At Maturity
                           </p>
