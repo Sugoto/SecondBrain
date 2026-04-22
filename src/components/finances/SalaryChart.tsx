@@ -6,7 +6,8 @@ const SALARY_DATA = [
   { label: "Nov 2023", lpa: 11 },
   { label: "Apr 2024", lpa: 12 },
   { label: "Jan 2025", lpa: 20 },
-  { label: "Apr 2025", lpa: 28 },
+  { label: "Apr 2025", lpa: 29 },
+  { label: "May 2026", lpa: 33 },
 ];
 
 interface SalaryChartProps {
@@ -34,6 +35,8 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
       yAxis: {
         type: "value",
         min: 0,
+        max: 40,
+        interval: 10,
         axisLine: { show: true, lineStyle: { color: borderColor, width: 1 } },
         axisTick: { show: false },
         splitLine: { lineStyle: { color: borderColor, type: "solid" } },

@@ -1,6 +1,6 @@
 // Fixed Deposit configuration and calculation utilities
 
-export type FDConfig = {
+type FDConfig = {
   bank: string;
   rate: number; // Annual interest rate in %
   startDate: string; // YYYY-MM-DD
@@ -9,7 +9,7 @@ export type FDConfig = {
 };
 
 // Configure your FDs here - principal comes from database
-export const FD_CONFIG: FDConfig[] = [
+const FD_CONFIG: FDConfig[] = [
   {
     bank: "Axis Bank",
     rate: 7.25,
@@ -20,7 +20,7 @@ export const FD_CONFIG: FDConfig[] = [
 ];
 
 // Calculate compound interest: A = P(1 + r/n)^(nt)
-export function calculateCompoundInterest(
+function calculateCompoundInterest(
   principal: number,
   annualRate: number,
   compoundingFrequency: number,
@@ -31,7 +31,7 @@ export function calculateCompoundInterest(
   return principal * Math.pow(1 + r / n, n * years);
 }
 
-export type FDCalculation = {
+type FDCalculation = {
   bank: string;
   rate: number;
   principal: number;

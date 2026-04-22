@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { getCacheMeta, setCacheMeta } from "@/lib/db";
 
 // Mutual fund scheme codes for the watchlist
-export const WATCHLIST_FUNDS = [
+const WATCHLIST_FUNDS = [
   {
     schemeCode: 122639,
     shortName: "Parag Parikh Flexi Cap",
@@ -36,7 +36,7 @@ export const WATCHLIST_FUNDS = [
   },
 ] as const;
 
-export type MutualFundData = {
+type MutualFundData = {
   meta: {
     fund_house: string;
     scheme_type: string;
@@ -300,7 +300,7 @@ export function useMutualFundWatchlist() {
 }
 
 // Utility to calculate portfolio totals from funds and investments
-export type PortfolioTotals = {
+type PortfolioTotals = {
   invested: number;
   current: number;
   dailyChange: number;

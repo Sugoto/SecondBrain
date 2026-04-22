@@ -1,1 +1,1 @@
-export { LabeledPieChart, type PieChartDataItem } from "./LabeledPieChart";
+export { LabeledPieChart } from "./LabeledPieChart";

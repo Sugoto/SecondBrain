@@ -136,5 +136,3 @@ export function DailyGoals() {
     </div>
   );
 }
-
-export { DailyGoals as BountyBoard };

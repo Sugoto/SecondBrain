@@ -1,17 +1,16 @@
 import { useState, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
-import { useTheme } from "@/hooks/useTheme";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Pencil, Check, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   formatCurrency,
   getTransactionBudgetType,
+  EXCLUDED_CATEGORIES,
 } from "./constants";
-import { Input } from "@/components/ui/input";
 import { calculateBudgetTypeInfo } from "./utils";
 import { TopTabs } from "@/components/navigation/TopTabs";
 import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
@@ -39,20 +38,12 @@ function SegmentedBudgetBar({
   totalExpenses,
   budgetTypeFilter,
   onBudgetTypeFilterChange,
-  onUpdateBudgets,
 }: {
   budgetInfo: ReturnType<typeof calculateBudgetTypeInfo>;
-  theme: "light" | "dark";
   totalExpenses: number;
   budgetTypeFilter: "need" | "want" | null;
   onBudgetTypeFilterChange: (filter: "need" | "want" | null) => void;
-  onUpdateBudgets: (needsBudget: number, wantsBudget: number) => Promise<void>;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingNeeds, setEditingNeeds] = useState("");
-  const [editingWants, setEditingWants] = useState("");
-  const [saving, setSaving] = useState(false);
-
   const wantsPercent =
     budgetInfo.wantsBudget > 0
       ? (budgetInfo.wantsSpent / budgetInfo.wantsBudget) * 100
@@ -63,63 +54,25 @@ function SegmentedBudgetBar({
       ? (budgetInfo.needsSpent / budgetInfo.needsBudget) * 100
       : 0;
 
-  const startEditing = () => {
-    setEditingNeeds(budgetInfo.needsBudget.toString());
-    setEditingWants(budgetInfo.wantsBudget.toString());
-    setIsEditing(true);
-  };
-
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setEditingNeeds("");
-    setEditingWants("");
-  };
-
-  const saveEditing = async () => {
-    const newNeeds = parseInt(editingNeeds, 10);
-    const newWants = parseInt(editingWants, 10);
-
-    if (isNaN(newNeeds) || isNaN(newWants) || newNeeds < 0 || newWants < 0) {
-      toast.error("Please enter valid budget amounts");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      await onUpdateBudgets(newNeeds, newWants);
-      setIsEditing(false);
-      toast.success("Budget updated");
-    } catch {
-      toast.error("Failed to update budget");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
     <div className="sticky top-0 z-30 px-4 md:px-5 pt-1.5">
       <div className="max-w-6xl mx-auto px-3 py-2 rounded-xl border border-border bg-card">
         <div className="flex items-center gap-2">
-          {/* Progress bars side by side */}
           <div className="flex-1 grid grid-cols-2 gap-3">
-            {/* Needs progress bar */}
             <button
               onClick={(e) => {
-                if (isEditing) return;
                 e.stopPropagation();
                 onBudgetTypeFilterChange(
                   budgetTypeFilter === "need" ? null : "need"
                 );
               }}
-              disabled={isEditing}
-              className={`w-full space-y-1 transition-all duration-200 rounded-md p-1.5 -m-1.5 ${isEditing
-                ? ""
-                : budgetTypeFilter === "want"
+              className={`w-full space-y-1 transition-all duration-200 rounded-md p-1.5 -m-1.5 ${
+                budgetTypeFilter === "want"
                   ? "opacity-40"
                   : budgetTypeFilter === "need"
                     ? "bg-accent"
                     : "hover:bg-muted"
-                }`}
+              }`}
             >
               <div className="flex items-center justify-between">
                 <span
@@ -127,26 +80,9 @@ function SegmentedBudgetBar({
                 >
                   Needs
                 </span>
-                {isEditing ? (
-                  <div className="flex items-center gap-0.5">
-                    <span className="font-mono text-[10px] font-bold text-foreground">
-                      {formatCurrency(budgetInfo.needsSpent)}
-                    </span>
-                    <span className="text-muted-foreground font-bold text-[10px]">/</span>
-                    <Input
-                      type="number"
-                      value={editingNeeds}
-                      onChange={(e) => setEditingNeeds(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-14 text-[9px] font-mono font-bold text-right px-1 border border-border rounded"
-                      disabled={saving}
-                    />
-                  </div>
-                ) : (
-                  <span className="font-mono text-[10px] font-bold text-foreground">
-                    {formatCurrency(budgetInfo.needsSpent)}
-                  </span>
-                )}
+                <span className="font-mono text-[10px] font-bold text-foreground">
+                  {formatCurrency(budgetInfo.needsSpent)}
+                </span>
               </div>
               <div className="relative h-2 rounded overflow-hidden bg-muted">
                 <motion.div
@@ -162,24 +98,20 @@ function SegmentedBudgetBar({
               </div>
             </button>
 
-            {/* Wants progress bar */}
             <button
               onClick={(e) => {
-                if (isEditing) return;
                 e.stopPropagation();
                 onBudgetTypeFilterChange(
                   budgetTypeFilter === "want" ? null : "want"
                 );
               }}
-              disabled={isEditing}
-              className={`w-full space-y-1 transition-all duration-200 rounded-md p-1.5 -m-1.5 ${isEditing
-                ? ""
-                : budgetTypeFilter === "need"
+              className={`w-full space-y-1 transition-all duration-200 rounded-md p-1.5 -m-1.5 ${
+                budgetTypeFilter === "need"
                   ? "opacity-40"
                   : budgetTypeFilter === "want"
                     ? "bg-accent"
                     : "hover:bg-muted"
-                }`}
+              }`}
             >
               <div className="flex items-center justify-between">
                 <span
@@ -187,26 +119,9 @@ function SegmentedBudgetBar({
                 >
                   Wants
                 </span>
-                {isEditing ? (
-                  <div className="flex items-center gap-0.5">
-                    <span className="font-mono text-[10px] font-bold text-foreground">
-                      {formatCurrency(budgetInfo.wantsSpent)}
-                    </span>
-                    <span className="text-muted-foreground font-bold text-[10px]">/</span>
-                    <Input
-                      type="number"
-                      value={editingWants}
-                      onChange={(e) => setEditingWants(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-14 text-[9px] font-mono font-bold text-right px-1 border border-border rounded"
-                      disabled={saving}
-                    />
-                  </div>
-                ) : (
-                  <span className="font-mono text-[10px] font-bold text-foreground">
-                    {formatCurrency(budgetInfo.wantsSpent)}
-                  </span>
-                )}
+                <span className="font-mono text-[10px] font-bold text-foreground">
+                  {formatCurrency(budgetInfo.wantsSpent)}
+                </span>
               </div>
               <div className="relative h-2 rounded overflow-hidden bg-muted">
                 <motion.div
@@ -224,42 +139,19 @@ function SegmentedBudgetBar({
           </div>
         </div>
 
-        {/* Total Expenses row with edit button */}
-        <div className="flex items-center justify-between pt-1.5 mt-1.5">
+        <div className="flex items-center justify-between pt-1.5 mt-1.5 px-1.5">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Total</span>
             <span className="font-mono text-xs font-bold text-foreground">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
-          {isEditing ? (
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={saveEditing}
-                disabled={saving}
-                className="h-5 w-5 rounded-lg flex items-center justify-center bg-muted border border-border text-foreground transition-colors hover:bg-accent disabled:opacity-50"
-                title="Save"
-              >
-                <Check className="h-2.5 w-2.5" strokeWidth={2.5} />
-              </button>
-              <button
-                onClick={cancelEditing}
-                disabled={saving}
-                className="h-5 w-5 rounded-lg flex items-center justify-center bg-muted border border-border text-foreground transition-colors hover:bg-accent disabled:opacity-50"
-                title="Cancel"
-              >
-                <X className="h-2.5 w-2.5" strokeWidth={2.5} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={startEditing}
-              className="h-5 w-5 rounded-lg flex items-center justify-center bg-muted border border-border text-foreground transition-colors hover:bg-accent"
-              title="Edit Budget"
-            >
-              <Pencil className="h-2.5 w-2.5" strokeWidth={2.5} />
-            </button>
-          )}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Budgeted</span>
+            <span className="font-mono text-xs font-bold text-foreground">
+              {formatCurrency(budgetInfo.needsSpent + budgetInfo.wantsSpent)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -294,7 +186,7 @@ export function FinanceTracker({
   const { transactions, addToCache, updateInCache, removeFromCache } =
     useExpenseData();
 
-  const { userStats, updateUserStats } = useUserStats();
+  const { userStats } = useUserStats();
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
@@ -307,8 +199,6 @@ export function FinanceTracker({
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  const { theme } = useTheme();
 
   const swipeHandlers = useSwipeNavigation({
     views: VIEWS,
@@ -480,32 +370,12 @@ export function FinanceTracker({
     
     return monthTransactions
       .filter((t) => {
-        if (t.excluded_from_budget) return false;
+        if (t.category && EXCLUDED_CATEGORIES.includes(t.category)) return false;
         const txnDate = new Date(t.date);
         return txnDate >= startOfMonth;
       })
       .reduce((sum, t) => sum + t.amount, 0);
   }, [transactions, timeFilter, customDateRange]);
-
-  const handleUpdateBudgets = async (
-    needsBudget: number,
-    wantsBudget: number
-  ) => {
-    if (!userStats?.id) throw new Error("No user stats");
-
-    const { error: updateError } = await supabase
-      .from("user_stats")
-      .update({ needs_budget: needsBudget, wants_budget: wantsBudget })
-      .eq("id", userStats.id);
-
-    if (updateError) throw updateError;
-
-    updateUserStats({
-      ...userStats,
-      needs_budget: needsBudget,
-      wants_budget: wantsBudget,
-    });
-  };
 
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden">
@@ -539,11 +409,9 @@ export function FinanceTracker({
         {activeView === "expenses" && (
           <SegmentedBudgetBar
             budgetInfo={budgetTypeInfo}
-            theme={theme}
             totalExpenses={totalExpenses}
             budgetTypeFilter={budgetTypeFilter}
             onBudgetTypeFilterChange={setBudgetTypeFilter}
-            onUpdateBudgets={handleUpdateBudgets}
           />
         )}
 

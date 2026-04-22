@@ -54,7 +54,7 @@ export function InvestmentsView() {
 
         <WealthDistributionChart userStats={userStats} theme={theme} mutualFundsValue={mfPortfolioValue} />
 
-        <MutualFundWatchlist theme={theme} />
+        <MutualFundWatchlist />
 
         <FixedDepositsSection userStats={userStats} />
 

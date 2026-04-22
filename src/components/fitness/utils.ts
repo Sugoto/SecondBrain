@@ -4,7 +4,7 @@ import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT } from "./types";
 /**
  * Calculate BMR using the Mifflin-St Jeor equation
  */
-export function calculateBMR(
+function calculateBMR(
   weight_kg: number,
   height_cm: number,
   age: number,
@@ -62,30 +62,6 @@ export function calculateTDEE(
   };
 }
 
-/**
- * Calculate BMI
- */
-export function calculateBMI(weight_kg: number, height_cm: number): number {
-  const height_m = height_cm / 100;
-  return weight_kg / (height_m * height_m);
-}
-
-/**
- * Get BMI category
- */
-export function getBMICategory(bmi: number): {
-  category: string;
-  color: string;
-} {
-  if (bmi < 18.5) return { category: "Underweight", color: "#737373" };
-  if (bmi < 25) return { category: "Normal", color: "#525252" };
-  if (bmi < 30) return { category: "Overweight", color: "#737373" };
-  return { category: "Obese", color: "#737373" };
-}
-
-/**
- * Format number with comma separators
- */
 export function formatNumber(num: number): string {
   return num.toLocaleString("en-IN");
 }

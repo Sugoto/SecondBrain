@@ -39,9 +39,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Export for prefetching
-export { queryClient };
-
 const expenseKeys = {
   all: ["transactions"] as const,
   lists: () => [...expenseKeys.all, "list"] as const,

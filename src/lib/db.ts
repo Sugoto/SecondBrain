@@ -200,5 +200,3 @@ export async function cacheShoppingList(items: ShoppingItem[]): Promise<void> {
     console.warn("Failed to cache shopping list:", error);
   }
 }
-
-export { db };

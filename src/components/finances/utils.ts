@@ -9,7 +9,7 @@ import { getCurrentFDValue } from "./fdUtils";
 import type { TimeFilter, DateRange } from "./types";
 
 // Net worth calculation options for real-time values
-export type NetWorthOptions = {
+type NetWorthOptions = {
   mutualFundsValue?: number; // Real-time MF portfolio value (units × NAV)
 };
 
@@ -49,7 +49,7 @@ export function getMonthlyAmount(txn: Transaction): number {
 /**
  * Check if a prorated transaction applies to a given month
  */
-export function isProratedInMonth(
+function isProratedInMonth(
   txn: Transaction,
   targetMonth: Date,
 ): boolean {
@@ -77,7 +77,7 @@ export function isProratedInMonth(
 }
 
 // Date range helpers - centralized to avoid duplication
-export function getDateRanges() {
+function getDateRanges() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -283,7 +283,7 @@ export function createEmptyTransaction(): Transaction {
 }
 
 // Budget type calculations
-export type BudgetTypeInfo = {
+type BudgetTypeInfo = {
   needsSpent: number;
   wantsSpent: number;
   needsBudget: number;

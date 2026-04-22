@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
 
-export interface PieChartDataItem {
+interface PieChartDataItem {
   name: string;
   value: number;
   color: string;
@@ -164,5 +164,3 @@ export const LabeledPieChart = memo(function LabeledPieChart({
     />
   );
 });
-
-export default LabeledPieChart;

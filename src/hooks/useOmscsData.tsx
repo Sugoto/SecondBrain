@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import type { OmscsCourse } from "@/lib/supabase";
 
 // Calculate current semester based on date
-export function getCurrentSemester(): string {
+function getCurrentSemester(): string {
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
@@ -18,7 +18,7 @@ const GRADE_POINTS: Record<string, number> = {
   A: 4.0, B: 3.0, C: 2.0, D: 1.0, F: 0.0,
 };
 
-export function calculateGPA(grades: string[]): number {
+function calculateGPA(grades: string[]): number {
   const valid = grades.filter((g) => g in GRADE_POINTS);
   if (valid.length === 0) return 0;
   return valid.reduce((sum, g) => sum + GRADE_POINTS[g], 0) / valid.length;

@@ -28,34 +28,6 @@ export const CATEGORY_BUDGET_TYPE: Record<string, BudgetType> = {
   Travel: "want",
 };
 
-// Budget type styling - monochromatic
-export const BUDGET_TYPE_CONFIG: Record<
-  BudgetType,
-  {
-    label: string;
-    color: string;
-    bgLight: string;
-    bgDark: string;
-  }
-> = {
-  need: {
-    label: "Need",
-    color: "#525252", // Neutral gray
-    bgLight: "rgba(82, 82, 82, 0.1)",
-    bgDark: "rgba(82, 82, 82, 0.2)",
-  },
-  want: {
-    label: "Want",
-    color: "#737373", // Neutral gray
-    bgLight: "rgba(115, 115, 115, 0.1)",
-    bgDark: "rgba(115, 115, 115, 0.2)",
-  },
-};
-
-/**
- * Get the budget type for a transaction
- * Returns explicit budget_type if set, otherwise auto-assigns based on category
- */
 export function getTransactionBudgetType(
   category: string | null,
   explicitBudgetType: BudgetType | null,
@@ -142,6 +114,16 @@ export const formatTime = (timeStr: string) => {
   return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };
 
-export const getCategoryColor = (_category: string): string => {
-  return CATEGORY_COLOR;
+const CATEGORY_COLOR_MAP: Record<string, string> = {
+  "Self Care": "#ec4899",
+  Bills: "#f59e0b",
+  Investments: "#10b981",
+  Food: "#eab308",
+  Shopping: "#3b82f6",
+  Entertainment: "#a855f7",
+  Travel: "#14b8a6",
+};
+
+export const getCategoryColor = (category: string): string => {
+  return CATEGORY_COLOR_MAP[category] || CATEGORY_COLOR;
 };

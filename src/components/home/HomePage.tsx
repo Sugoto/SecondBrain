@@ -21,7 +21,6 @@ import { formatCurrency } from "@/components/finances/constants";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { calculateTDEE, formatNumber } from "@/components/fitness/utils";
 import { DailyGoals } from "@/components/home/BountyBoard";
-import { FreeTimeCard } from "@/components/home/FreeTimeCard";
 
 const MODERATE_MULTIPLIER = 1.55;
 
@@ -133,11 +132,6 @@ export function HomePage() {
             )}
           </div>
         </button>
-
-        {/* Free Time */}
-        <div className="mb-4">
-          <FreeTimeCard />
-        </div>
 
         {/* Nutrition Card */}
         {hasHealthData && tdee && (

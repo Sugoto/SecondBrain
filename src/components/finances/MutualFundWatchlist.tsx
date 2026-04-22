@@ -311,11 +311,7 @@ const FundSection = memo(function FundSection({
   );
 });
 
-interface MutualFundWatchlistProps {
-  theme: "light" | "dark";
-}
-
-export function MutualFundWatchlist({ theme: _theme }: MutualFundWatchlistProps) {
+export function MutualFundWatchlist() {
   const { funds, error, isRefetching, refresh, lastUpdated } =
     useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
