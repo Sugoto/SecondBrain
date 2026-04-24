@@ -8,28 +8,15 @@ import {
 import { getCurrentFDValue } from "./fdUtils";
 import type { TimeFilter, DateRange } from "./types";
 
-// Net worth calculation options for real-time values
-type NetWorthOptions = {
-  mutualFundsValue?: number; // Real-time MF portfolio value (units × NAV)
-};
-
-// Net worth calculation - uses current FD value and optionally real-time MF value
-export function calculateNetWorth(
-  stats: UserStats | null,
-  options?: NetWorthOptions,
-): number {
+export function calculateNetWorth(stats: UserStats | null): number {
   if (!stats) return 0;
 
-  // Get current FD value with accrued interest instead of just principal
   const currentFDValue = getCurrentFDValue(stats.fixed_deposits || 0);
-
-  // Use real-time MF value if provided, otherwise fall back to static value
-  const mfValue = options?.mutualFundsValue ?? (stats.mutual_funds || 0);
 
   return (
     (stats.bank_savings || 0) +
     currentFDValue +
-    mfValue +
+    (stats.mutual_funds || 0) +
     (stats.ppf || 0) +
     (stats.epf || 0)
   );

@@ -13,7 +13,6 @@ import {
 import { useTheme } from "@/hooks/useTheme";
 import { useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
-import { useMutualFundWatchlist, calculateMFPortfolioTotals } from "@/hooks/useMutualFunds";
 import { NetWorthEditDialog } from "@/components/finances/NetWorthCard";
 import { HealthStatsEditDialog } from "@/components/fitness/HealthStatsCard";
 import { calculateNetWorth } from "@/components/finances/utils";
@@ -35,20 +34,12 @@ export function HomePage() {
   const { theme, toggle } = useTheme();
   const { userStats, updateUserStats } = useUserStats();
   const { userStats: healthStats, updateInCache: updateHealthStats } = useHealthData();
-  const { funds } = useMutualFundWatchlist();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [healthDialogOpen, setHealthDialogOpen] = useState(false);
 
-  const mfPortfolioValue = useMemo(() => {
-    const investments = userStats?.investments || [];
-    if (funds.length === 0 || investments.length === 0) return undefined;
-    const totals = calculateMFPortfolioTotals(funds, investments);
-    return totals.current;
-  }, [funds, userStats?.investments]);
-
   const netWorth = useMemo(
-    () => calculateNetWorth(userStats, { mutualFundsValue: mfPortfolioValue }),
-    [userStats, mfPortfolioValue]
+    () => calculateNetWorth(userStats),
+    [userStats]
   );
 
   const dailySalary = userStats?.monthly_income

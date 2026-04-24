@@ -63,7 +63,7 @@ const FundSection = memo(function FundSection({
     };
   }, [investments, fund.currentNav, fund.previousNav]);
 
-  const { currentValue, netChange, dailyChangeAmount, hasInvestments, isNetUp, isPositiveDay } = investmentStats;
+  const { currentValue, hasInvestments, isPositiveDay } = investmentStats;
 
   const dayColor = isPositiveDay ? "#737373" : "#737373";
 
@@ -135,7 +135,6 @@ const FundSection = memo(function FundSection({
           <h4 className="font-bold text-xs truncate text-foreground">{fund.shortName}</h4>
         </div>
 
-        {/* Current Value + Changes */}
         {hasInvestments && (
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-xs font-bold font-mono text-foreground">
@@ -143,19 +142,6 @@ const FundSection = memo(function FundSection({
               {currentValue.toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
               })}
-            </span>
-            <span className="text-[10px] font-mono font-medium text-muted-foreground">
-              {isNetUp ? "+" : "-"}₹
-              {Math.abs(netChange).toLocaleString("en-IN", {
-                maximumFractionDigits: 0,
-              })}
-            </span>
-            <span className="text-[9px] font-mono text-muted-foreground">
-              ({isPositiveDay ? "+" : "-"}₹
-              {Math.abs(dailyChangeAmount).toLocaleString("en-IN", {
-                maximumFractionDigits: 0,
-              })}
-              )
             </span>
           </div>
         )}
@@ -378,37 +364,6 @@ export function MutualFundWatchlist() {
   const getInvestmentsForFund = useCallback((schemeCode: number) =>
     investmentsByFund.get(schemeCode) || [], [investmentsByFund]);
 
-  const portfolioTotals = useMemo(() => {
-    let invested = 0;
-    let current = 0;
-    let dailyChange = 0;
-
-    for (const fund of funds) {
-      const fundInvestments = investmentsByFund.get(fund.schemeCode) || [];
-      let totalUnits = 0;
-      let totalInvested = 0;
-
-      for (const inv of fundInvestments) {
-        totalUnits += inv.units;
-        totalInvested += inv.amount;
-      }
-
-      const currentValue = totalUnits * fund.currentNav;
-      const previousValue = totalUnits * fund.previousNav;
-
-      invested += totalInvested;
-      current += currentValue;
-      dailyChange += currentValue - previousValue;
-    }
-
-    return { invested, current, dailyChange };
-  }, [funds, investmentsByFund]);
-
-  const hasPortfolio = portfolioTotals.current > 0;
-  const netChange = portfolioTotals.current - portfolioTotals.invested;
-  const isNetUp = netChange >= 0;
-  const isPortfolioUp = portfolioTotals.dailyChange >= 0;
-
   if (error && funds.length === 0) {
     return (
       <div className="space-y-2">
@@ -472,38 +427,16 @@ export function MutualFundWatchlist() {
         >
           <span className="text-sm font-bold font-mono text-foreground">
             ₹
-            {portfolioTotals.current.toLocaleString("en-IN", {
+            {(userStats?.mutual_funds || 0).toLocaleString("en-IN", {
               maximumFractionDigits: 0,
             })}
           </span>
 
-          <div className="flex items-center gap-2">
-            {hasPortfolio && (
-              <>
-                <span className="text-xs font-mono font-medium text-muted-foreground">
-                  {isNetUp ? "+" : "-"}₹
-                  {Math.abs(netChange).toLocaleString("en-IN", {
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  ({isPortfolioUp ? "+" : "-"}₹
-                  {Math.abs(portfolioTotals.dailyChange).toLocaleString(
-                    "en-IN",
-                    {
-                      maximumFractionDigits: 0,
-                    }
-                  )}
-                  )
-                </span>
-              </>
-            )}
-            <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
-              <ChevronDown
-                className={`h-3 w-3 text-foreground transition-transform ${isCardExpanded ? "rotate-180" : ""
-                  }`}
-              />
-            </div>
+          <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
+            <ChevronDown
+              className={`h-3 w-3 text-foreground transition-transform ${isCardExpanded ? "rotate-180" : ""
+                }`}
+            />
           </div>
         </button>
 

@@ -16,33 +16,29 @@ const ASSET_CONFIG = [
 interface WealthDistributionChartProps {
   userStats: UserStats | null;
   theme: "light" | "dark";
-  mutualFundsValue?: number;
 }
 
 export const WealthDistributionChart = memo(function WealthDistributionChart({
   userStats,
   theme,
-  mutualFundsValue,
 }: WealthDistributionChartProps) {
   const pieData = useMemo(() => {
     if (!userStats) return [];
 
     return ASSET_CONFIG.map((asset) => {
       let value = userStats[asset.key] || 0;
-      
+
       if (asset.key === "fixed_deposits") {
         value = getCurrentFDValue(userStats.fixed_deposits || 0);
-      } else if (asset.key === "mutual_funds" && mutualFundsValue !== undefined) {
-        value = mutualFundsValue;
       }
-      
+
       return {
         name: asset.label,
         value,
         color: "",
       };
     }).filter((item) => item.value > 0);
-  }, [userStats, mutualFundsValue]);
+  }, [userStats]);
 
   if (pieData.length === 0) {
     return null;

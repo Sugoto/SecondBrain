@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useUserStats } from "@/hooks/useExpenseData";
-import { useMutualFundWatchlist, calculateMFPortfolioTotals } from "@/hooks/useMutualFunds";
 import { Footer } from "./Footer";
 import { NetWorthCard, NetWorthEditDialog } from "./NetWorthCard";
 import { WealthDistributionChart } from "./WealthDistributionChart";
@@ -15,21 +14,11 @@ import { calculateNetWorth } from "./utils";
 export function InvestmentsView() {
   const { theme } = useTheme();
   const { userStats, updateUserStats } = useUserStats();
-  const { funds } = useMutualFundWatchlist();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  // Calculate real-time MF portfolio value from units × current NAV
-  const mfPortfolioValue = useMemo(() => {
-    const investments = userStats?.investments || [];
-    if (funds.length === 0 || investments.length === 0) return undefined;
-    const totals = calculateMFPortfolioTotals(funds, investments);
-    return totals.current;
-  }, [funds, userStats?.investments]);
-
-  // Net worth using real-time MF and FD values
   const netWorth = useMemo(
-    () => calculateNetWorth(userStats, { mutualFundsValue: mfPortfolioValue }),
-    [userStats, mfPortfolioValue]
+    () => calculateNetWorth(userStats),
+    [userStats]
   );
 
   const dailySalary = userStats?.monthly_income ? userStats.monthly_income / 22 : 0;
@@ -52,7 +41,7 @@ export function InvestmentsView() {
       <div className="max-w-6xl mx-auto pt-3 flex flex-col gap-3">
         <SalaryChart theme={theme} />
 
-        <WealthDistributionChart userStats={userStats} theme={theme} mutualFundsValue={mfPortfolioValue} />
+        <WealthDistributionChart userStats={userStats} theme={theme} />
 
         <MutualFundWatchlist />
 
