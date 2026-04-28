@@ -28,8 +28,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     localStorage.setItem('theme', theme)
 
-    // Update theme-color meta tag for Android status bar
-    const themeColor = theme === 'dark' ? '#1a1a2e' : '#FDF6E3'
+    // Match the M3 --background token (OKLCH approximation in hex)
+    const themeColor = theme === 'dark' ? '#1d1c20' : '#fafafa'
     const metaThemeColor = document.querySelector('meta[name="theme-color"]')
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', themeColor)

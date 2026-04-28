@@ -5,7 +5,7 @@ import { TransactionCard } from "./TransactionCard";
 import { Footer } from "./Footer";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-const ROW_HEIGHT = 50;
+const ROW_HEIGHT = 52;
 const OVERSCAN = 5;
 
 interface ExpensesViewProps {
@@ -78,7 +78,7 @@ export const ExpensesView = memo(function ExpensesView({
                   right: 0,
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
-                  paddingBottom: "10px",
+                  paddingBottom: "12px",
                 }}
               >
                 <TransactionCard

@@ -126,42 +126,46 @@ export function NetWorthEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-sm max-h-[85vh] overflow-y-auto rounded-3xl border-0 bg-surface-container-high shadow-xl p-6"
+        className="sm:max-w-xs max-h-[85vh] overflow-y-auto rounded-3xl border-0 bg-surface-container-high shadow-xl p-4"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="mb-2">
-          <DialogTitle className="text-headline-s text-foreground">Edit Assets</DialogTitle>
+          <DialogTitle className="text-title-l text-foreground">Edit Assets</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-1.5">
           {ASSET_CATEGORIES.map((cat) => (
-            <div key={cat.key} className="space-y-1">
-              <label className="text-label-m text-muted-foreground">{cat.label}</label>
+            <div key={cat.key} className="flex items-center gap-2">
+              <label className="text-label-m text-muted-foreground flex-1 min-w-0 truncate">
+                {cat.label}
+              </label>
               <Input
                 type="number"
                 value={values[cat.key]}
                 onChange={(e) =>
                   setValues((prev) => ({ ...prev, [cat.key]: e.target.value }))
                 }
-                className="font-mono h-10 text-body-m bg-surface-container-low border border-outline-variant rounded-lg"
+                className="font-mono h-8 text-body-m text-right w-28 bg-surface-container-low border border-outline-variant rounded-lg"
               />
             </div>
           ))}
 
-          <div className="space-y-1 pt-2 border-t border-outline-variant">
-            <label className="text-label-m text-muted-foreground">Monthly Salary</label>
+          <div className="flex items-center gap-2">
+            <label className="text-label-m text-muted-foreground flex-1 min-w-0 truncate">
+              Monthly Salary
+            </label>
             <Input
               type="number"
               value={monthlySalary}
               onChange={(e) => setMonthlySalary(e.target.value)}
-              className="font-mono h-10 text-body-m bg-surface-container-low border border-outline-variant rounded-lg"
+              className="font-mono h-8 text-body-m text-right w-28 bg-surface-container-low border border-outline-variant rounded-lg"
             />
           </div>
 
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-11 rounded-full text-label-l bg-primary text-primary-foreground disabled:opacity-50 active:scale-[0.98] transition-transform mt-2"
+            className="w-full h-10 rounded-full text-label-l bg-primary text-primary-foreground disabled:opacity-50 active:scale-[0.98] transition-transform mt-3"
           >
             {saving ? "Saving..." : "Save"}
           </button>
