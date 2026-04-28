@@ -5,12 +5,12 @@ import { getMonthlyAmount } from "./utils";
 import { motion } from "framer-motion";
 import { hapticFeedback } from "@/hooks/useHaptics";
 import {
-  formatCurrencyCompact,
   formatDate,
   EXPENSE_CATEGORIES,
   CATEGORY_PASTEL_COLORS,
   getTransactionBudgetType,
 } from "./constants";
+import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
 
 interface TransactionCardProps {
   transaction: Transaction;
@@ -23,6 +23,7 @@ export const TransactionCard = memo(function TransactionCard({
   onClick,
   index = 0,
 }: TransactionCardProps) {
+  const fmt = useFormatCurrencyCompact();
   const cat = EXPENSE_CATEGORIES.find((c) => c.name === txn.category);
   const CategoryIcon = cat?.icon;
   const categoryPastelColor = CATEGORY_PASTEL_COLORS[txn.category ?? ""] || "bg-pastel-blue";
@@ -93,7 +94,7 @@ export const TransactionCard = memo(function TransactionCard({
           isExcluded ? "text-muted-foreground" : "text-foreground"
         }`}
       >
-        −{formatCurrencyCompact(getMonthlyAmount(txn))}
+        −{fmt(getMonthlyAmount(txn))}
       </span>
     </motion.button>
   );

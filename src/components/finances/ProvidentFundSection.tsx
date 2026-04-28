@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { UserStats } from "@/lib/supabase";
+import { useMaskedRupee } from "@/hooks/usePrivacy";
 
 interface ProvidentFundSectionProps {
   userStats: UserStats | null;
@@ -9,6 +10,7 @@ interface ProvidentFundSectionProps {
 }
 
 export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionProps) {
+  const rupee = useMaskedRupee();
   const [isExpanded, setIsExpanded] = useState(false);
   const ppf = userStats?.ppf ?? 0;
   const epf = userStats?.epf ?? 0;
@@ -32,7 +34,7 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
           className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors"
         >
           <span className="text-sm font-bold font-mono text-foreground">
-            ₹{total.toLocaleString("en-IN")}
+            {rupee(total)}
           </span>
           <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
             <ChevronDown
@@ -79,7 +81,7 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
                     <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-muted/50 border border-border">
                       <div className="w-2 h-2 rounded bg-foreground" />
                       <span className="text-[10px] font-bold text-muted-foreground">PPF</span>
-                      <span className="text-xs font-mono font-bold text-foreground">₹{ppf.toLocaleString("en-IN")}</span>
+                      <span className="text-xs font-mono font-bold text-foreground">{rupee(ppf)}</span>
                     </div>
                   )}
                   {epf > 0 && (
@@ -89,7 +91,7 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
                         style={{ background: isDark ? "#71717a" : "#a1a1aa" }}
                       />
                       <span className="text-[10px] font-bold text-muted-foreground">EPF</span>
-                      <span className="text-xs font-mono font-bold text-foreground">₹{epf.toLocaleString("en-IN")}</span>
+                      <span className="text-xs font-mono font-bold text-foreground">{rupee(epf)}</span>
                     </div>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { ThemeProvider } from "./hooks/useTheme";
+import { PrivacyProvider } from "./hooks/usePrivacy";
 import {
   ExpenseDataProvider,
   usePrefetchTransactions,
@@ -116,9 +117,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <ExpenseDataProvider>
-        <AppContent />
-      </ExpenseDataProvider>
+      <PrivacyProvider>
+        <ExpenseDataProvider>
+          <AppContent />
+        </ExpenseDataProvider>
+      </PrivacyProvider>
     </ThemeProvider>
   );
 }

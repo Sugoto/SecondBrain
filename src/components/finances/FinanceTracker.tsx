@@ -6,10 +6,10 @@ import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import {
-  formatCurrency,
   getTransactionBudgetType,
   EXCLUDED_CATEGORIES,
 } from "./constants";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { calculateBudgetTypeInfo } from "./utils";
 import { TopTabs } from "@/components/navigation/TopTabs";
 import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
@@ -43,6 +43,7 @@ function SegmentedBudgetBar({
   budgetTypeFilter: "need" | "want" | null;
   onBudgetTypeFilterChange: (filter: "need" | "want" | null) => void;
 }) {
+  const formatCurrency = useFormatCurrency();
   const wantsPercent =
     budgetInfo.wantsBudget > 0
       ? (budgetInfo.wantsSpent / budgetInfo.wantsBudget) * 100

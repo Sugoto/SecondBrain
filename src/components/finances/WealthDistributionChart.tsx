@@ -1,13 +1,11 @@
 import { useMemo, memo } from "react";
 import { motion } from "framer-motion";
-import { formatCurrency } from "./constants";
-import { getCurrentFDValue } from "./fdUtils";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
 import type { UserStats } from "@/lib/supabase";
 import { LabeledPieChart } from "@/components/shared";
 
 const ASSET_CONFIG = [
   { key: "bank_savings" as const, label: "Bank Savings" },
-  { key: "fixed_deposits" as const, label: "Fixed Deposits" },
   { key: "mutual_funds" as const, label: "Mutual Funds" },
   { key: "ppf" as const, label: "PPF" },
   { key: "epf" as const, label: "EPF" },
@@ -22,6 +20,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
   userStats,
   theme,
 }: WealthDistributionChartProps) {
+  const formatCurrency = useFormatCurrency();
   const pieData = useMemo(() => {
     if (!userStats) return [];
 
@@ -31,13 +30,10 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
       ? ["#a5b4fc", "#818cf8", "#6366f1", "#4f46e5", "#4338ca"]
       : ["#3730a3", "#4338ca", "#6366f1", "#818cf8", "#a5b4fc"];
 
-    const items = ASSET_CONFIG.map((asset) => {
-      let value = userStats[asset.key] || 0;
-      if (asset.key === "fixed_deposits") {
-        value = getCurrentFDValue(userStats.fixed_deposits || 0);
-      }
-      return { name: asset.label, value };
-    }).filter((item) => item.value > 0);
+    const items = ASSET_CONFIG.map((asset) => ({
+      name: asset.label,
+      value: userStats[asset.key] || 0,
+    })).filter((item) => item.value > 0);
 
     items.sort((a, b) => b.value - a.value);
 

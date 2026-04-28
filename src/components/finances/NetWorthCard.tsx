@@ -7,14 +7,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ChevronRight } from "lucide-react";
-import { formatCurrency } from "./constants";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { supabase, type UserStats } from "@/lib/supabase";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 // Asset categories
 const ASSET_CATEGORIES = [
   { key: "bank_savings" as const, label: "Bank Savings" },
-  { key: "fixed_deposits" as const, label: "Fixed Deposits" },
   { key: "mutual_funds" as const, label: "Mutual Funds" },
   { key: "ppf" as const, label: "PPF" },
   { key: "epf" as const, label: "EPF" },
@@ -30,6 +29,7 @@ interface NetWorthCardProps {
 
 export function NetWorthCard({ netWorth, monthlyIncome, onEdit }: NetWorthCardProps) {
   const dailySalary = monthlyIncome ? Math.round(monthlyIncome / 22) : null;
+  const fmt = useFormatCurrency();
 
   return (
     <button
@@ -41,11 +41,11 @@ export function NetWorthCard({ netWorth, monthlyIncome, onEdit }: NetWorthCardPr
           <p className="text-label-m mb-1">Net Worth</p>
           <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-headline-s font-mono">
-              <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
+              <AnimatedNumber value={netWorth} formatFn={fmt} animateOnMount />
             </p>
             {dailySalary && (
               <span className="text-label-s font-mono px-2 py-0.5 rounded-full bg-on-primary-container/10">
-                +{formatCurrency(dailySalary)}/d
+                +{fmt(dailySalary)}/d
               </span>
             )}
           </div>
@@ -71,7 +71,6 @@ export function NetWorthEditDialog({
 }: NetWorthEditDialogProps) {
   const [values, setValues] = useState<Record<AssetKey, string>>({
     bank_savings: "0",
-    fixed_deposits: "0",
     mutual_funds: "0",
     ppf: "0",
     epf: "0",
@@ -83,7 +82,6 @@ export function NetWorthEditDialog({
     if (open && userStats) {
       setValues({
         bank_savings: (userStats.bank_savings || 0).toString(),
-        fixed_deposits: (userStats.fixed_deposits || 0).toString(),
         mutual_funds: (userStats.mutual_funds || 0).toString(),
         ppf: (userStats.ppf || 0).toString(),
         epf: (userStats.epf || 0).toString(),
@@ -101,7 +99,6 @@ export function NetWorthEditDialog({
     try {
       const updateData = {
         bank_savings: parseFloat(values.bank_savings) || 0,
-        fixed_deposits: parseFloat(values.fixed_deposits) || 0,
         mutual_funds: parseFloat(values.mutual_funds) || 0,
         ppf: parseFloat(values.ppf) || 0,
         epf: parseFloat(values.epf) || 0,
@@ -145,7 +142,7 @@ export function NetWorthEditDialog({
                 onChange={(e) =>
                   setValues((prev) => ({ ...prev, [cat.key]: e.target.value }))
                 }
-                className="font-mono h-8 text-body-m text-right w-28 bg-surface-container-low border border-outline-variant rounded-lg"
+                className="font-mono h-8 text-body-m text-right w-44 bg-surface-container-low border border-outline-variant rounded-lg"
               />
             </div>
           ))}
@@ -158,7 +155,7 @@ export function NetWorthEditDialog({
               type="number"
               value={monthlySalary}
               onChange={(e) => setMonthlySalary(e.target.value)}
-              className="font-mono h-8 text-body-m text-right w-28 bg-surface-container-low border border-outline-variant rounded-lg"
+              className="font-mono h-8 text-body-m text-right w-44 bg-surface-container-low border border-outline-variant rounded-lg"
             />
           </div>
 

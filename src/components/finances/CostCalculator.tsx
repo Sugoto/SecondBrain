@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { formatCurrency } from "./constants";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
 
 type PeriodMode = "months" | "years";
 
@@ -9,6 +9,7 @@ interface CostCalculatorProps {
 }
 
 export function CostCalculator({ dailySalary }: CostCalculatorProps) {
+  const fmt = useFormatCurrency();
   const [cost, setCost] = useState("");
   const [periodMode, setPeriodMode] = useState<PeriodMode>("years");
   const [sliderValue, setSliderValue] = useState(1);
@@ -102,7 +103,7 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
           <div>
             <p className="text-label-s text-muted-foreground">Per day</p>
             <p className="font-mono text-title-s text-foreground mt-0.5">
-              {result ? formatCurrency(result.perDay) : "—"}
+              {result ? fmt(result.perDay) : "—"}
             </p>
           </div>
           <div>

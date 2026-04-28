@@ -7,7 +7,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { formatDate, formatCurrency, CATEGORY_PASTEL_COLORS } from "./constants";
+import { formatDate, CATEGORY_PASTEL_COLORS } from "./constants";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { getMonthlyAmount } from "./utils";
 
 interface CategoryCardProps {
@@ -36,6 +37,7 @@ export const CategoryCard = memo(function CategoryCard({
   const IconComp = icon || Receipt;
   const categoryName = name.replace(" (Needs)", "").replace(" (Wants)", "");
   const categoryPastelColor = CATEGORY_PASTEL_COLORS[categoryName] || "bg-pastel-blue";
+  const fmt = useFormatCurrency();
 
   return (
     <motion.div
@@ -65,7 +67,7 @@ export const CategoryCard = memo(function CategoryCard({
           </p>
         </div>
         <span className="font-mono text-label-m text-foreground">
-          {formatCurrency(total)}
+          {fmt(total)}
         </span>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -117,7 +119,7 @@ export const CategoryCard = memo(function CategoryCard({
                         {formatDate(txn.date)}
                         {isProrated && (
                           <span className="ml-1">
-                            · {formatCurrency(displayAmount)}/mo
+                            · {fmt(displayAmount)}/mo
                           </span>
                         )}
                       </p>
@@ -127,7 +129,7 @@ export const CategoryCard = memo(function CategoryCard({
                         isExcluded ? "text-muted-foreground" : "text-foreground"
                       }`}
                     >
-                      -{formatCurrency(displayAmount)}
+                      -{fmt(displayAmount)}
                     </span>
                   </motion.button>
                 );

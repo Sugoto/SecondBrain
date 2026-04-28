@@ -33,7 +33,7 @@ export function NutritionCard({ onEdit }: NutritionCardProps) {
     );
   }, [userStats]);
 
-  const waterLiters = userStats?.weight_kg ? userStats.weight_kg * 0.033 : 0;
+  const waterLiters = 3;
 
   const hasHealthData =
     userStats?.height_cm &&
@@ -67,7 +67,7 @@ export function NutritionCard({ onEdit }: NutritionCardProps) {
           { icon: Wheat, value: `${tdee.carbs}g`, label: "Carbs" },
           { icon: Droplet, value: `${tdee.fat}g`, label: "Fat" },
           { icon: Leaf, value: "30g", label: "Fibre" },
-          { icon: GlassWater, value: `${waterLiters.toFixed(1)}L`, label: "Water" },
+          { icon: GlassWater, value: `${waterLiters}L`, label: "Water" },
         ].map(({ icon: Icon, value, label }) => (
           <div
             key={label}

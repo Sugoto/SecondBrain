@@ -6,20 +6,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   EXPENSE_CATEGORIES,
   EXCLUDED_CATEGORIES,
-  formatCurrency,
   getTransactionBudgetType,
   CATEGORY_BUDGET_TYPE,
   CATEGORY_PASTEL_COLORS,
 } from "./constants";
-import {
-  Loader2,
-  Trash2,
-} from "lucide-react";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { Loader2, Trash2, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
@@ -51,7 +47,6 @@ function evaluateExpression(expr: string): number | null {
   try {
     const tokens: (number | string)[] = [];
     let numBuffer = "";
-
     for (const char of cleaned) {
       if (/[\d.]/.test(char)) {
         numBuffer += char;
@@ -65,32 +60,18 @@ function evaluateExpression(expr: string): number | null {
     }
     if (numBuffer) tokens.push(parseFloat(numBuffer));
 
-    const precedence: Record<string, number> = {
-      "+": 1,
-      "-": 1,
-      "*": 2,
-      "/": 2,
-    };
+    const precedence: Record<string, number> = { "+": 1, "-": 1, "*": 2, "/": 2 };
     const output: number[] = [];
     const ops: string[] = [];
-
     const applyOp = () => {
       const op = ops.pop()!;
       const b = output.pop()!;
       const a = output.pop()!;
       switch (op) {
-        case "+":
-          output.push(a + b);
-          break;
-        case "-":
-          output.push(a - b);
-          break;
-        case "*":
-          output.push(a * b);
-          break;
-        case "/":
-          output.push(a / b);
-          break;
+        case "+": output.push(a + b); break;
+        case "-": output.push(a - b); break;
+        case "*": output.push(a * b); break;
+        case "/": output.push(a / b); break;
       }
     };
 
@@ -103,12 +84,7 @@ function evaluateExpression(expr: string): number | null {
         while (ops.length && ops[ops.length - 1] !== "(") applyOp();
         ops.pop();
       } else if (precedence[token]) {
-        while (
-          ops.length &&
-          precedence[ops[ops.length - 1]] >= precedence[token]
-        ) {
-          applyOp();
-        }
+        while (ops.length && precedence[ops[ops.length - 1]] >= precedence[token]) applyOp();
         ops.push(token);
       }
     }
@@ -116,9 +92,7 @@ function evaluateExpression(expr: string): number | null {
     while (ops.length) applyOp();
 
     const result = output[0];
-    return isNaN(result) || !isFinite(result)
-      ? null
-      : Math.round(result * 100) / 100;
+    return isNaN(result) || !isFinite(result) ? null : Math.round(result * 100) / 100;
   } catch {
     return null;
   }
@@ -134,13 +108,18 @@ export function TransactionDialog({
   onChange,
   onDelete,
 }: TransactionDialogProps) {
+  const formatCurrency = useFormatCurrency();
   const [amountInput, setAmountInput] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (transaction) {
-      setAmountInput(
-        transaction.amount === 0 ? "" : transaction.amount.toString()
+      setAmountInput(transaction.amount === 0 ? "" : transaction.amount.toString());
+      // Auto-open advanced section if it has values
+      setShowAdvanced(
+        Boolean(transaction.prorate_months) ||
+          Boolean(transaction.excluded_from_budget && !EXCLUDED_CATEGORIES.includes(transaction.category ?? ""))
       );
     }
   }, [transaction?.id]);
@@ -192,11 +171,28 @@ export function TransactionDialog({
   };
 
   const handleTimeChange = (value: string) => {
+    onChange({ ...transaction, time: value ? value + ":00" : null });
+  };
+
+  const handleCategoryClick = (cat: typeof EXPENSE_CATEGORIES[0]) => {
+    if (saving) return;
+    const isSelected = transaction.category === cat.name;
+    const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
+    const newCategory = isSelected ? null : cat.name;
+    const currentIsExcluded = EXCLUDED_CATEGORIES.includes(transaction.category ?? "");
+    let newExcludedFromBudget = transaction.excluded_from_budget;
+    if (isExcludedCategory && !isSelected) newExcludedFromBudget = true;
+    else if (currentIsExcluded && (isSelected || !isExcludedCategory)) newExcludedFromBudget = false;
     onChange({
       ...transaction,
-      time: value ? value + ":00" : null,
+      category: newCategory,
+      excluded_from_budget: newExcludedFromBudget,
+      budget_type: null,
     });
   };
+
+  const effectiveBudgetType = getTransactionBudgetType(transaction.category, transaction.budget_type);
+  const autoBudgetType = CATEGORY_BUDGET_TYPE[transaction.category ?? ""] ?? "want";
 
   return (
     <Dialog
@@ -207,266 +203,144 @@ export function TransactionDialog({
         className="max-w-md w-[calc(100%-1.5rem)] rounded-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-0 bg-surface-container-high shadow-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-3">
-          <DialogTitle className="text-headline-s text-foreground">
-            {transaction.category ||
-              (isNew ? "New Expense" : "Edit Transaction")}
+        <DialogHeader className="shrink-0 px-5 pt-5 pb-2">
+          <DialogTitle className="text-title-l text-foreground">
+            {isNew ? "New expense" : "Edit expense"}
           </DialogTitle>
-          {transaction.merchant && (
-            <p className="text-sm text-muted-foreground font-medium">
-              {transaction.merchant}
-            </p>
-          )}
         </DialogHeader>
 
-        <div className="space-y-4 px-5 py-4 overflow-y-auto flex-1">
-          {/* Category Selection */}
-          {(() => {
-            const renderCategoryButton = (cat: typeof EXPENSE_CATEGORIES[0]) => {
-              const IconComp = cat.icon;
-              const isSelected = transaction.category === cat.name;
-              const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
-              const categoryPastelColor = CATEGORY_PASTEL_COLORS[cat.name] || "bg-pastel-blue";
-
-              return (
-                <button
-                  key={cat.name}
-                  onClick={() => {
-                    if (saving) return;
-                    const newCategory = isSelected ? null : cat.name;
-                    const currentIsExcluded = EXCLUDED_CATEGORIES.includes(
-                      transaction.category ?? ""
-                    );
-                    let newExcludedFromBudget =
-                      transaction.excluded_from_budget;
-                    if (isExcludedCategory && !isSelected) {
-                      newExcludedFromBudget = true;
-                    } else if (
-                      currentIsExcluded &&
-                      (isSelected || !isExcludedCategory)
-                    ) {
-                      newExcludedFromBudget = false;
-                    }
-                    onChange({
-                      ...transaction,
-                      category: newCategory,
-                      excluded_from_budget: newExcludedFromBudget,
-                      budget_type: null,
-                    });
-                  }}
-                  disabled={saving}
-                  className={`h-10 rounded-lg flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
-                    } ${isSelected
-                      ? `${categoryPastelColor} border-foreground`
-                      : "bg-card border-border"
-                    }`}
+        <div className="px-5 py-3 overflow-y-auto flex-1 space-y-4">
+          {/* Hero amount input */}
+          <div className="space-y-1.5">
+            <label className="text-label-m text-muted-foreground">Amount</label>
+            <div className="flex items-baseline gap-2 bg-surface-container rounded-xl px-4 py-3">
+              <span className="font-mono text-title-l text-muted-foreground">₹</span>
+              <Input
+                id="amount"
+                type="text"
+                inputMode="text"
+                placeholder="0"
+                className="flex-1 font-mono text-title-l text-foreground bg-transparent border-0 px-0 h-auto py-0 placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:border-0"
+                value={amountInput}
+                onChange={(e) => handleAmountInputChange(e.target.value)}
+                onBlur={handleAmountBlur}
+                onKeyDown={handleAmountKeyDown}
+                onFocus={(e) => setTimeout(() => e.target.select(), 0)}
+                disabled={saving}
+              />
+              {isExpression && (
+                <span
+                  className={`font-mono text-label-m ${
+                    evaluatedAmount !== null ? "text-foreground" : "text-destructive"
+                  }`}
                 >
-                  <IconComp
-                    className={`h-4 w-4 ${isSelected ? "text-foreground" : "text-muted-foreground"
-                      }`}
-                  />
-                </button>
-              );
-            };
+                  {evaluatedAmount !== null ? `= ${evaluatedAmount}` : "?"}
+                </span>
+              )}
+            </div>
+          </div>
 
-            const effectiveBudgetType = getTransactionBudgetType(
-              transaction.category,
-              transaction.budget_type
-            );
-            const isWant = effectiveBudgetType === "want";
-            const autoBudgetType = CATEGORY_BUDGET_TYPE[transaction.category ?? ""] ?? "want";
+          {/* Category strip */}
+          <div className="space-y-1.5">
+            <label className="text-label-m text-muted-foreground">Category</label>
+            <div
+              className="grid gap-1.5"
+              style={{ gridTemplateColumns: `repeat(${EXPENSE_CATEGORIES.length}, minmax(0, 1fr))` }}
+            >
+              {EXPENSE_CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                const isSelected = transaction.category === cat.name;
+                const pastel = CATEGORY_PASTEL_COLORS[cat.name] || "bg-pastel-blue";
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => handleCategoryClick(cat)}
+                    disabled={saving}
+                    aria-label={cat.name}
+                    aria-pressed={isSelected}
+                    className={`h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${pastel} ${
+                      isSelected
+                        ? "ring-2 ring-primary text-foreground"
+                        : "text-foreground/70"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-            const topRowCategories = EXPENSE_CATEGORIES.slice(0, 5);
-            const bottomRowCategories = EXPENSE_CATEGORIES.slice(5);
-
-            return (
-              <div className="space-y-2">
+          {/* Need/Want segmented pill — shown only when category selected */}
+          <AnimatePresence initial={false}>
+            {transaction.category && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
                 <div className="space-y-1.5">
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {topRowCategories.map(renderCategoryButton)}
-                  </div>
-                  <div className="flex justify-center gap-1.5">
-                    {bottomRowCategories.map((cat) => {
-                      const IconComp = cat.icon;
-                      const isSelected = transaction.category === cat.name;
-                      const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
-                      const categoryPastelColor = CATEGORY_PASTEL_COLORS[cat.name] || "bg-pastel-blue";
-
+                  <label className="text-label-m text-muted-foreground">Budget type</label>
+                  <div className="flex bg-surface-container rounded-full p-0.5">
+                    {(["need", "want"] as const).map((type) => {
+                      const isActive = effectiveBudgetType === type;
                       return (
                         <button
-                          key={cat.name}
+                          key={type}
+                          type="button"
                           onClick={() => {
-                            if (saving) return;
-                            const newCategory = isSelected ? null : cat.name;
-                            const currentIsExcluded = EXCLUDED_CATEGORIES.includes(
-                              transaction.category ?? ""
-                            );
-                            let newExcludedFromBudget =
-                              transaction.excluded_from_budget;
-                            if (isExcludedCategory && !isSelected) {
-                              newExcludedFromBudget = true;
-                            } else if (
-                              currentIsExcluded &&
-                              (isSelected || !isExcludedCategory)
-                            ) {
-                              newExcludedFromBudget = false;
-                            }
-                            onChange({
-                              ...transaction,
-                              category: newCategory,
-                              excluded_from_budget: newExcludedFromBudget,
-                              budget_type: null,
-                            });
+                            const newBudgetType = type === autoBudgetType ? null : type;
+                            onChange({ ...transaction, budget_type: newBudgetType });
                           }}
                           disabled={saving}
-                          className={`h-10 w-16 rounded-lg flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
-                            } ${isSelected
-                              ? `${categoryPastelColor} border-foreground`
-                              : "bg-card border-border"
-                            }`}
+                          className={`flex-1 rounded-full py-1.5 text-label-m capitalize transition-colors ${
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground"
+                          }`}
                         >
-                          <IconComp
-                            className={`h-4 w-4 ${isSelected ? "text-foreground" : "text-muted-foreground"
-                              }`}
-                          />
+                          {type}
                         </button>
                       );
                     })}
                   </div>
                 </div>
-
-                {/* Need/Want toggle */}
-                <AnimatePresence>
-                  {transaction.category && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="flex items-center justify-center gap-3 py-1">
-                        <span
-                          className={`text-xs font-medium transition-opacity ${!isWant ? "text-foreground" : "text-muted-foreground"}`}
-                        >
-                          Need
-                        </span>
-                        <Switch
-                          checked={isWant}
-                          onCheckedChange={(checked) => {
-                            const newType = checked ? "want" : "need";
-                            const newBudgetType = newType === autoBudgetType ? null : newType;
-                            onChange({ ...transaction, budget_type: newBudgetType });
-                          }}
-                          disabled={saving}
-                          className="scale-90"
-                        />
-                        <span
-                          className={`text-xs font-medium transition-opacity ${isWant ? "text-foreground" : "text-muted-foreground"}`}
-                        >
-                          Want
-                        </span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })()}
-
-          {/* Amount with Calculator */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="amount"
-              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5"
-            >
-              How much did you spend?
-            </Label>
-            <div className="relative">
-              <Input
-                id="amount"
-                type="text"
-                inputMode="text"
-                placeholder="e.g. 100 or 100+50"
-                className="h-12 text-xl font-semibold font-mono pr-20 placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground/50"
-                value={amountInput}
-                onChange={(e) => handleAmountInputChange(e.target.value)}
-                onBlur={handleAmountBlur}
-                onKeyDown={handleAmountKeyDown}
-                onFocus={(e) => {
-                  if (!amountInput) {
-                    setAmountInput(
-                      transaction.amount === 0
-                        ? ""
-                        : transaction.amount.toString()
-                    );
-                  }
-                  setTimeout(() => e.target.select(), 0);
-                }}
-                disabled={saving}
-              />
-              {isExpression && (
-                <div
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm font-mono font-semibold ${evaluatedAmount !== null ? "text-foreground" : "text-destructive"
-                    }`}
-                >
-                  {evaluatedAmount !== null ? `= ₹${evaluatedAmount}` : "?"}
-                </div>
-              )}
-            </div>
-            {isExpression && (
-              <p className="text-[10px] text-muted-foreground">
-                Press Enter or tap outside to calculate
-              </p>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
 
           {/* Merchant */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="merchant"
-              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-            >
-              Where did you spend?
-            </Label>
+          <div className="space-y-1.5">
+            <label className="text-label-m text-muted-foreground">Merchant</label>
             <Input
-              id="merchant"
-              autoFocus={false}
-              placeholder="e.g. Amazon, Swiggy, Uber"
-              className="h-10"
+              placeholder="Amazon, Swiggy, Uber…"
+              className="h-11 text-body-m bg-surface-container border-0 rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary"
               value={transaction.merchant || ""}
-              onChange={(e) =>
-                onChange({ ...transaction, merchant: e.target.value })
-              }
+              onChange={(e) => onChange({ ...transaction, merchant: e.target.value })}
               disabled={saving}
             />
           </div>
 
-          {/* Date & Time row */}
+          {/* Date & Time */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-[10px] text-muted-foreground uppercase">
-                Date
-              </Label>
+            <div className="space-y-1.5">
+              <label className="text-label-m text-muted-foreground">Date</label>
               <Input
-                id="date"
                 type="date"
-                className="h-9 text-sm"
+                className="h-11 text-body-m bg-surface-container border-0 rounded-xl px-3 focus-visible:ring-1 focus-visible:ring-primary"
                 value={transaction.date}
-                onChange={(e) =>
-                  onChange({ ...transaction, date: e.target.value })
-                }
+                onChange={(e) => onChange({ ...transaction, date: e.target.value })}
                 disabled={saving}
               />
             </div>
-            <div className="space-y-1">
-              <Label className="text-[10px] text-muted-foreground uppercase">
-                Time
-              </Label>
+            <div className="space-y-1.5">
+              <label className="text-label-m text-muted-foreground">Time</label>
               <Input
-                id="time"
                 type="time"
-                className="h-9 text-sm"
+                className="h-11 text-body-m bg-surface-container border-0 rounded-xl px-3 focus-visible:ring-1 focus-visible:ring-primary"
                 value={transaction.time?.slice(0, 5) || ""}
                 onChange={(e) => handleTimeChange(e.target.value)}
                 disabled={saving}
@@ -474,73 +348,85 @@ export function TransactionDialog({
             </div>
           </div>
 
-          {/* Prorate row */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="prorate" className="text-[10px] text-muted-foreground uppercase">
-              Spread over months
-            </Label>
-            <div className="flex items-center gap-2">
-              {transaction.prorate_months &&
-                transaction.prorate_months > 1 && (
-                  <span className="text-xs font-mono font-semibold text-foreground">
-                    {formatCurrency(
-                      transaction.amount / transaction.prorate_months
-                    )}
-                    /mo
-                  </span>
-                )}
-              <Input
-                id="prorate"
-                type="number"
-                min="1"
-                max="60"
-                placeholder="1"
-                className="h-8 text-sm w-14 text-center"
-                value={transaction.prorate_months ?? ""}
-                onChange={(e) => handleProrateChange(e.target.value)}
-                onBlur={handleProrateBlur}
-                disabled={saving}
-              />
-            </div>
-          </div>
-
-          {/* Exclude row */}
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="excluded"
-              className="text-[10px] text-muted-foreground uppercase cursor-pointer"
-            >
-              Exclude from budget
-            </Label>
-            <Switch
-              id="excluded"
-              checked={transaction.excluded_from_budget}
-              onCheckedChange={(checked) =>
-                onChange({
-                  ...transaction,
-                  excluded_from_budget: checked,
-                })
-              }
-              disabled={saving}
-              className="scale-75"
-            />
-          </div>
-
-          {/* Delete button */}
-          {!isNew && onDelete && (
+          {/* Advanced — progressive disclosure */}
+          <div>
             <button
               type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              disabled={saving || deleting}
-              className="w-full h-11 rounded-full flex items-center justify-center gap-2 text-label-l border border-outline text-destructive active:scale-[0.98] disabled:opacity-50 transition-transform"
+              onClick={() => setShowAdvanced((s) => !s)}
+              className="w-full flex items-center justify-between py-2 text-label-l text-foreground"
             >
-              <Trash2 className="h-4 w-4" />
-              Delete Transaction
+              <span>More options</span>
+              <motion.span
+                animate={{ rotate: showAdvanced ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </motion.span>
             </button>
-          )}
+
+            <AnimatePresence initial={false}>
+              {showAdvanced && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-m text-foreground">Spread over months</p>
+                        {transaction.prorate_months && transaction.prorate_months > 1 && (
+                          <p className="text-label-s text-muted-foreground font-mono">
+                            {formatCurrency(transaction.amount / transaction.prorate_months)}/mo
+                          </p>
+                        )}
+                      </div>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="60"
+                        placeholder="1"
+                        className="h-9 w-16 text-center text-body-m font-mono bg-surface-container border-0 rounded-lg focus-visible:ring-1 focus-visible:ring-primary"
+                        value={transaction.prorate_months ?? ""}
+                        onChange={(e) => handleProrateChange(e.target.value)}
+                        onBlur={handleProrateBlur}
+                        disabled={saving}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-body-m text-foreground">Exclude from budget</p>
+                      <Switch
+                        checked={transaction.excluded_from_budget}
+                        onCheckedChange={(checked) =>
+                          onChange({ ...transaction, excluded_from_budget: checked })
+                        }
+                        disabled={saving}
+                      />
+                    </div>
+
+                    {!isNew && onDelete && (
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        disabled={saving || deleting}
+                        className="w-full flex items-center gap-2 py-2 text-label-l text-destructive active:opacity-70 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete transaction
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        <div className="flex gap-2 px-6 pb-6 pt-2 shrink-0">
+        {/* Footer actions */}
+        <div className="flex gap-2 px-5 pb-5 pt-2 shrink-0">
           <button
             onClick={onClose}
             disabled={saving || deleting}
@@ -556,7 +442,7 @@ export function TransactionDialog({
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+                Saving…
               </>
             ) : (
               "Save"
@@ -565,21 +451,23 @@ export function TransactionDialog({
         </div>
       </DialogContent>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent className="max-w-sm rounded-3xl border-0 bg-surface-container-high shadow-xl p-6">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-headline-s text-foreground">
-              Delete Transaction
+            <AlertDialogTitle className="text-title-l text-foreground">
+              Delete this transaction?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-body-m text-muted-foreground">
-              Are you sure you want to delete this transaction
-              {transaction.merchant && (
-                <span className="text-foreground">
-                  {" "}from {transaction.merchant}
-                </span>
+              {transaction.merchant ? (
+                <>
+                  Your record from{" "}
+                  <span className="text-foreground">{transaction.merchant}</span>{" "}
+                  will be removed. This can't be undone.
+                </>
+              ) : (
+                "This record will be removed. This can't be undone."
               )}
-              ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2 mt-4">
@@ -600,7 +488,7 @@ export function TransactionDialog({
               {deleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  Deleting…
                 </>
               ) : (
                 "Delete"

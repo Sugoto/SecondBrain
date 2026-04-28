@@ -5,17 +5,13 @@ import {
   DEFAULT_NEEDS_BUDGET,
   DEFAULT_WANTS_BUDGET,
 } from "./constants";
-import { getCurrentFDValue } from "./fdUtils";
 import type { TimeFilter, DateRange } from "./types";
 
 export function calculateNetWorth(stats: UserStats | null): number {
   if (!stats) return 0;
 
-  const currentFDValue = getCurrentFDValue(stats.fixed_deposits || 0);
-
   return (
     (stats.bank_savings || 0) +
-    currentFDValue +
     (stats.mutual_funds || 0) +
     (stats.ppf || 0) +
     (stats.epf || 0)

@@ -16,6 +16,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+import { useMaskedRupee } from "@/hooks/usePrivacy";
 
 interface FundSectionProps {
   fund: FundWithStats;
@@ -40,6 +41,7 @@ const FundSection = memo(function FundSection({
   const [investAmount, setInvestAmount] = useState("");
   const [investDate, setInvestDate] = useState("");
   const [adding, setAdding] = useState(false);
+  const rupee = useMaskedRupee();
 
   const investmentStats = useMemo(() => {
     const totalUnits = investments.reduce((sum, i) => sum + i.units, 0);
@@ -136,10 +138,7 @@ const FundSection = memo(function FundSection({
         {hasInvestments && (
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-xs font-bold font-mono text-foreground">
-              ₹
-              {currentValue.toLocaleString("en-IN", {
-                maximumFractionDigits: 0,
-              })}
+              {rupee(currentValue, { maximumFractionDigits: 0 })}
             </span>
           </div>
         )}
@@ -235,7 +234,7 @@ const FundSection = memo(function FundSection({
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono font-bold text-foreground">
-                          ₹{inv.amount.toLocaleString("en-IN")}
+                          {rupee(inv.amount)}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-medium">
                           {new Date(inv.date).toLocaleDateString("en-IN", {
@@ -299,6 +298,7 @@ export function MutualFundWatchlist() {
   const { funds, error, isRefetching, refresh, lastUpdated } =
     useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
+  const rupee = useMaskedRupee();
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
@@ -420,10 +420,7 @@ export function MutualFundWatchlist() {
           className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors"
         >
           <span className="text-sm font-bold font-mono text-foreground">
-            ₹
-            {(userStats?.mutual_funds || 0).toLocaleString("en-IN", {
-              maximumFractionDigits: 0,
-            })}
+            {rupee(userStats?.mutual_funds || 0, { maximumFractionDigits: 0 })}
           </span>
 
           <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">

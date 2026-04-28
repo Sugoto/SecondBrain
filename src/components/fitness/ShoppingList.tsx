@@ -370,7 +370,7 @@ type SortOption =
 export function ShoppingList() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("caloriesPerProtein_asc");
+  const [sortBy, setSortBy] = useState<SortOption>("costPerProtein_asc");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("per100g");
 
   // Toggle sort for a given metric (cycles: none -> asc -> desc -> none)

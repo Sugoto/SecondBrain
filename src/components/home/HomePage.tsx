@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import {
   Moon,
   Sun,
+  Eye,
+  EyeOff,
   ChevronRight,
   Droplet,
   GlassWater,
@@ -11,12 +13,12 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { usePrivacy, useFormatCurrency } from "@/hooks/usePrivacy";
 import { useUserStats } from "@/hooks/useExpenseData";
 import { useHealthData } from "@/hooks/useHealthData";
 import { NetWorthEditDialog } from "@/components/finances/NetWorthCard";
 import { HealthStatsEditDialog } from "@/components/fitness/HealthStatsCard";
 import { calculateNetWorth } from "@/components/finances/utils";
-import { formatCurrency } from "@/components/finances/constants";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { calculateTDEE, formatNumber } from "@/components/fitness/utils";
 import { DailyGoals } from "@/components/home/BountyBoard";
@@ -32,6 +34,8 @@ function getGreeting(): string {
 
 export function HomePage() {
   const { theme, toggle } = useTheme();
+  const { hidden, toggle: togglePrivacy } = usePrivacy();
+  const fmt = useFormatCurrency();
   const { userStats, updateUserStats } = useUserStats();
   const { userStats: healthStats, updateInCache: updateHealthStats } = useHealthData();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -60,7 +64,7 @@ export function HomePage() {
     );
   }, [healthStats]);
 
-  const waterLiters = healthStats?.weight_kg ? healthStats.weight_kg * 0.033 : 0;
+  const waterLiters = 3;
   const hasHealthData =
     healthStats?.height_cm &&
     healthStats?.weight_kg &&
@@ -79,17 +83,31 @@ export function HomePage() {
             Sugoto
           </h1>
         </div>
-        <button
-          onClick={toggle}
-          aria-label="Toggle theme"
-          className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container text-on-secondary-container transition-colors active:scale-95"
-        >
-          {theme === "dark" ? (
-            <Sun className="h-5 w-5 text-foreground" />
-          ) : (
-            <Moon className="h-5 w-5 text-foreground" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={togglePrivacy}
+            aria-label={hidden ? "Show amounts" : "Hide amounts"}
+            aria-pressed={hidden}
+            className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container transition-colors active:scale-95"
+          >
+            {hidden ? (
+              <Eye className="h-5 w-5 text-foreground" />
+            ) : (
+              <EyeOff className="h-5 w-5 text-foreground" />
+            )}
+          </button>
+          <button
+            onClick={toggle}
+            aria-label="Toggle theme"
+            className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container transition-colors active:scale-95"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5 text-foreground" />
+            ) : (
+              <Moon className="h-5 w-5 text-foreground" />
+            )}
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pt-2 pb-28">
@@ -106,11 +124,11 @@ export function HomePage() {
           </div>
           <div className="flex items-baseline gap-2 flex-wrap">
             <span className="text-headline-s font-mono tracking-tight">
-              <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
+              <AnimatedNumber value={netWorth} formatFn={fmt} animateOnMount />
             </span>
             {dailySalary && (
               <span className="text-label-s px-2 py-0.5 rounded-full bg-on-primary-container/10">
-                +{formatCurrency(dailySalary)}/d
+                +{fmt(dailySalary)}/d
               </span>
             )}
           </div>
@@ -140,7 +158,7 @@ export function HomePage() {
                 { icon: Wheat, value: `${tdee.carbs}g`, label: "Carbs" },
                 { icon: Droplet, value: `${tdee.fat}g`, label: "Fat" },
                 { icon: Leaf, value: "30g", label: "Fibre" },
-                { icon: GlassWater, value: `${waterLiters.toFixed(1)}L`, label: "Water" },
+                { icon: GlassWater, value: `${waterLiters}L`, label: "Water" },
               ].map(({ icon: Icon, value, label }) => (
                 <div key={label} className="flex flex-col items-center gap-0.5 py-2 rounded-xl bg-surface-container">
                   <Icon className="h-3 w-3 text-muted-foreground" />

@@ -5,7 +5,6 @@ import { Footer } from "./Footer";
 import { NetWorthCard, NetWorthEditDialog } from "./NetWorthCard";
 import { WealthDistributionChart } from "./WealthDistributionChart";
 import { MutualFundWatchlist } from "./MutualFundWatchlist";
-import { FixedDepositsSection } from "./FixedDepositsSection";
 import { ProvidentFundSection } from "./ProvidentFundSection";
 import { CostCalculator } from "./CostCalculator";
 import { SalaryChart } from "./SalaryChart";
@@ -44,8 +43,6 @@ export function InvestmentsView() {
         <WealthDistributionChart userStats={userStats} theme={theme} />
 
         <MutualFundWatchlist />
-
-        <FixedDepositsSection userStats={userStats} />
 
         <ProvidentFundSection userStats={userStats} theme={theme} />
 

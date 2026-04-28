@@ -82,8 +82,8 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
   }, [theme]);
 
   return (
-    <div className="p-3 rounded-2xl border border-outline-variant bg-card">
-      <p className="text-title-s text-foreground mb-1">
+    <div className="px-5 py-4 rounded-2xl border border-outline-variant bg-card">
+      <p className="text-title-s text-foreground mb-3">
         Salary Progression
       </p>
       <div className="h-36">

@@ -3,13 +3,13 @@ import type { Transaction } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import {
   EXPENSE_CATEGORIES,
-  formatCurrency,
   getCategoryColor,
 } from "./constants";
 import { CategoryCard } from "./CategoryCard";
 import { Footer } from "./Footer";
 import type { CategoryTotal, CategoryTotalsByBudgetType } from "./utils";
 import { useTheme } from "@/hooks/useTheme";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { LabeledPieChart } from "@/components/shared";
 
 interface TrendsViewProps {
@@ -28,6 +28,7 @@ export const TrendsView = memo(function TrendsView({
   onTransactionClick,
 }: TrendsViewProps) {
   const { theme } = useTheme();
+  const formatCurrency = useFormatCurrency();
 
   const needsPieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
