@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Apple,
   Calculator,
-  BookOpen,
   CalendarDays,
 } from "lucide-react";
 import type { NavItem } from "./DynamicBottomNav";
@@ -23,7 +22,7 @@ export const HOME_NAV_ITEMS: NavItem[] = [
 export const FINANCE_NAV_ITEMS: NavItem[] = [
   { id: "investments", icon: Landmark, label: "Assets" },
   { id: "expenses", icon: Receipt, label: "Expenses" },
-  { id: "trends", icon: TrendingUp, label: "Trends" },
+  { id: "trends", icon: TrendingUp, label: "Insights" },
 ];
 
 // Health tracker nav items
@@ -35,5 +34,4 @@ export const HEALTH_NAV_ITEMS: NavItem[] = [
 export const OMSCS_NAV_ITEMS: NavItem[] = [
   { id: "grades", icon: Calculator, label: "Grades" },
   { id: "semester", icon: CalendarDays, label: "Semester" },
-  { id: "courses", icon: BookOpen, label: "Courses" },
 ];

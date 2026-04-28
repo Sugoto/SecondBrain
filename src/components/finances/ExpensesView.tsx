@@ -5,7 +5,7 @@ import { TransactionCard } from "./TransactionCard";
 import { Footer } from "./Footer";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-const ROW_HEIGHT = 52;
+const ROW_HEIGHT = 50;
 const OVERSCAN = 5;
 
 interface ExpensesViewProps {
@@ -41,8 +41,8 @@ export const ExpensesView = memo(function ExpensesView({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="p-8 text-center rounded-xl border border-dashed border-border bg-card">
-            <p className="text-muted-foreground font-medium">
+          <div className="p-8 text-center rounded-2xl border border-dashed border-outline-variant bg-card">
+            <p className="text-body-m text-muted-foreground">
               No transactions for this period
             </p>
           </div>
@@ -53,10 +53,10 @@ export const ExpensesView = memo(function ExpensesView({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-1 md:px-2 pt-4 space-y-4">
+    <div className="max-w-6xl mx-auto pt-3 space-y-4">
       <div
         ref={parentRef}
-        className="h-[72dvh] overflow-auto scrollbar-hide px-4 md:px-4"
+        className="h-[72dvh] overflow-auto scrollbar-hide px-4"
         style={{ contain: "strict" }}
       >
         <div
@@ -78,7 +78,7 @@ export const ExpensesView = memo(function ExpensesView({
                   right: 0,
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
-                  paddingBottom: "4px",
+                  paddingBottom: "10px",
                 }}
               >
                 <TransactionCard
@@ -92,7 +92,7 @@ export const ExpensesView = memo(function ExpensesView({
         </div>
       </div>
 
-      <div className="px-4 md:px-4">
+      <div className="px-4">
         <Footer />
       </div>
     </div>

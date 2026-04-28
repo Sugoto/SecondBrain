@@ -5,7 +5,6 @@ import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 import {
   formatCurrency,
   getTransactionBudgetType,
@@ -56,99 +55,79 @@ function SegmentedBudgetBar({
 
   return (
     <div className="sticky top-0 z-30 px-4 md:px-5 pt-1.5">
-      <div className="max-w-6xl mx-auto px-3 py-2 rounded-xl border border-border bg-card">
-        <div className="flex items-center gap-2">
-          <div className="flex-1 grid grid-cols-2 gap-3">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onBudgetTypeFilterChange(
-                  budgetTypeFilter === "need" ? null : "need"
-                );
-              }}
-              className={`w-full space-y-1 transition-all duration-200 rounded-md p-1.5 -m-1.5 ${
-                budgetTypeFilter === "want"
-                  ? "opacity-40"
-                  : budgetTypeFilter === "need"
-                    ? "bg-accent"
-                    : "hover:bg-muted"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wide ${budgetTypeFilter === "need" ? "text-foreground" : "text-muted-foreground"}`}
-                >
-                  Needs
-                </span>
-                <span className="font-mono text-[10px] font-bold text-foreground">
-                  {formatCurrency(budgetInfo.needsSpent)}
-                </span>
-              </div>
-              <div className="relative h-2 rounded overflow-hidden bg-muted">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(needsPercent, 100)}%` }}
-                  transition={{
-                    duration: 0.8,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                    delay: 0.1,
-                  }}
-                  className="h-full bg-foreground"
-                />
-              </div>
-            </button>
+      <div className="max-w-6xl mx-auto p-2 rounded-xl bg-surface-container-low border border-outline-variant">
+        <div className="grid grid-cols-2 gap-1.5 mb-1.5">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onBudgetTypeFilterChange(budgetTypeFilter === "need" ? null : "need");
+            }}
+            className={`w-full space-y-1 rounded-lg p-1.5 transition-colors ${
+              budgetTypeFilter === "want"
+                ? "opacity-40"
+                : budgetTypeFilter === "need"
+                  ? "bg-secondary-container"
+                  : ""
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-label-s text-foreground">Needs</span>
+              <span className="font-mono text-label-s text-foreground">
+                {formatCurrency(budgetInfo.needsSpent)}
+              </span>
+            </div>
+            <div className="relative h-1 rounded-full overflow-hidden bg-surface-container">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: Math.min(needsPercent, 100) / 100 }}
+                transition={{ type: "spring", stiffness: 380, damping: 27 }}
+                style={{ transformOrigin: "left" }}
+                className="h-full bg-primary"
+              />
+            </div>
+          </button>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onBudgetTypeFilterChange(
-                  budgetTypeFilter === "want" ? null : "want"
-                );
-              }}
-              className={`w-full space-y-1 transition-all duration-200 rounded-md p-1.5 -m-1.5 ${
-                budgetTypeFilter === "need"
-                  ? "opacity-40"
-                  : budgetTypeFilter === "want"
-                    ? "bg-accent"
-                    : "hover:bg-muted"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wide ${budgetTypeFilter === "want" ? "text-foreground" : "text-muted-foreground"}`}
-                >
-                  Wants
-                </span>
-                <span className="font-mono text-[10px] font-bold text-foreground">
-                  {formatCurrency(budgetInfo.wantsSpent)}
-                </span>
-              </div>
-              <div className="relative h-2 rounded overflow-hidden bg-muted">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(wantsPercent, 100)}%` }}
-                  transition={{
-                    duration: 0.8,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                    delay: 0.2,
-                  }}
-                  className="h-full bg-foreground"
-                />
-              </div>
-            </button>
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onBudgetTypeFilterChange(budgetTypeFilter === "want" ? null : "want");
+            }}
+            className={`w-full space-y-1 rounded-lg p-1.5 transition-colors ${
+              budgetTypeFilter === "need"
+                ? "opacity-40"
+                : budgetTypeFilter === "want"
+                  ? "bg-tertiary-container"
+                  : ""
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-label-s text-foreground">Wants</span>
+              <span className="font-mono text-label-s text-foreground">
+                {formatCurrency(budgetInfo.wantsSpent)}
+              </span>
+            </div>
+            <div className="relative h-1 rounded-full overflow-hidden bg-surface-container">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: Math.min(wantsPercent, 100) / 100 }}
+                transition={{ type: "spring", stiffness: 380, damping: 27, delay: 0.05 }}
+                style={{ transformOrigin: "left" }}
+                className="h-full bg-tertiary"
+              />
+            </div>
+          </button>
         </div>
 
-        <div className="flex items-center justify-between pt-1.5 mt-1.5 px-1.5">
+        <div className="flex items-center justify-between px-1.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Total</span>
-            <span className="font-mono text-xs font-bold text-foreground">
+            <span className="text-label-s text-muted-foreground">Total</span>
+            <span className="font-mono text-label-m text-foreground">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Budgeted</span>
-            <span className="font-mono text-xs font-bold text-foreground">
+            <span className="text-label-s text-muted-foreground">Budgeted</span>
+            <span className="font-mono text-label-m text-foreground">
               {formatCurrency(budgetInfo.needsSpent + budgetInfo.wantsSpent)}
             </span>
           </div>
@@ -235,7 +214,6 @@ export function FinanceTracker({
         if (data) {
           addToCache(data);
         }
-        toast.success("Expense added successfully");
       } else {
         const { error: updateError } = await supabase
           .from("transactions")
@@ -254,14 +232,10 @@ export function FinanceTracker({
 
         if (updateError) throw updateError;
         updateInCache(updated);
-        toast.success("Transaction updated");
       }
       setDialogState(null);
     } catch (err) {
       console.error("Failed to save:", err);
-      toast.error(
-        isNew ? "Failed to add expense" : "Failed to update transaction"
-      );
     } finally {
       setSaving(false);
     }
@@ -277,11 +251,9 @@ export function FinanceTracker({
 
       if (deleteError) throw deleteError;
       removeFromCache(txn.id);
-      toast.success("Transaction deleted");
       setDialogState(null);
     } catch (err) {
       console.error("Failed to delete:", err);
-      toast.error("Failed to delete transaction");
     } finally {
       setDeleting(false);
     }
@@ -456,20 +428,19 @@ export function FinanceTracker({
         onDelete={deleteTransaction}
       />
 
-      {/* Mobile FAB */}
       <AnimatePresence>
         {activeView === "expenses" && (
           <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 700, damping: 32 }}
+            whileTap={{ scale: 0.92 }}
             onClick={openAddExpense}
-            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-11 w-11 rounded-full bg-foreground text-background shadow-lg"
+            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-2xl bg-primary-container text-on-primary-container"
             aria-label="Add expense"
           >
-            <Plus className="h-5 w-5" strokeWidth={2.5} />
+            <Plus className="h-6 w-6" />
           </motion.button>
         )}
       </AnimatePresence>

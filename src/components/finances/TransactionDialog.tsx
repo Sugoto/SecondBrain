@@ -204,12 +204,11 @@ export function TransactionDialog({
       onOpenChange={(open) => !open && !saving && onClose()}
     >
       <DialogContent
-        className="max-w-md w-[calc(100%-2rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border bg-background shadow-xl"
+        className="max-w-md w-[calc(100%-1.5rem)] rounded-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-0 bg-surface-container-high shadow-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        {/* Header */}
-        <DialogHeader className={`shrink-0 px-5 pt-5 pb-4 border-b border-border bg-muted`}>
-          <DialogTitle className="text-lg font-bold text-foreground">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-3">
+          <DialogTitle className="text-headline-s text-foreground">
             {transaction.category ||
               (isNew ? "New Expense" : "Edit Transaction")}
           </DialogTitle>
@@ -259,7 +258,7 @@ export function TransactionDialog({
                   className={`h-10 rounded-lg flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
                     } ${isSelected
                       ? `${categoryPastelColor} border-foreground`
-                      : "bg-card border-border hover:bg-muted"
+                      : "bg-card border-border"
                     }`}
                 >
                   <IconComp
@@ -323,7 +322,7 @@ export function TransactionDialog({
                           className={`h-10 w-16 rounded-lg flex items-center justify-center border transition-all duration-100 ${saving ? "pointer-events-none opacity-50" : "active:scale-95"
                             } ${isSelected
                               ? `${categoryPastelColor} border-foreground`
-                              : "bg-card border-border hover:bg-muted"
+                              : "bg-card border-border"
                             }`}
                         >
                           <IconComp
@@ -533,27 +532,26 @@ export function TransactionDialog({
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
               disabled={saving || deleting}
-              className="w-full h-10 rounded-lg flex items-center justify-center gap-2 text-xs font-bold border border-border text-muted-foreground transition-all hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-500 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full h-11 rounded-full flex items-center justify-center gap-2 text-label-l border border-outline text-destructive active:scale-[0.98] disabled:opacity-50 transition-transform"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
               Delete Transaction
             </button>
           )}
         </div>
 
-        {/* Fixed footer buttons */}
-        <div className="flex gap-3 p-5 shrink-0 border-t border-border bg-muted">
+        <div className="flex gap-2 px-6 pb-6 pt-2 shrink-0">
           <button
             onClick={onClose}
             disabled={saving || deleting}
-            className="flex-1 h-12 rounded-xl bg-card border border-border text-foreground font-bold text-sm transition-colors hover:bg-muted disabled:opacity-50 flex items-center justify-center"
+            className="flex-1 h-11 rounded-full text-label-l text-primary disabled:opacity-50 active:scale-[0.98] transition-transform"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
-            className="flex-1 h-12 rounded-xl bg-foreground text-background font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 h-11 rounded-full bg-primary text-primary-foreground text-label-l disabled:opacity-50 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
           >
             {saving ? (
               <>
@@ -569,41 +567,35 @@ export function TransactionDialog({
 
       {/* Delete Confirmation Modal */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-sm rounded-2xl border border-border shadow-xl">
+        <AlertDialogContent className="max-w-sm rounded-3xl border-0 bg-surface-container-high shadow-xl p-6">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-3 text-lg font-bold">
-              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center justify-center">
-                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
-              </div>
+            <AlertDialogTitle className="text-headline-s text-foreground">
               Delete Transaction
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
+            <AlertDialogDescription className="text-body-m text-muted-foreground">
               Are you sure you want to delete this transaction
               {transaction.merchant && (
-                <span className="font-bold">
-                  {" "}
-                  from {transaction.merchant}
+                <span className="text-foreground">
+                  {" "}from {transaction.merchant}
                 </span>
               )}
               ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2">
-            <AlertDialogCancel 
+          <AlertDialogFooter className="gap-2 sm:gap-2 mt-4">
+            <AlertDialogCancel
               disabled={deleting}
-              className="rounded-xl border border-border font-bold hover:bg-muted"
+              className="rounded-full h-11 px-6 text-label-l text-primary border-0 bg-transparent"
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (onDelete) {
-                  onDelete(transaction);
-                }
+                if (onDelete) onDelete(transaction);
                 setShowDeleteConfirm(false);
               }}
               disabled={deleting}
-              className="rounded-xl border border-red-600 bg-red-500 text-white font-bold hover:bg-red-600"
+              className="rounded-full h-11 px-6 bg-destructive text-primary-foreground text-label-l border-0"
             >
               {deleting ? (
                 <>

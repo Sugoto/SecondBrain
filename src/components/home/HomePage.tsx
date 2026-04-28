@@ -70,109 +70,89 @@ export function HomePage() {
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-4 pb-1">
+      <header className="flex items-center justify-between px-5 pt-5 pb-2">
         <div>
-          <p className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 tracking-wider uppercase">
+          <p className="text-label-m text-muted-foreground">
             {getGreeting()}
           </p>
-          <h1 className="text-xl font-bold tracking-tight vercel-gradient-text">
+          <h1 className="text-headline-s text-foreground">
             Sugoto
           </h1>
         </div>
         <button
           onClick={toggle}
-          className="h-9 w-9 rounded-full flex items-center justify-center border border-neutral-200/80 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-sm transition-all hover:bg-white dark:hover:bg-white/10 hover:scale-105 active:scale-95"
+          aria-label="Toggle theme"
+          className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container text-on-secondary-container transition-colors active:scale-95"
         >
           {theme === "dark" ? (
-            <Sun className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+            <Sun className="h-5 w-5 text-foreground" />
           ) : (
-            <Moon className="h-4 w-4 text-neutral-500" />
+            <Moon className="h-5 w-5 text-foreground" />
           )}
         </button>
       </header>
 
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto px-5 pt-3 pb-28">
-        {/* Net Worth Card */}
+      <main className="flex-1 overflow-y-auto px-4 pt-2 pb-28">
         <button
           onClick={() => setEditDialogOpen(true)}
-          className="w-full text-left vercel-card vercel-glow px-5 py-4 group mb-4"
+          className="w-full text-left bg-primary-container rounded-2xl px-5 py-4 mb-2.5 transition-colors active:scale-[0.99]"
         >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-5 rounded-md bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center">
-                <TrendingUp className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                Net Worth
-              </span>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5" />
+              <span className="text-label-m">Net Worth</span>
             </div>
-            <div className="h-5 w-5 rounded-full flex items-center justify-center bg-neutral-100/80 dark:bg-white/5 transition-all group-hover:bg-neutral-200/80 dark:group-hover:bg-white/10 group-hover:translate-x-0.5">
-              <ChevronRight className="h-2.5 w-2.5 text-neutral-400 dark:text-neutral-500" />
-            </div>
+            <ChevronRight className="h-3.5 w-3.5 opacity-60" />
           </div>
-
-          <div className="flex items-baseline gap-2.5">
-            <span className="text-2xl font-bold text-neutral-900 dark:text-white font-mono tracking-tighter">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-headline-s font-mono tracking-tight">
               <AnimatedNumber value={netWorth} formatFn={formatCurrency} animateOnMount />
             </span>
             {dailySalary && (
-              <span className="vercel-badge text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20 bg-emerald-50/80 dark:bg-emerald-500/10">
+              <span className="text-label-s px-2 py-0.5 rounded-full bg-on-primary-container/10">
                 +{formatCurrency(dailySalary)}/d
               </span>
             )}
           </div>
         </button>
 
-        {/* Nutrition Card */}
         {hasHealthData && tdee && (
           <button
             onClick={() => setHealthDialogOpen(true)}
-            className="w-full text-left vercel-card vercel-glow px-5 py-4 mb-4 group"
+            className="w-full text-left bg-card border border-outline-variant rounded-2xl px-5 py-4 mb-2.5 transition-colors active:scale-[0.99]"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-mono text-neutral-900 dark:text-white tracking-tighter">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-title-l font-mono text-foreground">
                   {formatNumber(tdee.targetCalories)}
                 </span>
-                <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                  kcal
-                </span>
-                <span className="text-[10px] font-mono text-neutral-300 dark:text-neutral-600 line-through">
+                <span className="text-label-m text-muted-foreground">kcal</span>
+                <span className="text-label-s font-mono text-muted-foreground line-through">
                   {formatNumber(tdee.tdee)}
                 </span>
               </div>
-              <div className="h-5 w-5 rounded-full flex items-center justify-center bg-neutral-100/80 dark:bg-white/5 transition-all group-hover:bg-neutral-200/80 dark:group-hover:bg-white/10 group-hover:translate-x-0.5">
-                <ChevronRight className="h-2.5 w-2.5 text-neutral-400 dark:text-neutral-500" />
-              </div>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
 
             <div className="grid grid-cols-5 gap-1.5">
               {[
-                { icon: Beef, value: `${tdee.protein}g`, label: "Protein", color: "text-rose-500 dark:text-rose-400" },
-                { icon: Wheat, value: `${tdee.carbs}g`, label: "Carbs", color: "text-amber-500 dark:text-amber-400" },
-                { icon: Droplet, value: `${tdee.fat}g`, label: "Fat", color: "text-sky-500 dark:text-sky-400" },
-                { icon: Leaf, value: "30g", label: "Fibre", color: "text-green-500 dark:text-green-400" },
-                { icon: GlassWater, value: `${waterLiters.toFixed(1)}L`, label: "Water", color: "text-cyan-500 dark:text-cyan-400" },
-              ].map(({ icon: Icon, value, label, color }) => (
-                <div key={label} className="vercel-stat flex flex-col items-center gap-1 py-2 px-1">
-                  <Icon className={`h-3 w-3 ${color}`} />
-                  <p className="text-xs font-bold font-mono text-neutral-900 dark:text-white tracking-tight">
-                    {value}
-                  </p>
-                  <p className="text-[8px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
-                    {label}
-                  </p>
+                { icon: Beef, value: `${tdee.protein}g`, label: "Protein" },
+                { icon: Wheat, value: `${tdee.carbs}g`, label: "Carbs" },
+                { icon: Droplet, value: `${tdee.fat}g`, label: "Fat" },
+                { icon: Leaf, value: "30g", label: "Fibre" },
+                { icon: GlassWater, value: `${waterLiters.toFixed(1)}L`, label: "Water" },
+              ].map(({ icon: Icon, value, label }) => (
+                <div key={label} className="flex flex-col items-center gap-0.5 py-2 rounded-xl bg-surface-container">
+                  <Icon className="h-3 w-3 text-muted-foreground" />
+                  <p className="text-label-m font-mono text-foreground">{value}</p>
+                  <p className="text-label-s text-muted-foreground">{label}</p>
                 </div>
               ))}
             </div>
           </button>
         )}
 
-        {/* Daily Goals */}
-        <div>
-          <DailyGoals />
-        </div>
+        <DailyGoals />
       </main>
 
       <NetWorthEditDialog

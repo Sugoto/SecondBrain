@@ -18,11 +18,9 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
 
   const result = useMemo(() => {
     if (amount <= 0 || dailySalary <= 0) return null;
-
     const perDay = amount / days;
     const workHoursToEarn = (amount / dailySalary) * 8;
     const pctOfDaily = (perDay / dailySalary) * 100;
-
     return { perDay, workHoursToEarn, pctOfDaily };
   }, [amount, days, dailySalary]);
 
@@ -36,81 +34,91 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
     return `${days}d ${remainingHours}h`;
   };
 
+  const sliderMax = periodMode === "months" ? 12 : 10;
   const periodLabel = periodMode === "months"
     ? `${sliderValue} ${sliderValue === 1 ? "month" : "months"}`
     : `${sliderValue} ${sliderValue === 1 ? "year" : "years"}`;
 
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
-        Cost Calculator
-      </h3>
-      <div className="rounded-xl border border-border bg-card p-3">
+      <h3 className="text-title-s text-foreground">Cost Calculator</h3>
 
-      <Input
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        placeholder="Item cost"
-        value={cost}
-        onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
-        className="font-mono h-8 text-xs font-bold border border-border rounded-lg bg-muted mb-3"
-      />
+      <div className="rounded-2xl border border-outline-variant bg-card p-4 space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-label-m text-muted-foreground">Item cost</label>
+          <div className="flex items-baseline gap-2 bg-surface-container rounded-xl px-4 py-3">
+            <span className="font-mono text-title-l text-muted-foreground">₹</span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="0"
+              value={cost}
+              onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
+              className="flex-1 font-mono text-title-l text-foreground bg-transparent border-0 px-0 h-auto py-0 placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:border-0"
+            />
+          </div>
+        </div>
 
-      {/* Period mode tabs */}
-      <div className="flex rounded-lg overflow-hidden border border-border text-[10px] mb-2">
-        {(["months", "years"] as const).map((mode) => (
-          <button
-            key={mode}
-            onClick={() => { setPeriodMode(mode); setSliderValue(1); }}
-            className={`flex-1 px-2 py-1.5 font-bold transition-colors capitalize ${
-              periodMode === mode
-                ? "bg-foreground text-background"
-                : "bg-card text-muted-foreground hover:bg-muted"
-            } ${mode === "years" ? "border-l border-border" : ""}`}
-          >
-            {mode}
-          </button>
-        ))}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-label-m text-muted-foreground">Spread over</span>
+            <span className="font-mono text-label-l text-foreground">{periodLabel}</span>
+          </div>
+
+          <div className="flex bg-surface-container rounded-full p-0.5">
+            {(["months", "years"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => { setPeriodMode(mode); setSliderValue(1); }}
+                className={`flex-1 rounded-full py-1 text-label-m capitalize transition-colors ${
+                  periodMode === mode
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+
+          <input
+            type="range"
+            min={1}
+            max={sliderMax}
+            step={1}
+            value={sliderValue}
+            onChange={(e) => setSliderValue(parseInt(e.target.value))}
+            className="w-full h-1 rounded-full appearance-none cursor-pointer accent-primary bg-surface-container"
+          />
+          <div className="flex justify-between font-mono text-label-s text-muted-foreground px-0.5">
+            <span>1</span>
+            <span>{sliderMax}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-outline-variant">
+          <div>
+            <p className="text-label-s text-muted-foreground">Per day</p>
+            <p className="font-mono text-title-s text-foreground mt-0.5">
+              {result ? formatCurrency(result.perDay) : "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-label-s text-muted-foreground">Work time</p>
+            <p className="font-mono text-title-s text-foreground mt-0.5">
+              {result ? formatWorkTime(result.workHoursToEarn) : "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-label-s text-muted-foreground">Of daily pay</p>
+            <p className="font-mono text-title-s text-foreground mt-0.5">
+              {result ? `${result.pctOfDaily.toFixed(1)}%` : "—"}
+            </p>
+          </div>
+        </div>
       </div>
-
-      {/* Slider */}
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[9px] font-bold text-muted-foreground uppercase">Spread over</span>
-          <span className="text-xs font-bold font-mono text-foreground">{periodLabel}</span>
-        </div>
-        <input
-          type="range"
-          min={1}
-          max={periodMode === "months" ? 12 : 10}
-          step={1}
-          value={sliderValue}
-          onChange={(e) => setSliderValue(parseInt(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-foreground bg-muted border border-border"
-        />
-        <div className="flex justify-between text-[8px] text-muted-foreground font-mono mt-0.5">
-          {Array.from({ length: periodMode === "months" ? 12 : 10 }, (_, i) => (
-            <span key={i + 1}>{i + 1}</span>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        <div className="text-center p-2 rounded-lg bg-muted border border-border">
-          <p className="text-sm font-bold font-mono text-foreground">{result ? formatCurrency(result.perDay) : "₹0"}</p>
-          <p className="text-[8px] font-bold text-muted-foreground uppercase">per day</p>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-muted border border-border">
-          <p className="text-sm font-bold font-mono text-foreground">{result ? formatWorkTime(result.workHoursToEarn) : "0h"}</p>
-          <p className="text-[8px] font-bold text-muted-foreground uppercase">work time</p>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-muted border border-border">
-          <p className="text-sm font-bold font-mono text-foreground">{result ? `${result.pctOfDaily.toFixed(1)}%` : "0%"}</p>
-          <p className="text-[8px] font-bold text-muted-foreground uppercase">of daily pay</p>
-        </div>
-      </div>
-    </div>
     </div>
   );
 }

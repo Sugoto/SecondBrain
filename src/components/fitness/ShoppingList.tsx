@@ -183,7 +183,7 @@ function ItemForm({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex-1 h-7 rounded-lg bg-card border border-border text-foreground font-bold text-xs transition-colors hover:bg-muted disabled:opacity-50 flex items-center justify-center gap-1"
+            className="flex-1 h-7 rounded-lg bg-card border border-border text-foreground font-bold text-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
           >
             <X className="h-2.5 w-2.5" />
             Cancel
@@ -191,7 +191,7 @@ function ItemForm({
           <button
             type="submit"
             disabled={!name.trim() || isSubmitting}
-            className="flex-1 h-7 rounded-lg bg-foreground text-background text-xs font-bold transition-colors hover:opacity-90 disabled:opacity-50"
+            className="flex-1 h-7 rounded-lg bg-primary text-primary-foreground text-xs font-bold transition-colors disabled:opacity-50"
           >
             {isSubmitting ? (
               <Loader2 className="h-2.5 w-2.5 animate-spin mx-auto" />
@@ -207,7 +207,7 @@ function ItemForm({
             type="button"
             onClick={onDelete}
             disabled={isSubmitting}
-            className="w-full h-7 rounded-lg bg-card border border-border text-muted-foreground font-bold text-xs transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 disabled:opacity-50 flex items-center justify-center gap-1"
+            className="w-full h-7 rounded-lg bg-card border border-border text-muted-foreground font-bold text-xs transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
           >
             <Trash2 className="h-2.5 w-2.5" />
             Delete Item
@@ -296,7 +296,7 @@ function ShoppingItemRow({
         onClick={() => onToggle(item.id, !item.checked)}
         className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors shrink-0 border ${item.checked
           ? "bg-foreground border-foreground"
-          : "border-border bg-card hover:bg-muted"
+          : "border-border bg-card"
           }`}
       >
         {item.checked && <Check className="h-2.5 w-2.5 text-background" />}
@@ -346,7 +346,7 @@ function ShoppingItemRow({
       {/* Edit button */}
       <button
         onClick={() => onEdit(item)}
-        className="p-1.5 rounded-md border border-border bg-muted text-foreground hover:bg-accent transition-colors"
+        className="p-1.5 rounded-md border border-border bg-muted text-foreground transition-colors"
       >
         <Pencil className="h-2.5 w-2.5" />
       </button>
@@ -553,8 +553,8 @@ export function ShoppingList() {
             <button
               onClick={() => setDisplayMode("raw")}
               className={`px-1.5 py-1 font-bold transition-colors ${displayMode === "raw"
-                ? "bg-foreground text-background"
-                : "hover:bg-muted text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground"
                 }`}
             >
               Raw
@@ -563,8 +563,8 @@ export function ShoppingList() {
             <button
               onClick={() => setDisplayMode("per100g")}
               className={`px-1.5 py-1 font-bold transition-colors ${displayMode === "per100g"
-                ? "bg-foreground text-background"
-                : "hover:bg-muted text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground"
                 }`}
             >
               /100g
@@ -573,8 +573,8 @@ export function ShoppingList() {
             <button
               onClick={() => setDisplayMode("perServe")}
               className={`px-1.5 py-1 font-bold transition-colors ${displayMode === "perServe"
-                ? "bg-foreground text-background"
-                : "hover:bg-muted text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground"
                 }`}
             >
               /serve
@@ -584,7 +584,7 @@ export function ShoppingList() {
           {!showAddForm && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="h-6 w-6 p-0 flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted transition-colors"
+              className="h-6 w-6 p-0 flex items-center justify-center rounded-lg border border-border bg-card transition-colors"
             >
               <Plus className="h-3 w-3 text-foreground" />
             </button>
@@ -598,7 +598,7 @@ export function ShoppingList() {
           onClick={() => toggleSort("calories")}
           className={`text-center py-1 rounded-md transition-colors border ${sortBy === "calories_asc" || sortBy === "calories_desc"
             ? "bg-card border-border"
-            : "border-transparent hover:bg-card/50"
+            : "border-transparent"
             }`}
         >
           <p className="text-xs font-mono font-bold text-foreground">
@@ -619,7 +619,7 @@ export function ShoppingList() {
           onClick={() => toggleSort("protein")}
           className={`text-center py-1 rounded-md transition-colors border ${sortBy.startsWith("protein")
             ? "bg-card border-border"
-            : "border-transparent hover:bg-card/50"
+            : "border-transparent"
             }`}
         >
           <p className="text-xs font-mono font-bold text-foreground">
@@ -640,7 +640,7 @@ export function ShoppingList() {
           onClick={() => toggleSort("cost")}
           className={`text-center py-1 rounded-md transition-colors border ${sortBy === "cost_asc" || sortBy === "cost_desc"
             ? "bg-card border-border"
-            : "border-transparent hover:bg-card/50"
+            : "border-transparent"
             }`}
         >
           <p className="text-xs font-mono font-bold text-foreground">
@@ -659,7 +659,7 @@ export function ShoppingList() {
           onClick={() => toggleSort("costPerProtein")}
           className={`text-center py-1 rounded-md transition-colors border ${sortBy.startsWith("costPerProtein")
             ? "bg-card border-border"
-            : "border-transparent hover:bg-card/50"
+            : "border-transparent"
             }`}
         >
           <p className="text-xs font-mono font-bold text-foreground">
@@ -680,7 +680,7 @@ export function ShoppingList() {
           onClick={() => toggleSort("caloriesPerProtein")}
           className={`text-center py-1 rounded-md transition-colors border ${sortBy.startsWith("caloriesPerProtein")
             ? "bg-card border-border"
-            : "border-transparent hover:bg-card/50"
+            : "border-transparent"
             }`}
         >
           <p className="text-xs font-mono font-bold text-foreground">

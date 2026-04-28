@@ -1,27 +1,19 @@
-import { Loader2, Award } from "lucide-react";
+import { Award } from "lucide-react";
 import { useOmscsData } from "@/hooks/useOmscsData";
 
 export function GradesView() {
-  const { completedCourses, cumulativeGPA, loading } = useOmscsData();
-
-  if (loading) {
-    return (
-      <div className="p-4 flex items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  const { completedCourses, cumulativeGPA } = useOmscsData();
 
   return (
     <div className="p-4 space-y-3">
-      <div className="px-4 py-3 rounded-xl border border-border bg-card">
+      <div className="px-4 py-3 rounded-2xl border border-outline-variant bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
               <Award className="h-3.5 w-3.5 text-foreground" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              <p className="text-label-m text-muted-foreground">
                 Cumulative GPA
               </p>
               <div className="flex items-baseline gap-1">
@@ -33,7 +25,7 @@ export function GradesView() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-label-m text-muted-foreground">
               Completed
             </p>
             <p className="text-lg font-bold font-mono text-foreground">
@@ -63,13 +55,13 @@ export function GradesView() {
 
       {completedCourses.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+          <h3 className="text-label-m text-muted-foreground">
             Completed Courses
           </h3>
           {completedCourses.map((course) => (
             <div
               key={course.id}
-              className="px-3 py-2 rounded-xl border border-border bg-card"
+              className="px-3 py-2 rounded-2xl border border-outline-variant bg-card"
             >
               <div className="flex items-center justify-between">
                 <div className="min-w-0">

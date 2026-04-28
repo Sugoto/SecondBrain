@@ -25,20 +25,27 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
   const pieData = useMemo(() => {
     if (!userStats) return [];
 
-    return ASSET_CONFIG.map((asset) => {
-      let value = userStats[asset.key] || 0;
+    const isDark = theme === "dark";
+    // Single-hue indigo ramp: deepest shade first (largest slice), fading out
+    const ramp = isDark
+      ? ["#a5b4fc", "#818cf8", "#6366f1", "#4f46e5", "#4338ca"]
+      : ["#3730a3", "#4338ca", "#6366f1", "#818cf8", "#a5b4fc"];
 
+    const items = ASSET_CONFIG.map((asset) => {
+      let value = userStats[asset.key] || 0;
       if (asset.key === "fixed_deposits") {
         value = getCurrentFDValue(userStats.fixed_deposits || 0);
       }
-
-      return {
-        name: asset.label,
-        value,
-        color: "",
-      };
+      return { name: asset.label, value };
     }).filter((item) => item.value > 0);
-  }, [userStats]);
+
+    items.sort((a, b) => b.value - a.value);
+
+    return items.map((item, i) => ({
+      ...item,
+      color: ramp[Math.min(i, ramp.length - 1)],
+    }));
+  }, [userStats, theme]);
 
   if (pieData.length === 0) {
     return null;
@@ -51,7 +58,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
       transition={{ duration: 0.3, delay: 0.15 }}
       className="space-y-2"
     >
-      <div className="p-3 rounded-xl border border-border bg-card">
+      <div className="p-3 rounded-2xl border border-outline-variant bg-card">
         <div className="relative h-40 flex items-center justify-center">
           <LabeledPieChart
             data={pieData}

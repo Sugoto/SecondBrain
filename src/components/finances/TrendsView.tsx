@@ -116,7 +116,7 @@ export const TrendsView = memo(function TrendsView({
       {/* === NEEDS SECTION === */}
       {(needsPieData.length > 0 || needsCategories.length > 0 || hasNeedsUncategorized) && (
         <div className="space-y-2">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide px-0.5">
+          <h3 className="text-title-s text-foreground px-0.5">
             Needs
           </h3>
 
@@ -126,7 +126,7 @@ export const TrendsView = memo(function TrendsView({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="p-3 rounded-xl border border-border bg-card">
+              <div className="p-3 rounded-2xl border border-outline-variant bg-card">
                 <div className="h-40 flex items-center justify-center">
                   <LabeledPieChart
                     data={needsPieData}
@@ -184,7 +184,7 @@ export const TrendsView = memo(function TrendsView({
       {/* === WANTS SECTION === */}
       {(wantsPieData.length > 0 || wantsCategories.length > 0 || hasWantsUncategorized) && (
         <div className="space-y-2">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide px-0.5">
+          <h3 className="text-title-s text-foreground px-0.5">
             Wants
           </h3>
 
@@ -194,7 +194,7 @@ export const TrendsView = memo(function TrendsView({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <div className="p-3 rounded-xl border border-border bg-card">
+              <div className="p-3 rounded-2xl border border-outline-variant bg-card">
                 <div className="h-40 flex items-center justify-center">
                   <LabeledPieChart
                     data={wantsPieData}

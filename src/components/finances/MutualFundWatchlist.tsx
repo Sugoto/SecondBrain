@@ -16,7 +16,6 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { toast } from "sonner";
 
 interface FundSectionProps {
   fund: FundWithStats;
@@ -90,7 +89,6 @@ const FundSection = memo(function FundSection({
 
   const handleInvest = async () => {
     if (!investAmount || !investDate) {
-      toast.error("Please fill all fields");
       return;
     }
     setAdding(true);
@@ -119,7 +117,7 @@ const FundSection = memo(function FundSection({
       {/* Fund Header */}
       <button
         onClick={onToggle}
-        className="w-full py-2 flex items-center gap-2 text-left hover:bg-muted transition-colors"
+        className="w-full py-2 flex items-center gap-2 text-left transition-colors"
       >
         {/* Trend indicator */}
         <div className="h-5 w-5 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
@@ -252,7 +250,7 @@ const FundSection = memo(function FundSection({
                           e.stopPropagation();
                           onDeleteInvestment(inv.id);
                         }}
-                        className="p-1 rounded-lg hover:bg-accent border border-transparent hover:border-border text-muted-foreground hover:text-foreground transition-all"
+                        className="p-1 rounded-lg border border-transparent text-muted-foreground transition-all"
                       >
                         <Trash2 className="h-2.5 w-2.5" />
                       </button>
@@ -284,7 +282,7 @@ const FundSection = memo(function FundSection({
                     handleInvest();
                   }}
                   disabled={adding}
-                  className="h-7 w-7 flex items-center justify-center rounded-lg border border-border bg-foreground text-background hover:opacity-90 transition-all disabled:opacity-50"
+                  className="h-7 w-7 flex items-center justify-center rounded-lg border border-border bg-primary text-primary-foreground transition-all disabled:opacity-50"
                 >
                   {adding ? "..." : <Plus className="h-3 w-3" />}
                 </button>
@@ -325,7 +323,6 @@ export function MutualFundWatchlist() {
   ) => {
     const nav = await fetchNavForDate(schemeCode, date);
     if (!nav) {
-      toast.error("Could not fetch NAV for that date");
       throw new Error("NAV not found");
     }
 
@@ -339,15 +336,12 @@ export function MutualFundWatchlist() {
       units,
     });
 
-    toast.success(`Added ₹${amount.toLocaleString("en-IN")} investment`);
   }, [addInvestment]);
 
   const handleDeleteInvestment = useCallback(async (id: string) => {
     try {
       await deleteInvestment(id);
-      toast.success("Investment removed");
     } catch {
-      toast.error("Failed to remove investment");
     }
   }, [deleteInvestment]);
 
@@ -367,7 +361,7 @@ export function MutualFundWatchlist() {
   if (error && funds.length === 0) {
     return (
       <div className="space-y-2">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+        <h3 className="text-title-s text-foreground">
           Mutual Funds
         </h3>
         <div className="p-3 rounded-xl border border-dashed border-border">
@@ -377,7 +371,7 @@ export function MutualFundWatchlist() {
             </p>
             <button
               onClick={refresh}
-              className="text-xs font-bold text-foreground hover:underline"
+              className="text-xs font-bold text-foreground"
             >
               Try again
             </button>
@@ -391,7 +385,7 @@ export function MutualFundWatchlist() {
     <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+        <h3 className="text-title-s text-foreground">
           Mutual Funds
         </h3>
         <div className="flex items-center gap-2">
@@ -407,7 +401,7 @@ export function MutualFundWatchlist() {
             onClick={refresh}
             disabled={isRefetching}
             whileTap={{ scale: 0.9 }}
-            className="h-6 w-6 flex items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+            className="h-6 w-6 flex items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw
@@ -419,11 +413,11 @@ export function MutualFundWatchlist() {
       </div>
 
       {/* Single Collapsible Card */}
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden rounded-2xl border border-outline-variant bg-card">
         {/* Summary Header */}
         <button
           onClick={() => setIsCardExpanded(!isCardExpanded)}
-          className="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-muted transition-colors"
+          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors"
         >
           <span className="text-sm font-bold font-mono text-foreground">
             ₹

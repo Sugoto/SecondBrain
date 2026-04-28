@@ -61,35 +61,30 @@ export function DailyGoals() {
   const allDone = completedCount === totalCount;
 
   return (
-    <div className="vercel-card vercel-glow p-5">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-lg bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center">
-            <Target className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-            Daily Goals
-          </span>
+    <div className="bg-card border border-outline-variant rounded-2xl px-5 py-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <Target className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-label-m text-foreground">Daily Goals</span>
         </div>
         <span className={cn(
-          "vercel-badge font-mono transition-colors",
-          allDone && "!border-emerald-200/50 dark:!border-emerald-500/20 !bg-emerald-50/80 dark:!bg-emerald-500/10 !text-emerald-600 dark:!text-emerald-400"
+          "text-label-s font-mono px-2 py-0.5 rounded-full transition-colors",
+          allDone
+            ? "bg-tertiary-container"
+            : "bg-surface-container text-muted-foreground"
         )}>
           {completedCount}/{totalCount}
         </span>
       </div>
 
-      {/* Gradient progress bar */}
-      <div className="h-1 rounded-full bg-neutral-100 dark:bg-white/5 mb-4 overflow-hidden">
+      <div className="h-1 rounded-full bg-surface-container mb-2.5 overflow-hidden">
         <div
-          className="h-full rounded-full vercel-progress transition-all duration-700 ease-out"
+          className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
           style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
         />
       </div>
 
-      {/* Goal items */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         {DAILY_GOALS.map((goal) => {
           const isCompleted = completedGoals.has(goal.id);
 
@@ -98,33 +93,31 @@ export function DailyGoals() {
               key={goal.id}
               onClick={() => toggleGoal(goal.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-3.5 py-3 text-left rounded-xl transition-all duration-200",
+                "w-full flex items-center gap-2.5 px-3 py-2 text-left rounded-xl transition-colors",
                 isCompleted
-                  ? "bg-neutral-50/50 dark:bg-white/[0.02]"
-                  : "bg-neutral-50/80 dark:bg-white/[0.03] hover:bg-neutral-100/80 dark:hover:bg-white/[0.06]"
+                  ? "bg-surface-container"
+                  : ""
               )}
             >
-              {/* Checkbox */}
               <div
                 className={cn(
-                  "h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-all duration-300",
+                  "h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-colors",
                   isCompleted
-                    ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 shadow-[0_0_12px_-2px_rgba(139,92,246,0.5)]"
-                    : "border border-neutral-300/80 dark:border-white/15"
+                    ? "bg-primary"
+                    : "border-2 border-outline"
                 )}
               >
                 {isCompleted && (
-                  <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+                  <Check className="h-2.5 w-2.5 text-primary-foreground" strokeWidth={3} />
                 )}
               </div>
 
-              {/* Label */}
               <span
                 className={cn(
-                  "text-[13px] font-medium transition-all duration-200",
+                  "text-body-m transition-colors",
                   isCompleted
-                    ? "text-neutral-300 dark:text-neutral-600 line-through"
-                    : "text-neutral-700 dark:text-neutral-300"
+                    ? "text-muted-foreground line-through"
+                    : "text-foreground"
                 )}
               >
                 {goal.label}

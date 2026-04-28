@@ -32,14 +32,14 @@ export function FixedDepositsSection({
 
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+      <h3 className="text-title-s text-foreground">
         Fixed Deposits
       </h3>
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden rounded-2xl border border-outline-variant bg-card">
         {/* Summary Header */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors hover:bg-muted"
+          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors"
         >
           <span className="text-sm font-bold font-mono text-foreground">
             ₹{Math.round(totalCurrentValue).toLocaleString("en-IN")}

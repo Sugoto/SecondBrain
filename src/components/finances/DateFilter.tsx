@@ -139,7 +139,7 @@ export function DateFilter({
     >
       <PopoverTrigger asChild>
         <button
-          className="h-7 px-2 rounded-lg flex items-center gap-1.5 transition-colors border border-border bg-card text-foreground hover:bg-muted"
+          className="h-7 px-2 rounded-lg flex items-center gap-1.5 transition-colors border border-border bg-card text-foreground"
         >
           <CalendarDays className="h-3 w-3" />
           <span className="text-[10px] font-bold">{getFilterLabel()}</span>
@@ -163,7 +163,7 @@ export function DateFilter({
                     }}
                     className={`h-8 flex-1 text-xs font-bold rounded-lg transition-all duration-100 border ${timeFilter === filter
                         ? "bg-foreground border-foreground text-background"
-                        : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                        : "bg-card border-border text-muted-foreground"
                       }`}
                   >
                     {TIME_LABELS[filter]}
@@ -180,7 +180,7 @@ export function DateFilter({
                   <button
                     key={month.label}
                     onClick={() => handleMonthSelect(month.date)}
-                    className="h-8 text-xs font-bold rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-muted"
+                    className="h-8 text-xs font-bold rounded-lg border border-border bg-card text-foreground transition-colors"
                   >
                     {month.shortLabel}
                   </button>
@@ -192,7 +192,7 @@ export function DateFilter({
             <div className="border-t border-border pt-4">
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
                 {pendingRange.from
-                  ? `From ${format(pendingRange.from, "d MMM")} — pick end`
+                  ? `From ${format(pendingRange.from, "d MMM")}: pick end`
                   : "Or pick a date range"}
               </p>
               <Calendar
@@ -208,7 +208,7 @@ export function DateFilter({
               {pendingRange.from && (
                 <button
                   onClick={() => setPendingRange({})}
-                  className="w-full h-8 mt-3 text-xs font-bold rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="w-full h-8 mt-3 text-xs font-bold rounded-lg border border-border bg-card text-muted-foreground transition-colors"
                 >
                   Clear selection
                 </button>

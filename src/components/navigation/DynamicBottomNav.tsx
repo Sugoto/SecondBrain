@@ -32,10 +32,11 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
 
   return createPortal(
     <nav
-      className="md:hidden fixed left-5 right-5 z-[9999] no-view-transition rounded-2xl border border-neutral-200/50 bg-white/80 shadow-lg shadow-black/5 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80"
-      style={{ bottom: "max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem))" }}
+      aria-label="Primary"
+      className="md:hidden fixed left-3 right-3 z-[9999] no-view-transition rounded-3xl border border-outline-variant bg-surface-container"
+      style={{ bottom: "max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))" }}
     >
-      <div className="flex h-14 items-center">
+      <div className="flex h-16 items-center px-1.5">
         {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
@@ -45,12 +46,13 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
               onViewChange(id);
             }}
             onPointerEnter={() => onPrefetch?.(id)}
-            className="flex h-full flex-1 flex-col items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-muted/80 active:scale-95 dark:text-neutral-400"
+            aria-label={label}
+            className="group flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors active:scale-95"
           >
-            <Icon className="h-5 w-5" />
-            <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide">
-              {label}
+            <span className="flex h-7 min-w-14 items-center justify-center rounded-full px-4 text-foreground transition-colors">
+              <Icon className="h-5 w-5" />
             </span>
+            <span className="text-label-s text-foreground">{label}</span>
           </button>
         ))}
       </div>

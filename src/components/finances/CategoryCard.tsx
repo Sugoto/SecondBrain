@@ -39,42 +39,40 @@ export const CategoryCard = memo(function CategoryCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.3,
-        delay: index * 0.05,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        duration: 0.25,
+        delay: Math.min(index * 0.03, 0.15),
+        ease: [0.2, 0, 0, 1],
       }}
-      className="bg-card border border-border rounded-xl overflow-hidden"
+      className="bg-card border border-outline-variant rounded-xl overflow-hidden"
     >
       <motion.button
         onClick={onToggle}
         whileTap={{ scale: 0.99 }}
-        className="w-full flex items-center gap-2 p-2 transition-colors hover:bg-muted"
+        className="w-full flex items-center gap-2.5 px-3 py-2 transition-colors"
       >
-        <motion.div
-          animate={{ scale: isExpanded ? 1.05 : 1 }}
-          transition={{ duration: 0.2 }}
-          className={`h-7 w-7 rounded-lg ${categoryPastelColor} border border-border flex items-center justify-center`}
+        <div
+          className={`h-8 w-8 rounded-full ${categoryPastelColor} flex items-center justify-center shrink-0`}
         >
-          <IconComp className="h-3 w-3 text-foreground" />
-        </motion.div>
+          <IconComp className="h-3.5 w-3.5 text-foreground" />
+        </div>
         <div className="flex-1 text-left min-w-0">
-          <p className="font-bold text-xs text-foreground truncate">{name}</p>
-          <p className="text-[10px] text-muted-foreground font-medium">
+          <p className="text-body-m text-foreground truncate">{name}</p>
+          <p className="text-label-s text-muted-foreground">
             {count} transaction{count !== 1 ? "s" : ""}
           </p>
         </div>
-        <span className="font-mono text-xs font-bold text-foreground">
+        <span className="font-mono text-label-m text-foreground">
           {formatCurrency(total)}
         </span>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted"
+          transition={{ type: "spring", stiffness: 700, damping: 32 }}
+          className="shrink-0"
         >
-          <ChevronRight className="h-3 w-3 text-foreground" />
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
         </motion.div>
       </motion.button>
 
@@ -84,10 +82,10 @@ export const CategoryCard = memo(function CategoryCard({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-border divide-y divide-border/50">
+            <div className="border-t border-outline-variant">
               {transactions.map((txn, i) => {
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
@@ -96,50 +94,38 @@ export const CategoryCard = memo(function CategoryCard({
                 return (
                   <motion.button
                     key={txn.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.2 }}
-                    whileTap={{ backgroundColor: "var(--accent)" }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.02, duration: 0.15 }}
                     onClick={() => onTransactionClick(txn)}
-                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-muted text-left ${isExcluded
-                      ? "opacity-40"
-                      : ""
-                      }`}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${
+                      isExcluded ? "opacity-50" : ""
+                    }`}
                   >
                     <div className="min-w-0 flex-1">
                       <p
-                        className={`text-xs font-bold truncate flex items-center gap-1 ${isExcluded ? "text-muted-foreground" : "text-foreground"
-                          }`}
+                        className={`text-body-s truncate flex items-center gap-1.5 ${
+                          isExcluded ? "text-muted-foreground" : "text-foreground"
+                        }`}
                       >
                         {txn.merchant || "Unknown"}
                         {isProrated && (
-                          <span
-                            className="shrink-0 text-muted-foreground"
-                            title={`${formatCurrency(txn.amount)} over ${txn.prorate_months} months`}
-                          >
-                            <CalendarRange className="h-2.5 w-2.5" />
-                          </span>
+                          <CalendarRange className="h-3 w-3 shrink-0 text-muted-foreground" />
                         )}
                       </p>
-                      <p
-                        className={`text-[10px] font-medium ${isExcluded
-                          ? "text-muted-foreground/50"
-                          : "text-muted-foreground"
-                          }`}
-                      >
+                      <p className="text-label-s text-muted-foreground">
                         {formatDate(txn.date)}
                         {isProrated && (
                           <span className="ml-1">
-                            • {formatCurrency(displayAmount)}/mo
+                            · {formatCurrency(displayAmount)}/mo
                           </span>
                         )}
                       </p>
                     </div>
                     <span
-                      className={`font-mono text-xs font-bold ${isExcluded
-                        ? "text-muted-foreground/50"
-                        : "text-foreground"
-                        }`}
+                      className={`font-mono text-label-s ${
+                        isExcluded ? "text-muted-foreground" : "text-foreground"
+                      }`}
                     >
                       -{formatCurrency(displayAmount)}
                     </span>

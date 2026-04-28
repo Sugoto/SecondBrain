@@ -5,9 +5,8 @@ import { OMSCS_NAV_ITEMS } from "@/components/navigation/constants";
 import type { OmscsView } from "@/types/navigation";
 import { GradesView } from "./GradesView";
 import { SemesterView } from "./SemesterView";
-import { CoursesView } from "./CoursesView";
 
-const OMSCS_VIEWS = ["grades", "semester", "courses"] as const;
+const OMSCS_VIEWS = ["grades", "semester"] as const;
 
 const VIEW_ANIMATION = {
   initial: { opacity: 0, x: -20 },
@@ -56,11 +55,6 @@ export function OmscsTracker({ activeView, onViewChange, onGoHome }: OmscsTracke
           {activeView === "semester" && (
             <motion.div key="semester" {...VIEW_ANIMATION}>
               <SemesterView />
-            </motion.div>
-          )}
-          {activeView === "courses" && (
-            <motion.div key="courses" {...VIEW_ANIMATION}>
-              <CoursesView />
             </motion.div>
           )}
         </AnimatePresence>

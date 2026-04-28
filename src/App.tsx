@@ -11,7 +11,6 @@ import {
   FINANCE_NAV_ITEMS,
   OMSCS_NAV_ITEMS,
 } from "./components/navigation/constants";
-import { Toaster } from "./components/ui/sonner";
 import { useAppNavigation } from "./hooks/useAppNavigation";
 import type { AppSection } from "./types/navigation";
 import { HomePage } from "./components/home/HomePage";
@@ -75,15 +74,8 @@ function AppContent() {
   );
 
   return (
-    <div className="h-[100dvh] bg-[#fafafa] dark:bg-[#09090b] overflow-hidden relative">
-      {/* Global ambient glow orbs */}
-      <div className="vercel-orb w-[300px] h-[300px] -top-20 -right-20 bg-indigo-500" aria-hidden />
-      <div className="vercel-orb w-[250px] h-[250px] top-[40%] -left-24 bg-purple-500" aria-hidden />
-      <div className="vercel-orb w-[200px] h-[200px] bottom-20 right-10 bg-fuchsia-500" aria-hidden />
-      {/* Global dot grid overlay */}
-      <div className="absolute inset-0 vercel-grid-light dark:vercel-grid pointer-events-none z-0" aria-hidden />
-
-      <div className="h-full relative z-10">
+    <div className="h-[100dvh] bg-background overflow-hidden relative">
+      <div className="h-full relative">
         {currentSection === "home" && <HomePage />}
         {currentSection === "omscs" && (
           <OmscsTracker
@@ -117,7 +109,6 @@ function AppContent() {
         />
       )}
 
-      <Toaster position="top-center" richColors />
     </div>
   );
 }

@@ -13,7 +13,6 @@ import {
   User,
 } from "lucide-react";
 import { supabase, type UserStats } from "@/lib/supabase";
-import { toast } from "sonner";
 
 interface HealthStatsEditDialogProps {
   open: boolean;
@@ -49,7 +48,6 @@ export function HealthStatsEditDialog({
 
   async function handleSave() {
     if (!userStats?.id) {
-      toast.error("No user stats found");
       return;
     }
 
@@ -70,10 +68,8 @@ export function HealthStatsEditDialog({
 
       onUpdate({ ...userStats, ...updateData });
       onOpenChange(false);
-      toast.success("Health stats updated");
     } catch (err) {
       console.error("Failed to update:", err);
-      toast.error("Failed to update health stats");
     } finally {
       setSaving(false);
     }
@@ -82,22 +78,18 @@ export function HealthStatsEditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-xs max-h-[90vh] overflow-y-auto rounded-2xl border border-border shadow-xl"
+        className="sm:max-w-sm max-h-[90vh] overflow-y-auto rounded-3xl border-0 bg-surface-container-high shadow-xl p-6"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="pb-2 border-b border-border -mx-5 -mt-5 px-4 pt-4 mb-3 bg-muted rounded-t-2xl">
-          <DialogTitle className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-            Edit Profile
-          </DialogTitle>
+        <DialogHeader className="mb-3">
+          <DialogTitle className="text-headline-s text-foreground">Edit Profile</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {/* All fields in one compact row */}
+        <div className="space-y-4">
           <div className="grid grid-cols-4 gap-2">
-            {/* Height */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
-                <Ruler className="h-2.5 w-2.5" /> cm
+              <label className="text-label-m text-muted-foreground flex items-center gap-0.5">
+                <Ruler className="h-3 w-3" /> cm
               </label>
               <Input
                 type="number"
@@ -105,20 +97,17 @@ export function HealthStatsEditDialog({
                 onChange={(e) =>
                   setValues((prev) => ({
                     ...prev,
-                    height_cm: e.target.value
-                      ? parseFloat(e.target.value)
-                      : null,
+                    height_cm: e.target.value ? parseFloat(e.target.value) : null,
                   }))
                 }
-                className="font-mono h-7 text-xs text-center border border-border rounded-lg font-bold"
+                className="font-mono h-10 text-body-m text-center bg-surface-container-low border border-outline-variant rounded-lg"
                 placeholder="175"
               />
             </div>
 
-            {/* Weight */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
-                <Scale className="h-2.5 w-2.5" /> kg
+              <label className="text-label-m text-muted-foreground flex items-center gap-0.5">
+                <Scale className="h-3 w-3" /> kg
               </label>
               <Input
                 type="number"
@@ -126,20 +115,17 @@ export function HealthStatsEditDialog({
                 onChange={(e) =>
                   setValues((prev) => ({
                     ...prev,
-                    weight_kg: e.target.value
-                      ? parseFloat(e.target.value)
-                      : null,
+                    weight_kg: e.target.value ? parseFloat(e.target.value) : null,
                   }))
                 }
-                className="font-mono h-7 text-xs text-center border border-border rounded-lg font-bold"
+                className="font-mono h-10 text-body-m text-center bg-surface-container-low border border-outline-variant rounded-lg"
                 placeholder="70"
               />
             </div>
 
-            {/* Age */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
-                <Calendar className="h-2.5 w-2.5" /> yrs
+              <label className="text-label-m text-muted-foreground flex items-center gap-0.5">
+                <Calendar className="h-3 w-3" /> yrs
               </label>
               <Input
                 type="number"
@@ -150,15 +136,14 @@ export function HealthStatsEditDialog({
                     age: e.target.value ? parseFloat(e.target.value) : null,
                   }))
                 }
-                className="font-mono h-7 text-xs text-center border border-border rounded-lg font-bold"
+                className="font-mono h-10 text-body-m text-center bg-surface-container-low border border-outline-variant rounded-lg"
                 placeholder="25"
               />
             </div>
 
-            {/* Gender Toggle */}
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground flex items-center gap-0.5 uppercase">
-                <User className="h-2.5 w-2.5" /> Sex
+              <label className="text-label-m text-muted-foreground flex items-center gap-0.5">
+                <User className="h-3 w-3" /> Sex
               </label>
               <button
                 type="button"
@@ -168,20 +153,19 @@ export function HealthStatsEditDialog({
                     gender: prev.gender === "male" ? "female" : "male",
                   }))
                 }
-                className="h-7 w-full rounded-lg border border-border bg-muted flex items-center justify-center transition-colors hover:bg-accent"
+                className="h-10 w-full rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center"
               >
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-title-m text-foreground">
                   {values.gender === "female" ? "♀" : "♂"}
                 </span>
               </button>
             </div>
           </div>
 
-          {/* Save Button */}
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full h-9 rounded-lg text-xs font-bold transition-colors bg-foreground text-background hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 rounded-full text-label-l bg-primary text-primary-foreground disabled:opacity-50 active:scale-[0.98] transition-transform"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
