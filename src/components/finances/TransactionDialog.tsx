@@ -205,7 +205,7 @@ export function TransactionDialog({
       >
         <DialogHeader className="shrink-0 px-5 pt-5 pb-2">
           <DialogTitle className="text-title-l text-foreground">
-            {isNew ? "New expense" : "Edit expense"}
+            {transaction.category || (isNew ? "New expense" : "Edit expense")}
           </DialogTitle>
         </DialogHeader>
 

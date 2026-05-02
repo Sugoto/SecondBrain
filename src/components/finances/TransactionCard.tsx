@@ -51,13 +51,15 @@ export const TransactionCard = memo(function TransactionCard({
       onClick={handleClick}
       className={`w-full flex items-center gap-2 p-2 rounded-xl text-left transition-colors border ${
         isExcluded
-          ? "opacity-50 bg-surface-container border-dashed border-outline-variant"
+          ? "opacity-40 grayscale bg-surface-container border-dashed border-outline-variant"
           : "bg-card border-outline-variant"
       }`}
     >
       {CategoryIcon && (
         <div
-          className={`shrink-0 w-6 h-6 rounded-full ${categoryPastelColor} flex items-center justify-center relative`}
+          className={`shrink-0 w-6 h-6 rounded-full ${categoryPastelColor} flex items-center justify-center relative ${
+            isExcluded ? "grayscale" : ""
+          }`}
         >
           <CategoryIcon className="h-3 w-3 text-foreground" />
           {isNeed && !isExcluded && (
