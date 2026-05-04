@@ -8,8 +8,9 @@ import { useHealthData } from "@/hooks/useHealthData";
 import { HealthStatsEditDialog } from "./HealthStatsCard";
 import { ShoppingList } from "./ShoppingList";
 import { NutritionCard } from "./NutritionCard";
+import { MealPlanner } from "./MealPlanner";
 
-const HEALTH_VIEWS = ["nutrition"] as const;
+const HEALTH_VIEWS = ["nutrition", "shopping"] as const;
 
 interface HealthTrackerProps {
   activeView: HealthView;
@@ -30,14 +31,17 @@ interface NutritionViewProps {
 
 function NutritionView({ onEditHealth }: NutritionViewProps) {
   return (
-    <div className="p-4 flex flex-col gap-4 h-full">
-      {/* Main TDEE Card - Clickable */}
+    <div className="p-4 flex flex-col gap-4">
       <NutritionCard onEdit={onEditHealth} />
+      <MealPlanner />
+    </div>
+  );
+}
 
-      {/* Shopping List - takes remaining space */}
-      <div className="flex-1 min-h-0">
-        <ShoppingList />
-      </div>
+function ShoppingView() {
+  return (
+    <div className="p-4 flex flex-col h-full">
+      <ShoppingList />
     </div>
   );
 }
@@ -81,6 +85,11 @@ export function HealthTracker({
           {activeView === "nutrition" && (
             <motion.div key="nutrition" {...VIEW_ANIMATION}>
               <NutritionView onEditHealth={() => setShowHealthDialog(true)} />
+            </motion.div>
+          )}
+          {activeView === "shopping" && (
+            <motion.div key="shopping" {...VIEW_ANIMATION} className="h-full">
+              <ShoppingView />
             </motion.div>
           )}
         </AnimatePresence>

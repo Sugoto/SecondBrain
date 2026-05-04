@@ -117,7 +117,7 @@ export const TrendsView = memo(function TrendsView({
       {/* === NEEDS SECTION === */}
       {(needsPieData.length > 0 || needsCategories.length > 0 || hasNeedsUncategorized) && (
         <div className="space-y-2">
-          <h3 className="text-title-s text-foreground px-0.5">
+          <h3 className="text-title-s text-foreground">
             Needs
           </h3>
 
@@ -185,7 +185,7 @@ export const TrendsView = memo(function TrendsView({
       {/* === WANTS SECTION === */}
       {(wantsPieData.length > 0 || wantsCategories.length > 0 || hasWantsUncategorized) && (
         <div className="space-y-2">
-          <h3 className="text-title-s text-foreground px-0.5">
+          <h3 className="text-title-s text-foreground">
             Wants
           </h3>
 

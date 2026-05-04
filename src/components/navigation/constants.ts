@@ -6,6 +6,7 @@ import {
   Receipt,
   TrendingUp,
   Apple,
+  ShoppingCart,
   Calculator,
   CalendarDays,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export const FINANCE_NAV_ITEMS: NavItem[] = [
 // Health tracker nav items
 export const HEALTH_NAV_ITEMS: NavItem[] = [
   { id: "nutrition", icon: Apple, label: "Nutrition" },
+  { id: "shopping", icon: ShoppingCart, label: "Shopping list" },
 ];
 
 // OMSCS tracker nav items

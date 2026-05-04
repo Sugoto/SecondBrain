@@ -55,7 +55,7 @@ export function GradesView() {
 
       {completedCourses.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-label-m text-muted-foreground">
+          <h3 className="text-title-s text-foreground">
             Completed Courses
           </h3>
           {completedCourses.map((course) => (

@@ -83,9 +83,9 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
 
   return (
     <div className="px-5 py-4 rounded-2xl border border-outline-variant bg-card">
-      <p className="text-title-s text-foreground mb-3">
+      <h3 className="text-title-s text-foreground mb-3">
         Salary Progression
-      </p>
+      </h3>
       <div className="h-36">
         <ReactECharts
           option={option}

@@ -8,23 +8,15 @@ const shoppingKeys = {
   list: () => [...shoppingKeys.all, "list"] as const,
 };
 
-// Pre-load cache data before React Query kicks in
 let cachedShoppingListPromise: Promise<ShoppingItem[] | null> | null = null;
 
-// Start loading cache immediately on module load
 if (typeof window !== "undefined") {
-  cachedShoppingListPromise = getCachedShoppingList(true); // allowStale=true for instant load
+  cachedShoppingListPromise = getCachedShoppingList(true);
 }
 
-/**
- * Fetch shopping list with IndexedDB cache-first strategy
- * Returns cached data instantly, then fetches fresh data in background
- */
 async function fetchShoppingList(): Promise<ShoppingItem[]> {
-  // Try cache first for instant load
   const cached = await getCachedShoppingList();
 
-  // Fetch fresh data
   const { data, error } = await supabase
     .from("shopping_list")
     .select("*")
@@ -32,14 +24,12 @@ async function fetchShoppingList(): Promise<ShoppingItem[]> {
 
   if (error) {
     console.error("Error fetching shopping list:", error);
-    // If network fails, return cache if available
     if (cached) return cached;
     return [];
   }
 
-  // Cache the fresh data for next time
   if (data) {
-    cacheShoppingList(data); // Fire and forget
+    cacheShoppingList(data);
   }
 
   return data ?? cached ?? [];
@@ -82,16 +72,13 @@ async function deleteShoppingItem(id: string): Promise<void> {
 export function useShoppingList() {
   const queryClient = useQueryClient();
 
-  // Get initial cached data for instant display
   const [initialData, setInitialData] = useState<ShoppingItem[] | undefined>(
     undefined
   );
 
-  // Load initial data from IndexedDB on mount (only once)
   useEffect(() => {
     cachedShoppingListPromise?.then((cached) => {
       if (cached && cached.length > 0) {
-        // Prime the query cache with stale data for instant display
         queryClient.setQueryData(shoppingKeys.list(), cached);
         setInitialData(cached);
       }
@@ -105,12 +92,15 @@ export function useShoppingList() {
   } = useQuery({
     queryKey: shoppingKeys.list(),
     queryFn: fetchShoppingList,
-    // Show cached data as placeholder while fetching
     placeholderData: initialData,
   });
 
-  // Consider "loading" only if no data at all (no cache, no fetched data)
   const loading = isLoading && items.length === 0 && !initialData;
+
+  const persistCache = () => {
+    const fresh = queryClient.getQueryData<ShoppingItem[]>(shoppingKeys.list());
+    if (fresh) cacheShoppingList(fresh);
+  };
 
   const addMutation = useMutation({
     mutationFn: addShoppingItem,
@@ -118,6 +108,7 @@ export function useShoppingList() {
       queryClient.setQueryData<ShoppingItem[]>(shoppingKeys.list(), (old) =>
         old ? [newItem, ...old] : [newItem]
       );
+      persistCache();
     },
   });
 
@@ -125,20 +116,25 @@ export function useShoppingList() {
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Omit<ShoppingItem, "id" | "created_at">> }) =>
       updateShoppingItem(id, updates),
     onMutate: async ({ id, updates }) => {
-      // Optimistic update
       await queryClient.cancelQueries({ queryKey: shoppingKeys.list() });
       const previousItems = queryClient.getQueryData<ShoppingItem[]>(shoppingKeys.list());
-      
+
       queryClient.setQueryData<ShoppingItem[]>(shoppingKeys.list(), (old) =>
         old?.map((item) => (item.id === id ? { ...item, ...updates } : item)) ?? []
       );
-      
+
+      persistCache();
+
       return { previousItems };
     },
     onError: (_err, _variables, context) => {
       if (context?.previousItems) {
         queryClient.setQueryData(shoppingKeys.list(), context.previousItems);
+        cacheShoppingList(context.previousItems);
       }
+    },
+    onSuccess: () => {
+      persistCache();
     },
   });
 
@@ -147,21 +143,25 @@ export function useShoppingList() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: shoppingKeys.list() });
       const previousItems = queryClient.getQueryData<ShoppingItem[]>(shoppingKeys.list());
-      
+
       queryClient.setQueryData<ShoppingItem[]>(shoppingKeys.list(), (old) =>
         old?.filter((item) => item.id !== id) ?? []
       );
-      
+      persistCache();
+
       return { previousItems };
     },
     onError: (_err, _id, context) => {
       if (context?.previousItems) {
         queryClient.setQueryData(shoppingKeys.list(), context.previousItems);
+        cacheShoppingList(context.previousItems);
       }
+    },
+    onSuccess: () => {
+      persistCache();
     },
   });
 
-  // Calculate totals (only checked items)
   const totals = items
     .filter((item) => item.checked)
     .reduce(
