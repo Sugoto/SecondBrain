@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 function readOAuthErrorFromUrl(): string | null {
   if (typeof window === "undefined") return null;
@@ -37,32 +40,50 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-background flex items-center justify-center px-6">
-      <div className="w-full max-w-sm flex flex-col gap-6">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-2xl font-semibold tracking-tight">SecondBrain</h1>
-          <p className="text-sm text-muted-foreground">Sign in to continue</p>
+    <div className="h-[100dvh] w-full bg-background flex flex-col px-6">
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto gap-8">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="h-16 w-16 rounded-3xl bg-primary-container flex items-center justify-center">
+            <Brain className="h-8 w-8 text-on-primary-container" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-headline-l font-semibold tracking-tight text-foreground">
+              SecondBrain
+            </h1>
+            <p className="text-body-l text-muted-foreground max-w-xs">
+              A personal dashboard for fitness, finance, and study.
+            </p>
+          </div>
         </div>
 
-        {error && (
-          <p
-            className="text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/50 rounded-xl px-4 py-3"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
+        <div className="w-full flex flex-col gap-3">
+          {error && (
+            <p
+              className="text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/50 rounded-xl px-4 py-3"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
 
-        <Button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={submitting}
-          className="w-full"
-        >
-          <GoogleIcon className="h-4 w-4" />
-          {submitting ? "Redirecting…" : "Continue with Google"}
-        </Button>
+          <Button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={submitting}
+            className="w-full"
+          >
+            <GoogleIcon className="h-4 w-4" />
+            {submitting ? "Redirecting…" : "Continue with Google"}
+          </Button>
+        </div>
       </div>
+
+      <footer className="shrink-0 text-center pb-6 pt-4">
+        <p className="text-xs text-muted-foreground tracking-wide font-medium">
+          {CURRENT_YEAR} •{" "}
+          <span className="font-bold text-foreground">Sugoto Basu</span>
+        </p>
+      </footer>
     </div>
   );
 }
