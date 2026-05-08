@@ -2,35 +2,26 @@ import { useMemo } from "react";
 import {
   Droplet,
   GlassWater,
-  ChevronRight,
   Beef,
   Wheat,
   Leaf,
 } from "lucide-react";
-import { useHealthData } from "@/hooks/useHealthData";
+import { useUserStats } from "@/hooks/useExpenseData";
 import { calculateTDEE, formatNumber } from "./utils";
 
-const MODERATE_MULTIPLIER = 1.55;
-
-interface NutritionCardProps {
-  onEdit: () => void;
-}
-
-export function NutritionCard({ onEdit }: NutritionCardProps) {
-  const { userStats } = useHealthData();
+export function NutritionCard() {
+  const { userStats } = useUserStats();
 
   const tdee = useMemo(() => {
     if (!userStats) return null;
-    return calculateTDEE(
-      {
-        height_cm: userStats.height_cm,
-        weight_kg: userStats.weight_kg,
-        age: userStats.age,
-        gender: userStats.gender,
-        activity_level: "moderate",
-      },
-      MODERATE_MULTIPLIER
-    );
+    return calculateTDEE({
+      height_cm: userStats.height_cm,
+      weight_kg: userStats.weight_kg,
+      age: userStats.age,
+      gender: userStats.gender,
+      activity_level: userStats.activity_level,
+      calorie_adjustment: userStats.calorie_adjustment,
+    });
   }, [userStats]);
 
   const waterLiters = 3;
@@ -44,21 +35,15 @@ export function NutritionCard({ onEdit }: NutritionCardProps) {
   if (!hasHealthData || !tdee) return null;
 
   return (
-    <button
-      onClick={onEdit}
-      className="w-full text-left bg-card border border-outline-variant rounded-2xl px-5 py-4 mb-2.5 transition-colors active:scale-[0.99]"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-title-l font-mono text-foreground">
-            {formatNumber(tdee.targetCalories)}
-          </span>
-          <span className="text-label-m text-muted-foreground">kcal</span>
-          <span className="text-label-s font-mono text-muted-foreground line-through">
-            {formatNumber(tdee.tdee)}
-          </span>
-        </div>
-        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+    <div className="w-full bg-card border border-outline-variant rounded-2xl px-5 py-4 mb-2.5">
+      <div className="flex items-baseline gap-1.5 mb-2">
+        <span className="text-title-l font-mono text-foreground">
+          {formatNumber(tdee.targetCalories)}
+        </span>
+        <span className="text-label-m text-muted-foreground">kcal</span>
+        <span className="text-label-s font-mono text-muted-foreground line-through">
+          {formatNumber(tdee.tdee)}
+        </span>
       </div>
 
       <div className="grid grid-cols-5 gap-1.5">
@@ -79,6 +64,6 @@ export function NutritionCard({ onEdit }: NutritionCardProps) {
           </div>
         ))}
       </div>
-    </button>
+    </div>
   );
 }

@@ -32,27 +32,21 @@ export type Investment = {
 
 export type ActivityLevel = "sedentary" | "light" | "moderate" | "heavy";
 
-// Activity log: date -> activity level
-export type ActivityLog = Record<string, ActivityLevel>;
-
 export type UserStats = {
   id: string;
   bank_savings: number;
-  fixed_deposits: number;
   mutual_funds: number;
   ppf: number;
   epf: number;
   monthly_income: number | null;
-  needs_budget: number | null; // Monthly budget for needs
-  wants_budget: number | null; // Monthly budget for wants
+  needs_budget: number | null;
+  wants_budget: number | null;
   height_cm: number | null;
   weight_kg: number | null;
   age: number | null;
   gender: "male" | "female" | null;
   activity_level: ActivityLevel | null;
-  activity_log: ActivityLog | null;
-  manual_activity_dates: string[] | null; // Dates with manual entries
-  workout_dates: string[] | null; // Dates with gym workouts marked
+  calorie_adjustment: number;
   investments: Investment[] | null;
 };
 

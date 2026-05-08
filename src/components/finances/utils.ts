@@ -2,20 +2,12 @@ import type { Transaction, UserStats } from "@/lib/supabase";
 import {
   EXPENSE_CATEGORIES,
   getTransactionBudgetType,
-  DEFAULT_NEEDS_BUDGET,
-  DEFAULT_WANTS_BUDGET,
 } from "./constants";
 import type { TimeFilter, DateRange } from "./types";
 
 export function calculateNetWorth(stats: UserStats | null): number {
   if (!stats) return 0;
-
-  return (
-    (stats.bank_savings || 0) +
-    (stats.mutual_funds || 0) +
-    (stats.ppf || 0) +
-    (stats.epf || 0)
-  );
+  return stats.bank_savings + stats.mutual_funds + stats.ppf + stats.epf;
 }
 
 // Proration helpers
@@ -289,9 +281,8 @@ export function calculateBudgetTypeInfo(
 ): BudgetTypeInfo {
   const { startOfMonth } = getDateRanges();
 
-  // Use provided budgets or fall back to defaults
-  const actualNeedsBudget = needsBudget ?? DEFAULT_NEEDS_BUDGET;
-  const actualWantsBudget = wantsBudget ?? DEFAULT_WANTS_BUDGET;
+  const actualNeedsBudget = needsBudget ?? 0;
+  const actualWantsBudget = wantsBudget ?? 0;
 
   // Filter to current month, expenses only, budget-included
   const monthlyTransactions = transactions.filter((t) => {

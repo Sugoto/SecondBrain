@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from "react";
 import { ThemeProvider } from "./hooks/useTheme";
 import { PrivacyProvider } from "./hooks/usePrivacy";
+import { AuthProvider } from "./hooks/useAuth";
+import { AuthGate } from "./components/auth/AuthGate";
 import {
   ExpenseDataProvider,
   usePrefetchTransactions,
@@ -18,6 +20,7 @@ import { HomePage } from "./components/home/HomePage";
 import { FinanceTracker } from "./components/finances";
 import { HealthTracker } from "./components/fitness/FitnessTracker";
 import { OmscsTracker } from "./components/omscs/OmscsTracker";
+import { ProfilePage } from "./components/profile/ProfilePage";
 
 function AppContent() {
   const {
@@ -99,6 +102,7 @@ function AppContent() {
             onGoHome={goHome}
           />
         )}
+        {currentSection === "profile" && <ProfilePage onGoHome={goHome} />}
       </div>
 
       {/* Only show bottom nav on home page */}
@@ -117,11 +121,15 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <PrivacyProvider>
-        <ExpenseDataProvider>
-          <AppContent />
-        </ExpenseDataProvider>
-      </PrivacyProvider>
+      <AuthProvider>
+        <AuthGate>
+          <PrivacyProvider>
+            <ExpenseDataProvider>
+              <AppContent />
+            </ExpenseDataProvider>
+          </PrivacyProvider>
+        </AuthGate>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

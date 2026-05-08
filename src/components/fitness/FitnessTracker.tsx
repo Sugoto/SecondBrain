@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { TopTabs } from "@/components/navigation/TopTabs";
 import { HEALTH_NAV_ITEMS } from "@/components/navigation/constants";
 import type { HealthView } from "@/types/navigation";
-import { useHealthData } from "@/hooks/useHealthData";
-import { HealthStatsEditDialog } from "./HealthStatsCard";
 import { ShoppingList } from "./ShoppingList";
 import { NutritionCard } from "./NutritionCard";
 import { MealPlanner } from "./MealPlanner";
@@ -25,14 +22,10 @@ const VIEW_ANIMATION = {
   transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] as const },
 };
 
-interface NutritionViewProps {
-  onEditHealth: () => void;
-}
-
-function NutritionView({ onEditHealth }: NutritionViewProps) {
+function NutritionView() {
   return (
     <div className="p-4 flex flex-col gap-4">
-      <NutritionCard onEdit={onEditHealth} />
+      <NutritionCard />
       <MealPlanner />
     </div>
   );
@@ -51,11 +44,6 @@ export function HealthTracker({
   onViewChange,
   onGoHome,
 }: HealthTrackerProps) {
-  const { userStats, updateInCache } = useHealthData();
-  const [showHealthDialog, setShowHealthDialog] = useState(false);
-
-  // Swipe navigation for mobile (no View Transitions - Framer Motion handles animations)
-  // Note: Currently only one view, swipe will be disabled automatically
   const { ref: swipeRef } = useSwipeNavigation({
     views: HEALTH_VIEWS,
     currentView: activeView,
@@ -84,7 +72,7 @@ export function HealthTracker({
         <AnimatePresence mode="wait">
           {activeView === "nutrition" && (
             <motion.div key="nutrition" {...VIEW_ANIMATION}>
-              <NutritionView onEditHealth={() => setShowHealthDialog(true)} />
+              <NutritionView />
             </motion.div>
           )}
           {activeView === "shopping" && (
@@ -94,14 +82,6 @@ export function HealthTracker({
           )}
         </AnimatePresence>
       </main>
-
-      {/* Health Stats Edit Dialog */}
-      <HealthStatsEditDialog
-        open={showHealthDialog}
-        onOpenChange={setShowHealthDialog}
-        userStats={userStats ?? null}
-        onUpdate={updateInCache}
-      />
     </div>
   );
 }

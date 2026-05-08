@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, Target } from "lucide-react";
+import { Check, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Goal {
@@ -21,7 +21,7 @@ function getTodayKey(): string {
 export function DailyGoals() {
   const [completedGoals, setCompletedGoals] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
-    const stored = localStorage.getItem("bounty-board");
+    const stored = localStorage.getItem("daily-goals");
     if (!stored) return new Set();
     try {
       const { date, completed } = JSON.parse(stored);
@@ -36,7 +36,7 @@ export function DailyGoals() {
 
   useEffect(() => {
     localStorage.setItem(
-      "bounty-board",
+      "daily-goals",
       JSON.stringify({
         date: getTodayKey(),
         completed: Array.from(completedGoals),
@@ -56,32 +56,11 @@ export function DailyGoals() {
     });
   };
 
-  const completedCount = completedGoals.size;
-  const totalCount = DAILY_GOALS.length;
-  const allDone = completedCount === totalCount;
-
   return (
     <div className="bg-card border border-outline-variant rounded-2xl px-5 py-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <Target className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-label-m text-foreground">Daily Goals</span>
-        </div>
-        <span className={cn(
-          "text-label-s font-mono px-2 py-0.5 rounded-full transition-colors",
-          allDone
-            ? "bg-tertiary-container"
-            : "bg-surface-container text-muted-foreground"
-        )}>
-          {completedCount}/{totalCount}
-        </span>
-      </div>
-
-      <div className="h-1 rounded-full bg-surface-container mb-2.5 overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
-          style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
-        />
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Flag className="h-3.5 w-3.5 text-foreground" />
+        <span className="text-label-m text-foreground">Daily Goals</span>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -93,7 +72,7 @@ export function DailyGoals() {
               key={goal.id}
               onClick={() => toggleGoal(goal.id)}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 text-left rounded-xl transition-colors",
+                "w-full flex items-center gap-1.5 px-1.5 py-1 text-left rounded-md transition-colors",
                 isCompleted
                   ? "bg-surface-container"
                   : ""
@@ -101,20 +80,20 @@ export function DailyGoals() {
             >
               <div
                 className={cn(
-                  "h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-colors",
+                  "h-3 w-3 rounded-full flex items-center justify-center shrink-0 transition-colors",
                   isCompleted
                     ? "bg-primary"
-                    : "border-2 border-outline"
+                    : "border-[1.5px] border-outline"
                 )}
               >
                 {isCompleted && (
-                  <Check className="h-2.5 w-2.5 text-primary-foreground" strokeWidth={3} />
+                  <Check className="h-1.5 w-1.5 text-primary-foreground" strokeWidth={3} />
                 )}
               </div>
 
               <span
                 className={cn(
-                  "text-body-m transition-colors",
+                  "text-label-m transition-colors",
                   isCompleted
                     ? "text-muted-foreground line-through"
                     : "text-foreground"

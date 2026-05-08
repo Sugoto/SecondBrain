@@ -269,10 +269,11 @@ export function useUserStats() {
   // Load initial data from IndexedDB on mount
   useEffect(() => {
     cachedUserStatsPromise?.then((cached) => {
-      if (cached) {
-        queryClient.setQueryData(userStatsKeys.detail(), cached);
-        setInitialData(cached);
-      }
+      if (!cached) return;
+      // Skip if React Query already has fresher data (e.g. after a save).
+      if (queryClient.getQueryData(userStatsKeys.detail())) return;
+      queryClient.setQueryData(userStatsKeys.detail(), cached);
+      setInitialData(cached);
     });
   }, [queryClient]);
 

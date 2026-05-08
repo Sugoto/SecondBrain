@@ -403,3 +403,14 @@ body > nav.no-view-transition {
   will-change: transform, opacity;
   contain: layout style paint;
 }
+
+/* Remove spinner arrows on number inputs across browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useUserStats } from "@/hooks/useExpenseData";
 import { Footer } from "./Footer";
-import { NetWorthCard, NetWorthEditDialog } from "./NetWorthCard";
+import { NetWorthCard } from "./NetWorthCard";
 import { WealthDistributionChart } from "./WealthDistributionChart";
 import { MutualFundWatchlist } from "./MutualFundWatchlist";
 import { ProvidentFundSection } from "./ProvidentFundSection";
@@ -12,8 +12,7 @@ import { calculateNetWorth } from "./utils";
 
 export function InvestmentsView() {
   const { theme } = useTheme();
-  const { userStats, updateUserStats } = useUserStats();
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const { userStats } = useUserStats();
 
   const netWorth = useMemo(
     () => calculateNetWorth(userStats),
@@ -27,14 +26,6 @@ export function InvestmentsView() {
       <NetWorthCard
         netWorth={netWorth}
         monthlyIncome={userStats?.monthly_income ?? null}
-        onEdit={() => setEditDialogOpen(true)}
-      />
-
-      <NetWorthEditDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        userStats={userStats}
-        onUpdate={updateUserStats}
       />
 
       <div className="max-w-6xl mx-auto pt-3 flex flex-col gap-3">

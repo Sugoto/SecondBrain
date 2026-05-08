@@ -1,5 +1,5 @@
 import type { HealthStats, TDEEResult } from "./types";
-import { ACTIVITY_LEVELS, RECOMP_CALORIE_ADJUSTMENT } from "./types";
+import { ACTIVITY_LEVELS } from "./types";
 
 /**
  * Calculate BMR using the Mifflin-St Jeor equation
@@ -40,12 +40,14 @@ export function calculateTDEE(
   }
 
   const tdee = bmr * multiplier;
-  const targetCalories = Math.round(tdee + RECOMP_CALORIE_ADJUSTMENT);
+  const targetCalories = Math.round(
+    tdee * (1 + stats.calorie_adjustment / 100),
+  );
 
-  const protein = Math.round(weight_kg * 1.8);
+  const protein = Math.round(weight_kg * 1.6);
   const proteinCalories = protein * 4;
 
-  const fat = Math.round((targetCalories * 0.28) / 9);
+  const fat = Math.round((targetCalories * 0.3) / 9);
   const fatCalories = fat * 9;
 
   const carbs = Math.round(

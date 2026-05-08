@@ -10,10 +10,6 @@ import {
 } from "lucide-react";
 import type { BudgetType } from "@/lib/supabase";
 
-// Default budget values (used when user hasn't set custom values)
-export const DEFAULT_NEEDS_BUDGET = 15000;
-export const DEFAULT_WANTS_BUDGET = 10000;
-
 // Category to budget type mapping (auto-assignment)
 // Food defaults to "want" but user can override individual transactions
 export const CATEGORY_BUDGET_TYPE: Record<string, BudgetType> = {

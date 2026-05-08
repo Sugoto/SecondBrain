@@ -1,29 +1,22 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
-  Moon,
-  Sun,
-  Eye,
-  EyeOff,
-  ChevronRight,
   Droplet,
   GlassWater,
   Beef,
   Wheat,
   Leaf,
   TrendingUp,
+  User,
+  Apple,
 } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
-import { usePrivacy, useFormatCurrency } from "@/hooks/usePrivacy";
+import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
+import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/hooks/useExpenseData";
-import { useHealthData } from "@/hooks/useHealthData";
-import { NetWorthEditDialog } from "@/components/finances/NetWorthCard";
-import { HealthStatsEditDialog } from "@/components/fitness/HealthStatsCard";
 import { calculateNetWorth } from "@/components/finances/utils";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { calculateTDEE, formatNumber } from "@/components/fitness/utils";
-import { DailyGoals } from "@/components/home/BountyBoard";
-
-const MODERATE_MULTIPLIER = 1.55;
+import { DailyGoals } from "@/components/home/DailyGoals";
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -33,13 +26,17 @@ function getGreeting(): string {
 }
 
 export function HomePage() {
-  const { theme, toggle } = useTheme();
-  const { hidden, toggle: togglePrivacy } = usePrivacy();
+  const { navigateToSection } = useAppNavigation();
+  const { session } = useAuth();
   const fmt = useFormatCurrency();
-  const { userStats, updateUserStats } = useUserStats();
-  const { userStats: healthStats, updateInCache: updateHealthStats } = useHealthData();
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [healthDialogOpen, setHealthDialogOpen] = useState(false);
+  const { userStats } = useUserStats();
+
+  const firstName =
+    (session?.user?.user_metadata?.given_name as string | undefined) ??
+    (session?.user?.user_metadata?.full_name as string | undefined)?.split(
+      " ",
+    )[0] ??
+    "there";
 
   const netWorth = useMemo(
     () => calculateNetWorth(userStats),
@@ -51,25 +48,23 @@ export function HomePage() {
     : null;
 
   const tdee = useMemo(() => {
-    if (!healthStats) return null;
-    return calculateTDEE(
-      {
-        height_cm: healthStats.height_cm,
-        weight_kg: healthStats.weight_kg,
-        age: healthStats.age,
-        gender: healthStats.gender,
-        activity_level: "moderate",
-      },
-      MODERATE_MULTIPLIER
-    );
-  }, [healthStats]);
+    if (!userStats) return null;
+    return calculateTDEE({
+      height_cm: userStats.height_cm,
+      weight_kg: userStats.weight_kg,
+      age: userStats.age,
+      gender: userStats.gender,
+      activity_level: userStats.activity_level,
+      calorie_adjustment: userStats.calorie_adjustment,
+    });
+  }, [userStats]);
 
   const waterLiters = 3;
   const hasHealthData =
-    healthStats?.height_cm &&
-    healthStats?.weight_kg &&
-    healthStats?.age &&
-    healthStats?.gender;
+    userStats?.height_cm &&
+    userStats?.weight_kg &&
+    userStats?.age &&
+    userStats?.gender;
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
@@ -80,47 +75,23 @@ export function HomePage() {
             {getGreeting()}
           </p>
           <h1 className="text-headline-s text-foreground">
-            Sugoto
+            {firstName}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={togglePrivacy}
-            aria-label={hidden ? "Show amounts" : "Hide amounts"}
-            aria-pressed={hidden}
-            className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container transition-colors active:scale-95"
-          >
-            {hidden ? (
-              <Eye className="h-5 w-5 text-foreground" />
-            ) : (
-              <EyeOff className="h-5 w-5 text-foreground" />
-            )}
-          </button>
-          <button
-            onClick={toggle}
-            aria-label="Toggle theme"
-            className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container transition-colors active:scale-95"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-foreground" />
-            ) : (
-              <Moon className="h-5 w-5 text-foreground" />
-            )}
-          </button>
-        </div>
+        <button
+          onClick={() => navigateToSection("profile")}
+          aria-label="Open profile"
+          className="h-11 w-11 rounded-full flex items-center justify-center bg-surface-container transition-colors active:scale-95"
+        >
+          <User className="h-5 w-5 text-foreground" />
+        </button>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pt-2 pb-28">
-        <button
-          onClick={() => setEditDialogOpen(true)}
-          className="w-full text-left bg-primary-container rounded-2xl px-5 py-4 mb-2.5 transition-colors active:scale-[0.99]"
-        >
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5" />
-              <span className="text-label-m">Net Worth</span>
-            </div>
-            <ChevronRight className="h-3.5 w-3.5 opacity-60" />
+        <div className="w-full bg-primary-container rounded-2xl px-5 py-4 mb-2.5">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <TrendingUp className="h-3.5 w-3.5" />
+            <span className="text-label-m">Net Worth</span>
           </div>
           <div className="flex items-baseline gap-2 flex-wrap">
             <span className="text-headline-s font-mono tracking-tight">
@@ -132,24 +103,22 @@ export function HomePage() {
               </span>
             )}
           </div>
-        </button>
+        </div>
 
         {hasHealthData && tdee && (
-          <button
-            onClick={() => setHealthDialogOpen(true)}
-            className="w-full text-left bg-card border border-outline-variant rounded-2xl px-5 py-4 mb-2.5 transition-colors active:scale-[0.99]"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-title-l font-mono text-foreground">
-                  {formatNumber(tdee.targetCalories)}
-                </span>
-                <span className="text-label-m text-muted-foreground">kcal</span>
-                <span className="text-label-s font-mono text-muted-foreground line-through">
-                  {formatNumber(tdee.tdee)}
-                </span>
-              </div>
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          <div className="w-full bg-card border border-outline-variant rounded-2xl px-5 py-4 mb-2.5">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Apple className="h-3.5 w-3.5 text-foreground" />
+              <span className="text-label-m text-foreground">Nutrition</span>
+            </div>
+            <div className="flex items-baseline gap-1.5 mb-2">
+              <span className="text-title-l font-mono text-foreground">
+                {formatNumber(tdee.targetCalories)}
+              </span>
+              <span className="text-label-m text-muted-foreground">kcal</span>
+              <span className="text-label-s font-mono text-muted-foreground line-through">
+                {formatNumber(tdee.tdee)}
+              </span>
             </div>
 
             <div className="grid grid-cols-5 gap-1.5">
@@ -167,25 +136,11 @@ export function HomePage() {
                 </div>
               ))}
             </div>
-          </button>
+          </div>
         )}
 
         <DailyGoals />
       </main>
-
-      <NetWorthEditDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        userStats={userStats}
-        onUpdate={updateUserStats}
-      />
-
-      <HealthStatsEditDialog
-        open={healthDialogOpen}
-        onOpenChange={setHealthDialogOpen}
-        userStats={healthStats ?? null}
-        onUpdate={updateHealthStats}
-      />
     </div>
   );
 }

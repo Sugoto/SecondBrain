@@ -1,4 +1,4 @@
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type {
   AppSection,
   HealthView,
@@ -27,7 +27,7 @@ function parseHash(hash: string): NavigationState | null {
   const parts = hash.split("/");
   const section = parts[0] as AppSection;
 
-  if (!["home", "omscs", "finances", "fitness"].includes(section)) {
+  if (!["home", "omscs", "finances", "fitness", "profile"].includes(section)) {
     return null;
   }
 
@@ -84,10 +84,23 @@ function setSharedState(updater: (prev: NavigationState) => NavigationState) {
   emitChange();
 }
 
+// Detect OAuth response fragments — Supabase puts tokens in the URL hash and
+// reads them asynchronously. If we rewrite the hash before then, the session
+// is lost and the user gets bounced back to the login screen.
+function isOAuthHash(hash: string): boolean {
+  return (
+    hash.includes("access_token=") ||
+    hash.includes("error=") ||
+    hash.includes("error_description=")
+  );
+}
+
 // Initialize history state on module load
 if (typeof window !== "undefined") {
-  window.history.replaceState(sharedState, "", toHash(sharedState));
-  
+  if (!isOAuthHash(window.location.hash)) {
+    window.history.replaceState(sharedState, "", toHash(sharedState));
+  }
+
   // Handle browser back/forward navigation
   window.addEventListener("popstate", (e: PopStateEvent) => {
     const newState = (e.state as NavigationState) ?? DEFAULT_STATE;
@@ -103,21 +116,16 @@ if (typeof window !== "undefined") {
 export function useAppNavigation() {
   // Use useSyncExternalStore to subscribe to shared state
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  const isHandlingPopstate = useRef(false);
 
   // Navigate to a section (pushes history for non-home sections)
   const navigateToSection = useCallback((section: AppSection) => {
     setSharedState((prev) => {
       const next = { ...prev, section };
-
-      if (!isHandlingPopstate.current) {
-        if (section !== "home") {
-          window.history.pushState(next, "", toHash(next));
-        } else {
-          window.history.replaceState(next, "", toHash(next));
-        }
+      if (section !== "home") {
+        window.history.pushState(next, "", toHash(next));
+      } else {
+        window.history.replaceState(next, "", toHash(next));
       }
-
       return next;
     });
   }, []);
@@ -126,9 +134,7 @@ export function useAppNavigation() {
   const navigateHealthView = useCallback((healthView: HealthView) => {
     setSharedState((prev) => {
       const next = { ...prev, healthView };
-      if (!isHandlingPopstate.current) {
-        window.history.replaceState(next, "", toHash(next));
-      }
+      window.history.replaceState(next, "", toHash(next));
       return next;
     });
   }, []);
@@ -136,9 +142,7 @@ export function useAppNavigation() {
   const navigateFinanceView = useCallback((financeView: FinanceView) => {
     setSharedState((prev) => {
       const next = { ...prev, financeView };
-      if (!isHandlingPopstate.current) {
-        window.history.replaceState(next, "", toHash(next));
-      }
+      window.history.replaceState(next, "", toHash(next));
       return next;
     });
   }, []);
@@ -146,9 +150,7 @@ export function useAppNavigation() {
   const navigateOmscsView = useCallback((omscsView: OmscsView) => {
     setSharedState((prev) => {
       const next = { ...prev, omscsView };
-      if (!isHandlingPopstate.current) {
-        window.history.replaceState(next, "", toHash(next));
-      }
+      window.history.replaceState(next, "", toHash(next));
       return next;
     });
   }, []);

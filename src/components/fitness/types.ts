@@ -6,7 +6,14 @@ export interface HealthStats {
   age: number | null;
   gender: "male" | "female" | null;
   activity_level: ActivityLevel | null;
+  calorie_adjustment: number;
 }
+
+export const CALORIE_PRESETS = [
+  { value: -25, label: "Lose", description: "Weight loss" },
+  { value: -10, label: "Recomp", description: "Recomp" },
+  { value: 15, label: "Gain", description: "Muscle gain" },
+] as const;
 
 export interface TDEEResult {
   bmr: number;
@@ -54,4 +61,3 @@ export const ACTIVITY_LEVELS: {
   },
 ];
 
-export const RECOMP_CALORIE_ADJUSTMENT = -500;
