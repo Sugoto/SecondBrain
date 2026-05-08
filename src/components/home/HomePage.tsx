@@ -16,7 +16,7 @@ import { useUserStats } from "@/hooks/useExpenseData";
 import { calculateNetWorth } from "@/components/finances/utils";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { calculateTDEE, formatNumber } from "@/components/fitness/utils";
-import { DailyGoals } from "@/components/home/DailyGoals";
+import { Notes } from "@/components/home/Notes";
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -139,7 +139,7 @@ export function HomePage() {
           </div>
         )}
 
-        <DailyGoals />
+        <Notes />
       </main>
     </div>
   );
