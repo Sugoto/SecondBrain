@@ -1,4 +1,4 @@
-import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { useAssetCurrency } from "@/hooks/usePrivacy";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 interface NetWorthCardProps {
@@ -8,7 +8,7 @@ interface NetWorthCardProps {
 
 export function NetWorthCard({ netWorth, monthlyIncome }: NetWorthCardProps) {
   const dailySalary = monthlyIncome ? Math.round(monthlyIncome / 22) : null;
-  const fmt = useFormatCurrency();
+  const fmt = useAssetCurrency();
 
   return (
     <section className="px-6 pt-6 pb-8">

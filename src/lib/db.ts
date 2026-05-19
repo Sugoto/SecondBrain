@@ -1,5 +1,11 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Transaction, UserStats, ShoppingItem } from "./supabase";
+import type {
+  Transaction,
+  UserStats,
+  ShoppingItem,
+  OmscsCourse,
+  Workout,
+} from "./supabase";
 
 interface CachedTransaction extends Transaction {
   _cachedAt: number;
@@ -10,6 +16,14 @@ interface CachedUserStats extends UserStats {
 }
 
 interface CachedShoppingItem extends ShoppingItem {
+  _cachedAt: number;
+}
+
+interface CachedOmscsCourse extends OmscsCourse {
+  _cachedAt: number;
+}
+
+interface CachedWorkout extends Workout {
   _cachedAt: number;
 }
 
@@ -24,6 +38,8 @@ const db = new Dexie("SecondBrainCache") as Dexie & {
   userStats: EntityTable<CachedUserStats, "id">;
   meta: EntityTable<CacheMeta, "key">;
   shoppingList: EntityTable<CachedShoppingItem, "id">;
+  omscsCourses: EntityTable<CachedOmscsCourse, "id">;
+  workouts: EntityTable<CachedWorkout, "id">;
 };
 
 db.version(1).stores({
@@ -38,6 +54,25 @@ db.version(2).stores({
   userStats: "id, _cachedAt",
   meta: "key, updatedAt",
   shoppingList: "id, _cachedAt",
+});
+
+// Version 3 adds OMSCS courses cache
+db.version(3).stores({
+  transactions: "id, date, category, type, _cachedAt",
+  userStats: "id, _cachedAt",
+  meta: "key, updatedAt",
+  shoppingList: "id, _cachedAt",
+  omscsCourses: "id, code, _cachedAt",
+});
+
+// Version 4 adds workouts cache
+db.version(4).stores({
+  transactions: "id, date, category, type, _cachedAt",
+  userStats: "id, _cachedAt",
+  meta: "key, updatedAt",
+  shoppingList: "id, _cachedAt",
+  omscsCourses: "id, code, _cachedAt",
+  workouts: "id, _cachedAt",
 });
 
 const CACHE_TTL = 5 * 60 * 1000;
@@ -198,5 +233,81 @@ export async function cacheShoppingList(items: ShoppingItem[]): Promise<void> {
     await db.shoppingList.bulkPut(cached);
   } catch (error) {
     console.warn("Failed to cache shopping list:", error);
+  }
+}
+
+/**
+ * Get cached OMSCS courses
+ */
+export async function getCachedOmscsCourses(
+  allowStale = false,
+): Promise<OmscsCourse[] | null> {
+  try {
+    const cached = await db.omscsCourses.toArray();
+    if (cached.length === 0) return null;
+    const oldestCache = Math.min(...cached.map((c) => c._cachedAt));
+    const age = Date.now() - oldestCache;
+    const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
+    if (age > maxAge) return null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return cached.map(({ _cachedAt, ...c }) => c as OmscsCourse);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Store OMSCS courses in cache
+ */
+export async function cacheOmscsCourses(
+  courses: OmscsCourse[],
+): Promise<void> {
+  try {
+    const now = Date.now();
+    const cached: CachedOmscsCourse[] = courses.map((c) => ({
+      ...c,
+      _cachedAt: now,
+    }));
+    await db.omscsCourses.clear();
+    await db.omscsCourses.bulkPut(cached);
+  } catch (error) {
+    console.warn("Failed to cache OMSCS courses:", error);
+  }
+}
+
+/**
+ * Get cached workouts
+ */
+export async function getCachedWorkouts(
+  allowStale = false,
+): Promise<Workout[] | null> {
+  try {
+    const cached = await db.workouts.toArray();
+    if (cached.length === 0) return null;
+    const oldestCache = Math.min(...cached.map((w) => w._cachedAt));
+    const age = Date.now() - oldestCache;
+    const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
+    if (age > maxAge) return null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return cached.map(({ _cachedAt, ...w }) => w as Workout);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Store workouts in cache
+ */
+export async function cacheWorkouts(workouts: Workout[]): Promise<void> {
+  try {
+    const now = Date.now();
+    const cached: CachedWorkout[] = workouts.map((w) => ({
+      ...w,
+      _cachedAt: now,
+    }));
+    await db.workouts.clear();
+    await db.workouts.bulkPut(cached);
+  } catch (error) {
+    console.warn("Failed to cache workouts:", error);
   }
 }

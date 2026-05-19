@@ -6,8 +6,9 @@ import type { HealthView } from "@/types/navigation";
 import { ShoppingList } from "./ShoppingList";
 import { NutritionCard } from "./NutritionCard";
 import { MealPlanner } from "./MealPlanner";
+import { WorkoutsView } from "./WorkoutsView";
 
-const HEALTH_VIEWS = ["nutrition", "shopping"] as const;
+const HEALTH_VIEWS = ["nutrition", "workouts", "shopping"] as const;
 
 interface HealthTrackerProps {
   activeView: HealthView;
@@ -71,6 +72,11 @@ export function HealthTracker({
           {activeView === "nutrition" && (
             <motion.div key="nutrition" {...VIEW_ANIMATION}>
               <NutritionView />
+            </motion.div>
+          )}
+          {activeView === "workouts" && (
+            <motion.div key="workouts" {...VIEW_ANIMATION}>
+              <WorkoutsView />
             </motion.div>
           )}
           {activeView === "shopping" && (

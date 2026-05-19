@@ -1,6 +1,7 @@
 import { useMemo, memo } from "react";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
+import { usePrivacy } from "@/hooks/usePrivacy";
 
 const SALARY_DATA = [
   { label: "Nov 2023", lpa: 11 },
@@ -15,6 +16,7 @@ interface SalaryChartProps {
 }
 
 export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps) {
+  const { hidden } = usePrivacy();
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
     const textColor = isDark ? "oklch(72% 0.01 275)" : "oklch(40% 0.01 275)";
@@ -75,6 +77,8 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
       ],
     };
   }, [theme]);
+
+  if (hidden) return null;
 
   return (
     <section className="px-6 pt-7 pb-8">

@@ -315,10 +315,16 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
             { key: "monthly_income", label: "Monthly Salary" },
           ].map((row) => (
             <Field key={row.key} label={row.label}>
-              <NumberField
-                value={form[row.key as keyof FormState] as number}
-                onChange={setNumber(row.key as keyof FormState)}
-              />
+              {hidden ? (
+                <span className="font-mono tabular-nums text-right text-[14px] text-muted-foreground/60 w-32">
+                  ₹•••
+                </span>
+              ) : (
+                <NumberField
+                  value={form[row.key as keyof FormState] as number}
+                  onChange={setNumber(row.key as keyof FormState)}
+                />
+              )}
             </Field>
           ))}
         </section>

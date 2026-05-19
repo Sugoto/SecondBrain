@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Calculator,
   CalendarDays,
+  Dumbbell,
 } from "lucide-react";
 import type { NavItem } from "./DynamicBottomNav";
 
@@ -29,7 +30,8 @@ export const FINANCE_NAV_ITEMS: NavItem[] = [
 // Health tracker nav items
 export const HEALTH_NAV_ITEMS: NavItem[] = [
   { id: "nutrition", icon: Apple, label: "Nutrition" },
-  { id: "shopping", icon: ShoppingCart, label: "Shopping list" },
+  { id: "workouts", icon: Dumbbell, label: "Workouts" },
+  { id: "shopping", icon: ShoppingCart, label: "Shopping" },
 ];
 
 // OMSCS tracker nav items

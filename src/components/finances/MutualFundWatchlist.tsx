@@ -15,7 +15,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { useMaskedRupee } from "@/hooks/usePrivacy";
+import { useMaskedAssetRupee } from "@/hooks/usePrivacy";
 
 interface FundSectionProps {
   fund: FundWithStats;
@@ -38,7 +38,7 @@ const FundSection = memo(function FundSection({
   const [investAmount, setInvestAmount] = useState("");
   const [investDate, setInvestDate] = useState("");
   const [adding, setAdding] = useState(false);
-  const rupee = useMaskedRupee();
+  const rupee = useMaskedAssetRupee();
 
   const investmentStats = useMemo(() => {
     const totalUnits = investments.reduce((sum, i) => sum + i.units, 0);
@@ -256,7 +256,7 @@ export function MutualFundWatchlist() {
   const { funds, error, isRefetching, refresh, lastUpdated } =
     useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
-  const rupee = useMaskedRupee();
+  const rupee = useMaskedAssetRupee();
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 

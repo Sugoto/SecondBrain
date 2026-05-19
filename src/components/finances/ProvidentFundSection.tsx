@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { UserStats } from "@/lib/supabase";
-import { useMaskedRupee } from "@/hooks/usePrivacy";
+import { useMaskedAssetRupee } from "@/hooks/usePrivacy";
 
 interface ProvidentFundSectionProps {
   userStats: UserStats | null;
@@ -10,7 +10,7 @@ interface ProvidentFundSectionProps {
 }
 
 export function ProvidentFundSection({ userStats }: ProvidentFundSectionProps) {
-  const rupee = useMaskedRupee();
+  const rupee = useMaskedAssetRupee();
   const [isExpanded, setIsExpanded] = useState(false);
   const ppf = userStats?.ppf ?? 0;
   const epf = userStats?.epf ?? 0;

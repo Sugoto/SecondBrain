@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useUserStats } from "@/hooks/useExpenseData";
+import { usePrivacy } from "@/hooks/usePrivacy";
 import { Footer } from "./Footer";
 import { NetWorthCard } from "./NetWorthCard";
 import { WealthDistributionChart } from "./WealthDistributionChart";
@@ -13,6 +14,7 @@ import { calculateNetWorth } from "./utils";
 export function InvestmentsView() {
   const { theme } = useTheme();
   const { userStats } = useUserStats();
+  const { hidden } = usePrivacy();
 
   const netWorth = useMemo(
     () => calculateNetWorth(userStats),
@@ -28,9 +30,11 @@ export function InvestmentsView() {
         netWorth={netWorth}
         monthlyIncome={userStats?.monthly_income ?? null}
       />
-      <div className={divider}>
-        <SalaryChart theme={theme} />
-      </div>
+      {!hidden && (
+        <div className={divider}>
+          <SalaryChart theme={theme} />
+        </div>
+      )}
       <div className={divider}>
         <WealthDistributionChart userStats={userStats} theme={theme} />
       </div>

@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import type { OmscsCourse } from "@/lib/supabase";
+import { getCachedOmscsCourses, cacheOmscsCourses } from "@/lib/db";
+
+// Pre-load cache before React kicks in so the first render is instant
+let cachedCoursesPromise: Promise<OmscsCourse[] | null> | null = null;
+if (typeof window !== "undefined") {
+  cachedCoursesPromise = getCachedOmscsCourses(true);
+}
 
 // Calculate current semester based on date
 function getCurrentSemester(): string {
@@ -32,7 +39,6 @@ export function useOmscsData() {
   // Fetch courses from Supabase
   const fetchCourses = useCallback(async () => {
     try {
-      setLoading(true);
       const { data, error: fetchError } = await supabase
         .from("omscs_courses")
         .select("*")
@@ -41,6 +47,7 @@ export function useOmscsData() {
       if (fetchError) throw fetchError;
       setCourses(data || []);
       setError(null);
+      if (data) cacheOmscsCourses(data);
     } catch (err) {
       console.error("Failed to fetch OMSCS courses:", err);
       setError(err as Error);
@@ -49,8 +56,20 @@ export function useOmscsData() {
     }
   }, []);
 
+  // Hydrate from IndexedDB cache first, then revalidate from network
   useEffect(() => {
-    fetchCourses();
+    let cancelled = false;
+    (async () => {
+      const cached = await (cachedCoursesPromise ?? getCachedOmscsCourses(true));
+      if (!cancelled && cached && cached.length > 0) {
+        setCourses(cached);
+        setLoading(false);
+      }
+      if (!cancelled) fetchCourses();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [fetchCourses]);
 
   const currentSemester = getCurrentSemester();
@@ -85,49 +104,74 @@ export function useOmscsData() {
     [completedCourses]
   );
 
+  // Apply a state change and persist to local cache
+  const applyCourses = useCallback(
+    (updater: (prev: OmscsCourse[]) => OmscsCourse[]) => {
+      setCourses((prev) => {
+        const next = updater(prev);
+        cacheOmscsCourses(next);
+        return next;
+      });
+    },
+    [],
+  );
+
   // Enroll in a course
-  const enrollCourse = useCallback(async (courseId: string, semester: string) => {
-    const { error: updateError } = await supabase
-      .from("omscs_courses")
-      .update({ enrolled_semester: semester })
-      .eq("id", courseId);
+  const enrollCourse = useCallback(
+    async (courseId: string, semester: string) => {
+      const { error: updateError } = await supabase
+        .from("omscs_courses")
+        .update({ enrolled_semester: semester })
+        .eq("id", courseId);
 
-    if (updateError) throw updateError;
+      if (updateError) throw updateError;
 
-    setCourses((prev) =>
-      prev.map((c) => (c.id === courseId ? { ...c, enrolled_semester: semester } : c))
-    );
-  }, []);
+      applyCourses((prev) =>
+        prev.map((c) =>
+          c.id === courseId ? { ...c, enrolled_semester: semester } : c,
+        ),
+      );
+    },
+    [applyCourses],
+  );
 
   // Unenroll from a course
-  const unenrollCourse = useCallback(async (courseId: string) => {
-    const { error: updateError } = await supabase
-      .from("omscs_courses")
-      .update({ enrolled_semester: null, final_grade: null })
-      .eq("id", courseId);
+  const unenrollCourse = useCallback(
+    async (courseId: string) => {
+      const { error: updateError } = await supabase
+        .from("omscs_courses")
+        .update({ enrolled_semester: null, final_grade: null })
+        .eq("id", courseId);
 
-    if (updateError) throw updateError;
+      if (updateError) throw updateError;
 
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === courseId ? { ...c, enrolled_semester: null, final_grade: null } : c
-      )
-    );
-  }, []);
+      applyCourses((prev) =>
+        prev.map((c) =>
+          c.id === courseId
+            ? { ...c, enrolled_semester: null, final_grade: null }
+            : c,
+        ),
+      );
+    },
+    [applyCourses],
+  );
 
   // Set final grade (marks course as completed)
-  const setFinalGrade = useCallback(async (courseId: string, grade: string) => {
-    const { error: updateError } = await supabase
-      .from("omscs_courses")
-      .update({ final_grade: grade })
-      .eq("id", courseId);
+  const setFinalGrade = useCallback(
+    async (courseId: string, grade: string) => {
+      const { error: updateError } = await supabase
+        .from("omscs_courses")
+        .update({ final_grade: grade })
+        .eq("id", courseId);
 
-    if (updateError) throw updateError;
+      if (updateError) throw updateError;
 
-    setCourses((prev) =>
-      prev.map((c) => (c.id === courseId ? { ...c, final_grade: grade } : c))
-    );
-  }, []);
+      applyCourses((prev) =>
+        prev.map((c) => (c.id === courseId ? { ...c, final_grade: grade } : c)),
+      );
+    },
+    [applyCourses],
+  );
 
   // Add a new course
   const addCourse = useCallback(
@@ -153,11 +197,13 @@ export function useOmscsData() {
       if (insertError) throw insertError;
 
       if (data) {
-        setCourses((prev) => [...prev, data].sort((a, b) => a.code.localeCompare(b.code)));
+        applyCourses((prev) =>
+          [...prev, data].sort((a, b) => a.code.localeCompare(b.code)),
+        );
       }
       return data;
     },
-    []
+    [applyCourses],
   );
 
   // Update a course
@@ -179,26 +225,29 @@ export function useOmscsData() {
 
       if (updateError) throw updateError;
 
-      setCourses((prev) =>
+      applyCourses((prev) =>
         prev
           .map((c) => (c.id === courseId ? { ...c, ...updates } : c))
-          .sort((a, b) => a.code.localeCompare(b.code))
+          .sort((a, b) => a.code.localeCompare(b.code)),
       );
     },
-    []
+    [applyCourses],
   );
 
   // Delete a course
-  const deleteCourse = useCallback(async (courseId: string) => {
-    const { error: deleteError } = await supabase
-      .from("omscs_courses")
-      .delete()
-      .eq("id", courseId);
+  const deleteCourse = useCallback(
+    async (courseId: string) => {
+      const { error: deleteError } = await supabase
+        .from("omscs_courses")
+        .delete()
+        .eq("id", courseId);
 
-    if (deleteError) throw deleteError;
+      if (deleteError) throw deleteError;
 
-    setCourses((prev) => prev.filter((c) => c.id !== courseId));
-  }, []);
+      applyCourses((prev) => prev.filter((c) => c.id !== courseId));
+    },
+    [applyCourses],
+  );
 
   return {
     courses,

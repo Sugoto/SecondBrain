@@ -1,5 +1,5 @@
 import { useMemo, memo } from "react";
-import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { useAssetCurrency } from "@/hooks/usePrivacy";
 import type { UserStats } from "@/lib/supabase";
 import { LabeledPieChart } from "@/components/shared";
 
@@ -19,7 +19,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
   userStats,
   theme,
 }: WealthDistributionChartProps) {
-  const formatCurrency = useFormatCurrency();
+  const formatCurrency = useAssetCurrency();
   const pieData = useMemo(() => {
     if (!userStats) return [];
 

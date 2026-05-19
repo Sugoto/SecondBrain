@@ -78,3 +78,12 @@ export type OmscsCourse = {
   details: OmscsCourseDetails | null;
   created_at: string;
 };
+
+export type Workout = {
+  id: string;
+  name: string;
+  max_weight: number;
+  unit: "kg" | "lb";
+  created_at: string;
+  updated_at: string;
+};

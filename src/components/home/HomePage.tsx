@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { User } from "lucide-react";
-import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { useAssetCurrency } from "@/hooks/usePrivacy";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/hooks/useExpenseData";
@@ -21,7 +21,7 @@ const EYEBROW = "text-[10px] uppercase tracking-wider text-muted-foreground";
 export function HomePage() {
   const { navigateToSection } = useAppNavigation();
   const { session } = useAuth();
-  const fmt = useFormatCurrency();
+  const fmt = useAssetCurrency();
   const { userStats } = useUserStats();
 
   const firstName =
