@@ -34,6 +34,6 @@ export const HEALTH_NAV_ITEMS: NavItem[] = [
 
 // OMSCS tracker nav items
 export const OMSCS_NAV_ITEMS: NavItem[] = [
-  { id: "grades", icon: Calculator, label: "Grades" },
+  { id: "grades", icon: Calculator, label: "Courses" },
   { id: "semester", icon: CalendarDays, label: "Semester" },
 ];

@@ -33,7 +33,7 @@ export const TopTabs = memo(function TopTabs({
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
             </button>
-            <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground truncate">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
               {title}
             </span>
           </div>
@@ -54,7 +54,7 @@ export const TopTabs = memo(function TopTabs({
                 type="button"
                 onClick={() => onViewChange(id)}
                 className={cn(
-                  "h-10 text-[10px] uppercase tracking-[0.18em] transition-colors",
+                  "h-10 text-[10px] uppercase tracking-wider transition-colors",
                   isActive
                     ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground",

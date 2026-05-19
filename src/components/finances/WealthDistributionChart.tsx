@@ -57,7 +57,7 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
 
   return (
     <section className="px-6 pt-7 pb-8">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
         Wealth Distribution
       </p>
       <div className="h-44 flex items-center justify-center">

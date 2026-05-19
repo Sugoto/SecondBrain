@@ -266,7 +266,7 @@ export function MealPlanner() {
   return (
     <section className="px-6 pt-7 pb-8">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Weekly Meal Plan
         </span>
         <button
@@ -288,9 +288,9 @@ export function MealPlanner() {
               onClick={() => toggleDay(i)}
               aria-label={DAY_NAMES[i]}
               aria-pressed={active}
-              className={`flex-1 h-9 flex items-center justify-center text-[10px] uppercase tracking-[0.16em] transition-colors border ${
+              className={`flex-1 h-9 flex items-center justify-center text-[10px] uppercase tracking-wider transition-colors border ${
                 active
-                  ? "bg-primary text-primary-foreground border-primary"
+                  ? "bg-foreground text-background border-foreground"
                   : "border-zinc-300 dark:border-zinc-700 text-muted-foreground hover:text-foreground"
               } ${i === 0 ? "rounded-l-md" : ""} ${
                 i === DAY_LABELS.length - 1 ? "rounded-r-md" : ""
@@ -304,7 +304,7 @@ export function MealPlanner() {
 
       <div className="grid grid-cols-2 divide-x divide-outline-variant/60 border-y border-outline-variant/60 mb-5">
         <div className="pr-4 py-3">
-          <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
             Cost target / day
           </p>
           <div className="flex items-baseline gap-1">
@@ -319,7 +319,7 @@ export function MealPlanner() {
           </div>
         </div>
         <div className="pl-4 py-3">
-          <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
             Protein target / day
           </p>
           <div className="flex items-baseline gap-1">
@@ -370,7 +370,7 @@ export function MealPlanner() {
                   <p className="text-[12px] text-foreground">
                     {DAY_NAMES[day]}
                     {isToday && (
-                      <span className="ml-2 text-[9px] uppercase tracking-[0.2em] text-primary">
+                      <span className="ml-2 text-[9px] uppercase tracking-wider text-primary">
                         Today
                       </span>
                     )}

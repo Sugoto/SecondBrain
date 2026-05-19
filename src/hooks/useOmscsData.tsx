@@ -131,12 +131,20 @@ export function useOmscsData() {
 
   // Add a new course
   const addCourse = useCallback(
-    async (course: { code: string; name: string; details?: Record<string, unknown> }) => {
+    async (course: {
+      code: string;
+      name: string;
+      enrolled_semester?: string | null;
+      final_grade?: string | null;
+      details?: Record<string, unknown>;
+    }) => {
       const { data, error: insertError } = await supabase
         .from("omscs_courses")
         .insert({
           code: course.code,
           name: course.name,
+          enrolled_semester: course.enrolled_semester ?? null,
+          final_grade: course.final_grade ?? null,
           details: course.details || null,
         })
         .select()
@@ -154,7 +162,16 @@ export function useOmscsData() {
 
   // Update a course
   const updateCourse = useCallback(
-    async (courseId: string, updates: { code?: string; name?: string; details?: Record<string, unknown> | null }) => {
+    async (
+      courseId: string,
+      updates: {
+        code?: string;
+        name?: string;
+        enrolled_semester?: string | null;
+        final_grade?: string | null;
+        details?: Record<string, unknown> | null;
+      },
+    ) => {
       const { error: updateError } = await supabase
         .from("omscs_courses")
         .update(updates)

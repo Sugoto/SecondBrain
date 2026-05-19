@@ -70,7 +70,7 @@ export const TrendsView = memo(function TrendsView({
     return (
       <div className="max-w-6xl mx-auto px-6 pt-10">
         <div className="py-16 text-center">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
             No transactions
           </p>
           <p className="text-[13px] text-muted-foreground/70">
@@ -112,7 +112,7 @@ export const TrendsView = memo(function TrendsView({
     isFirst: boolean,
   ) => (
     <section className={`px-6 pt-7 pb-2 ${isFirst ? "" : "border-t border-zinc-300 dark:border-zinc-700"}`}>
-      <p className="text-[10px] uppercase tracking-[0.22em] text-foreground mb-4">
+      <p className="text-[10px] uppercase tracking-wider text-foreground mb-4">
         {label}
       </p>
 

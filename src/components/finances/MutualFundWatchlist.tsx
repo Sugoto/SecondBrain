@@ -163,7 +163,7 @@ const FundSection = memo(function FundSection({
                   { label: "5Y", value: fund.fiveYearChangePercent },
                 ].map((p) => (
                   <div key={p.label} className="flex flex-col items-start gap-1 px-2 py-2">
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
                       {p.label}
                     </span>
                     <span
@@ -314,7 +314,7 @@ export function MutualFundWatchlist() {
   if (error && funds.length === 0) {
     return (
       <section className="px-6 pt-7 pb-8">
-        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
           Mutual Funds
         </p>
         <p className="text-[13px] text-muted-foreground mb-3">
@@ -322,7 +322,7 @@ export function MutualFundWatchlist() {
         </p>
         <button
           onClick={refresh}
-          className="text-[11px] uppercase tracking-[0.2em] text-foreground hover:opacity-80 transition-opacity"
+          className="text-[11px] uppercase tracking-wider text-foreground hover:opacity-80 transition-opacity"
         >
           Try again
         </button>
@@ -333,7 +333,7 @@ export function MutualFundWatchlist() {
   return (
     <section className="px-6 pt-7 pb-8">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Mutual Funds
         </p>
         <div className="flex items-center gap-3">

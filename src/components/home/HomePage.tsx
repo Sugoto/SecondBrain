@@ -16,7 +16,7 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-const EYEBROW = "text-[10px] uppercase tracking-[0.22em] text-muted-foreground";
+const EYEBROW = "text-[10px] uppercase tracking-wider text-muted-foreground";
 
 export function HomePage() {
   const { navigateToSection } = useAppNavigation();

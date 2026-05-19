@@ -95,8 +95,8 @@ function fromUserStats(stats: UserStats | null | undefined): FormState {
   };
 }
 
-const EYEBROW = "text-[10px] uppercase tracking-[0.22em] text-muted-foreground";
-const SECTION_LABEL = "text-[10px] uppercase tracking-[0.22em] text-foreground";
+const EYEBROW = "text-[10px] uppercase tracking-wider text-muted-foreground";
+const SECTION_LABEL = "text-[10px] uppercase tracking-wider text-foreground";
 
 type FieldProps = {
   label: string;
@@ -165,7 +165,7 @@ function Segmented<T extends string | number>({
             className={cn(
               "h-9 flex items-center justify-center transition-colors",
               selected
-                ? "bg-primary text-primary-foreground"
+                ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -407,7 +407,7 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
           type="button"
           onClick={handleSave}
           disabled={!isDirty || saving}
-          className="w-full h-12 flex items-center justify-center bg-primary text-primary-foreground text-[13px] uppercase tracking-[0.22em] rounded-lg transition-opacity active:opacity-90 disabled:opacity-30"
+          className="w-full h-12 flex items-center justify-center bg-foreground text-background text-[13px] uppercase tracking-wider rounded-lg transition-opacity active:opacity-90 disabled:opacity-30"
         >
           {saving ? "Saving" : isDirty ? "Save changes" : "No changes to save"}
         </button>

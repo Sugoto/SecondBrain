@@ -78,7 +78,7 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
 
   return (
     <section className="px-6 pt-7 pb-8">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
         Salary Progression
       </p>
       <div className="h-40">

@@ -76,7 +76,7 @@ function SegmentedBudgetBar({
                 } ${isMuted ? "opacity-40" : ""}`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-[9px] uppercase tracking-[0.2em] ${
+                  <span className={`text-[9px] uppercase tracking-wider ${
                     isActive ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     {b.label}
@@ -105,13 +105,13 @@ function SegmentedBudgetBar({
 
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Total</span>
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Total</span>
             <span className="font-mono tabular-nums text-[13px] text-foreground">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Budgeted</span>
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Budgeted</span>
             <span className="font-mono tabular-nums text-[13px] text-foreground">
               {formatCurrency(budgetInfo.needsSpent + budgetInfo.wantsSpent)}
             </span>

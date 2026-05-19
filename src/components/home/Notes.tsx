@@ -14,7 +14,7 @@ export function Notes() {
 
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
         Notes
       </p>
       <textarea

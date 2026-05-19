@@ -51,7 +51,7 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
             className="group flex flex-1 flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-[0.97]"
           >
             <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            <span className="text-[9px] uppercase tracking-[0.2em] leading-none">
+            <span className="text-[9px] uppercase tracking-wider leading-none">
               {label}
             </span>
           </button>

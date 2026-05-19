@@ -94,7 +94,7 @@ function evaluateExpression(expr: string): number | null {
   }
 }
 
-const EYEBROW = "text-[10px] uppercase tracking-[0.22em] text-muted-foreground";
+const EYEBROW = "text-[10px] uppercase tracking-wider text-muted-foreground";
 
 export function TransactionDialog({
   transaction,
@@ -257,7 +257,7 @@ export function TransactionDialog({
                     aria-pressed={isSelected}
                     className={`h-9 border rounded-md flex items-center justify-center transition-colors active:scale-95 ${
                       isSelected
-                        ? "bg-primary text-primary-foreground border-primary"
+                        ? "bg-foreground text-background border-foreground"
                         : "border-outline-variant text-muted-foreground hover:text-foreground hover:border-foreground/30"
                     }`}
                   >
@@ -290,9 +290,9 @@ export function TransactionDialog({
                           onChange({ ...transaction, budget_type: newBudgetType });
                         }}
                         disabled={saving}
-                        className={`h-9 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                        className={`h-9 text-[10px] uppercase tracking-wider transition-colors ${
                           isActive
-                            ? "bg-primary text-primary-foreground"
+                            ? "bg-foreground text-background"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
@@ -345,7 +345,7 @@ export function TransactionDialog({
               onClick={() => setShowAdvanced((s) => !s)}
               className="w-full flex items-center justify-between text-muted-foreground hover:text-foreground transition-colors py-2"
             >
-              <span className="text-[10px] uppercase tracking-[0.22em]">
+              <span className="text-[10px] uppercase">
                 More options
               </span>
               <ChevronDown
@@ -404,7 +404,7 @@ export function TransactionDialog({
                         type="button"
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={saving || deleting}
-                        className="w-full flex items-center justify-center gap-2 h-10 text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 h-10 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                         Delete transaction
@@ -421,14 +421,14 @@ export function TransactionDialog({
           <button
             onClick={onClose}
             disabled={saving || deleting}
-            className="flex-1 h-11 rounded-lg border border-outline-variant text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+            className="flex-1 h-11 rounded-lg border border-outline-variant text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
-            className="flex-1 h-11 rounded-lg bg-primary text-primary-foreground text-[11px] uppercase tracking-[0.2em] transition-opacity active:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
+            className="flex-1 h-11 rounded-lg bg-foreground text-background text-[11px] uppercase tracking-wider transition-opacity active:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
           >
             {saving ? (
               <>
@@ -462,7 +462,7 @@ export function TransactionDialog({
           <AlertDialogFooter className="gap-2 sm:gap-2 mt-5">
             <AlertDialogCancel
               disabled={deleting}
-              className="rounded-lg h-11 px-5 border border-outline-variant bg-transparent text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+              className="rounded-lg h-11 px-5 border border-outline-variant bg-transparent text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
             >
               Cancel
             </AlertDialogCancel>
@@ -472,7 +472,7 @@ export function TransactionDialog({
                 setShowDeleteConfirm(false);
               }}
               disabled={deleting}
-              className="rounded-lg h-11 px-5 bg-destructive text-background text-[11px] uppercase tracking-[0.2em] border-0"
+              className="rounded-lg h-11 px-5 bg-destructive text-background text-[11px] uppercase tracking-wider border-0"
             >
               {deleting ? (
                 <>

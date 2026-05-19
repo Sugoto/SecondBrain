@@ -42,7 +42,7 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
 
   return (
     <section className="px-6 pt-7 pb-8">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-5">
         Cost Calculator
       </p>
 
@@ -60,7 +60,7 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
       </div>
 
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Spread over
         </span>
         <span className="font-mono tabular-nums text-[13px] text-foreground">
@@ -77,9 +77,9 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
               setPeriodMode(mode);
               setSliderValue(1);
             }}
-            className={`h-9 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+            className={`h-9 text-[10px] uppercase tracking-wider transition-colors ${
               periodMode === mode
-                ? "bg-primary text-primary-foreground"
+                ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -109,7 +109,7 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
           { label: "Of daily pay", value: result ? `${result.pctOfDaily.toFixed(1)}%` : "—" },
         ].map((cell, i) => (
           <div key={cell.label} className={`flex flex-col gap-1 ${i === 0 ? "pr-3" : i === 1 ? "px-3" : "pl-3"}`}>
-            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
               {cell.label}
             </span>
             <span className="font-mono tabular-nums text-[15px] text-foreground">

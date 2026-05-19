@@ -13,7 +13,7 @@ export function NetWorthCard({ netWorth, monthlyIncome }: NetWorthCardProps) {
   return (
     <section className="px-6 pt-6 pb-8">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Net Worth
         </span>
         {dailySalary && (

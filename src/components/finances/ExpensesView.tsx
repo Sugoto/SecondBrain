@@ -36,7 +36,7 @@ export const ExpensesView = memo(function ExpensesView({
     return (
       <div className="max-w-6xl mx-auto px-6 pt-10">
         <div className="py-16 text-center">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
             No transactions
           </p>
           <p className="text-[13px] text-muted-foreground/70">

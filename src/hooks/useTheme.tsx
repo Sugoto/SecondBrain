@@ -29,7 +29,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('theme', theme)
 
     // Match the M3 --background token (OKLCH approximation in hex)
-    const themeColor = theme === 'dark' ? '#1d1c20' : '#fafafa'
+    const themeColor = theme === 'dark' ? '#1d1c20' : '#ffffff'
     const metaThemeColor = document.querySelector('meta[name="theme-color"]')
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', themeColor)

@@ -46,7 +46,7 @@ export function LoginScreen() {
           strokeWidth={1.25}
         />
 
-        <p className="text-[10px] uppercase tracking-[0.32em] text-muted-foreground mb-3">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
           SecondBrain
         </p>
 
@@ -72,7 +72,7 @@ export function LoginScreen() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={submitting}
-            className="w-full h-12 flex items-center justify-center gap-3 bg-foreground text-background text-[11px] uppercase tracking-[0.22em] rounded-lg transition-opacity active:opacity-90 disabled:opacity-30"
+            className="w-full h-12 flex items-center justify-center gap-3 bg-foreground text-background text-[11px] uppercase tracking-wider rounded-lg transition-opacity active:opacity-90 disabled:opacity-30"
           >
             <GoogleIcon className="h-4 w-4" />
             {submitting ? "Redirecting" : "Continue with Google"}
@@ -81,7 +81,7 @@ export function LoginScreen() {
       </div>
 
       <footer className="shrink-0 text-center pb-8 pt-4">
-        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
           {CURRENT_YEAR}
           <span className="mx-2 text-muted-foreground/30">·</span>
           <span className="text-muted-foreground">Sugoto Basu</span>

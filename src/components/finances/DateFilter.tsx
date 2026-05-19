@@ -136,7 +136,7 @@ export function DateFilter({
       >
         <div className="p-5 space-y-5 min-w-[280px]">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
               Quick select
             </p>
             <div className="grid grid-cols-3 border-y border-outline-variant divide-x divide-outline-variant">
@@ -147,9 +147,9 @@ export function DateFilter({
                     onTimeFilterChange(filter);
                     setFilterOpen(false);
                   }}
-                  className={`h-9 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                  className={`h-9 text-[10px] uppercase tracking-wider transition-colors ${
                     timeFilter === filter
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-foreground text-background"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -160,7 +160,7 @@ export function DateFilter({
           </div>
 
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
               Recent months
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -168,7 +168,7 @@ export function DateFilter({
                 <button
                   key={month.label}
                   onClick={() => handleMonthSelect(month.date)}
-                  className="h-8 text-[11px] uppercase tracking-[0.16em] border border-outline-variant rounded-full text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                  className="h-8 text-[11px] uppercase tracking-wider border border-outline-variant rounded-full text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                 >
                   {month.shortLabel}
                 </button>
@@ -177,7 +177,7 @@ export function DateFilter({
           </div>
 
           <div className="border-t border-outline-variant/60 pt-4">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
               {pendingRange.from
                 ? `From ${format(pendingRange.from, "d MMM")} — pick end`
                 : "Custom range"}
@@ -195,7 +195,7 @@ export function DateFilter({
             {pendingRange.from && (
               <button
                 onClick={() => setPendingRange({})}
-                className="w-full h-8 mt-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full h-8 mt-3 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
               >
                 Clear selection
               </button>

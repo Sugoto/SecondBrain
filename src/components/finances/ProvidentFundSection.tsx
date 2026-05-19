@@ -23,7 +23,7 @@ export function ProvidentFundSection({ userStats }: ProvidentFundSectionProps) {
 
   return (
     <section className="px-6 pt-7 pb-8">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
         Provident Funds
       </p>
 
@@ -70,7 +70,7 @@ export function ProvidentFundSection({ userStats }: ProvidentFundSectionProps) {
               <div className="grid grid-cols-2 divide-x divide-outline-variant/60">
                 {ppf > 0 && (
                   <div className="flex flex-col gap-1 pr-3">
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
                       PPF
                     </span>
                     <span className="font-mono tabular-nums text-[14px] text-foreground">
@@ -80,7 +80,7 @@ export function ProvidentFundSection({ userStats }: ProvidentFundSectionProps) {
                 )}
                 {epf > 0 && (
                   <div className="flex flex-col gap-1 pl-3">
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
                       EPF
                     </span>
                     <span className="font-mono tabular-nums text-[14px] text-foreground">

@@ -18,7 +18,7 @@ import {
 import { useShoppingList } from "@/hooks/useShoppingList";
 import type { ShoppingItem } from "@/lib/supabase";
 
-const EYEBROW = "text-[10px] uppercase tracking-[0.22em] text-muted-foreground";
+const EYEBROW = "text-[10px] uppercase tracking-wider text-muted-foreground";
 
 interface ItemFormProps {
   open: boolean;
@@ -189,7 +189,7 @@ function ItemForm({
                 type="button"
                 onClick={onDelete}
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 h-10 mt-4 text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 h-10 mt-4 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Delete item
@@ -202,14 +202,14 @@ function ItemForm({
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="flex-1 h-11 rounded-lg border border-outline-variant text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+              className="flex-1 h-11 rounded-lg border border-outline-variant text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!name.trim() || isSubmitting}
-              className="flex-1 h-11 rounded-lg bg-primary text-primary-foreground text-[11px] uppercase tracking-[0.2em] transition-opacity active:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
+              className="flex-1 h-11 rounded-lg bg-foreground text-background text-[11px] uppercase tracking-wider transition-opacity active:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -505,9 +505,9 @@ export function ShoppingList() {
               <button
                 key={mode}
                 onClick={() => setDisplayMode(mode)}
-                className={`h-7 text-[9px] uppercase tracking-[0.16em] transition-colors ${
+                className={`h-7 text-[9px] uppercase tracking-wider transition-colors ${
                   displayMode === mode
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -543,7 +543,7 @@ export function ShoppingList() {
               <p className="font-mono tabular-nums text-[12px] text-foreground leading-none">
                 {cell.value}
               </p>
-              <p className="text-[8px] uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-0.5">
+              <p className="text-[8px] uppercase tracking-wider text-muted-foreground flex items-center gap-0.5">
                 {cell.label}
                 {getSortIndicator(cell.key) ? (
                   <span className="text-foreground">
