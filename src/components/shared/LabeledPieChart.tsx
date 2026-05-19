@@ -156,6 +156,9 @@ export const LabeledPieChart = memo(function LabeledPieChart({
       option={option}
       style={{ width: "100%", height: size }}
       opts={{ renderer: "canvas" }}
+      onChartReady={(chart) => {
+        requestAnimationFrame(() => chart.resize());
+      }}
       notMerge
       lazyUpdate
     />

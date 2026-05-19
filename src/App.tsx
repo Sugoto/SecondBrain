@@ -78,7 +78,7 @@ function AppContent() {
   );
 
   return (
-    <div className="h-[100dvh] bg-background overflow-hidden relative">
+    <div className="h-full bg-background overflow-hidden relative">
       <div className="h-full relative">
         {currentSection === "home" && <HomePage />}
         {currentSection === "omscs" && (

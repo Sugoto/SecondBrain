@@ -90,6 +90,9 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
           option={option}
           style={{ width: "100%", height: "100%" }}
           opts={{ renderer: "canvas" }}
+          onChartReady={(chart) => {
+            requestAnimationFrame(() => chart.resize());
+          }}
           notMerge
           lazyUpdate
         />

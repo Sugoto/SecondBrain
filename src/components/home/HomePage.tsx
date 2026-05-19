@@ -42,20 +42,20 @@ export function HomePage() {
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden bg-background">
-      <header className="flex items-end justify-between px-6 pt-8 pb-2">
-        <div>
-          <p className={`${EYEBROW} mb-2`}>{getGreeting()}</p>
-          <h1 className="font-heading text-[40px] leading-[0.95] tracking-[-0.03em] text-foreground">
+      <header className="px-6 pt-10 pb-5">
+        <p className={`${EYEBROW} mb-2`}>{getGreeting()}</p>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="font-heading text-[40px] leading-[1.1] tracking-[-0.03em] text-foreground min-w-0 truncate">
             {firstName}
           </h1>
+          <button
+            onClick={() => navigateToSection("profile")}
+            aria-label="Open profile"
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          >
+            <User className="h-5 w-5" strokeWidth={1.5} />
+          </button>
         </div>
-        <button
-          onClick={() => navigateToSection("profile")}
-          aria-label="Open profile"
-          className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-        >
-          <User className="h-5 w-5" strokeWidth={1.5} />
-        </button>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-28">

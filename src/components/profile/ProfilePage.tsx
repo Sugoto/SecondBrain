@@ -287,10 +287,10 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
       </header>
 
       <main className="flex-1 overflow-y-auto min-h-0">
-        <section className="px-6 pt-2 pb-8 border-b border-outline-variant">
+        <section className="px-6 pt-4 pb-6 border-b border-outline-variant">
           <p className={`${EYEBROW} mb-3`}>Account</p>
-          <div className="flex items-end justify-between gap-4">
-            <p className="text-[20px] font-heading tracking-[-0.02em] text-foreground truncate">
+          <div className="flex items-center gap-3">
+            <p className="flex-1 min-w-0 text-[15px] text-foreground truncate">
               {email || "Unknown"}
             </p>
             <button
@@ -298,7 +298,7 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
               onClick={handleSignOut}
               disabled={signingOut}
               aria-label="Sign out"
-              className="text-muted-foreground hover:text-destructive transition-colors active:scale-95 disabled:opacity-50"
+              className="text-destructive hover:opacity-80 transition-opacity active:scale-95 disabled:opacity-50 shrink-0"
             >
               <LogOut className="h-4 w-4" strokeWidth={1.5} />
             </button>
@@ -405,10 +405,13 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
           </Field>
         </section>
 
-        <div className="h-32" />
+        <div className="h-32" aria-hidden="true" />
       </main>
 
-      <footer className="shrink-0 px-6 pt-3 pb-5 bg-background border-t border-outline-variant">
+      <footer
+        className="fixed left-0 right-0 bottom-0 z-30 px-6 pt-3 bg-background border-t border-outline-variant"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 1.25rem)" }}
+      >
         <button
           type="button"
           onClick={handleSave}
