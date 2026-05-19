@@ -1,5 +1,4 @@
 import { useMemo, memo } from "react";
-import { motion } from "framer-motion";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import type { UserStats } from "@/lib/supabase";
 import { LabeledPieChart } from "@/components/shared";
@@ -25,10 +24,19 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
     if (!userStats) return [];
 
     const isDark = theme === "dark";
-    // Single-hue indigo ramp: deepest shade first (largest slice), fading out
     const ramp = isDark
-      ? ["#a5b4fc", "#818cf8", "#6366f1", "#4f46e5", "#4338ca"]
-      : ["#3730a3", "#4338ca", "#6366f1", "#818cf8", "#a5b4fc"];
+      ? [
+          "oklch(92% 0.005 275)",
+          "oklch(75% 0.01 275)",
+          "oklch(55% 0.01 275)",
+          "oklch(40% 0.01 275)",
+        ]
+      : [
+          "oklch(15% 0.005 275)",
+          "oklch(35% 0.01 275)",
+          "oklch(55% 0.01 275)",
+          "oklch(75% 0.01 275)",
+        ];
 
     const items = ASSET_CONFIG.map((asset) => ({
       name: asset.label,
@@ -48,22 +56,18 @@ export const WealthDistributionChart = memo(function WealthDistributionChart({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, delay: 0.15 }}
-      className="space-y-2"
-    >
-      <div className="p-3 rounded-2xl border border-outline-variant bg-card">
-        <div className="relative h-40 flex items-center justify-center">
-          <LabeledPieChart
-            data={pieData}
-            theme={theme}
-            formatValue={formatCurrency}
-            size={160}
-          />
-        </div>
+    <section className="px-6 pt-7 pb-8">
+      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
+        Wealth Distribution
+      </p>
+      <div className="h-44 flex items-center justify-center">
+        <LabeledPieChart
+          data={pieData}
+          theme={theme}
+          formatValue={formatCurrency}
+          size={170}
+        />
       </div>
-    </motion.div>
+    </section>
   );
 });

@@ -1,11 +1,4 @@
 import { useMemo } from "react";
-import {
-  Droplet,
-  GlassWater,
-  Beef,
-  Wheat,
-  Leaf,
-} from "lucide-react";
 import { useUserStats } from "@/hooks/useExpenseData";
 import { calculateTDEE, formatNumber } from "./utils";
 
@@ -34,36 +27,51 @@ export function NutritionCard() {
 
   if (!hasHealthData || !tdee) return null;
 
+  const macros = [
+    { value: `${tdee.protein}`, unit: "g", label: "Protein" },
+    { value: `${tdee.carbs}`, unit: "g", label: "Carbs" },
+    { value: `${tdee.fat}`, unit: "g", label: "Fat" },
+    { value: `30`, unit: "g", label: "Fibre" },
+    { value: `${waterLiters}`, unit: "L", label: "Water" },
+  ];
+
   return (
-    <div className="w-full bg-card border border-outline-variant rounded-2xl px-5 py-4 mb-2.5">
-      <div className="flex items-baseline gap-1.5 mb-2">
-        <span className="text-title-l font-mono text-foreground">
+    <section className="px-6 pt-7 pb-8">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Target
+        </span>
+        <span className="font-mono tabular-nums text-[11px] text-muted-foreground/70">
+          TDEE {formatNumber(tdee.tdee)}
+        </span>
+      </div>
+      <div className="flex items-baseline gap-2 mb-6">
+        <span className="font-mono tabular-nums tracking-[-0.04em] text-foreground leading-[0.9] text-[clamp(44px,13vw,64px)]">
           {formatNumber(tdee.targetCalories)}
         </span>
-        <span className="text-label-m text-muted-foreground">kcal</span>
-        <span className="text-label-s font-mono text-muted-foreground line-through">
-          {formatNumber(tdee.tdee)}
+        <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground ml-1">
+          kcal
         </span>
       </div>
 
-      <div className="grid grid-cols-5 gap-1.5">
-        {[
-          { icon: Beef, value: `${tdee.protein}g`, label: "Protein" },
-          { icon: Wheat, value: `${tdee.carbs}g`, label: "Carbs" },
-          { icon: Droplet, value: `${tdee.fat}g`, label: "Fat" },
-          { icon: Leaf, value: "30g", label: "Fibre" },
-          { icon: GlassWater, value: `${waterLiters}L`, label: "Water" },
-        ].map(({ icon: Icon, value, label }) => (
+      <div className="grid grid-cols-5 border-y border-outline-variant/60">
+        {macros.map(({ value, unit, label }, i) => (
           <div
             key={label}
-            className="flex flex-col items-center gap-0.5 py-2 rounded-xl bg-surface-container"
+            className={`flex flex-col gap-1.5 px-2 py-3 ${
+              i > 0 ? "border-l border-outline-variant/60" : ""
+            }`}
           >
-            <Icon className="h-3 w-3 text-muted-foreground" />
-            <p className="text-label-m font-mono text-foreground">{value}</p>
-            <p className="text-label-s text-muted-foreground">{label}</p>
+            <p className="font-mono tabular-nums text-foreground text-[15px] leading-none">
+              {value}
+              <span className="text-muted-foreground/60 text-[11px] ml-0.5">{unit}</span>
+            </p>
+            <p className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground/70">
+              {label}
+            </p>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

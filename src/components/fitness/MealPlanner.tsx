@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { RefreshCw, Beef, IndianRupee } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { RefreshCw } from "lucide-react";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import { useMaskedRupee } from "@/hooks/usePrivacy";
 import type { ShoppingItem } from "@/lib/supabase";
@@ -45,10 +44,7 @@ function shuffle<T>(arr: T[], seed: number): T[] {
   return out;
 }
 
-function maxAchievableProtein(
-  pool: ShoppingItem[],
-  targetCost: number
-): number {
+function maxAchievableProtein(pool: ShoppingItem[], targetCost: number): number {
   const candidates = pool
     .filter((it) => it.protein > 0 && it.weight_grams > 0 && it.cost > 0)
     .map((it) => {
@@ -83,7 +79,7 @@ function fillInOrder(
   ordered: ShoppingItem[],
   targetCost: number,
   targetProtein: number,
-  applyContribCap: boolean
+  applyContribCap: boolean,
 ): PickedItem[] | null {
   let remainingProtein = targetProtein;
   let remainingCost = targetCost;
@@ -102,7 +98,7 @@ function fillInOrder(
       cap,
       gramsForRemainingProtein,
       gramsAffordable,
-      gramsForContribCap
+      gramsForContribCap,
     );
     if (grams < MIN_PER_ITEM_GRAMS) continue;
     allocations.push({ item: it, grams });
@@ -156,7 +152,7 @@ function fillFromPicks(
   fullPool: ShoppingItem[],
   targetCost: number,
   targetProtein: number,
-  seed: number
+  seed: number,
 ): PickedItem[] {
   for (let attempt = 0; attempt < 20; attempt++) {
     const ordered = shuffle(picks, seed * 7919 + attempt + 1);
@@ -183,10 +179,10 @@ function planWeek(
   selectedDays: number[],
   targetCost: number,
   targetProtein: number,
-  seed: number
+  seed: number,
 ): DayPlan[] {
   const usable = pool.filter(
-    (it) => it.protein > 0 && it.weight_grams > 0 && it.cost > 0
+    (it) => it.protein > 0 && it.weight_grams > 0 && it.cost > 0,
   );
   if (usable.length === 0 || selectedDays.length === 0) return [];
 
@@ -220,9 +216,7 @@ function loadSelectedDays(): number[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      return parsed.filter(
-        (n) => typeof n === "number" && n >= 0 && n <= 6
-      );
+      return parsed.filter((n) => typeof n === "number" && n >= 0 && n <= 6);
     }
   } catch {
     /* ignore */
@@ -256,7 +250,7 @@ export function MealPlanner() {
       hasEnough && feasible
         ? planWeek(pool, selectedDays, costTarget, proteinTarget, seed)
         : [],
-    [pool, selectedDays, costTarget, proteinTarget, seed, hasEnough, feasible]
+    [pool, selectedDays, costTarget, proteinTarget, seed, hasEnough, feasible],
   );
 
   const reroll = useCallback(() => setSeed((s) => s + 1), []);
@@ -265,24 +259,26 @@ export function MealPlanner() {
 
   const toggleDay = (day: number) => {
     setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-title-s text-foreground">Weekly Meal Planner</h3>
+    <section className="px-6 pt-7 pb-8">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Weekly Meal Plan
+        </span>
         <button
           onClick={reroll}
           aria-label="Re-roll week"
-          className="h-8 w-8 rounded-full flex items-center justify-center bg-surface-container text-foreground active:scale-95 transition-transform"
+          className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
-          <RefreshCw className="h-3.5 w-3.5" />
+          <RefreshCw className="h-3.5 w-3.5" strokeWidth={1.5} />
         </button>
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center mb-5">
         {DAY_LABELS.map((letter, i) => {
           const active = selectedDays.includes(i);
           return (
@@ -292,11 +288,13 @@ export function MealPlanner() {
               onClick={() => toggleDay(i)}
               aria-label={DAY_NAMES[i]}
               aria-pressed={active}
-              className={`flex-1 h-8 rounded-full flex items-center justify-center text-label-m transition-colors active:scale-95 ${
+              className={`flex-1 h-9 flex items-center justify-center text-[10px] uppercase tracking-[0.16em] transition-colors border ${
                 active
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-surface-container text-muted-foreground"
-              }`}
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-zinc-300 dark:border-zinc-700 text-muted-foreground hover:text-foreground"
+              } ${i === 0 ? "rounded-l-md" : ""} ${
+                i === DAY_LABELS.length - 1 ? "rounded-r-md" : ""
+              } ${i > 0 ? "-ml-px" : ""}`}
             >
               {letter}
             </button>
@@ -304,47 +302,53 @@ export function MealPlanner() {
         })}
       </div>
 
-      <div className="rounded-2xl border border-outline-variant bg-card px-4 py-3 grid grid-cols-2 gap-2">
-        <div className="space-y-1">
-          <label className="text-label-m text-muted-foreground flex items-center gap-1">
-            <IndianRupee className="h-3 w-3" /> Cost target
-          </label>
-          <Input
-            type="number"
-            inputMode="numeric"
-            value={costTarget}
-            onChange={(e) => setCostTarget(parseInt(e.target.value) || 0)}
-            className="font-mono h-9 text-body-m bg-surface-container border-0 rounded-lg px-3"
-          />
+      <div className="grid grid-cols-2 divide-x divide-outline-variant/60 border-y border-outline-variant/60 mb-5">
+        <div className="pr-4 py-3">
+          <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+            Cost target / day
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-muted-foreground text-[12px]">₹</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={costTarget}
+              onChange={(e) => setCostTarget(parseInt(e.target.value) || 0)}
+              className="font-mono tabular-nums text-[18px] text-foreground bg-transparent outline-none w-full"
+            />
+          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-label-m text-muted-foreground flex items-center gap-1">
-            <Beef className="h-3 w-3" /> Protein target
-          </label>
-          <Input
-            type="number"
-            inputMode="numeric"
-            value={proteinTarget}
-            onChange={(e) => setProteinTarget(parseInt(e.target.value) || 0)}
-            className="font-mono h-9 text-body-m bg-surface-container border-0 rounded-lg px-3"
-          />
+        <div className="pl-4 py-3">
+          <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+            Protein target / day
+          </p>
+          <div className="flex items-baseline gap-1">
+            <input
+              type="number"
+              inputMode="numeric"
+              value={proteinTarget}
+              onChange={(e) => setProteinTarget(parseInt(e.target.value) || 0)}
+              className="font-mono tabular-nums text-[18px] text-foreground bg-transparent outline-none w-full"
+            />
+            <span className="text-muted-foreground text-[12px]">g</span>
+          </div>
         </div>
       </div>
 
       {!hasEnough ? (
-        <p className="text-label-s text-muted-foreground py-3 text-center">
+        <p className="text-[12px] text-muted-foreground/80 py-4 text-center">
           Select at least {MIN_PICKS} items in your shopping list to plan a meal.
         </p>
       ) : !feasible ? (
-        <p className="text-label-s text-muted-foreground py-3 text-center">
-          Can't reach {proteinTarget}g protein under {rupee(costTarget, { maximumFractionDigits: 0 })} with one daily serving each. Raise the cost, lower the protein, or add more food.
+        <p className="text-[12px] text-muted-foreground/80 py-4 text-center">
+          Can't reach {proteinTarget}g protein under {rupee(costTarget, { maximumFractionDigits: 0 })} per day. Raise the cost, lower the protein, or add more food.
         </p>
       ) : selectedDays.length === 0 ? (
-        <p className="text-label-s text-muted-foreground py-3 text-center">
+        <p className="text-[12px] text-muted-foreground/80 py-4 text-center">
           Pick the days you'll eat at home.
         </p>
       ) : (
-        <div className="space-y-2">
+        <div>
           {week.map(({ day, plan }) => {
             const totals = plan.reduce(
               (acc, p) => ({
@@ -352,54 +356,51 @@ export function MealPlanner() {
                 protein: acc.protein + p.protein,
                 cost: acc.cost + p.cost,
               }),
-              { calories: 0, protein: 0, cost: 0 }
+              { calories: 0, protein: 0, cost: 0 },
             );
             const isToday = day === todayIndex;
             return (
               <div
                 key={day}
-                className={`rounded-2xl px-4 py-3 space-y-1.5 transition-colors ${
-                  isToday
-                    ? "bg-primary-container"
-                    : "border border-outline-variant bg-card opacity-70"
+                className={`py-4 border-b border-outline-variant/60 last:border-b-0 ${
+                  !isToday ? "opacity-60" : ""
                 }`}
               >
-                <p className="text-label-l text-foreground">
-                  {DAY_NAMES[day]}
-                  {isToday && (
-                    <span className="ml-2 text-label-s text-muted-foreground">Today</span>
-                  )}
-                </p>
+                <div className="flex items-baseline justify-between mb-2">
+                  <p className="text-[12px] text-foreground">
+                    {DAY_NAMES[day]}
+                    {isToday && (
+                      <span className="ml-2 text-[9px] uppercase tracking-[0.2em] text-primary">
+                        Today
+                      </span>
+                    )}
+                  </p>
+                  <span className="font-mono tabular-nums text-[11px] text-muted-foreground/70">
+                    {totals.calories} kcal · {totals.protein}g · {rupee(totals.cost, { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
                 {plan.length > 0 && (
-                  <>
+                  <div className="space-y-1.5">
                     {plan.map(({ item, grams, protein, cost }) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between gap-2 px-1"
+                        className="flex items-center justify-between gap-2"
                       >
-                        <span className="text-body-s text-foreground truncate flex-1">
+                        <span className="text-[12px] text-foreground truncate flex-1">
                           {item.name}
                         </span>
-                        <span className="font-mono text-label-s text-muted-foreground shrink-0">
+                        <span className="font-mono tabular-nums text-[10px] text-muted-foreground shrink-0">
                           {grams}g · {protein}g · {rupee(cost, { maximumFractionDigits: 0 })}
                         </span>
                       </div>
                     ))}
-                    <div className="pt-1.5 border-t border-outline-variant">
-                      <div className="flex items-center justify-between gap-2 px-1">
-                        <span className="text-body-s text-foreground flex-1">Total</span>
-                        <span className="font-mono text-label-s text-muted-foreground shrink-0">
-                          {totals.calories} kcal · {totals.protein}g · {rupee(totals.cost, { maximumFractionDigits: 0 })}
-                        </span>
-                      </div>
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
             );
           })}
         </div>
       )}
-    </div>
+    </section>
   );
 }

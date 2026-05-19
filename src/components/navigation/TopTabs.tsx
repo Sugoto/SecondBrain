@@ -21,41 +21,50 @@ export const TopTabs = memo(function TopTabs({
   rightContent,
 }: TopTabsProps) {
   return (
-    <div className="flex h-[72px] flex-col px-4 pt-2 pb-1.5">
-      <div className="mb-1.5 flex min-h-8 items-center gap-2">
-        <button
-          type="button"
-          onClick={onGoHome}
-          aria-label="Back to home"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors active:scale-95"
-        >
-          <ChevronLeft className="h-4 w-4 text-foreground" />
-        </button>
-
-        <h1 className="flex-1 text-title-m text-foreground truncate">{title}</h1>
-
-        {rightContent}
+    <div className="bg-background">
+      <div className="px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between gap-3 h-8">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={onGoHome}
+              aria-label="Back to home"
+              className="text-muted-foreground hover:text-foreground transition-colors active:scale-95 shrink-0"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground truncate">
+              {title}
+            </span>
+          </div>
+          {rightContent && <div className="shrink-0">{rightContent}</div>}
+        </div>
       </div>
 
-      <div className="flex items-center bg-surface-container rounded-full p-0.5">
-        {navItems.map(({ id, label }) => {
-          const isActive = activeView === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onViewChange(id)}
-              className={cn(
-                "flex-1 rounded-full px-2 py-1 text-label-m transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
-              )}
-            >
-              {label}
-            </button>
-          );
-        })}
+      <div className="border-t border-zinc-300 dark:border-zinc-700">
+        <div
+          className="grid divide-x divide-zinc-300 dark:divide-zinc-700"
+          style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+        >
+          {navItems.map(({ id, label }) => {
+            const isActive = activeView === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onViewChange(id)}
+                className={cn(
+                  "h-10 text-[10px] uppercase tracking-[0.18em] transition-colors",
+                  isActive
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -48,87 +48,71 @@ function SegmentedBudgetBar({
     budgetInfo.wantsBudget > 0
       ? (budgetInfo.wantsSpent / budgetInfo.wantsBudget) * 100
       : 0;
-
   const needsPercent =
     budgetInfo.needsBudget > 0
       ? (budgetInfo.needsSpent / budgetInfo.needsBudget) * 100
       : 0;
 
   return (
-    <div className="sticky top-0 z-30 px-4 md:px-5 pt-1.5">
-      <div className="max-w-6xl mx-auto p-2 rounded-xl bg-surface-container-low border border-outline-variant">
-        <div className="grid grid-cols-2 gap-1.5 mb-1.5">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onBudgetTypeFilterChange(budgetTypeFilter === "need" ? null : "need");
-            }}
-            className={`w-full space-y-1 rounded-lg p-1.5 transition-colors ${
-              budgetTypeFilter === "want"
-                ? "opacity-40"
-                : budgetTypeFilter === "need"
-                  ? "bg-secondary-container"
-                  : ""
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-label-s text-foreground">Needs</span>
-              <span className="font-mono text-label-s text-foreground">
-                {formatCurrency(budgetInfo.needsSpent)}
-              </span>
-            </div>
-            <div className="relative h-1 rounded-full overflow-hidden bg-surface-container">
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: Math.min(needsPercent, 100) / 100 }}
-                transition={{ type: "spring", stiffness: 380, damping: 27 }}
-                style={{ transformOrigin: "left" }}
-                className="h-full bg-primary"
-              />
-            </div>
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onBudgetTypeFilterChange(budgetTypeFilter === "want" ? null : "want");
-            }}
-            className={`w-full space-y-1 rounded-lg p-1.5 transition-colors ${
-              budgetTypeFilter === "need"
-                ? "opacity-40"
-                : budgetTypeFilter === "want"
-                  ? "bg-tertiary-container"
-                  : ""
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-label-s text-foreground">Wants</span>
-              <span className="font-mono text-label-s text-foreground">
-                {formatCurrency(budgetInfo.wantsSpent)}
-              </span>
-            </div>
-            <div className="relative h-1 rounded-full overflow-hidden bg-surface-container">
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: Math.min(wantsPercent, 100) / 100 }}
-                transition={{ type: "spring", stiffness: 380, damping: 27, delay: 0.05 }}
-                style={{ transformOrigin: "left" }}
-                className="h-full bg-tertiary"
-              />
-            </div>
-          </button>
+    <div className="sticky top-0 z-30 bg-background border-y border-zinc-300 dark:border-zinc-700">
+      <div className="max-w-6xl mx-auto px-6 pt-3 pb-3">
+        <div className="grid grid-cols-2 divide-x divide-outline-variant/60 mb-3">
+          {[
+            { type: "need" as const, label: "Needs", spent: budgetInfo.needsSpent, percent: needsPercent },
+            { type: "want" as const, label: "Wants", spent: budgetInfo.wantsSpent, percent: wantsPercent },
+          ].map((b, i) => {
+            const isActive = budgetTypeFilter === b.type;
+            const isMuted = budgetTypeFilter && budgetTypeFilter !== b.type;
+            const isOver = b.percent > 100;
+            return (
+              <button
+                key={b.type}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onBudgetTypeFilterChange(isActive ? null : b.type);
+                }}
+                className={`text-left transition-opacity ${
+                  i === 0 ? "pr-4" : "pl-4"
+                } ${isMuted ? "opacity-40" : ""}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[9px] uppercase tracking-[0.2em] ${
+                    isActive ? "text-foreground" : "text-muted-foreground"
+                  }`}>
+                    {b.label}
+                  </span>
+                  <span
+                    className={`font-mono tabular-nums text-[12px] ${
+                      isOver ? "text-destructive" : "text-foreground"
+                    }`}
+                  >
+                    {formatCurrency(b.spent)}
+                  </span>
+                </div>
+                <div className="h-[2px] rounded-full overflow-hidden bg-outline-variant/40">
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: Math.min(b.percent, 100) / 100 }}
+                    transition={{ duration: 0.4, ease: [0.2, 0, 0, 1], delay: i * 0.05 }}
+                    style={{ transformOrigin: "left" }}
+                    className={`h-full ${isOver ? "bg-destructive" : "bg-foreground"}`}
+                  />
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex items-center justify-between px-1.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-label-s text-muted-foreground">Total</span>
-            <span className="font-mono text-label-m text-foreground">
+        <div className="flex items-center justify-between">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Total</span>
+            <span className="font-mono tabular-nums text-[13px] text-foreground">
               {formatCurrency(totalExpenses)}
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-label-s text-muted-foreground">Budgeted</span>
-            <span className="font-mono text-label-m text-foreground">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Budgeted</span>
+            <span className="font-mono tabular-nums text-[13px] text-foreground">
               {formatCurrency(budgetInfo.needsSpent + budgetInfo.wantsSpent)}
             </span>
           </div>
@@ -352,7 +336,7 @@ export function FinanceTracker({
 
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden">
-      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20 vercel-header pb-3">
+      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20 bg-background border-b border-zinc-300 dark:border-zinc-700">
         <div className="max-w-6xl mx-auto">
           <TopTabs
             navItems={FINANCE_NAV_ITEMS}
@@ -376,7 +360,7 @@ export function FinanceTracker({
       </header>
 
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-4 md:pb-0 pt-[88px] md:pt-0"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-28 md:pb-0 pt-[112px] md:pt-0"
         {...swipeHandlers}
       >
         {activeView === "expenses" && (
@@ -438,10 +422,10 @@ export function FinanceTracker({
             transition={{ type: "spring", stiffness: 700, damping: 32 }}
             whileTap={{ scale: 0.92 }}
             onClick={openAddExpense}
-            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-14 w-14 rounded-2xl bg-primary-container text-on-primary-container"
+            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-12 w-12 rounded-full bg-foreground text-background shadow-lg shadow-foreground/20"
             aria-label="Add expense"
           >
-            <Plus className="h-6 w-6" />
+            <Plus className="h-5 w-5" strokeWidth={1.5} />
           </motion.button>
         )}
       </AnimatePresence>

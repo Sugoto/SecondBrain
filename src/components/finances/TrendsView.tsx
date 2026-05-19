@@ -1,10 +1,6 @@
 import { useMemo, memo } from "react";
 import type { Transaction } from "@/lib/supabase";
-import { motion } from "framer-motion";
-import {
-  EXPENSE_CATEGORIES,
-  getCategoryColor,
-} from "./constants";
+import { EXPENSE_CATEGORIES } from "./constants";
 import { CategoryCard } from "./CategoryCard";
 import { Footer } from "./Footer";
 import type { CategoryTotal, CategoryTotalsByBudgetType } from "./utils";
@@ -32,42 +28,38 @@ export const TrendsView = memo(function TrendsView({
 
   const needsPieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
-      (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
+      (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0,
     ).map((cat) => ({
       name: cat.name,
       value: categoryTotalsByBudgetType.needs[cat.name].total,
-      color: getCategoryColor(cat.name),
+      color: undefined,
     }));
-
     if (categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0) {
       data.push({
         name: "Other",
         value: categoryTotalsByBudgetType.needs["Uncategorized"].total,
-        color: "#94a3b8",
+        color: undefined,
       });
     }
-
-    return data;
+    return data.sort((a, b) => b.value - a.value);
   }, [categoryTotalsByBudgetType]);
 
   const wantsPieData = useMemo(() => {
     const data = EXPENSE_CATEGORIES.filter(
-      (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
+      (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0,
     ).map((cat) => ({
       name: cat.name,
       value: categoryTotalsByBudgetType.wants[cat.name].total,
-      color: getCategoryColor(cat.name),
+      color: undefined,
     }));
-
     if (categoryTotalsByBudgetType.wants["Uncategorized"]?.count > 0) {
       data.push({
         name: "Other",
         value: categoryTotalsByBudgetType.wants["Uncategorized"].total,
-        color: "#94a3b8",
+        color: undefined,
       });
     }
-
-    return data;
+    return data.sort((a, b) => b.value - a.value);
   }, [categoryTotalsByBudgetType]);
 
   const hasCategories =
@@ -76,181 +68,129 @@ export const TrendsView = memo(function TrendsView({
 
   if (!hasCategories) {
     return (
-      <div className="max-w-6xl mx-auto p-4 md:p-5 pt-3 space-y-3">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="p-6 text-center rounded-xl border border-dashed border-border bg-card">
-            <p className="text-xs font-medium text-muted-foreground">
-              No transactions for this period
-            </p>
-          </div>
-        </motion.div>
+      <div className="max-w-6xl mx-auto px-6 pt-10">
+        <div className="py-16 text-center">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+            No transactions
+          </p>
+          <p className="text-[13px] text-muted-foreground/70">
+            Nothing recorded for this period yet.
+          </p>
+        </div>
         <Footer />
       </div>
     );
   }
 
   const needsCategories = EXPENSE_CATEGORIES.filter(
-    (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0
+    (cat) => categoryTotalsByBudgetType.needs[cat.name]?.count > 0,
   ).sort(
     (a, b) =>
       (categoryTotalsByBudgetType.needs[b.name]?.total ?? 0) -
-      (categoryTotalsByBudgetType.needs[a.name]?.total ?? 0)
+      (categoryTotalsByBudgetType.needs[a.name]?.total ?? 0),
   );
 
   const wantsCategories = EXPENSE_CATEGORIES.filter(
-    (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0
+    (cat) => categoryTotalsByBudgetType.wants[cat.name]?.count > 0,
   ).sort(
     (a, b) =>
       (categoryTotalsByBudgetType.wants[b.name]?.total ?? 0) -
-      (categoryTotalsByBudgetType.wants[a.name]?.total ?? 0)
+      (categoryTotalsByBudgetType.wants[a.name]?.total ?? 0),
   );
 
-  const hasNeedsUncategorized = categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0;
-  const hasWantsUncategorized = categoryTotalsByBudgetType.wants["Uncategorized"]?.count > 0;
+  const hasNeedsUncategorized =
+    categoryTotalsByBudgetType.needs["Uncategorized"]?.count > 0;
+  const hasWantsUncategorized =
+    categoryTotalsByBudgetType.wants["Uncategorized"]?.count > 0;
+
+  const renderSection = (
+    label: string,
+    pieData: { name: string; value: number; color?: string }[],
+    categories: typeof EXPENSE_CATEGORIES,
+    bucket: "needs" | "wants",
+    hasUncategorized: boolean,
+    isFirst: boolean,
+  ) => (
+    <section className={`px-6 pt-7 pb-2 ${isFirst ? "" : "border-t border-zinc-300 dark:border-zinc-700"}`}>
+      <p className="text-[10px] uppercase tracking-[0.22em] text-foreground mb-4">
+        {label}
+      </p>
+
+      {pieData.length > 0 && (
+        <div className="h-44 flex items-center justify-center mb-4">
+          <LabeledPieChart
+            data={pieData}
+            theme={theme}
+            formatValue={formatCurrency}
+            size={170}
+          />
+        </div>
+      )}
+
+      <div className="divide-y divide-zinc-300 dark:divide-zinc-700">
+        {categories.map((cat, index) => {
+          const data = categoryTotalsByBudgetType[bucket][cat.name];
+          const key = `${bucket === "needs" ? "need" : "want"}-${cat.name}`;
+          return (
+            <CategoryCard
+              key={key}
+              name={cat.name}
+              icon={cat.icon}
+              total={data.total}
+              count={data.count}
+              transactions={data.transactions}
+              isExpanded={expandedCategory === key}
+              onToggle={() =>
+                onToggleCategory(expandedCategory === key ? null : key)
+              }
+              onTransactionClick={onTransactionClick}
+              index={index}
+            />
+          );
+        })}
+
+        {hasUncategorized && (
+          <CategoryCard
+            name={`Uncategorized (${label})`}
+            icon={null}
+            total={categoryTotalsByBudgetType[bucket]["Uncategorized"].total}
+            count={categoryTotalsByBudgetType[bucket]["Uncategorized"].count}
+            transactions={
+              categoryTotalsByBudgetType[bucket]["Uncategorized"].transactions
+            }
+            isExpanded={
+              expandedCategory === `${bucket === "needs" ? "need" : "want"}-Uncategorized`
+            }
+            onToggle={() =>
+              onToggleCategory(
+                expandedCategory ===
+                  `${bucket === "needs" ? "need" : "want"}-Uncategorized`
+                  ? null
+                  : `${bucket === "needs" ? "need" : "want"}-Uncategorized`,
+              )
+            }
+            onTransactionClick={onTransactionClick}
+            index={EXPENSE_CATEGORIES.length}
+          />
+        )}
+      </div>
+    </section>
+  );
+
+  const showNeeds =
+    needsPieData.length > 0 || needsCategories.length > 0 || hasNeedsUncategorized;
+  const showWants =
+    wantsPieData.length > 0 || wantsCategories.length > 0 || hasWantsUncategorized;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-5 pt-3 space-y-3">
-      {/* === NEEDS SECTION === */}
-      {(needsPieData.length > 0 || needsCategories.length > 0 || hasNeedsUncategorized) && (
-        <div className="space-y-2">
-          <h3 className="text-title-s text-foreground">
-            Needs
-          </h3>
-
-          {needsPieData.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="p-3 rounded-2xl border border-outline-variant bg-card">
-                <div className="h-40 flex items-center justify-center">
-                  <LabeledPieChart
-                    data={needsPieData}
-                    theme={theme}
-                    formatValue={formatCurrency}
-                    size={160}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {needsCategories.map((cat, index) => {
-            const data = categoryTotalsByBudgetType.needs[cat.name];
-            return (
-              <CategoryCard
-                key={`need-${cat.name}`}
-                name={cat.name}
-                icon={cat.icon}
-                total={data.total}
-                count={data.count}
-                transactions={data.transactions}
-                isExpanded={expandedCategory === `need-${cat.name}`}
-                onToggle={() =>
-                  onToggleCategory(
-                    expandedCategory === `need-${cat.name}` ? null : `need-${cat.name}`
-                  )
-                }
-                onTransactionClick={onTransactionClick}
-                index={index}
-              />
-            );
-          })}
-
-          {hasNeedsUncategorized && (
-            <CategoryCard
-              name="Uncategorized (Needs)"
-              icon={null}
-              total={categoryTotalsByBudgetType.needs["Uncategorized"].total}
-              count={categoryTotalsByBudgetType.needs["Uncategorized"].count}
-              transactions={categoryTotalsByBudgetType.needs["Uncategorized"].transactions}
-              isExpanded={expandedCategory === "need-Uncategorized"}
-              onToggle={() =>
-                onToggleCategory(
-                  expandedCategory === "need-Uncategorized" ? null : "need-Uncategorized"
-                )
-              }
-              onTransactionClick={onTransactionClick}
-              index={EXPENSE_CATEGORIES.length}
-            />
-          )}
-        </div>
-      )}
-
-      {/* === WANTS SECTION === */}
-      {(wantsPieData.length > 0 || wantsCategories.length > 0 || hasWantsUncategorized) && (
-        <div className="space-y-2">
-          <h3 className="text-title-s text-foreground">
-            Wants
-          </h3>
-
-          {wantsPieData.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <div className="p-3 rounded-2xl border border-outline-variant bg-card">
-                <div className="h-40 flex items-center justify-center">
-                  <LabeledPieChart
-                    data={wantsPieData}
-                    theme={theme}
-                    formatValue={formatCurrency}
-                    size={160}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {wantsCategories.map((cat, index) => {
-            const data = categoryTotalsByBudgetType.wants[cat.name];
-            return (
-              <CategoryCard
-                key={`want-${cat.name}`}
-                name={cat.name}
-                icon={cat.icon}
-                total={data.total}
-                count={data.count}
-                transactions={data.transactions}
-                isExpanded={expandedCategory === `want-${cat.name}`}
-                onToggle={() =>
-                  onToggleCategory(
-                    expandedCategory === `want-${cat.name}` ? null : `want-${cat.name}`
-                  )
-                }
-                onTransactionClick={onTransactionClick}
-                index={index}
-              />
-            );
-          })}
-
-          {hasWantsUncategorized && (
-            <CategoryCard
-              name="Uncategorized (Wants)"
-              icon={null}
-              total={categoryTotalsByBudgetType.wants["Uncategorized"].total}
-              count={categoryTotalsByBudgetType.wants["Uncategorized"].count}
-              transactions={categoryTotalsByBudgetType.wants["Uncategorized"].transactions}
-              isExpanded={expandedCategory === "want-Uncategorized"}
-              onToggle={() =>
-                onToggleCategory(
-                  expandedCategory === "want-Uncategorized" ? null : "want-Uncategorized"
-                )
-              }
-              onTransactionClick={onTransactionClick}
-              index={EXPENSE_CATEGORIES.length + 1}
-            />
-          )}
-        </div>
-      )}
-
-      <Footer />
+    <div className="max-w-6xl mx-auto">
+      {showNeeds &&
+        renderSection("Needs", needsPieData, needsCategories, "needs", hasNeedsUncategorized, true)}
+      {showWants &&
+        renderSection("Wants", wantsPieData, wantsCategories, "wants", hasWantsUncategorized, showNeeds)}
+      <div className="px-6 pt-6">
+        <Footer />
+      </div>
     </div>
   );
 });

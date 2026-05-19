@@ -44,7 +44,7 @@ export function calculateTDEE(
     tdee * (1 + stats.calorie_adjustment / 100),
   );
 
-  const protein = Math.round(weight_kg * 1.6);
+  const protein = Math.round(weight_kg * 1.8);
   const proteinCalories = protein * 4;
 
   const fat = Math.round((targetCalories * 0.3) / 9);

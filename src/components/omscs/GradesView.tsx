@@ -1,97 +1,95 @@
-import { Award } from "lucide-react";
 import { useOmscsData } from "@/hooks/useOmscsData";
 
 export function GradesView() {
   const { completedCourses, cumulativeGPA } = useOmscsData();
 
   return (
-    <div className="p-4 space-y-3">
-      <div className="px-4 py-3 rounded-2xl border border-outline-variant bg-card">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
-              <Award className="h-3.5 w-3.5 text-foreground" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-label-m text-muted-foreground">
-                Cumulative GPA
-              </p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold font-mono text-foreground">
-                  {cumulativeGPA.toFixed(2)}
-                </span>
-                <span className="text-[10px] text-muted-foreground">/ 4.0</span>
-              </div>
+    <div>
+      <section className="px-6 pt-6 pb-8">
+        <div className="grid grid-cols-2 divide-x divide-outline-variant/60 border-b border-outline-variant/60 pb-6">
+          <div className="pr-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+              Cumulative GPA
+            </p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-mono tabular-nums tracking-[-0.03em] text-foreground text-[44px] leading-none">
+                {cumulativeGPA.toFixed(2)}
+              </span>
+              <span className="text-[11px] text-muted-foreground/70">/ 4.0</span>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-label-m text-muted-foreground">
+          <div className="pl-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
               Completed
             </p>
-            <p className="text-lg font-bold font-mono text-foreground">
-              {completedCourses.length}/10
-            </p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-mono tabular-nums tracking-[-0.03em] text-foreground text-[44px] leading-none">
+                {completedCourses.length}
+              </span>
+              <span className="text-[11px] text-muted-foreground/70">/ 10</span>
+            </div>
           </div>
         </div>
 
         {completedCourses.length > 0 && (
-          <div className="mt-3 grid grid-cols-5 gap-1.5">
-            {completedCourses.map((course) => (
+          <div className="grid grid-cols-5 mt-6">
+            {completedCourses.map((course, i) => (
               <div
                 key={course.id}
-                className="p-1.5 rounded-lg text-center bg-muted border border-border"
+                className={`flex flex-col items-start gap-1 px-2 py-2 ${
+                  i > 0 ? "border-l border-outline-variant/60" : ""
+                }`}
               >
-                <p className="text-xs font-mono font-bold text-foreground">
+                <p className="font-mono tabular-nums text-[14px] text-foreground leading-none">
                   {course.final_grade}
                 </p>
-                <p className="text-[8px] truncate text-muted-foreground font-medium">
+                <p className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground/80 truncate">
                   {course.code}
                 </p>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      {completedCourses.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-title-s text-foreground">
-            Completed Courses
-          </h3>
+      {completedCourses.length > 0 ? (
+        <section className="px-6 pt-7 pb-8 border-t border-outline-variant">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
+            Course history
+          </p>
           {completedCourses.map((course) => (
             <div
               key={course.id}
-              className="px-3 py-2 rounded-2xl border border-outline-variant bg-card"
+              className="flex items-center justify-between gap-4 py-3 border-b border-outline-variant/60 last:border-b-0"
             >
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <p className="font-bold text-xs truncate text-foreground">
-                    {course.code}
-                  </p>
-                  <p className="text-[10px] truncate text-muted-foreground font-medium">
-                    {course.name}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] font-medium text-muted-foreground">
-                    {course.enrolled_semester}
-                  </span>
-                  <span className="inline-flex items-center text-xs font-mono font-semibold text-foreground bg-muted px-2 py-0.5 rounded-full border border-border">
-                    {course.final_grade}
-                  </span>
-                </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] text-foreground truncate">
+                  {course.code}
+                </p>
+                <p className="text-[11px] text-muted-foreground/70 truncate">
+                  {course.name}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="font-mono tabular-nums text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {course.enrolled_semester}
+                </span>
+                <span className="font-mono tabular-nums text-[14px] text-foreground">
+                  {course.final_grade}
+                </span>
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {completedCourses.length === 0 && (
-        <div className="text-center py-6 rounded-xl border border-dashed border-border bg-card/50">
-          <p className="text-xs font-medium text-muted-foreground">
+        </section>
+      ) : (
+        <section className="px-6 pt-12 pb-8 text-center border-t border-outline-variant">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+            No history
+          </p>
+          <p className="text-[13px] text-muted-foreground/70">
             No completed courses yet.
           </p>
-        </div>
+        </section>
       )}
     </div>
   );

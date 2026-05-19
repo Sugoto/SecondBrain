@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { NotebookPen } from "lucide-react";
 
 const STORAGE_KEY = "home-notes";
 
@@ -14,16 +13,15 @@ export function Notes() {
   }, [value]);
 
   return (
-    <div className="bg-card border border-outline-variant rounded-2xl px-5 py-4">
-      <div className="flex items-center gap-1.5 mb-2">
-        <NotebookPen className="h-3.5 w-3.5 text-foreground" />
-        <span className="text-label-m text-foreground">Notes</span>
-      </div>
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+        Notes
+      </p>
       <textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Jot anything down…"
-        className="w-full min-h-32 resize-none bg-transparent text-body-m text-foreground placeholder:text-muted-foreground outline-none"
+        className="w-full min-h-40 resize-none bg-transparent text-[15px] leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none"
       />
     </div>
   );

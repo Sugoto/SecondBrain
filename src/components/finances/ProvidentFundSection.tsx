@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { UserStats } from "@/lib/supabase";
 import { useMaskedRupee } from "@/hooks/usePrivacy";
 
@@ -9,13 +9,12 @@ interface ProvidentFundSectionProps {
   theme: "light" | "dark";
 }
 
-export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionProps) {
+export function ProvidentFundSection({ userStats }: ProvidentFundSectionProps) {
   const rupee = useMaskedRupee();
   const [isExpanded, setIsExpanded] = useState(false);
   const ppf = userStats?.ppf ?? 0;
   const epf = userStats?.epf ?? 0;
   const total = ppf + epf;
-  const isDark = theme === "dark";
 
   if (total === 0) return null;
 
@@ -23,83 +22,77 @@ export function ProvidentFundSection({ userStats, theme }: ProvidentFundSectionP
   const epfPercent = total > 0 ? (epf / total) * 100 : 0;
 
   return (
-    <div className="space-y-2">
-      <h3 className="text-title-s text-foreground">
+    <section className="px-6 pt-7 pb-8">
+      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
         Provident Funds
-      </h3>
-      <div className="overflow-hidden rounded-2xl border border-outline-variant bg-card">
-        {/* Summary Header */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors"
-        >
-          <span className="text-sm font-bold font-mono text-foreground">
-            {rupee(total)}
-          </span>
-          <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
-            <ChevronDown
-              className={`h-3 w-3 text-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
-            />
-          </div>
-        </button>
+      </p>
 
-        {/* Expanded Content */}
-        <AnimatePresence initial={false}>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="overflow-hidden"
-            >
-              <div className="px-3 pb-3">
-                <div className="h-px bg-border mb-2" />
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between text-left py-2"
+      >
+        <span className="font-mono tabular-nums text-[22px] tracking-[-0.02em] text-foreground">
+          {rupee(total)}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+          strokeWidth={1.5}
+        />
+      </button>
 
-                {/* Progress Bar */}
-                <div className="h-2 rounded-full overflow-hidden flex bg-muted border border-border mb-2">
-                  {ppf > 0 && (
-                    <div
-                      className="h-full bg-foreground"
-                      style={{ width: `${ppfPercent}%` }}
-                    />
-                  )}
-                  {epf > 0 && (
-                    <div
-                      className="h-full"
-                      style={{
-                        width: `${epfPercent}%`,
-                        background: isDark ? "#71717a" : "#a1a1aa",
-                      }}
-                    />
-                  )}
-                </div>
-
-                {/* Labels */}
-                <div className="flex items-center justify-between">
-                  {ppf > 0 && (
-                    <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-muted/50 border border-border">
-                      <div className="w-2 h-2 rounded bg-foreground" />
-                      <span className="text-[10px] font-bold text-muted-foreground">PPF</span>
-                      <span className="text-xs font-mono font-bold text-foreground">{rupee(ppf)}</span>
-                    </div>
-                  )}
-                  {epf > 0 && (
-                    <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-muted/50 border border-border">
-                      <div
-                        className="w-2 h-2 rounded"
-                        style={{ background: isDark ? "#71717a" : "#a1a1aa" }}
-                      />
-                      <span className="text-[10px] font-bold text-muted-foreground">EPF</span>
-                      <span className="text-xs font-mono font-bold text-foreground">{rupee(epf)}</span>
-                    </div>
-                  )}
-                </div>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.2, 0, 0, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-4">
+              <div className="h-[3px] flex w-full bg-outline-variant/30 mb-4 overflow-hidden">
+                {ppf > 0 && (
+                  <div
+                    className="h-full bg-foreground"
+                    style={{ width: `${ppfPercent}%` }}
+                  />
+                )}
+                {epf > 0 && (
+                  <div
+                    className="h-full bg-muted-foreground/50"
+                    style={{ width: `${epfPercent}%` }}
+                  />
+                )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+
+              <div className="grid grid-cols-2 divide-x divide-outline-variant/60">
+                {ppf > 0 && (
+                  <div className="flex flex-col gap-1 pr-3">
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                      PPF
+                    </span>
+                    <span className="font-mono tabular-nums text-[14px] text-foreground">
+                      {rupee(ppf)}
+                    </span>
+                  </div>
+                )}
+                {epf > 0 && (
+                  <div className="flex flex-col gap-1 pl-3">
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                      EPF
+                    </span>
+                    <span className="font-mono tabular-nums text-[14px] text-foreground">
+                      {rupee(epf)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }

@@ -1,13 +1,13 @@
 import { memo } from "react";
 import type { Transaction } from "@/lib/supabase";
 import {
-  ChevronRight,
+  ChevronDown,
   Receipt,
   CalendarRange,
   type LucideIcon,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { formatDate, CATEGORY_PASTEL_COLORS } from "./constants";
+import { AnimatePresence, motion } from "framer-motion";
+import { formatDate } from "./constants";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { getMonthlyAmount } from "./utils";
 
@@ -23,6 +23,7 @@ interface CategoryCardProps {
   index?: number;
 }
 
+// million-ignore - parent divide-y requires direct DOM child; Million block wrapping breaks it
 export const CategoryCard = memo(function CategoryCard({
   name,
   icon,
@@ -32,51 +33,36 @@ export const CategoryCard = memo(function CategoryCard({
   isExpanded,
   onToggle,
   onTransactionClick,
-  index = 0,
 }: CategoryCardProps) {
   const IconComp = icon || Receipt;
-  const categoryName = name.replace(" (Needs)", "").replace(" (Wants)", "");
-  const categoryPastelColor = CATEGORY_PASTEL_COLORS[categoryName] || "bg-pastel-blue";
   const fmt = useFormatCurrency();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.25,
-        delay: Math.min(index * 0.03, 0.15),
-        ease: [0.2, 0, 0, 1],
-      }}
-      className="bg-card border border-outline-variant rounded-xl overflow-hidden"
-    >
-      <motion.button
+    <div>
+      <button
         onClick={onToggle}
-        whileTap={{ scale: 0.99 }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 transition-colors"
+        className="w-full flex items-center gap-3 py-3 text-left"
       >
-        <div
-          className={`h-8 w-8 rounded-full ${categoryPastelColor} flex items-center justify-center shrink-0`}
-        >
-          <IconComp className="h-3.5 w-3.5 text-foreground" />
-        </div>
-        <div className="flex-1 text-left min-w-0">
-          <p className="text-body-m text-foreground truncate">{name}</p>
-          <p className="text-label-s text-muted-foreground">
+        <IconComp
+          className="h-4 w-4 text-muted-foreground shrink-0"
+          strokeWidth={1.5}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] text-foreground truncate">{name}</p>
+          <p className="text-[10px] text-muted-foreground/80">
             {count} transaction{count !== 1 ? "s" : ""}
           </p>
         </div>
-        <span className="font-mono text-label-m text-foreground">
+        <span className="font-mono tabular-nums text-[14px] text-foreground shrink-0">
           {fmt(total)}
         </span>
-        <motion.div
-          animate={{ rotate: isExpanded ? 90 : 0 }}
-          transition={{ type: "spring", stiffness: 700, damping: 32 }}
-          className="shrink-0"
-        >
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-        </motion.div>
-      </motion.button>
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-muted-foreground/70 shrink-0 transition-transform ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+          strokeWidth={1.5}
+        />
+      </button>
 
       <AnimatePresence initial={false}>
         {isExpanded && (
@@ -87,57 +73,47 @@ export const CategoryCard = memo(function CategoryCard({
             transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-outline-variant">
-              {transactions.map((txn, i) => {
+            <div className="pl-7 pb-2">
+              {transactions.map((txn) => {
                 const isExcluded = txn.excluded_from_budget;
                 const isProrated = txn.prorate_months && txn.prorate_months > 1;
                 const displayAmount = getMonthlyAmount(txn);
 
                 return (
-                  <motion.button
+                  <button
                     key={txn.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.02, duration: 0.15 }}
                     onClick={() => onTransactionClick(txn)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${
+                    className={`w-full flex items-center gap-3 py-2 text-left border-b border-outline-variant/40 last:border-b-0 ${
                       isExcluded ? "opacity-50" : ""
                     }`}
                   >
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className={`text-body-s truncate flex items-center gap-1.5 ${
-                          isExcluded ? "text-muted-foreground" : "text-foreground"
-                        }`}
-                      >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] text-foreground truncate flex items-center gap-1.5">
                         {txn.merchant || "Unknown"}
                         {isProrated && (
-                          <CalendarRange className="h-3 w-3 shrink-0 text-muted-foreground" />
+                          <CalendarRange
+                            className="h-3 w-3 shrink-0 text-muted-foreground/60"
+                            strokeWidth={1.5}
+                          />
                         )}
                       </p>
-                      <p className="text-label-s text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground/70">
                         {formatDate(txn.date)}
                         {isProrated && (
-                          <span className="ml-1">
-                            · {fmt(displayAmount)}/mo
-                          </span>
+                          <span> · {fmt(displayAmount)}/mo</span>
                         )}
                       </p>
                     </div>
-                    <span
-                      className={`font-mono text-label-s ${
-                        isExcluded ? "text-muted-foreground" : "text-foreground"
-                      }`}
-                    >
-                      -{fmt(displayAmount)}
+                    <span className="font-mono tabular-nums text-[12px] text-foreground">
+                      −{fmt(displayAmount)}
                     </span>
-                  </motion.button>
+                  </button>
                 );
               })}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 });

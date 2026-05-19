@@ -22,11 +22,39 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => {},
 });
 
+const DEV_BYPASS =
+  import.meta.env.DEV &&
+  import.meta.env.VITE_DEV_BYPASS_AUTH === "true";
+
+const FAKE_SESSION = {
+  access_token: "dev",
+  refresh_token: "dev",
+  expires_in: 3600,
+  expires_at: 9999999999,
+  token_type: "bearer",
+  user: {
+    id: "dev-user",
+    aud: "authenticated",
+    role: "authenticated",
+    email: "dev@localhost",
+    app_metadata: {},
+    user_metadata: {
+      given_name: "Dev",
+      full_name: "Dev User",
+    },
+    created_at: new Date(0).toISOString(),
+  },
+} as unknown as Session;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(
+    DEV_BYPASS ? FAKE_SESSION : null,
+  );
+  const [loading, setLoading] = useState(!DEV_BYPASS);
 
   useEffect(() => {
+    if (DEV_BYPASS) return;
+
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);

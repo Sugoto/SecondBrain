@@ -68,13 +68,11 @@ export function DateFilter({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
-
     if (!pendingRange.from) {
       setPendingRange({ from: date });
     } else if (!pendingRange.to) {
       const from = pendingRange.from;
       const to = date;
-
       if (to >= from) {
         onCustomDateRangeChange({ from, to });
         onTimeFilterChange("custom");
@@ -89,24 +87,16 @@ export function DateFilter({
 
   const getFilterLabel = () => {
     const now = new Date();
-
-    if (timeFilter === "today") {
-      return format(now, "d MMM");
-    }
-
+    if (timeFilter === "today") return format(now, "d MMM");
     if (timeFilter === "week") {
       const weekStart = startOfWeek(now, { weekStartsOn: 1 });
       const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
       if (isSameMonth(weekStart, weekEnd)) {
-        return `${format(weekStart, "d")}-${format(weekEnd, "d MMM")}`;
+        return `${format(weekStart, "d")}–${format(weekEnd, "d MMM")}`;
       }
-      return `${format(weekStart, "d MMM")}-${format(weekEnd, "d MMM")}`;
+      return `${format(weekStart, "d MMM")}–${format(weekEnd, "d MMM")}`;
     }
-
-    if (timeFilter === "month") {
-      return format(now, "MMM");
-    }
-
+    if (timeFilter === "month") return format(now, "MMM");
     if (timeFilter === "custom" && customDateRange) {
       const { from, to } = customDateRange;
       if (
@@ -116,12 +106,9 @@ export function DateFilter({
       ) {
         return format(from, "MMM");
       }
-      if (isSameMonth(from, to)) {
-        return `${format(from, "d")}-${format(to, "d MMM")}`;
-      }
-      return `${format(from, "d MMM")}-${format(to, "d MMM")}`;
+      if (isSameMonth(from, to)) return `${format(from, "d")}–${format(to, "d MMM")}`;
+      return `${format(from, "d MMM")}–${format(to, "d MMM")}`;
     }
-
     return format(now, "MMM");
   };
 
@@ -132,89 +119,89 @@ export function DateFilter({
       open={filterOpen}
       onOpenChange={(open) => {
         setFilterOpen(open);
-        if (open) {
-          setPendingRange({});
-        }
+        if (open) setPendingRange({});
       }}
     >
       <PopoverTrigger asChild>
-        <button
-          className="h-7 px-2 rounded-lg flex items-center gap-1.5 transition-colors border border-border bg-card text-foreground"
-        >
-          <CalendarDays className="h-3 w-3" />
-          <span className="text-[10px] font-bold">{getFilterLabel()}</span>
+        <button className="inline-flex items-center gap-2 h-8 px-3 border border-outline-variant rounded-full text-muted-foreground hover:text-foreground transition-colors">
+          <CalendarDays className="h-3 w-3" strokeWidth={1.5} />
+          <span className="font-mono tabular-nums text-[11px]">
+            {getFilterLabel()}
+          </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-auto p-0 rounded-xl border border-border bg-background shadow-xl" 
+      <PopoverContent
+        className="w-auto p-0 rounded-2xl border border-outline-variant bg-background shadow-2xl"
         align="end"
       >
-        <div className="p-4 space-y-4">
-            {/* Quick filters */}
-            <div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Quick select</p>
-              <div className="flex items-center gap-2">
-                {(["today", "week", "month"] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => {
-                      onTimeFilterChange(filter);
-                      setFilterOpen(false);
-                    }}
-                    className={`h-8 flex-1 text-xs font-bold rounded-lg transition-all duration-100 border ${timeFilter === filter
-                        ? "bg-foreground border-foreground text-background"
-                        : "bg-card border-border text-muted-foreground"
-                      }`}
-                  >
-                    {TIME_LABELS[filter]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Month buttons */}
-            <div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Select month</p>
-              <div className="grid grid-cols-3 gap-2">
-                {recentMonths.map((month) => (
-                  <button
-                    key={month.label}
-                    onClick={() => handleMonthSelect(month.date)}
-                    className="h-8 text-xs font-bold rounded-lg border border-border bg-card text-foreground transition-colors"
-                  >
-                    {month.shortLabel}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Calendar for custom range */}
-            <div className="border-t border-border pt-4">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
-                {pendingRange.from
-                  ? `From ${format(pendingRange.from, "d MMM")}: pick end`
-                  : "Or pick a date range"}
-              </p>
-              <Calendar
-                mode="single"
-                selected={pendingRange.from}
-                onSelect={handleDateSelect}
-                captionLayout="dropdown"
-                fromYear={2020}
-                toYear={new Date().getFullYear()}
-                defaultMonth={customDateRange?.from || new Date()}
-                className="rounded-xl border border-border"
-              />
-              {pendingRange.from && (
+        <div className="p-5 space-y-5 min-w-[280px]">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+              Quick select
+            </p>
+            <div className="grid grid-cols-3 border-y border-outline-variant divide-x divide-outline-variant">
+              {(["today", "week", "month"] as const).map((filter) => (
                 <button
-                  onClick={() => setPendingRange({})}
-                  className="w-full h-8 mt-3 text-xs font-bold rounded-lg border border-border bg-card text-muted-foreground transition-colors"
+                  key={filter}
+                  onClick={() => {
+                    onTimeFilterChange(filter);
+                    setFilterOpen(false);
+                  }}
+                  className={`h-9 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                    timeFilter === filter
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  Clear selection
+                  {TIME_LABELS[filter]}
                 </button>
-              )}
+              ))}
             </div>
           </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+              Recent months
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {recentMonths.map((month) => (
+                <button
+                  key={month.label}
+                  onClick={() => handleMonthSelect(month.date)}
+                  className="h-8 text-[11px] uppercase tracking-[0.16em] border border-outline-variant rounded-full text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                >
+                  {month.shortLabel}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-outline-variant/60 pt-4">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+              {pendingRange.from
+                ? `From ${format(pendingRange.from, "d MMM")} — pick end`
+                : "Custom range"}
+            </p>
+            <Calendar
+              mode="single"
+              selected={pendingRange.from}
+              onSelect={handleDateSelect}
+              captionLayout="dropdown"
+              fromYear={2020}
+              toYear={new Date().getFullYear()}
+              defaultMonth={customDateRange?.from || new Date()}
+              className="rounded-xl border border-outline-variant"
+            />
+            {pendingRange.from && (
+              <button
+                onClick={() => setPendingRange({})}
+                className="w-full h-8 mt-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Clear selection
+              </button>
+            )}
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );

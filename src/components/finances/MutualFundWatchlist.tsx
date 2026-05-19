@@ -6,8 +6,7 @@ import {
 } from "@/hooks/useMutualFunds";
 import { useUserStats } from "@/hooks/useExpenseData";
 import type { Investment } from "@/lib/supabase";
-import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   RefreshCw,
   ChevronDown,
@@ -20,7 +19,6 @@ import { useMaskedRupee } from "@/hooks/usePrivacy";
 
 interface FundSectionProps {
   fund: FundWithStats;
-  index: number;
   isExpanded: boolean;
   onToggle: () => void;
   investments: Investment[];
@@ -31,7 +29,6 @@ interface FundSectionProps {
 // million-ignore - SVG sparkline not compatible with Million.js
 const FundSection = memo(function FundSection({
   fund,
-  index,
   isExpanded,
   onToggle,
   investments,
@@ -52,12 +49,7 @@ const FundSection = memo(function FundSection({
     const dailyChangeAmount = currentValue - previousValue;
 
     return {
-      totalUnits,
-      totalInvested,
       currentValue,
-      previousValue,
-      netChange,
-      dailyChangeAmount,
       hasInvestments: investments.length > 0,
       isNetUp: netChange >= 0,
       isPositiveDay: dailyChangeAmount >= 0,
@@ -65,8 +57,6 @@ const FundSection = memo(function FundSection({
   }, [investments, fund.currentNav, fund.previousNav]);
 
   const { currentValue, hasInvestments, isPositiveDay } = investmentStats;
-
-  const dayColor = isPositiveDay ? "#737373" : "#737373";
 
   const sparklinePath = useMemo(() => {
     const history = fund.navHistory;
@@ -90,153 +80,116 @@ const FundSection = memo(function FundSection({
   }, [fund.navHistory]);
 
   const handleInvest = async () => {
-    if (!investAmount || !investDate) {
-      return;
-    }
+    if (!investAmount || !investDate) return;
     setAdding(true);
     try {
       await onAddInvestment(parseFloat(investAmount), investDate);
       setInvestAmount("");
       setInvestDate("");
     } catch {
-      // Error handled in parent
+      // handled in parent
     } finally {
       setAdding(false);
     }
   };
 
+  const Trend = isPositiveDay ? TrendingUp : TrendingDown;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.2,
-        delay: index * 0.05,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      className="border-t border-border first:border-t-0"
-    >
-      {/* Fund Header */}
+    <div className="border-b border-outline-variant/60 last:border-b-0">
       <button
         onClick={onToggle}
-        className="w-full py-2 flex items-center gap-2 text-left transition-colors"
+        className="w-full py-3 flex items-center gap-3 text-left"
       >
-        {/* Trend indicator */}
-        <div className="h-5 w-5 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
-          {isPositiveDay ? (
-            <TrendingUp className="h-2.5 w-2.5 text-foreground" />
-          ) : (
-            <TrendingDown className="h-2.5 w-2.5 text-foreground" />
-          )}
-        </div>
-
-        {/* Fund Name */}
-        <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-xs truncate text-foreground">{fund.shortName}</h4>
-        </div>
-
+        <Trend
+          className={`h-3.5 w-3.5 shrink-0 ${
+            isPositiveDay ? "text-success" : "text-destructive"
+          }`}
+          strokeWidth={1.5}
+        />
+        <span className="text-[13px] text-foreground truncate flex-1">
+          {fund.shortName}
+        </span>
         {hasInvestments && (
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-xs font-bold font-mono text-foreground">
-              {rupee(currentValue, { maximumFractionDigits: 0 })}
-            </span>
-          </div>
+          <span className="font-mono tabular-nums text-[13px] text-foreground shrink-0">
+            {rupee(currentValue, { maximumFractionDigits: 0 })}
+          </span>
         )}
-
-        {/* Expand Icon */}
         <ChevronDown
-          className={`h-3 w-3 text-muted-foreground shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""
-            }`}
+          className={`h-3.5 w-3.5 text-muted-foreground/70 shrink-0 transition-transform ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+          strokeWidth={1.5}
         />
       </button>
 
-      {/* Expanded View */}
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.22, ease: [0.2, 0, 0, 1] }}
             className="overflow-hidden"
           >
-            <div className="pb-3">
-              {/* Full Name */}
-              <p className="text-[10px] text-muted-foreground font-medium truncate mb-2">
+            <div className="pb-4 pt-1">
+              <p className="text-[11px] text-muted-foreground truncate mb-3">
                 {fund.fullName}
               </p>
 
-              {/* Sparkline */}
               <svg
                 width="100%"
-                height="20"
-                className="mb-2"
+                height="24"
+                className={`mb-4 ${isPositiveDay ? "text-success" : "text-destructive"}`}
                 viewBox="0 0 100 28"
                 preserveAspectRatio="none"
               >
-                <defs>
-                  <linearGradient
-                    id={`spark-gradient-${fund.schemeCode}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="0%" stopColor={dayColor} stopOpacity={0.3} />
-                    <stop offset="100%" stopColor={dayColor} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <path
-                  d={`${sparklinePath} L 100,28 L 0,28 Z`}
-                  fill={`url(#spark-gradient-${fund.schemeCode})`}
-                />
                 <path
                   d={sparklinePath}
                   fill="none"
-                  stroke={dayColor}
-                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  strokeWidth={1}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
 
-              {/* Period Returns */}
-              <div className="flex items-center mb-2 p-1.5 rounded-lg bg-muted/50 border border-border">
+              <div className="grid grid-cols-5 divide-x divide-outline-variant/60 border-y border-outline-variant/60 mb-4">
                 {[
                   { label: "1D", value: fund.dailyChangePercent },
                   { label: "1M", value: fund.monthChangePercent },
                   { label: "1Y", value: fund.yearChangePercent },
                   { label: "3Y", value: fund.threeYearChangePercent },
                   { label: "5Y", value: fund.fiveYearChangePercent },
-                ].map((period, idx) => (
-                  <div key={period.label} className="flex items-center flex-1">
-                    <div className="flex-1 text-center">
-                      <p className="text-[9px] font-bold text-muted-foreground uppercase">
-                        {period.label}
-                      </p>
-                      <p className="text-[10px] font-mono font-bold text-foreground">
-                        {period.value >= 0 ? "+" : ""}
-                        {period.value.toFixed(1)}%
-                      </p>
-                    </div>
-                    {idx < 4 && <div className="w-px h-5 bg-border" />}
+                ].map((p) => (
+                  <div key={p.label} className="flex flex-col items-start gap-1 px-2 py-2">
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {p.label}
+                    </span>
+                    <span
+                      className={`font-mono tabular-nums text-[12px] ${
+                        p.value >= 0 ? "text-success" : "text-destructive"
+                      }`}
+                    >
+                      {p.value >= 0 ? "+" : ""}
+                      {p.value.toFixed(1)}%
+                    </span>
                   </div>
                 ))}
               </div>
 
-              {/* Existing Investments */}
               {hasInvestments && (
-                <div className="space-y-1.5 mb-2">
+                <div className="mb-3">
                   {investments.map((inv) => (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/50 border border-border"
+                      className="flex items-center justify-between py-2 border-b border-outline-variant/40 last:border-b-0"
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-foreground">
+                      <div className="flex items-baseline gap-3">
+                        <span className="font-mono tabular-nums text-[13px] text-foreground">
                           {rupee(inv.amount)}
                         </span>
-                        <span className="text-[10px] text-muted-foreground font-medium">
+                        <span className="text-[10px] text-muted-foreground">
                           {new Date(inv.date).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
@@ -249,31 +202,31 @@ const FundSection = memo(function FundSection({
                           e.stopPropagation();
                           onDeleteInvestment(inv.id);
                         }}
-                        className="p-1 rounded-lg border border-transparent text-muted-foreground transition-all"
+                        aria-label="Delete investment"
+                        className="text-muted-foreground/60 hover:text-destructive transition-colors active:scale-95"
                       >
-                        <Trash2 className="h-2.5 w-2.5" />
+                        <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Add Investment Form */}
-              <div className="flex items-center gap-1.5">
-                <Input
+              <div className="flex items-center gap-2 pt-2 border-t border-outline-variant/60">
+                <input
                   type="number"
                   value={investAmount}
                   onChange={(e) => setInvestAmount(e.target.value)}
-                  placeholder="₹"
-                  className="h-7 text-xs font-mono flex-1 border border-border rounded-lg"
+                  placeholder="₹ amount"
                   onClick={(e) => e.stopPropagation()}
+                  className="font-mono tabular-nums text-[13px] bg-transparent outline-none flex-1 py-2 placeholder:text-muted-foreground/40"
                 />
-                <Input
+                <input
                   type="date"
                   value={investDate}
                   onChange={(e) => setInvestDate(e.target.value)}
-                  className="h-7 text-xs w-28 border border-border rounded-lg"
                   onClick={(e) => e.stopPropagation()}
+                  className="font-mono text-[12px] bg-transparent outline-none w-28 py-2 text-muted-foreground"
                 />
                 <button
                   onClick={(e) => {
@@ -281,16 +234,21 @@ const FundSection = memo(function FundSection({
                     handleInvest();
                   }}
                   disabled={adding}
-                  className="h-7 w-7 flex items-center justify-center rounded-lg border border-border bg-primary text-primary-foreground transition-all disabled:opacity-50"
+                  aria-label="Add investment"
+                  className="h-8 w-8 flex items-center justify-center text-foreground hover:text-foreground transition-colors active:scale-95 disabled:opacity-40"
                 >
-                  {adding ? "..." : <Plus className="h-3 w-3" />}
+                  {adding ? (
+                    <span className="text-[10px]">…</span>
+                  ) : (
+                    <Plus className="h-4 w-4" strokeWidth={1.5} />
+                  )}
                 </button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 });
 
@@ -302,48 +260,41 @@ export function MutualFundWatchlist() {
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
-  const investments = useMemo(() => userStats?.investments || [], [userStats?.investments]);
+  const investments = useMemo(
+    () => userStats?.investments || [],
+    [userStats?.investments],
+  );
 
   const handleToggle = useCallback((schemeCode: number) => {
     setExpandedFunds((prev) => {
       const next = new Set(prev);
-      if (next.has(schemeCode)) {
-        next.delete(schemeCode);
-      } else {
-        next.add(schemeCode);
-      }
+      if (next.has(schemeCode)) next.delete(schemeCode);
+      else next.add(schemeCode);
       return next;
     });
   }, []);
 
-  const handleAddInvestment = useCallback(async (
-    schemeCode: number,
-    amount: number,
-    date: string
-  ) => {
-    const nav = await fetchNavForDate(schemeCode, date);
-    if (!nav) {
-      throw new Error("NAV not found");
-    }
+  const handleAddInvestment = useCallback(
+    async (schemeCode: number, amount: number, date: string) => {
+      const nav = await fetchNavForDate(schemeCode, date);
+      if (!nav) throw new Error("NAV not found");
 
-    const units = amount / nav;
+      const units = amount / nav;
+      await addInvestment({ schemeCode, amount, date, nav, units });
+    },
+    [addInvestment],
+  );
 
-    await addInvestment({
-      schemeCode,
-      amount,
-      date,
-      nav,
-      units,
-    });
-
-  }, [addInvestment]);
-
-  const handleDeleteInvestment = useCallback(async (id: string) => {
-    try {
-      await deleteInvestment(id);
-    } catch {
-    }
-  }, [deleteInvestment]);
+  const handleDeleteInvestment = useCallback(
+    async (id: string) => {
+      try {
+        await deleteInvestment(id);
+      } catch {
+        // ignore
+      }
+    },
+    [deleteInvestment],
+  );
 
   const investmentsByFund = useMemo(() => {
     const map = new Map<number, Investment[]>();
@@ -355,124 +306,107 @@ export function MutualFundWatchlist() {
     return map;
   }, [investments]);
 
-  const getInvestmentsForFund = useCallback((schemeCode: number) =>
-    investmentsByFund.get(schemeCode) || [], [investmentsByFund]);
+  const getInvestmentsForFund = useCallback(
+    (schemeCode: number) => investmentsByFund.get(schemeCode) || [],
+    [investmentsByFund],
+  );
 
   if (error && funds.length === 0) {
     return (
-      <div className="space-y-2">
-        <h3 className="text-title-s text-foreground">
+      <section className="px-6 pt-7 pb-8">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
           Mutual Funds
-        </h3>
-        <div className="p-3 rounded-xl border border-dashed border-border">
-          <div className="text-center py-1">
-            <p className="text-xs font-medium text-muted-foreground mb-1.5">
-              Failed to load mutual fund data
-            </p>
-            <button
-              onClick={refresh}
-              className="text-xs font-bold text-foreground"
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      </div>
+        </p>
+        <p className="text-[13px] text-muted-foreground mb-3">
+          Failed to load mutual fund data.
+        </p>
+        <button
+          onClick={refresh}
+          className="text-[11px] uppercase tracking-[0.2em] text-foreground hover:opacity-80 transition-opacity"
+        >
+          Try again
+        </button>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-title-s text-foreground">
+    <section className="px-6 pt-7 pb-8">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           Mutual Funds
-        </h3>
-        <div className="flex items-center gap-2">
+        </p>
+        <div className="flex items-center gap-3">
           {lastUpdated && (
-            <p className="text-[10px] font-medium text-muted-foreground">
+            <span className="font-mono tabular-nums text-[10px] text-muted-foreground/70">
               {lastUpdated.toLocaleTimeString("en-IN", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-            </p>
+            </span>
           )}
-          <motion.button
+          <button
             onClick={refresh}
             disabled={isRefetching}
-            whileTap={{ scale: 0.9 }}
-            className="h-6 w-6 flex items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors disabled:opacity-50"
-            title="Refresh"
+            aria-label="Refresh"
+            className="text-muted-foreground hover:text-foreground transition-colors active:scale-95 disabled:opacity-50"
           >
             <RefreshCw
-              className={`h-3 w-3 ${isRefetching ? "animate-spin" : ""
-                }`}
+              className={`h-3.5 w-3.5 ${isRefetching ? "animate-spin" : ""}`}
+              strokeWidth={1.5}
             />
-          </motion.button>
+          </button>
         </div>
       </div>
 
-      {/* Single Collapsible Card */}
-      <div className="overflow-hidden rounded-2xl border border-outline-variant bg-card">
-        {/* Summary Header */}
-        <button
-          onClick={() => setIsCardExpanded(!isCardExpanded)}
-          className="w-full px-3 py-2 flex items-center justify-between text-left transition-colors"
-        >
-          <span className="text-sm font-bold font-mono text-foreground">
-            {rupee(userStats?.mutual_funds || 0, { maximumFractionDigits: 0 })}
-          </span>
+      <button
+        onClick={() => setIsCardExpanded(!isCardExpanded)}
+        className="w-full flex items-center justify-between text-left py-2"
+      >
+        <span className="font-mono tabular-nums text-[22px] tracking-[-0.02em] text-foreground">
+          {rupee(userStats?.mutual_funds || 0, { maximumFractionDigits: 0 })}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${
+            isCardExpanded ? "rotate-180" : ""
+          }`}
+          strokeWidth={1.5}
+        />
+      </button>
 
-          <div className="h-5 w-5 rounded-lg flex items-center justify-center border border-border bg-muted">
-            <ChevronDown
-              className={`h-3 w-3 text-foreground transition-transform ${isCardExpanded ? "rotate-180" : ""
-                }`}
-            />
-          </div>
-        </button>
-
-        {/* Expanded Content */}
-        <AnimatePresence initial={false}>
-          {isCardExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="overflow-hidden"
-            >
-              <div className="px-3 pb-3">
-                <div className="h-px bg-border mb-2" />
-
-                {funds.length > 0 ? (
-                  <div>
-                    {funds.map((fund, index) => (
-                      <FundSection
-                        key={fund.schemeCode}
-                        fund={fund}
-                        index={index}
-                        isExpanded={expandedFunds.has(fund.schemeCode)}
-                        onToggle={() => handleToggle(fund.schemeCode)}
-                        investments={getInvestmentsForFund(fund.schemeCode)}
-                        onAddInvestment={(amount, date) =>
-                          handleAddInvestment(fund.schemeCode, amount, date)
-                        }
-                        onDeleteInvestment={handleDeleteInvestment}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-3 text-center">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      No funds in watchlist
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+      <AnimatePresence initial={false}>
+        {isCardExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.2, 0, 0, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-2 border-t border-outline-variant/60 mt-3">
+              {funds.length > 0 ? (
+                funds.map((fund) => (
+                  <FundSection
+                    key={fund.schemeCode}
+                    fund={fund}
+                    isExpanded={expandedFunds.has(fund.schemeCode)}
+                    onToggle={() => handleToggle(fund.schemeCode)}
+                    investments={getInvestmentsForFund(fund.schemeCode)}
+                    onAddInvestment={(amount, date) =>
+                      handleAddInvestment(fund.schemeCode, amount, date)
+                    }
+                    onDeleteInvestment={handleDeleteInvestment}
+                  />
+                ))
+              ) : (
+                <p className="py-6 text-center text-[13px] text-muted-foreground">
+                  No funds in watchlist
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }

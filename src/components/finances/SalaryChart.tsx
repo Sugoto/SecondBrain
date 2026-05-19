@@ -17,33 +17,37 @@ interface SalaryChartProps {
 export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps) {
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
-    const textColor = isDark ? "#a3a3a3" : "#525252";
-    const borderColor = isDark ? "#262626" : "#e5e5e5";
-    const lineColor = "#6366f1";
-    const areaStart = "rgba(99,102,241,0.3)";
-    const areaEnd = "rgba(99,102,241,0)";
+    const textColor = isDark ? "oklch(72% 0.01 275)" : "oklch(40% 0.01 275)";
+    const subtleLine = isDark ? "oklch(35% 0.01 275)" : "oklch(85% 0.01 275)";
+    const lineColor = isDark ? "oklch(90% 0.005 275)" : "oklch(15% 0.005 275)";
 
     return {
-      grid: { left: 40, right: 15, top: 15, bottom: 30, containLabel: false },
+      grid: { left: 36, right: 12, top: 20, bottom: 28, containLabel: false },
       xAxis: {
         type: "category",
         data: SALARY_DATA.map((d) => d.label),
-        axisLine: { lineStyle: { color: borderColor, width: 1 } },
+        axisLine: { lineStyle: { color: subtleLine, width: 1 } },
         axisTick: { show: false },
-        axisLabel: { color: textColor, fontSize: 9, fontWeight: 600 },
+        axisLabel: {
+          color: textColor,
+          fontSize: 9,
+          fontWeight: 500,
+          fontFamily: "Google Sans Mono, monospace",
+        },
       },
       yAxis: {
         type: "value",
         min: 0,
         max: 40,
         interval: 10,
-        axisLine: { show: true, lineStyle: { color: borderColor, width: 1 } },
+        axisLine: { show: false },
         axisTick: { show: false },
-        splitLine: { lineStyle: { color: borderColor, type: "solid" } },
+        splitLine: { lineStyle: { color: subtleLine, type: "solid" } },
         axisLabel: {
           color: textColor,
           fontSize: 9,
-          fontWeight: 600,
+          fontWeight: 500,
+          fontFamily: "Google Sans Mono, monospace",
           formatter: (v: number) => `${v}L`,
         },
       },
@@ -53,28 +57,19 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
           data: SALARY_DATA.map((d) => d.lpa),
           smooth: false,
           symbol: "circle",
-          symbolSize: 6,
-          itemStyle: { color: lineColor, borderColor: lineColor, borderWidth: 2 },
-          lineStyle: { width: 2, color: lineColor },
-          areaStyle: {
-            color: {
-              type: "linear",
-              x: 0, y: 0, x2: 0, y2: 1,
-              colorStops: [
-                { offset: 0, color: areaStart },
-                { offset: 1, color: areaEnd },
-              ],
-            },
-          },
+          symbolSize: 5,
+          itemStyle: { color: lineColor },
+          lineStyle: { width: 1.5, color: lineColor },
           label: {
             show: true,
             position: "top",
             formatter: (params) => `${(params as { value: number }).value}L`,
-            color: isDark ? "#fafafa" : "#0a0a0a",
+            color: lineColor,
             fontSize: 10,
-            fontWeight: 700,
+            fontWeight: 500,
+            fontFamily: "Google Sans Mono, monospace",
           },
-          animationDuration: 600,
+          animationDuration: 400,
           animationEasing: "cubicOut",
         },
       ],
@@ -82,11 +77,11 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
   }, [theme]);
 
   return (
-    <div className="px-5 py-4 rounded-2xl border border-outline-variant bg-card">
-      <h3 className="text-title-s text-foreground mb-3">
+    <section className="px-6 pt-7 pb-8">
+      <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
         Salary Progression
-      </h3>
-      <div className="h-36">
+      </p>
+      <div className="h-40">
         <ReactECharts
           option={option}
           style={{ width: "100%", height: "100%" }}
@@ -95,6 +90,6 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
           lazyUpdate
         />
       </div>
-    </div>
+    </section>
   );
 });

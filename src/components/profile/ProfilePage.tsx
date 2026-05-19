@@ -7,29 +7,25 @@ import {
   EyeOff,
   Flame,
   Footprints,
-  HeartPulse,
   LogOut,
-  Mail,
   Mars,
   Minus,
   Moon,
-  PiggyBank,
   Sun,
   TrendingDown,
   TrendingUp,
   Venus,
-  Wallet,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { usePrivacy } from "@/hooks/usePrivacy";
 import { useUserStats } from "@/hooks/useExpenseData";
-import { Input } from "@/components/ui/input";
 import { supabase, type UserStats, type ActivityLevel } from "@/lib/supabase";
 import {
   ACTIVITY_LEVELS,
   CALORIE_PRESETS,
 } from "@/components/fitness/types";
+import { cn } from "@/lib/utils";
 
 const ACTIVITY_ICONS = {
   sedentary: Armchair,
@@ -43,7 +39,6 @@ const GOAL_ICONS: Record<number, typeof TrendingDown> = {
   [-10]: Minus,
   [15]: TrendingUp,
 };
-import { cn } from "@/lib/utils";
 
 interface ProfilePageProps {
   onGoHome: () => void;
@@ -100,11 +95,87 @@ function fromUserStats(stats: UserStats | null | undefined): FormState {
   };
 }
 
-const numberInputClass =
-  "font-mono h-9 text-body-m text-right bg-surface-container-low border border-outline-variant rounded-lg";
+const EYEBROW = "text-[10px] uppercase tracking-[0.22em] text-muted-foreground";
+const SECTION_LABEL = "text-[10px] uppercase tracking-[0.22em] text-foreground";
 
-const sectionHeaderClass =
-  "flex items-center gap-2 text-title-s text-foreground px-1";
+type FieldProps = {
+  label: string;
+  children: React.ReactNode;
+};
+
+function Field({ label, children }: FieldProps) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3.5 border-b border-outline-variant/60 last:border-b-0">
+      <label className="text-[13px] text-muted-foreground">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function NumberField({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: number | string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="font-mono tabular-nums text-right text-[15px] text-foreground bg-transparent outline-none w-32 placeholder:text-muted-foreground/40"
+    />
+  );
+}
+
+type SegmentOption<T extends string | number> = {
+  value: T;
+  icon: typeof TrendingDown;
+  ariaLabel: string;
+};
+
+function Segmented<T extends string | number>({
+  options,
+  active,
+  onChange,
+}: {
+  options: SegmentOption<T>[];
+  active: T | null;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div
+      className="grid border-y border-outline-variant divide-x divide-outline-variant w-44"
+      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+    >
+      {options.map((opt) => {
+        const Icon = opt.icon;
+        const selected = active === opt.value;
+        return (
+          <button
+            key={String(opt.value)}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            aria-label={opt.ariaLabel}
+            aria-pressed={selected}
+            className={cn(
+              "h-9 flex items-center justify-center transition-colors",
+              selected
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export function ProfilePage({ onGoHome }: ProfilePageProps) {
   const { session, signOut } = useAuth();
@@ -180,298 +251,165 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
   const email = session?.user?.email ?? "";
 
   return (
-    <div className="h-full flex flex-col">
-      <header className="shrink-0 vercel-header pb-3">
-        <div className="flex h-[72px] flex-col px-4 pt-2 pb-1.5">
-          <div className="mb-1.5 flex min-h-8 items-center gap-2">
-            <button
-              type="button"
-              onClick={onGoHome}
-              aria-label="Back to home"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors active:scale-95"
-            >
-              <ChevronLeft className="h-4 w-4 text-foreground" />
-            </button>
-            <h1 className="flex-1 text-title-m text-foreground truncate">
-              Profile
-            </h1>
-          </div>
+    <div className="h-full flex flex-col bg-background">
+      <header className="shrink-0 flex items-center justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onGoHome}
+            aria-label="Back to home"
+            className="text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          >
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+          <span className={EYEBROW}>Profile</span>
         </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-3 min-h-0">
-        <section className="shrink-0 bg-card border border-outline-variant rounded-2xl px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-label-s text-muted-foreground">Signed in as</p>
-              <p className="text-body-l text-foreground truncate flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="truncate">{email || "Unknown"}</span>
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              disabled={signingOut}
-              aria-label="Sign out"
-              className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center bg-red-100 hover:bg-red-100/80 text-red-700 dark:bg-red-950/50 dark:hover:bg-red-950/40 dark:text-red-300 transition-colors active:scale-95 disabled:opacity-50"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
-        </section>
-
-        <section className="shrink-0 bg-card border border-outline-variant rounded-2xl flex items-stretch overflow-hidden">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={togglePrivacy}
             aria-label={hidden ? "Show amounts" : "Hide amounts"}
             aria-pressed={hidden}
-            className="flex-1 flex items-center justify-center py-4 transition-colors active:scale-95"
+            className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors active:scale-95"
           >
-            {hidden ? (
-              <EyeOff className="h-5 w-5 text-foreground" />
-            ) : (
-              <Eye className="h-5 w-5 text-foreground" />
-            )}
+            {hidden ? <EyeOff className="h-4 w-4" strokeWidth={1.5} /> : <Eye className="h-4 w-4" strokeWidth={1.5} />}
           </button>
-          <div className="w-px bg-outline-variant" />
           <button
             type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
             aria-pressed={theme === "dark"}
-            className="flex-1 flex items-center justify-center py-4 transition-colors active:scale-95"
+            className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors active:scale-95"
           >
-            {theme === "dark" ? (
-              <Moon className="h-5 w-5 text-foreground" />
-            ) : (
-              <Sun className="h-5 w-5 text-foreground" />
-            )}
+            {theme === "dark" ? <Moon className="h-4 w-4" strokeWidth={1.5} /> : <Sun className="h-4 w-4" strokeWidth={1.5} />}
           </button>
-        </section>
+        </div>
+      </header>
 
-        <section className="shrink-0 bg-card border border-outline-variant rounded-2xl px-5 py-4 flex flex-col gap-3">
-          <div className={sectionHeaderClass}>
-            <Wallet className="h-4 w-4" />
-            <span>Assets</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            {[
-              { key: "bank_savings", label: "Bank Savings" },
-              { key: "mutual_funds", label: "Mutual Funds" },
-              { key: "ppf", label: "PPF" },
-              { key: "epf", label: "EPF" },
-              { key: "monthly_income", label: "Monthly Salary" },
-            ].map((row) => (
-              <div key={row.key} className="flex items-center gap-2">
-                <label className="text-label-m text-muted-foreground flex-1 truncate">
-                  {row.label}
-                </label>
-                <Input
-                  type="number"
-                  value={form[row.key as keyof FormState] as number}
-                  onChange={(e) =>
-                    setNumber(row.key as keyof FormState)(e.target.value)
-                  }
-                  className={cn(numberInputClass, "w-44")}
-                />
-              </div>
-            ))}
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <section className="px-6 pt-2 pb-8 border-b border-outline-variant">
+          <p className={`${EYEBROW} mb-3`}>Account</p>
+          <div className="flex items-end justify-between gap-4">
+            <p className="text-[20px] font-heading tracking-[-0.02em] text-foreground truncate">
+              {email || "Unknown"}
+            </p>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              aria-label="Sign out"
+              className="text-muted-foreground hover:text-destructive transition-colors active:scale-95 disabled:opacity-50"
+            >
+              <LogOut className="h-4 w-4" strokeWidth={1.5} />
+            </button>
           </div>
         </section>
 
-        <section className="shrink-0 bg-card border border-outline-variant rounded-2xl px-5 py-4 flex flex-col gap-3">
-          <div className={sectionHeaderClass}>
-            <PiggyBank className="h-4 w-4" />
-            <span>Budgets</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            {[
-              { key: "needs_budget", label: "Needs" },
-              { key: "wants_budget", label: "Wants" },
-            ].map((row) => (
-              <div key={row.key} className="flex items-center gap-2">
-                <label className="text-label-m text-muted-foreground flex-1 truncate">
-                  {row.label}
-                </label>
-                <Input
-                  type="number"
-                  value={form[row.key as keyof FormState] as number}
-                  onChange={(e) =>
-                    setNumber(row.key as keyof FormState)(e.target.value)
-                  }
-                  className={cn(numberInputClass, "w-44")}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="shrink-0 bg-card border border-outline-variant rounded-2xl px-5 py-4 flex flex-col gap-3">
-          <div className={sectionHeaderClass}>
-            <HeartPulse className="h-4 w-4" />
-            <span>Health profile</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <label className="text-label-m text-muted-foreground flex-1 truncate">
-                Height (cm)
-              </label>
-              <Input
-                type="number"
-                value={form.height_cm ?? ""}
-                onChange={(e) => setNullableNumber("height_cm")(e.target.value)}
-                placeholder="175"
-                className={cn(numberInputClass, "w-44")}
+        <section className="px-6 pt-7 pb-2 border-b border-outline-variant">
+          <p className={`${SECTION_LABEL} mb-1`}>Assets</p>
+          {[
+            { key: "bank_savings", label: "Bank Savings" },
+            { key: "mutual_funds", label: "Mutual Funds" },
+            { key: "ppf", label: "PPF" },
+            { key: "epf", label: "EPF" },
+            { key: "monthly_income", label: "Monthly Salary" },
+          ].map((row) => (
+            <Field key={row.key} label={row.label}>
+              <NumberField
+                value={form[row.key as keyof FormState] as number}
+                onChange={setNumber(row.key as keyof FormState)}
               />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-label-m text-muted-foreground flex-1 truncate">
-                Weight (kg)
-              </label>
-              <Input
-                type="number"
-                value={form.weight_kg ?? ""}
-                onChange={(e) => setNullableNumber("weight_kg")(e.target.value)}
-                placeholder="70"
-                className={cn(numberInputClass, "w-44")}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-label-m text-muted-foreground flex-1 truncate">
-                Age
-              </label>
-              <Input
-                type="number"
-                value={form.age ?? ""}
-                onChange={(e) => setNullableNumber("age")(e.target.value)}
-                placeholder="25"
-                className={cn(numberInputClass, "w-44")}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-label-m text-muted-foreground flex-1 truncate">
-                Sex
-              </label>
-              <div className="flex items-center bg-surface-container rounded-full p-0.5 w-44">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm((prev) => ({ ...prev, gender: "male" }))
-                  }
-                  aria-label="Male"
-                  aria-pressed={form.gender === "male"}
-                  className={cn(
-                    "flex-1 h-8 rounded-full flex items-center justify-center transition-colors",
-                    form.gender === "male"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <Mars className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm((prev) => ({ ...prev, gender: "female" }))
-                  }
-                  aria-label="Female"
-                  aria-pressed={form.gender === "female"}
-                  className={cn(
-                    "flex-1 h-8 rounded-full flex items-center justify-center transition-colors",
-                    form.gender === "female"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <Venus className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-label-m text-muted-foreground flex-1 truncate">
-                Activity level
-              </label>
-              <div className="flex items-center bg-surface-container rounded-full p-0.5 w-44">
-                {ACTIVITY_LEVELS.map((level) => {
-                  const Icon = ACTIVITY_ICONS[level.value];
-                  return (
-                    <button
-                      key={level.value}
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          activity_level: level.value,
-                        }))
-                      }
-                      aria-label={level.label}
-                      aria-pressed={form.activity_level === level.value}
-                      title={level.label}
-                      className={cn(
-                        "flex-1 h-8 rounded-full flex items-center justify-center transition-colors",
-                        form.activity_level === level.value
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-label-m text-muted-foreground flex-1 truncate">
-                Goal
-              </label>
-              <div className="flex items-center bg-surface-container rounded-full p-0.5 w-44">
-                {CALORIE_PRESETS.map((preset) => {
-                  const Icon = GOAL_ICONS[preset.value] ?? Minus;
-                  return (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          calorie_adjustment: preset.value,
-                        }))
-                      }
-                      aria-label={preset.description}
-                      aria-pressed={form.calorie_adjustment === preset.value}
-                      title={preset.description}
-                      className={cn(
-                        "flex-1 h-8 rounded-full flex items-center justify-center transition-colors",
-                        form.calorie_adjustment === preset.value
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+            </Field>
+          ))}
         </section>
 
+        <section className="px-6 pt-7 pb-2 border-b border-outline-variant">
+          <p className={`${SECTION_LABEL} mb-1`}>Budgets</p>
+          {[
+            { key: "needs_budget", label: "Needs" },
+            { key: "wants_budget", label: "Wants" },
+          ].map((row) => (
+            <Field key={row.key} label={row.label}>
+              <NumberField
+                value={form[row.key as keyof FormState] as number}
+                onChange={setNumber(row.key as keyof FormState)}
+              />
+            </Field>
+          ))}
+        </section>
+
+        <section className="px-6 pt-7 pb-10 border-b border-outline-variant">
+          <p className={`${SECTION_LABEL} mb-1`}>Health</p>
+          <Field label="Height (cm)">
+            <NumberField
+              value={form.height_cm ?? ""}
+              onChange={setNullableNumber("height_cm")}
+              placeholder="175"
+            />
+          </Field>
+          <Field label="Weight (kg)">
+            <NumberField
+              value={form.weight_kg ?? ""}
+              onChange={setNullableNumber("weight_kg")}
+              placeholder="70"
+            />
+          </Field>
+          <Field label="Age">
+            <NumberField
+              value={form.age ?? ""}
+              onChange={setNullableNumber("age")}
+              placeholder="25"
+            />
+          </Field>
+          <Field label="Sex">
+            <Segmented
+              active={form.gender}
+              onChange={(v) => setForm((prev) => ({ ...prev, gender: v }))}
+              options={[
+                { value: "male", icon: Mars, ariaLabel: "Male" },
+                { value: "female", icon: Venus, ariaLabel: "Female" },
+              ]}
+            />
+          </Field>
+          <Field label="Activity">
+            <Segmented
+              active={form.activity_level}
+              onChange={(v) =>
+                setForm((prev) => ({ ...prev, activity_level: v }))
+              }
+              options={ACTIVITY_LEVELS.map((l) => ({
+                value: l.value,
+                icon: ACTIVITY_ICONS[l.value],
+                ariaLabel: l.label,
+              }))}
+            />
+          </Field>
+          <Field label="Goal">
+            <Segmented
+              active={form.calorie_adjustment}
+              onChange={(v) =>
+                setForm((prev) => ({ ...prev, calorie_adjustment: v }))
+              }
+              options={CALORIE_PRESETS.map((p) => ({
+                value: p.value,
+                icon: GOAL_ICONS[p.value] ?? Minus,
+                ariaLabel: p.description,
+              }))}
+            />
+          </Field>
+        </section>
+
+        <div className="h-32" />
       </main>
 
-      <footer className="shrink-0 px-4 pt-3 pb-4 bg-background">
+      <footer className="shrink-0 px-6 pt-3 pb-5 bg-background border-t border-outline-variant">
         <button
           type="button"
           onClick={handleSave}
           disabled={!isDirty || saving}
-          className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-2xl px-5 py-4 transition-colors active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+          className="w-full h-12 flex items-center justify-center bg-primary text-primary-foreground text-[13px] uppercase tracking-[0.22em] rounded-lg transition-opacity active:opacity-90 disabled:opacity-30"
         >
-          <span className="text-body-l font-medium">
-            {saving ? "Saving…" : "Save changes"}
-          </span>
+          {saving ? "Saving" : isDirty ? "Save changes" : "No changes to save"}
         </button>
       </footer>
     </div>

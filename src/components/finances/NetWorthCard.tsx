@@ -11,18 +11,22 @@ export function NetWorthCard({ netWorth, monthlyIncome }: NetWorthCardProps) {
   const fmt = useFormatCurrency();
 
   return (
-    <div className="w-full rounded-2xl bg-primary-container px-5 py-4">
-      <p className="text-label-m mb-1">Net Worth</p>
-      <div className="flex items-baseline gap-2 flex-wrap">
-        <p className="text-headline-s font-mono">
-          <AnimatedNumber value={netWorth} formatFn={fmt} animateOnMount />
-        </p>
+    <section className="px-6 pt-6 pb-8">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Net Worth
+        </span>
         {dailySalary && (
-          <span className="text-label-s font-mono px-2 py-0.5 rounded-full bg-on-primary-container/10">
-            +{fmt(dailySalary)}/d
+          <span className="font-mono tabular-nums text-[11px] text-muted-foreground">
+            <span className="text-success">+</span>
+            {fmt(dailySalary)}
+            <span className="text-muted-foreground/60"> / day</span>
           </span>
         )}
       </div>
-    </div>
+      <p className="font-mono tabular-nums tracking-[-0.04em] text-foreground leading-[0.9] text-[clamp(44px,13vw,64px)]">
+        <AnimatedNumber value={netWorth} formatFn={fmt} animateOnMount />
+      </p>
+    </section>
   );
 }

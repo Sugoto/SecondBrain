@@ -1,12 +1,11 @@
 import { useCallback, memo, useRef } from "react";
 import type { Transaction } from "@/lib/supabase";
-import { motion } from "framer-motion";
 import { TransactionCard } from "./TransactionCard";
 import { Footer } from "./Footer";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-const ROW_HEIGHT = 52;
-const OVERSCAN = 5;
+const ROW_HEIGHT = 60;
+const OVERSCAN = 6;
 
 interface ExpensesViewProps {
   transactions: Transaction[];
@@ -35,28 +34,25 @@ export const ExpensesView = memo(function ExpensesView({
 
   if (transactions.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto px-5 md:px-6 pt-4 space-y-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="p-8 text-center rounded-2xl border border-dashed border-outline-variant bg-card">
-            <p className="text-body-m text-muted-foreground">
-              No transactions for this period
-            </p>
-          </div>
-        </motion.div>
+      <div className="max-w-6xl mx-auto px-6 pt-10">
+        <div className="py-16 text-center">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+            No transactions
+          </p>
+          <p className="text-[13px] text-muted-foreground/70">
+            Nothing recorded for this period yet.
+          </p>
+        </div>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto pt-3 space-y-4">
+    <div className="max-w-6xl mx-auto">
       <div
         ref={parentRef}
-        className="h-[72dvh] overflow-auto scrollbar-hide px-4"
+        className="h-[72dvh] overflow-auto scrollbar-hide px-6"
         style={{ contain: "strict" }}
       >
         <div
@@ -78,7 +74,6 @@ export const ExpensesView = memo(function ExpensesView({
                   right: 0,
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
-                  paddingBottom: "12px",
                 }}
               >
                 <TransactionCard
@@ -92,7 +87,7 @@ export const ExpensesView = memo(function ExpensesView({
         </div>
       </div>
 
-      <div className="px-4">
+      <div className="px-6 pt-4">
         <Footer />
       </div>
     </div>

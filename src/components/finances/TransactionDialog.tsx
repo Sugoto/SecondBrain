@@ -5,18 +5,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   EXPENSE_CATEGORIES,
   EXCLUDED_CATEGORIES,
   getTransactionBudgetType,
   CATEGORY_BUDGET_TYPE,
-  CATEGORY_PASTEL_COLORS,
 } from "./constants";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { Loader2, Trash2, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
   AlertDialog,
@@ -76,11 +74,9 @@ function evaluateExpression(expr: string): number | null {
     };
 
     for (const token of tokens) {
-      if (typeof token === "number") {
-        output.push(token);
-      } else if (token === "(") {
-        ops.push(token);
-      } else if (token === ")") {
+      if (typeof token === "number") output.push(token);
+      else if (token === "(") ops.push(token);
+      else if (token === ")") {
         while (ops.length && ops[ops.length - 1] !== "(") applyOp();
         ops.pop();
       } else if (precedence[token]) {
@@ -97,6 +93,8 @@ function evaluateExpression(expr: string): number | null {
     return null;
   }
 }
+
+const EYEBROW = "text-[10px] uppercase tracking-[0.22em] text-muted-foreground";
 
 export function TransactionDialog({
   transaction,
@@ -116,7 +114,6 @@ export function TransactionDialog({
   useEffect(() => {
     if (transaction) {
       setAmountInput(transaction.amount === 0 ? "" : transaction.amount.toString());
-      // Auto-open advanced section if it has values
       setShowAdvanced(
         Boolean(transaction.prorate_months) ||
           Boolean(transaction.excluded_from_budget && !EXCLUDED_CATEGORIES.includes(transaction.category ?? ""))
@@ -200,27 +197,28 @@ export function TransactionDialog({
       onOpenChange={(open) => !open && !saving && onClose()}
     >
       <DialogContent
-        className="max-w-md w-[calc(100%-1.5rem)] rounded-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-0 bg-surface-container-high shadow-xl"
+        className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant bg-background"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="shrink-0 px-5 pt-5 pb-2">
-          <DialogTitle className="text-title-l text-foreground">
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
+          <p className={EYEBROW}>
+            {isNew ? "New expense" : "Edit expense"}
+          </p>
+          <DialogTitle className="sr-only">
             {transaction.category || (isNew ? "New expense" : "Edit expense")}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-5 py-3 overflow-y-auto flex-1 space-y-4">
-          {/* Hero amount input */}
-          <div className="space-y-1.5">
-            <label className="text-label-m text-muted-foreground">Amount</label>
-            <div className="flex items-baseline gap-2 bg-surface-container rounded-xl px-4 py-3">
-              <span className="font-mono text-title-l text-muted-foreground">₹</span>
-              <Input
+        <div className="px-6 pt-4 pb-3 overflow-y-auto flex-1 space-y-7">
+          <div>
+            <div className="flex items-baseline gap-2 border-b border-outline-variant/60 pb-3">
+              <span className="font-mono text-muted-foreground text-[28px] leading-none">₹</span>
+              <input
                 id="amount"
                 type="text"
                 inputMode="text"
                 placeholder="0"
-                className="flex-1 font-mono text-title-l text-foreground bg-transparent border-0 px-0 h-auto py-0 placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:border-0"
+                className="flex-1 font-mono tabular-nums text-[40px] leading-none tracking-[-0.03em] text-foreground bg-transparent outline-none placeholder:text-muted-foreground/40"
                 value={amountInput}
                 onChange={(e) => handleAmountInputChange(e.target.value)}
                 onBlur={handleAmountBlur}
@@ -230,8 +228,8 @@ export function TransactionDialog({
               />
               {isExpression && (
                 <span
-                  className={`font-mono text-label-m ${
-                    evaluatedAmount !== null ? "text-foreground" : "text-destructive"
+                  className={`font-mono text-[12px] ${
+                    evaluatedAmount !== null ? "text-muted-foreground" : "text-destructive"
                   }`}
                 >
                   {evaluatedAmount !== null ? `= ${evaluatedAmount}` : "?"}
@@ -240,9 +238,8 @@ export function TransactionDialog({
             </div>
           </div>
 
-          {/* Category strip */}
-          <div className="space-y-1.5">
-            <label className="text-label-m text-muted-foreground">Category</label>
+          <div>
+            <p className={`${EYEBROW} mb-3`}>Category</p>
             <div
               className="grid gap-1.5"
               style={{ gridTemplateColumns: `repeat(${EXPENSE_CATEGORIES.length}, minmax(0, 1fr))` }}
@@ -250,7 +247,6 @@ export function TransactionDialog({
               {EXPENSE_CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 const isSelected = transaction.category === cat.name;
-                const pastel = CATEGORY_PASTEL_COLORS[cat.name] || "bg-pastel-blue";
                 return (
                   <button
                     key={cat.name}
@@ -259,20 +255,19 @@ export function TransactionDialog({
                     disabled={saving}
                     aria-label={cat.name}
                     aria-pressed={isSelected}
-                    className={`h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${pastel} ${
+                    className={`h-9 border rounded-md flex items-center justify-center transition-colors active:scale-95 ${
                       isSelected
-                        ? "ring-2 ring-primary text-foreground"
-                        : "text-foreground/70"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-outline-variant text-muted-foreground hover:text-foreground hover:border-foreground/30"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Need/Want segmented pill — shown only when category selected */}
           <AnimatePresence initial={false}>
             {transaction.category && (
               <motion.div
@@ -282,65 +277,61 @@ export function TransactionDialog({
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="space-y-1.5">
-                  <label className="text-label-m text-muted-foreground">Budget type</label>
-                  <div className="flex bg-surface-container rounded-full p-0.5">
-                    {(["need", "want"] as const).map((type) => {
-                      const isActive = effectiveBudgetType === type;
-                      return (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => {
-                            const newBudgetType = type === autoBudgetType ? null : type;
-                            onChange({ ...transaction, budget_type: newBudgetType });
-                          }}
-                          disabled={saving}
-                          className={`flex-1 rounded-full py-1.5 text-label-m capitalize transition-colors ${
-                            isActive
-                              ? "bg-primary text-primary-foreground"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {type}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <p className={`${EYEBROW} mb-3`}>Budget type</p>
+                <div className="grid grid-cols-2 border-y border-outline-variant divide-x divide-outline-variant">
+                  {(["need", "want"] as const).map((type) => {
+                    const isActive = effectiveBudgetType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          const newBudgetType = type === autoBudgetType ? null : type;
+                          onChange({ ...transaction, budget_type: newBudgetType });
+                        }}
+                        disabled={saving}
+                        className={`h-9 text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Merchant */}
-          <div className="space-y-1.5">
-            <label className="text-label-m text-muted-foreground">Merchant</label>
-            <Input
+          <div>
+            <p className={`${EYEBROW} mb-2`}>Merchant</p>
+            <input
               placeholder="Amazon, Swiggy, Uber…"
-              className="h-11 text-body-m bg-surface-container border-0 rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary"
+              className="w-full h-10 text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none placeholder:text-muted-foreground/40"
               value={transaction.merchant || ""}
               onChange={(e) => onChange({ ...transaction, merchant: e.target.value })}
               disabled={saving}
             />
           </div>
 
-          {/* Date & Time */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1.5">
-              <label className="text-label-m text-muted-foreground">Date</label>
-              <Input
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className={`${EYEBROW} mb-2`}>Date</p>
+              <input
                 type="date"
-                className="h-11 text-body-m bg-surface-container border-0 rounded-xl px-3 focus-visible:ring-1 focus-visible:ring-primary"
+                className="w-full h-10 text-[14px] font-mono text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
                 value={transaction.date}
                 onChange={(e) => onChange({ ...transaction, date: e.target.value })}
                 disabled={saving}
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-label-m text-muted-foreground">Time</label>
-              <Input
+            <div>
+              <p className={`${EYEBROW} mb-2`}>Time</p>
+              <input
                 type="time"
-                className="h-11 text-body-m bg-surface-container border-0 rounded-xl px-3 focus-visible:ring-1 focus-visible:ring-primary"
+                className="w-full h-10 text-[14px] font-mono text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
                 value={transaction.time?.slice(0, 5) || ""}
                 onChange={(e) => handleTimeChange(e.target.value)}
                 disabled={saving}
@@ -348,20 +339,21 @@ export function TransactionDialog({
             </div>
           </div>
 
-          {/* Advanced — progressive disclosure */}
           <div>
             <button
               type="button"
               onClick={() => setShowAdvanced((s) => !s)}
-              className="w-full flex items-center justify-between py-2 text-label-l text-foreground"
+              className="w-full flex items-center justify-between text-muted-foreground hover:text-foreground transition-colors py-2"
             >
-              <span>More options</span>
-              <motion.span
-                animate={{ rotate: showAdvanced ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </motion.span>
+              <span className="text-[10px] uppercase tracking-[0.22em]">
+                More options
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  showAdvanced ? "rotate-180" : ""
+                }`}
+                strokeWidth={1.5}
+              />
             </button>
 
             <AnimatePresence initial={false}>
@@ -373,22 +365,22 @@ export function TransactionDialog({
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="space-y-3 pt-1">
-                    <div className="flex items-center justify-between gap-3">
+                  <div className="pt-3 space-y-4">
+                    <div className="flex items-center justify-between gap-3 py-2 border-b border-outline-variant/60">
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-m text-foreground">Spread over months</p>
+                        <p className="text-[13px] text-foreground">Spread over months</p>
                         {transaction.prorate_months && transaction.prorate_months > 1 && (
-                          <p className="text-label-s text-muted-foreground font-mono">
+                          <p className="font-mono text-[11px] text-muted-foreground">
                             {formatCurrency(transaction.amount / transaction.prorate_months)}/mo
                           </p>
                         )}
                       </div>
-                      <Input
+                      <input
                         type="number"
                         min="1"
                         max="60"
                         placeholder="1"
-                        className="h-9 w-16 text-center text-body-m font-mono bg-surface-container border-0 rounded-lg focus-visible:ring-1 focus-visible:ring-primary"
+                        className="h-8 w-14 text-center font-mono text-[14px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
                         value={transaction.prorate_months ?? ""}
                         onChange={(e) => handleProrateChange(e.target.value)}
                         onBlur={handleProrateBlur}
@@ -396,8 +388,8 @@ export function TransactionDialog({
                       />
                     </div>
 
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-body-m text-foreground">Exclude from budget</p>
+                    <div className="flex items-center justify-between gap-3 py-2 border-b border-outline-variant/60">
+                      <p className="text-[13px] text-foreground">Exclude from budget</p>
                       <Switch
                         checked={transaction.excluded_from_budget}
                         onCheckedChange={(checked) =>
@@ -412,9 +404,9 @@ export function TransactionDialog({
                         type="button"
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={saving || deleting}
-                        className="w-full flex items-center gap-2 py-2 text-label-l text-destructive active:opacity-70 disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 h-10 text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                         Delete transaction
                       </button>
                     )}
@@ -425,24 +417,23 @@ export function TransactionDialog({
           </div>
         </div>
 
-        {/* Footer actions */}
-        <div className="flex gap-2 px-5 pb-5 pt-2 shrink-0">
+        <div className="flex gap-2 px-6 pb-6 pt-3 shrink-0 border-t border-outline-variant">
           <button
             onClick={onClose}
             disabled={saving || deleting}
-            className="flex-1 h-11 rounded-full text-label-l text-primary disabled:opacity-50 active:scale-[0.98] transition-transform"
+            className="flex-1 h-11 rounded-lg border border-outline-variant text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
-            className="flex-1 h-11 rounded-full bg-primary text-primary-foreground text-label-l disabled:opacity-50 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+            className="flex-1 h-11 rounded-lg bg-primary text-primary-foreground text-[11px] uppercase tracking-[0.2em] transition-opacity active:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
           >
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving…
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Saving
               </>
             ) : (
               "Save"
@@ -451,29 +442,27 @@ export function TransactionDialog({
         </div>
       </DialogContent>
 
-      {/* Delete confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-sm rounded-3xl border-0 bg-surface-container-high shadow-xl p-6">
+        <AlertDialogContent className="max-w-sm rounded-2xl border border-outline-variant bg-background p-6">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-title-l text-foreground">
+            <p className={`${EYEBROW} mb-3`}>Confirm</p>
+            <AlertDialogTitle className="text-[20px] font-heading tracking-[-0.02em] text-foreground">
               Delete this transaction?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-body-m text-muted-foreground">
+            <AlertDialogDescription className="text-[13px] text-muted-foreground pt-1">
               {transaction.merchant ? (
                 <>
-                  Your record from{" "}
-                  <span className="text-foreground">{transaction.merchant}</span>{" "}
-                  will be removed. This can't be undone.
+                  Your record from <span className="text-foreground">{transaction.merchant}</span> will be removed permanently.
                 </>
               ) : (
-                "This record will be removed. This can't be undone."
+                "This record will be removed permanently."
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2 mt-4">
+          <AlertDialogFooter className="gap-2 sm:gap-2 mt-5">
             <AlertDialogCancel
               disabled={deleting}
-              className="rounded-full h-11 px-6 text-label-l text-primary border-0 bg-transparent"
+              className="rounded-lg h-11 px-5 border border-outline-variant bg-transparent text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
             >
               Cancel
             </AlertDialogCancel>
@@ -483,12 +472,12 @@ export function TransactionDialog({
                 setShowDeleteConfirm(false);
               }}
               disabled={deleting}
-              className="rounded-full h-11 px-6 bg-destructive text-primary-foreground text-label-l border-0"
+              className="rounded-lg h-11 px-5 bg-destructive text-background text-[11px] uppercase tracking-[0.2em] border-0"
             >
               {deleting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting…
+                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                  Deleting
                 </>
               ) : (
                 "Delete"

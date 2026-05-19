@@ -16,15 +16,15 @@ interface HealthTrackerProps {
 }
 
 const VIEW_ANIMATION = {
-  initial: { opacity: 0, x: -20 },
+  initial: { opacity: 0, x: -16 },
   animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: 20 },
-  transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  exit: { opacity: 0, x: 16 },
+  transition: { duration: 0.2, ease: [0.2, 0, 0, 1] as const },
 };
 
 function NutritionView() {
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="divide-y divide-zinc-300 dark:divide-zinc-700">
       <NutritionCard />
       <MealPlanner />
     </div>
@@ -33,7 +33,7 @@ function NutritionView() {
 
 function ShoppingView() {
   return (
-    <div className="p-4 flex flex-col h-full">
+    <div className="px-6 pt-6 pb-6 h-full flex flex-col">
       <ShoppingList />
     </div>
   );
@@ -53,21 +53,19 @@ export function HealthTracker({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header with TopTabs */}
-      <header className="shrink-0 vercel-header pb-3">
+      <header className="shrink-0 bg-background border-b border-zinc-300 dark:border-zinc-700">
         <TopTabs
           navItems={HEALTH_NAV_ITEMS}
           activeView={activeView}
           onViewChange={(view) => onViewChange(view as HealthView)}
           onGoHome={onGoHome}
-          title="Fitness"
+          title="Health"
         />
       </header>
 
-      {/* Main Content */}
       <main
         ref={swipeRef as React.RefObject<HTMLElement>}
-        className="flex-1 overflow-y-auto pb-4 overscroll-contain"
+        className="flex-1 overflow-y-auto pb-28 overscroll-contain"
       >
         <AnimatePresence mode="wait">
           {activeView === "nutrition" && (

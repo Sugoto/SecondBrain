@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Brain } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -41,47 +40,51 @@ export function LoginScreen() {
 
   return (
     <div className="h-[100dvh] w-full bg-background flex flex-col px-6">
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto gap-8">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="h-16 w-16 rounded-3xl bg-primary-container flex items-center justify-center">
-            <Brain className="h-8 w-8 text-on-primary-container" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-headline-l font-semibold tracking-tight text-foreground">
-              SecondBrain
-            </h1>
-            <p className="text-body-l text-muted-foreground max-w-xs">
-              A personal dashboard for fitness, finance, and study.
-            </p>
-          </div>
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto">
+        <Brain
+          className="h-9 w-9 text-foreground mb-10"
+          strokeWidth={1.25}
+        />
 
-        <div className="w-full flex flex-col gap-3">
+        <p className="text-[10px] uppercase tracking-[0.32em] text-muted-foreground mb-3">
+          SecondBrain
+        </p>
+
+        <h1 className="font-heading text-[44px] tracking-[-0.03em] leading-[1.05] text-foreground text-center mb-4">
+          A quieter way to track your life.
+        </h1>
+
+        <p className="text-[13px] text-muted-foreground/80 text-center max-w-[24ch] mb-12">
+          Fitness, finance, and study in one minimal place.
+        </p>
+
+        <div className="w-full">
           {error && (
             <p
-              className="text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/50 rounded-xl px-4 py-3"
+              className="text-[12px] text-destructive border border-destructive/30 rounded-md px-3 py-2.5 mb-4"
               role="alert"
             >
               {error}
             </p>
           )}
 
-          <Button
+          <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={submitting}
-            className="w-full"
+            className="w-full h-12 flex items-center justify-center gap-3 bg-foreground text-background text-[11px] uppercase tracking-[0.22em] rounded-lg transition-opacity active:opacity-90 disabled:opacity-30"
           >
             <GoogleIcon className="h-4 w-4" />
-            {submitting ? "Redirecting…" : "Continue with Google"}
-          </Button>
+            {submitting ? "Redirecting" : "Continue with Google"}
+          </button>
         </div>
       </div>
 
-      <footer className="shrink-0 text-center pb-6 pt-4">
-        <p className="text-xs text-muted-foreground tracking-wide font-medium">
-          {CURRENT_YEAR} •{" "}
-          <span className="font-bold text-foreground">Sugoto Basu</span>
+      <footer className="shrink-0 text-center pb-8 pt-4">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+          {CURRENT_YEAR}
+          <span className="mx-2 text-muted-foreground/30">·</span>
+          <span className="text-muted-foreground">Sugoto Basu</span>
         </p>
       </footer>
     </div>

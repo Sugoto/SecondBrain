@@ -7,6 +7,7 @@ export interface NavItem {
   icon: React.ComponentType<{
     className?: string;
     style?: React.CSSProperties;
+    strokeWidth?: number | string;
   }>;
   label: string;
   color?: string;
@@ -33,10 +34,10 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   return createPortal(
     <nav
       aria-label="Primary"
-      className="md:hidden fixed left-3 right-3 z-[9999] no-view-transition rounded-3xl border border-outline-variant bg-surface-container"
-      style={{ bottom: "max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))" }}
+      className="md:hidden fixed inset-x-0 bottom-0 z-[9999] no-view-transition bg-background border-t border-outline-variant"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      <div className="flex h-16 items-center px-1.5">
+      <div className="flex h-14">
         {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
@@ -47,12 +48,12 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
             }}
             onPointerEnter={() => onPrefetch?.(id)}
             aria-label={label}
-            className="group flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors active:scale-95"
+            className="group flex flex-1 flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-[0.97]"
           >
-            <span className="flex h-7 min-w-14 items-center justify-center rounded-full px-4 text-foreground transition-colors">
-              <Icon className="h-5 w-5" />
+            <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            <span className="text-[9px] uppercase tracking-[0.2em] leading-none">
+              {label}
             </span>
-            <span className="text-label-s text-foreground">{label}</span>
           </button>
         ))}
       </div>

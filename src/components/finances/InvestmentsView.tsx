@@ -21,24 +21,31 @@ export function InvestmentsView() {
 
   const dailySalary = userStats?.monthly_income ? userStats.monthly_income / 22 : 0;
 
+  const divider = "border-t border-zinc-300 dark:border-zinc-700";
   return (
-    <div className="pb-3 pt-3 px-3">
+    <div className="max-w-6xl mx-auto">
       <NetWorthCard
         netWorth={netWorth}
         monthlyIncome={userStats?.monthly_income ?? null}
       />
-
-      <div className="max-w-6xl mx-auto pt-3 flex flex-col gap-3">
+      <div className={divider}>
         <SalaryChart theme={theme} />
-
+      </div>
+      <div className={divider}>
         <WealthDistributionChart userStats={userStats} theme={theme} />
-
+      </div>
+      <div className={divider}>
         <MutualFundWatchlist />
-
+      </div>
+      <div className={divider}>
         <ProvidentFundSection userStats={userStats} theme={theme} />
-
-        {dailySalary > 0 && <CostCalculator dailySalary={dailySalary} />}
-
+      </div>
+      {dailySalary > 0 && (
+        <div className={divider}>
+          <CostCalculator dailySalary={dailySalary} />
+        </div>
+      )}
+      <div className={divider}>
         <Footer />
       </div>
     </div>
