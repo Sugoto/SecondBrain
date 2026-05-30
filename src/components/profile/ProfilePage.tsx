@@ -47,6 +47,7 @@ interface ProfilePageProps {
 type FormState = {
   bank_savings: number;
   mutual_funds: number;
+  fixed_deposits: number;
   ppf: number;
   epf: number;
   monthly_income: number;
@@ -63,6 +64,7 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   bank_savings: 0,
   mutual_funds: 0,
+  fixed_deposits: 0,
   ppf: 0,
   epf: 0,
   monthly_income: 0,
@@ -81,6 +83,7 @@ function fromUserStats(stats: UserStats | null | undefined): FormState {
   return {
     bank_savings: stats.bank_savings,
     mutual_funds: stats.mutual_funds,
+    fixed_deposits: stats.fixed_deposits ?? 0,
     ppf: stats.ppf,
     epf: stats.epf,
     monthly_income: stats.monthly_income ?? 0,
@@ -310,6 +313,7 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
           {[
             { key: "bank_savings", label: "Bank Savings" },
             { key: "mutual_funds", label: "Mutual Funds" },
+            { key: "fixed_deposits", label: "Fixed Deposits" },
             { key: "ppf", label: "PPF" },
             { key: "epf", label: "EPF" },
             { key: "monthly_income", label: "Monthly Salary" },

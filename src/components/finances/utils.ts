@@ -7,7 +7,13 @@ import type { TimeFilter, DateRange } from "./types";
 
 export function calculateNetWorth(stats: UserStats | null): number {
   if (!stats) return 0;
-  return stats.bank_savings + stats.mutual_funds + stats.ppf + stats.epf;
+  return (
+    stats.bank_savings +
+    stats.mutual_funds +
+    stats.fixed_deposits +
+    stats.ppf +
+    stats.epf
+  );
 }
 
 // Proration helpers

@@ -36,6 +36,7 @@ export type UserStats = {
   id: string;
   bank_savings: number;
   mutual_funds: number;
+  fixed_deposits: number;
   ppf: number;
   epf: number;
   monthly_income: number | null;
