@@ -63,7 +63,7 @@ export function useWorkouts() {
   );
 
   const addWorkout = useCallback(
-    async (values: { name: string; max_weight: number; unit: "kg" | "lb" }) => {
+    async (values: { name: string; max_weight: number; session: "push" | "pull" | "legs"; muscle_group?: string }) => {
       const { data, error: insertError } = await supabase
         .from("workouts")
         .insert(values)
@@ -72,9 +72,7 @@ export function useWorkouts() {
 
       if (insertError) throw insertError;
       if (data) {
-        applyWorkouts((prev) =>
-          [...prev, data].sort((a, b) => b.max_weight - a.max_weight),
-        );
+        applyWorkouts((prev) => [...prev, data]);
       }
       return data;
     },
@@ -84,7 +82,7 @@ export function useWorkouts() {
   const updateWorkout = useCallback(
     async (
       id: string,
-      values: { name?: string; max_weight?: number; unit?: "kg" | "lb" },
+      values: { name?: string; max_weight?: number; muscle_group?: string },
     ) => {
       const { error: updateError } = await supabase
         .from("workouts")
@@ -93,9 +91,7 @@ export function useWorkouts() {
 
       if (updateError) throw updateError;
       applyWorkouts((prev) =>
-        prev
-          .map((w) => (w.id === id ? { ...w, ...values } : w))
-          .sort((a, b) => b.max_weight - a.max_weight),
+        prev.map((w) => (w.id === id ? { ...w, ...values } : w)),
       );
     },
     [applyWorkouts],

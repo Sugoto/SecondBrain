@@ -14,11 +14,7 @@ interface WorkoutDialogProps {
   open: boolean;
   initial?: Workout | null;
   onClose: () => void;
-  onSubmit: (values: {
-    name: string;
-    max_weight: number;
-    unit: "kg" | "lb";
-  }) => Promise<void>;
+  onSubmit: (values: { name: string; max_weight: number; muscle_group: string }) => Promise<void>;
   onDelete?: () => Promise<void>;
   isSubmitting: boolean;
 }
@@ -33,18 +29,18 @@ export function WorkoutDialog({
 }: WorkoutDialogProps) {
   const [name, setName] = useState("");
   const [weight, setWeight] = useState("");
-  const [unit, setUnit] = useState<"kg" | "lb">("kg");
+  const [muscleGroup, setMuscleGroup] = useState("");
 
   useEffect(() => {
     if (!open) return;
     if (initial) {
       setName(initial.name);
       setWeight(initial.max_weight.toString());
-      setUnit(initial.unit);
+      setMuscleGroup(initial.muscle_group ?? "");
     } else {
       setName("");
       setWeight("");
-      setUnit("kg");
+      setMuscleGroup("");
     }
   }, [open, initial]);
 
@@ -53,7 +49,7 @@ export function WorkoutDialog({
     if (!name.trim()) return;
     const parsed = parseFloat(weight);
     if (isNaN(parsed) || parsed < 0) return;
-    await onSubmit({ name: name.trim(), max_weight: parsed, unit });
+    await onSubmit({ name: name.trim(), max_weight: parsed, muscle_group: muscleGroup.trim() });
   };
 
   const title = initial ? "Edit workout" : "New workout";
@@ -87,6 +83,21 @@ export function WorkoutDialog({
             </div>
 
             <div>
+              <p className={`${EYEBROW} mb-2`}>Muscle group</p>
+              <select
+                value={muscleGroup}
+                onChange={(e) => setMuscleGroup(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full h-10 text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
+              >
+                <option value="">— Select</option>
+                {["Back", "Biceps", "Calves", "Chest", "Core", "Forearms", "Hamstrings", "Quads", "Rear Delts", "Shoulders", "Triceps"].map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <p className={`${EYEBROW} mb-2`}>Current max</p>
               <div className="flex items-baseline gap-2 border-b border-outline-variant/60 pb-2">
                 <input
@@ -98,23 +109,7 @@ export function WorkoutDialog({
                   disabled={isSubmitting}
                   className="flex-1 font-mono tabular-nums text-[40px] leading-none tracking-[-0.03em] text-foreground bg-transparent outline-none placeholder:text-muted-foreground/40"
                 />
-                <div className="grid grid-cols-2 border-y border-outline-variant divide-x divide-outline-variant">
-                  {(["kg", "lb"] as const).map((u) => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => setUnit(u)}
-                      disabled={isSubmitting}
-                      className={`h-8 w-12 text-[10px] uppercase tracking-wider transition-colors ${
-                        unit === u
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {u}
-                    </button>
-                  ))}
-                </div>
+                <span className="text-[13px] text-muted-foreground">kg</span>
               </div>
             </div>
 

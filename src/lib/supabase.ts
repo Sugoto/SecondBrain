@@ -84,7 +84,8 @@ export type Workout = {
   id: string;
   name: string;
   max_weight: number;
-  unit: "kg" | "lb";
+  session: "push" | "pull" | "legs";
+  muscle_group: string | null;
   created_at: string;
   updated_at: string;
 };
