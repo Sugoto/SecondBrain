@@ -47,6 +47,7 @@ interface ProfilePageProps {
 type FormState = {
   bank_savings: number;
   mutual_funds: number;
+  us_etfs: number;
   fixed_deposits: number;
   ppf: number;
   epf: number;
@@ -64,6 +65,7 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   bank_savings: 0,
   mutual_funds: 0,
+  us_etfs: 0,
   fixed_deposits: 0,
   ppf: 0,
   epf: 0,
@@ -83,6 +85,7 @@ function fromUserStats(stats: UserStats | null | undefined): FormState {
   return {
     bank_savings: stats.bank_savings,
     mutual_funds: stats.mutual_funds,
+    us_etfs: stats.us_etfs ?? 0,
     fixed_deposits: stats.fixed_deposits ?? 0,
     ppf: stats.ppf,
     epf: stats.epf,
@@ -196,6 +199,7 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
   }, [
     stats?.bank_savings,
     stats?.mutual_funds,
+    stats?.us_etfs,
     stats?.ppf,
     stats?.epf,
     stats?.monthly_income,
@@ -312,7 +316,8 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
           <p className={`${SECTION_LABEL} mb-1`}>Assets</p>
           {[
             { key: "bank_savings", label: "Bank Savings" },
-            { key: "mutual_funds", label: "Mutual Funds" },
+            { key: "mutual_funds", label: "IND Mutual Funds" },
+            { key: "us_etfs", label: "US ETFs" },
             { key: "fixed_deposits", label: "Fixed Deposits" },
             { key: "ppf", label: "PPF" },
             { key: "epf", label: "EPF" },

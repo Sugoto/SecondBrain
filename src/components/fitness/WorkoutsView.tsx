@@ -98,7 +98,14 @@ export function WorkoutsView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Workout | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [orderOverrides, setOrderOverrides] = useState<Record<string, string[]>>({});
+  const [orderOverrides, setOrderOverrides] = useState<Record<string, string[]>>(() => {
+    try {
+      const stored = localStorage.getItem("workout-order");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -149,7 +156,7 @@ export function WorkoutsView() {
   const session = DAYS[activeDay].session.toLowerCase() as "push" | "pull" | "legs";
 
   const filtered = workouts.filter((w) => w.session === session);
-  const orderKey = session;
+  const orderKey = `${DAYS[activeDay].label}-${session}`;
   const order = orderOverrides[orderKey];
   const sorted = order
     ? [...filtered].sort((a, b) => {
@@ -165,10 +172,11 @@ export function WorkoutsView() {
     const ids = sorted.map((w) => w.id);
     const oldIndex = ids.indexOf(active.id as string);
     const newIndex = ids.indexOf(over.id as string);
-    setOrderOverrides((prev) => ({
-      ...prev,
-      [orderKey]: arrayMove(ids, oldIndex, newIndex),
-    }));
+    setOrderOverrides((prev) => {
+      const next = { ...prev, [orderKey]: arrayMove(ids, oldIndex, newIndex) };
+      try { localStorage.setItem("workout-order", JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
 
   return (
