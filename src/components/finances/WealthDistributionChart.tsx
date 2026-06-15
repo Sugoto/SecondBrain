@@ -7,7 +7,6 @@ const ASSET_CONFIG = [
   { key: "bank_savings" as const, label: "Bank Savings" },
   { key: "mutual_funds" as const, label: "IND Mutual Funds" },
   { key: "us_etfs" as const, label: "US ETFs" },
-  { key: "fixed_deposits" as const, label: "Fixed Deposits" },
   { key: "ppf" as const, label: "PPF" },
   { key: "epf" as const, label: "EPF" },
 ] as const;

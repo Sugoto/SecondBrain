@@ -11,7 +11,6 @@ export function calculateNetWorth(stats: UserStats | null): number {
     stats.bank_savings +
     stats.mutual_funds +
     stats.us_etfs +
-    stats.fixed_deposits +
     stats.ppf +
     stats.epf
   );
