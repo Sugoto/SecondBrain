@@ -58,12 +58,26 @@ function SegmentedBudgetBar({
       <div className="max-w-6xl mx-auto px-6 pt-3 pb-3">
         <div className="grid grid-cols-2 divide-x divide-outline-variant/60 mb-3">
           {[
-            { type: "need" as const, label: "Needs", spent: budgetInfo.needsSpent, percent: needsPercent },
-            { type: "want" as const, label: "Wants", spent: budgetInfo.wantsSpent, percent: wantsPercent },
+            {
+              type: "need" as const,
+              label: "Needs",
+              spent: budgetInfo.needsSpent,
+              budget: budgetInfo.needsBudget,
+              percent: needsPercent,
+            },
+            {
+              type: "want" as const,
+              label: "Wants",
+              spent: budgetInfo.wantsSpent,
+              budget: budgetInfo.wantsBudget,
+              percent: wantsPercent,
+            },
           ].map((b, i) => {
             const isActive = budgetTypeFilter === b.type;
             const isMuted = budgetTypeFilter && budgetTypeFilter !== b.type;
-            const isOver = b.percent > 100;
+            const hasBudget = b.budget > 0;
+            const remaining = b.budget - b.spent;
+            const isOver = hasBudget && remaining < 0;
             return (
               <button
                 key={b.type}
@@ -86,7 +100,10 @@ function SegmentedBudgetBar({
                       isOver ? "text-destructive" : "text-foreground"
                     }`}
                   >
-                    {formatCurrency(b.spent)}
+                    {formatCurrency(hasBudget ? Math.abs(remaining) : b.spent)}
+                    <span className="ml-1 font-sans text-[9px] uppercase tracking-wider">
+                      {!hasBudget ? "spent" : isOver ? "over" : "left"}
+                    </span>
                   </span>
                 </div>
                 <div className="h-[2px] rounded-full overflow-hidden bg-outline-variant/40">
