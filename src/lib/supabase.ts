@@ -5,20 +5,17 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type BudgetType = "need" | "want";
-
 export type Transaction = {
   id: string;
   amount: number;
   merchant: string | null;
   date: string;
   time: string | null;
-  category: string | null;
+  value_rating: number | null; // 1-5, how worth-it the purchase felt
   excluded_from_budget: boolean;
   details: string | null;
   created_at: string;
   prorate_months: number | null;
-  budget_type: BudgetType | null; // null = auto-assign based on category
 };
 
 export type Investment = {
@@ -40,8 +37,7 @@ export type UserStats = {
   ppf: number;
   epf: number;
   monthly_income: number | null;
-  needs_budget: number | null;
-  wants_budget: number | null;
+  monthly_budget: number | null;
   height_cm: number | null;
   weight_kg: number | null;
   age: number | null;

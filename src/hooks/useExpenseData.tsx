@@ -173,11 +173,10 @@ export function useExpenseData() {
           merchant: transaction.merchant,
           date: transaction.date,
           time: transaction.time,
-          category: transaction.category,
+          value_rating: transaction.value_rating,
           excluded_from_budget: transaction.excluded_from_budget,
           details: transaction.details,
           prorate_months: transaction.prorate_months,
-          budget_type: transaction.budget_type,
         })
         .eq("id", transaction.id);
 

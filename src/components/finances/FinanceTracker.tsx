@@ -5,12 +5,8 @@ import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
-import {
-  getTransactionBudgetType,
-  EXCLUDED_CATEGORIES,
-} from "./constants";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
-import { calculateBudgetTypeInfo } from "./utils";
+import { calculateBudgetInfo } from "./utils";
 import { TopTabs } from "@/components/navigation/TopTabs";
 import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
 
@@ -27,112 +23,47 @@ import type { TimeFilter, ActiveView, DateRange } from "./types";
 import {
   filterByTimeRange,
   sortTransactions,
-  getCategoryTotals,
-  getCategoryTotalsByBudgetType,
+  getValueRatingTotals,
   createEmptyTransaction,
 } from "./utils";
 
-function SegmentedBudgetBar({
+function BudgetBar({
   budgetInfo,
-  totalExpenses,
-  budgetTypeFilter,
-  onBudgetTypeFilterChange,
 }: {
-  budgetInfo: ReturnType<typeof calculateBudgetTypeInfo>;
-  totalExpenses: number;
-  budgetTypeFilter: "need" | "want" | null;
-  onBudgetTypeFilterChange: (filter: "need" | "want" | null) => void;
+  budgetInfo: ReturnType<typeof calculateBudgetInfo>;
 }) {
   const formatCurrency = useFormatCurrency();
-  const wantsPercent =
-    budgetInfo.wantsBudget > 0
-      ? (budgetInfo.wantsSpent / budgetInfo.wantsBudget) * 100
-      : 0;
-  const needsPercent =
-    budgetInfo.needsBudget > 0
-      ? (budgetInfo.needsSpent / budgetInfo.needsBudget) * 100
-      : 0;
+  const hasBudget = budgetInfo.budget > 0;
+  const remaining = budgetInfo.budget - budgetInfo.spent;
+  const isOver = hasBudget && remaining < 0;
+  const percent = hasBudget ? (budgetInfo.spent / budgetInfo.budget) * 100 : 0;
 
   return (
     <div className="sticky top-0 z-30 bg-background border-y border-zinc-300 dark:border-zinc-700">
       <div className="max-w-6xl mx-auto px-6 pt-3 pb-3">
-        <div className="grid grid-cols-2 divide-x divide-outline-variant/60 mb-3">
-          {[
-            {
-              type: "need" as const,
-              label: "Needs",
-              spent: budgetInfo.needsSpent,
-              budget: budgetInfo.needsBudget,
-              percent: needsPercent,
-            },
-            {
-              type: "want" as const,
-              label: "Wants",
-              spent: budgetInfo.wantsSpent,
-              budget: budgetInfo.wantsBudget,
-              percent: wantsPercent,
-            },
-          ].map((b, i) => {
-            const isActive = budgetTypeFilter === b.type;
-            const isMuted = budgetTypeFilter && budgetTypeFilter !== b.type;
-            const hasBudget = b.budget > 0;
-            const remaining = b.budget - b.spent;
-            const isOver = hasBudget && remaining < 0;
-            return (
-              <button
-                key={b.type}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBudgetTypeFilterChange(isActive ? null : b.type);
-                }}
-                className={`text-left transition-opacity ${
-                  i === 0 ? "pr-4" : "pl-4"
-                } ${isMuted ? "opacity-40" : ""}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`text-[9px] uppercase tracking-wider ${
-                    isActive ? "text-foreground" : "text-muted-foreground"
-                  }`}>
-                    {b.label}
-                  </span>
-                  <span
-                    className={`font-mono tabular-nums text-[12px] ${
-                      isOver ? "text-destructive" : "text-foreground"
-                    }`}
-                  >
-                    {formatCurrency(hasBudget ? Math.abs(remaining) : b.spent)}
-                    <span className="ml-1 font-sans text-[9px] uppercase tracking-wider">
-                      {!hasBudget ? "spent" : isOver ? "over" : "left"}
-                    </span>
-                  </span>
-                </div>
-                <div className="h-[2px] rounded-full overflow-hidden bg-outline-variant/40">
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: Math.min(b.percent, 100) / 100 }}
-                    transition={{ duration: 0.4, ease: [0.2, 0, 0, 1], delay: i * 0.05 }}
-                    style={{ transformOrigin: "left" }}
-                    className={`h-full ${isOver ? "bg-destructive" : "bg-foreground"}`}
-                  />
-                </div>
-              </button>
-            );
-          })}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+            Budget
+          </span>
+          <span
+            className={`font-mono tabular-nums text-[12px] ${
+              isOver ? "text-destructive" : "text-foreground"
+            }`}
+          >
+            {formatCurrency(hasBudget ? Math.abs(remaining) : budgetInfo.spent)}
+            <span className="ml-1 font-sans text-[9px] uppercase tracking-wider">
+              {!hasBudget ? "spent" : isOver ? "over" : "left"}
+            </span>
+          </span>
         </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Total</span>
-            <span className="font-mono tabular-nums text-[13px] text-foreground">
-              {formatCurrency(totalExpenses)}
-            </span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Budgeted</span>
-            <span className="font-mono tabular-nums text-[13px] text-foreground">
-              {formatCurrency(budgetInfo.needsSpent + budgetInfo.wantsSpent)}
-            </span>
-          </div>
+        <div className="h-[2px] rounded-full overflow-hidden bg-outline-variant/40">
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: Math.min(percent, 100) / 100 }}
+            transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
+            style={{ transformOrigin: "left" }}
+            className={`h-full ${isOver ? "bg-destructive" : "bg-foreground"}`}
+          />
         </div>
       </div>
     </div>
@@ -171,11 +102,8 @@ export function FinanceTracker({
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
-  const [budgetTypeFilter, setBudgetTypeFilter] = useState<
-    "need" | "want" | null
-  >(null);
 
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
@@ -203,11 +131,10 @@ export function FinanceTracker({
             merchant: updated.merchant || null,
             date: updated.date,
             time: updated.time,
-            category: updated.category || null,
+            value_rating: updated.value_rating,
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details || null,
             prorate_months: updated.prorate_months || null,
-            budget_type: updated.budget_type,
           })
           .select()
           .single();
@@ -224,11 +151,10 @@ export function FinanceTracker({
             merchant: updated.merchant,
             date: updated.date,
             time: updated.time,
-            category: updated.category,
+            value_rating: updated.value_rating,
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details,
             prorate_months: updated.prorate_months || null,
-            budget_type: updated.budget_type,
           })
           .eq("id", updated.id);
 
@@ -282,40 +208,19 @@ export function FinanceTracker({
   }
 
   const filteredTransactions = useMemo(() => {
-    const disableProrationSpreading = !budgetTypeFilter;
-    
-    let result = filterByTimeRange(
+    const result = filterByTimeRange(
       transactions,
       timeFilter,
       customDateRange,
-      { disableProrationSpreading }
+      { disableProrationSpreading: true }
     );
 
-    if (budgetTypeFilter) {
-      result = result.filter((t) => {
-        const txnBudgetType = getTransactionBudgetType(
-          t.category,
-          t.budget_type
-        );
-        return txnBudgetType === budgetTypeFilter;
-      });
-    }
-
     return sortTransactions(result, "date", "desc");
-  }, [transactions, timeFilter, customDateRange, budgetTypeFilter]);
+  }, [transactions, timeFilter, customDateRange]);
 
-  const categoryTotals = useMemo(
+  const valueRatingTotals = useMemo(
     () =>
-      getCategoryTotals(transactions, timeFilter, {
-        customRange: customDateRange,
-        disableProrationSpreading: true,
-      }),
-    [transactions, timeFilter, customDateRange]
-  );
-
-  const categoryTotalsByBudgetType = useMemo(
-    () =>
-      getCategoryTotalsByBudgetType(transactions, timeFilter, {
+      getValueRatingTotals(transactions, timeFilter, {
         excludeBudgetExcluded: true,
         customRange: customDateRange,
         disableProrationSpreading: true,
@@ -323,33 +228,9 @@ export function FinanceTracker({
     [transactions, timeFilter, customDateRange]
   );
 
-  const budgetTypeInfo = useMemo(() => {
-    return calculateBudgetTypeInfo(
-      transactions,
-      userStats?.needs_budget,
-      userStats?.wants_budget
-    );
-  }, [transactions, userStats?.needs_budget, userStats?.wants_budget]);
-
-  const totalExpenses = useMemo(() => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const monthTransactions = filterByTimeRange(
-      transactions,
-      timeFilter,
-      customDateRange,
-      { disableProrationSpreading: true }
-    );
-    
-    return monthTransactions
-      .filter((t) => {
-        if (t.category && EXCLUDED_CATEGORIES.includes(t.category)) return false;
-        const txnDate = new Date(t.date);
-        return txnDate >= startOfMonth;
-      })
-      .reduce((sum, t) => sum + t.amount, 0);
-  }, [transactions, timeFilter, customDateRange]);
+  const budgetInfo = useMemo(() => {
+    return calculateBudgetInfo(transactions, userStats?.monthly_budget);
+  }, [transactions, userStats?.monthly_budget]);
 
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden">
@@ -380,14 +261,7 @@ export function FinanceTracker({
         className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-28 md:pb-0 pt-[112px] md:pt-0"
         {...swipeHandlers}
       >
-        {activeView === "expenses" && (
-          <SegmentedBudgetBar
-            budgetInfo={budgetTypeInfo}
-            totalExpenses={totalExpenses}
-            budgetTypeFilter={budgetTypeFilter}
-            onBudgetTypeFilterChange={setBudgetTypeFilter}
-          />
-        )}
+        {activeView === "expenses" && <BudgetBar budgetInfo={budgetInfo} />}
 
         <AnimatePresence mode="wait">
           {activeView === "investments" && (
@@ -407,10 +281,9 @@ export function FinanceTracker({
             <motion.div key="trends" {...VIEW_ANIMATION}>
               <Suspense fallback={null}>
                 <TrendsView
-                  categoryTotals={categoryTotals}
-                  categoryTotalsByBudgetType={categoryTotalsByBudgetType}
-                  expandedCategory={expandedCategory}
-                  onToggleCategory={setExpandedCategory}
+                  valueRatingTotals={valueRatingTotals}
+                  expandedGroup={expandedGroup}
+                  onToggleGroup={setExpandedGroup}
                   onTransactionClick={handleEditTransaction}
                 />
               </Suspense>

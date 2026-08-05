@@ -51,8 +51,7 @@ type FormState = {
   ppf: number;
   epf: number;
   monthly_income: number;
-  needs_budget: number;
-  wants_budget: number;
+  monthly_budget: number;
   height_cm: number | null;
   weight_kg: number | null;
   age: number | null;
@@ -68,8 +67,7 @@ const EMPTY_FORM: FormState = {
   ppf: 0,
   epf: 0,
   monthly_income: 0,
-  needs_budget: 0,
-  wants_budget: 0,
+  monthly_budget: 0,
   height_cm: null,
   weight_kg: null,
   age: null,
@@ -87,8 +85,7 @@ function fromUserStats(stats: UserStats | null | undefined): FormState {
     ppf: stats.ppf,
     epf: stats.epf,
     monthly_income: stats.monthly_income ?? 0,
-    needs_budget: stats.needs_budget ?? 0,
-    wants_budget: stats.wants_budget ?? 0,
+    monthly_budget: stats.monthly_budget ?? 0,
     height_cm: stats.height_cm,
     weight_kg: stats.weight_kg,
     age: stats.age,
@@ -200,8 +197,7 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
     stats?.ppf,
     stats?.epf,
     stats?.monthly_income,
-    stats?.needs_budget,
-    stats?.wants_budget,
+    stats?.monthly_budget,
     stats?.height_cm,
     stats?.weight_kg,
     stats?.age,
@@ -335,18 +331,13 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
         </section>
 
         <section className="px-6 pt-7 pb-2 border-b border-outline-variant">
-          <p className={`${SECTION_LABEL} mb-1`}>Budgets</p>
-          {[
-            { key: "needs_budget", label: "Needs" },
-            { key: "wants_budget", label: "Wants" },
-          ].map((row) => (
-            <Field key={row.key} label={row.label}>
-              <NumberField
-                value={form[row.key as keyof FormState] as number}
-                onChange={setNumber(row.key as keyof FormState)}
-              />
-            </Field>
-          ))}
+          <p className={`${SECTION_LABEL} mb-1`}>Budget</p>
+          <Field label="Monthly Budget">
+            <NumberField
+              value={form.monthly_budget}
+              onChange={setNumber("monthly_budget")}
+            />
+          </Field>
         </section>
 
         <section className="px-6 pt-7 pb-10 border-b border-outline-variant">

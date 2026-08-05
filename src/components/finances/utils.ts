@@ -1,8 +1,4 @@
 import type { Transaction, UserStats } from "@/lib/supabase";
-import {
-  EXPENSE_CATEGORIES,
-  getTransactionBudgetType,
-} from "./constants";
 import type { TimeFilter, DateRange } from "./types";
 
 export function calculateNetWorth(stats: UserStats | null): number {
@@ -146,18 +142,21 @@ export function sortTransactions(
   });
 }
 
-// Category aggregation
-export type CategoryTotal = {
+// Grouped totals (used for value-rating breakdown)
+export type GroupTotal = {
   total: number;
   count: number;
   transactions: Transaction[];
 };
 
-export function getCategoryTotals(
+// Value rating buckets, highest to lowest, with "Unrated" last
+export const VALUE_RATING_KEYS = ["5", "4", "3", "2", "1", "Unrated"] as const;
+
+export function getValueRatingTotals(
   transactions: Transaction[],
   timeFilter: TimeFilter,
   options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange; disableProrationSpreading?: boolean },
-): Record<string, CategoryTotal> {
+): Record<string, GroupTotal> {
   const filtered = filterByTimeRange(
     transactions,
     timeFilter,
@@ -165,11 +164,10 @@ export function getCategoryTotals(
     { disableProrationSpreading: options?.disableProrationSpreading },
   );
 
-  const totals: Record<string, CategoryTotal> = {};
-  EXPENSE_CATEGORIES.forEach((cat) => {
-    totals[cat.name] = { total: 0, count: 0, transactions: [] };
+  const totals: Record<string, GroupTotal> = {};
+  VALUE_RATING_KEYS.forEach((key) => {
+    totals[key] = { total: 0, count: 0, transactions: [] };
   });
-  totals["Uncategorized"] = { total: 0, count: 0, transactions: [] };
 
   filtered.forEach((txn) => {
     // Skip budget-excluded transactions if option is set
@@ -177,72 +175,15 @@ export function getCategoryTotals(
       return;
     }
 
-    const cat = txn.category || "Uncategorized";
-    if (totals[cat]) {
-      // Use full amount when proration spreading is disabled, otherwise prorated amount
-      const amount = options?.disableProrationSpreading ? txn.amount : getMonthlyAmount(txn);
-      totals[cat].total += amount;
-      totals[cat].count += 1;
-      totals[cat].transactions.push(txn);
-    }
+    const key = txn.value_rating ? String(txn.value_rating) : "Unrated";
+    // Use full amount when proration spreading is disabled, otherwise prorated amount
+    const amount = options?.disableProrationSpreading ? txn.amount : getMonthlyAmount(txn);
+    totals[key].total += amount;
+    totals[key].count += 1;
+    totals[key].transactions.push(txn);
   });
 
   return totals;
-}
-
-// Get category totals grouped by budget type (needs vs wants)
-// This considers manual budget_type overrides on individual transactions
-export type CategoryTotalsByBudgetType = {
-  needs: Record<string, CategoryTotal>;
-  wants: Record<string, CategoryTotal>;
-};
-
-export function getCategoryTotalsByBudgetType(
-  transactions: Transaction[],
-  timeFilter: TimeFilter,
-  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange; disableProrationSpreading?: boolean },
-): CategoryTotalsByBudgetType {
-  const filtered = filterByTimeRange(
-    transactions,
-    timeFilter,
-    options?.customRange,
-    { disableProrationSpreading: options?.disableProrationSpreading },
-  );
-
-  const result: CategoryTotalsByBudgetType = {
-    needs: {},
-    wants: {},
-  };
-
-  // Initialize all categories in both buckets
-  EXPENSE_CATEGORIES.forEach((cat) => {
-    result.needs[cat.name] = { total: 0, count: 0, transactions: [] };
-    result.wants[cat.name] = { total: 0, count: 0, transactions: [] };
-  });
-  result.needs["Uncategorized"] = { total: 0, count: 0, transactions: [] };
-  result.wants["Uncategorized"] = { total: 0, count: 0, transactions: [] };
-
-  filtered.forEach((txn) => {
-    // Skip budget-excluded transactions if option is set
-    if (options?.excludeBudgetExcluded && txn.excluded_from_budget) {
-      return;
-    }
-
-    const cat = txn.category || "Uncategorized";
-    // Use the actual budget type (considering manual override)
-    const budgetType = getTransactionBudgetType(cat, txn.budget_type);
-    const bucket = budgetType === "need" ? result.needs : result.wants;
-
-    if (bucket[cat]) {
-      // Use full amount when proration spreading is disabled, otherwise prorated amount
-      const amount = options?.disableProrationSpreading ? txn.amount : getMonthlyAmount(txn);
-      bucket[cat].total += amount;
-      bucket[cat].count += 1;
-      bucket[cat].transactions.push(txn);
-    }
-  });
-
-  return result;
 }
 
 // Create empty transaction template
@@ -254,41 +195,33 @@ export function createEmptyTransaction(): Transaction {
     merchant: "",
     date: now.toISOString().split("T")[0],
     time: now.toTimeString().slice(0, 8),
-    category: null,
+    value_rating: 3,
     excluded_from_budget: false,
     details: null,
     created_at: now.toISOString(),
     prorate_months: null,
-    budget_type: null, // auto-assign based on category
   };
 }
 
-// Budget type calculations
-type BudgetTypeInfo = {
-  needsSpent: number;
-  wantsSpent: number;
-  needsBudget: number;
-  wantsBudget: number;
-  needsRemaining: number;
-  wantsRemaining: number;
-  needsPercent: number;
-  wantsPercent: number;
-  totalPercent: number;
+// Unified budget calculations
+export type BudgetInfo = {
+  spent: number;
+  budget: number;
+  remaining: number;
+  percent: number;
 };
 
 /**
- * Calculate spending totals by budget type (needs vs wants)
- * Only considers budget-included expenses for the current month
+ * Calculate spending against the single monthly budget.
+ * Only considers budget-included expenses for the current month.
  */
-export function calculateBudgetTypeInfo(
+export function calculateBudgetInfo(
   transactions: Transaction[],
-  needsBudget?: number | null,
-  wantsBudget?: number | null,
-): BudgetTypeInfo {
+  monthlyBudget?: number | null,
+): BudgetInfo {
   const { startOfMonth } = getDateRanges();
 
-  const actualNeedsBudget = needsBudget ?? 0;
-  const actualWantsBudget = wantsBudget ?? 0;
+  const budget = monthlyBudget ?? 0;
 
   // Filter to current month, expenses only, budget-included
   const monthlyTransactions = transactions.filter((t) => {
@@ -303,34 +236,15 @@ export function calculateBudgetTypeInfo(
     return txnDate >= startOfMonth;
   });
 
-  let needsSpent = 0;
-  let wantsSpent = 0;
-
-  monthlyTransactions.forEach((t) => {
-    const budgetType = getTransactionBudgetType(t.category, t.budget_type);
-    const amount = getMonthlyAmount(t);
-
-    if (budgetType === "need") {
-      needsSpent += amount;
-    } else {
-      wantsSpent += amount;
-    }
-  });
-
-  const totalBudget = actualNeedsBudget + actualWantsBudget;
+  const spent = monthlyTransactions.reduce(
+    (sum, t) => sum + getMonthlyAmount(t),
+    0,
+  );
 
   return {
-    needsSpent,
-    wantsSpent,
-    needsBudget: actualNeedsBudget,
-    wantsBudget: actualWantsBudget,
-    needsRemaining: Math.max(0, actualNeedsBudget - needsSpent),
-    wantsRemaining: Math.max(0, actualWantsBudget - wantsSpent),
-    needsPercent:
-      actualNeedsBudget > 0 ? (needsSpent / actualNeedsBudget) * 100 : 0,
-    wantsPercent:
-      actualWantsBudget > 0 ? (wantsSpent / actualWantsBudget) * 100 : 0,
-    totalPercent:
-      totalBudget > 0 ? ((needsSpent + wantsSpent) / totalBudget) * 100 : 0,
+    spent,
+    budget,
+    remaining: Math.max(0, budget - spent),
+    percent: budget > 0 ? (spent / budget) * 100 : 0,
   };
 }

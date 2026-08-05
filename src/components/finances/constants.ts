@@ -1,65 +1,30 @@
-import {
-  UtensilsCrossed,
-  ShoppingBag,
-  Clapperboard,
-  Receipt,
-  HeartPulse,
-  Car,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
-import type { BudgetType } from "@/lib/supabase";
-
-// Category to budget type mapping (auto-assignment)
-// Food defaults to "want" but user can override individual transactions
-export const CATEGORY_BUDGET_TYPE: Record<string, BudgetType> = {
-  // NEEDS - Essential expenses
-  "Self Care": "need",
-  Bills: "need",
-  Investments: "need", // excluded from budget anyway
-  // WANTS - Discretionary spending (user can override to "need" for groceries etc.)
-  Food: "want",
-  Shopping: "want",
-  Entertainment: "want",
-  Travel: "want",
+// Value rating labels for the 1-5 "was it worth it" scale
+export const VALUE_RATING_LABELS: Record<number, string> = {
+  1: "Regret",
+  2: "Meh",
+  3: "Fine",
+  4: "Good",
+  5: "Worth it",
 };
 
-export function getTransactionBudgetType(
-  category: string | null,
-  explicitBudgetType: BudgetType | null,
-): BudgetType {
-  // If explicitly set, use that
-  if (explicitBudgetType) return explicitBudgetType;
-  // Auto-assign based category, default to "want" for uncategorized
-  return CATEGORY_BUDGET_TYPE[category ?? ""] ?? "want";
+// Subtle background tint for a 1-5 value rating - blends a hue
+// (red at 1, green at 5) into the current theme background.
+//
+// Mixed in oklab (Cartesian a/b), not oklch (polar hue angle): --background
+// isn't perfectly gray (oklch(.. 0.005 275), a faint blue-violet), and polar
+// hue interpolation would weight that stray 275° hue by its full 93% share
+// regardless of how little chroma it carries - dragging every rating's tint
+// toward blue/purple instead of red-to-green. oklab interpolates a/b
+// linearly, so a near-zero-chroma background barely perturbs the result.
+export function getValueRatingTint(
+  rating: number | null,
+  mixPercent = 7,
+): string {
+  if (!rating) return "var(--background)";
+  const clamped = Math.min(5, Math.max(1, rating));
+  const hue = 25 + ((clamped - 1) / 4) * (145 - 25);
+  return `color-mix(in oklab, var(--background) ${100 - mixPercent}%, oklch(60% 0.15 ${hue}) ${mixPercent}%)`;
 }
-
-// Neo-brutalism pastel colors for each category
-export const CATEGORY_PASTEL_COLORS: Record<string, string> = {
-  "Self Care": "bg-pastel-pink",
-  Bills: "bg-pastel-orange",
-  Investments: "bg-pastel-green",
-  Food: "bg-pastel-yellow",
-  Shopping: "bg-pastel-blue",
-  Entertainment: "bg-pastel-purple",
-  Travel: "bg-pastel-green",
-};
-
-// Monochromatic category styling (legacy)
-const CATEGORY_COLOR = "#737373"; // Neutral gray for all categories
-
-export const EXPENSE_CATEGORIES: { name: string; icon: LucideIcon }[] = [
-  { name: "Food", icon: UtensilsCrossed },
-  { name: "Self Care", icon: HeartPulse },
-  { name: "Travel", icon: Car },
-  { name: "Entertainment", icon: Clapperboard },
-  { name: "Shopping", icon: ShoppingBag },
-  { name: "Bills", icon: Receipt },
-  { name: "Investments", icon: TrendingUp },
-];
-
-// Categories that should auto-enable "exclude from budget"
-export const EXCLUDED_CATEGORIES = ["Investments"];
 
 export const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-IN", {
@@ -108,18 +73,4 @@ export const formatTime = (timeStr: string) => {
   const period = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12;
   return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
-};
-
-const CATEGORY_COLOR_MAP: Record<string, string> = {
-  "Self Care": "#ec4899",
-  Bills: "#f59e0b",
-  Investments: "#10b981",
-  Food: "#eab308",
-  Shopping: "#3b82f6",
-  Entertainment: "#a855f7",
-  Travel: "#14b8a6",
-};
-
-export const getCategoryColor = (category: string): string => {
-  return CATEGORY_COLOR_MAP[category] || CATEGORY_COLOR;
 };

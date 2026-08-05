@@ -6,12 +6,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import {
-  EXPENSE_CATEGORIES,
-  EXCLUDED_CATEGORIES,
-  getTransactionBudgetType,
-  CATEGORY_BUDGET_TYPE,
-} from "./constants";
+import { Slider } from "@/components/ui/slider";
+import { VALUE_RATING_LABELS, getValueRatingTint } from "./constants";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { Loader2, Trash2, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -115,8 +111,7 @@ export function TransactionDialog({
     if (transaction) {
       setAmountInput(transaction.amount === 0 ? "" : transaction.amount.toString());
       setShowAdvanced(
-        Boolean(transaction.prorate_months) ||
-          Boolean(transaction.excluded_from_budget && !EXCLUDED_CATEGORIES.includes(transaction.category ?? ""))
+        Boolean(transaction.prorate_months) || Boolean(transaction.excluded_from_budget)
       );
     }
   }, [transaction?.id]);
@@ -171,25 +166,7 @@ export function TransactionDialog({
     onChange({ ...transaction, time: value ? value + ":00" : null });
   };
 
-  const handleCategoryClick = (cat: typeof EXPENSE_CATEGORIES[0]) => {
-    if (saving) return;
-    const isSelected = transaction.category === cat.name;
-    const isExcludedCategory = EXCLUDED_CATEGORIES.includes(cat.name);
-    const newCategory = isSelected ? null : cat.name;
-    const currentIsExcluded = EXCLUDED_CATEGORIES.includes(transaction.category ?? "");
-    let newExcludedFromBudget = transaction.excluded_from_budget;
-    if (isExcludedCategory && !isSelected) newExcludedFromBudget = true;
-    else if (currentIsExcluded && (isSelected || !isExcludedCategory)) newExcludedFromBudget = false;
-    onChange({
-      ...transaction,
-      category: newCategory,
-      excluded_from_budget: newExcludedFromBudget,
-      budget_type: null,
-    });
-  };
-
-  const effectiveBudgetType = getTransactionBudgetType(transaction.category, transaction.budget_type);
-  const autoBudgetType = CATEGORY_BUDGET_TYPE[transaction.category ?? ""] ?? "want";
+  const valueRating = transaction.value_rating ?? 3;
 
   return (
     <Dialog
@@ -197,7 +174,8 @@ export function TransactionDialog({
       onOpenChange={(open) => !open && !saving && onClose()}
     >
       <DialogContent
-        className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant bg-background"
+        style={{ backgroundColor: getValueRatingTint(valueRating) }}
+        className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant transition-colors duration-300"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
@@ -205,20 +183,21 @@ export function TransactionDialog({
             {isNew ? "New expense" : "Edit expense"}
           </p>
           <DialogTitle className="sr-only">
-            {transaction.category || (isNew ? "New expense" : "Edit expense")}
+            {transaction.merchant || (isNew ? "New expense" : "Edit expense")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="px-6 pt-4 pb-3 overflow-y-auto flex-1 space-y-7">
           <div>
-            <div className="flex items-baseline gap-2 border-b border-outline-variant/60 pb-3">
+            <div className="flex items-baseline justify-center gap-2 border-b border-outline-variant/60 pb-3">
               <span className="font-mono text-muted-foreground text-[28px] leading-none">₹</span>
               <input
                 id="amount"
                 type="text"
                 inputMode="text"
                 placeholder="0"
-                className="flex-1 font-mono tabular-nums text-[40px] leading-none tracking-[-0.03em] text-foreground bg-transparent outline-none placeholder:text-muted-foreground/40"
+                className="flex-none w-auto max-w-[65%] font-mono tabular-nums text-[40px] leading-none tracking-[-0.03em] text-foreground bg-transparent outline-none placeholder:text-muted-foreground/40 text-center"
+                size={amountInput.length || 1}
                 value={amountInput}
                 onChange={(e) => handleAmountInputChange(e.target.value)}
                 onBlur={handleAmountBlur}
@@ -239,74 +218,24 @@ export function TransactionDialog({
           </div>
 
           <div>
-            <p className={`${EYEBROW} mb-3`}>Category</p>
-            <div
-              className="grid gap-1.5"
-              style={{ gridTemplateColumns: `repeat(${EXPENSE_CATEGORIES.length}, minmax(0, 1fr))` }}
-            >
-              {EXPENSE_CATEGORIES.map((cat) => {
-                const Icon = cat.icon;
-                const isSelected = transaction.category === cat.name;
-                return (
-                  <button
-                    key={cat.name}
-                    type="button"
-                    onClick={() => handleCategoryClick(cat)}
-                    disabled={saving}
-                    aria-label={cat.name}
-                    aria-pressed={isSelected}
-                    className={`h-9 border rounded-md flex items-center justify-center transition-colors active:scale-95 ${
-                      isSelected
-                        ? "bg-foreground text-background border-foreground"
-                        : "border-outline-variant text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  </button>
-                );
-              })}
+            <div className="flex items-baseline justify-between mb-4">
+              <p className={EYEBROW}>Value</p>
+              <span className="font-mono tabular-nums text-[12px] text-foreground">
+                {valueRating} · {VALUE_RATING_LABELS[valueRating]}
+              </span>
             </div>
+            <Slider
+              min={1}
+              max={5}
+              step={1}
+              value={[valueRating]}
+              onValueChange={([v]) => onChange({ ...transaction, value_rating: v })}
+              disabled={saving}
+            />
           </div>
 
-          <AnimatePresence initial={false}>
-            {transaction.category && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <p className={`${EYEBROW} mb-3`}>Budget type</p>
-                <div className="grid grid-cols-2 border-y border-outline-variant divide-x divide-outline-variant">
-                  {(["need", "want"] as const).map((type) => {
-                    const isActive = effectiveBudgetType === type;
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => {
-                          const newBudgetType = type === autoBudgetType ? null : type;
-                          onChange({ ...transaction, budget_type: newBudgetType });
-                        }}
-                        disabled={saving}
-                        className={`h-9 text-[10px] uppercase tracking-wider transition-colors ${
-                          isActive
-                            ? "bg-foreground text-background"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <div>
-            <p className={`${EYEBROW} mb-2`}>Merchant</p>
+            <p className={`${EYEBROW} mb-2`}>Where?</p>
             <input
               placeholder="Amazon, Swiggy, Uber…"
               className="w-full h-10 text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none placeholder:text-muted-foreground/40"
