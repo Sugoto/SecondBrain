@@ -187,8 +187,8 @@ export function DateFilter({
               selected={pendingRange.from}
               onSelect={handleDateSelect}
               captionLayout="dropdown"
-              fromYear={2020}
-              toYear={new Date().getFullYear()}
+              startMonth={new Date(2020, 0)}
+              endMonth={new Date(new Date().getFullYear(), 11)}
               defaultMonth={customDateRange?.from || new Date()}
               className="rounded-xl border border-outline-variant"
             />

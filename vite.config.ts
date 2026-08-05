@@ -1,15 +1,11 @@
 import path from "path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import compression from "vite-plugin-compression";
 import million from "million/compiler";
-
-// React Compiler configuration
-const ReactCompilerConfig = {
-  target: "19", // Target React 19
-};
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -23,11 +19,9 @@ export default defineConfig({
         skip: ["framer-motion"],
       },
     }),
-    react({
-      babel: {
-        plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
-      },
-    }),
+    react(),
+    // React Compiler, targeting React 19
+    babel({ presets: [reactCompilerPreset({ target: "19" })] }),
     tailwindcss(),
 
     // PWA configuration for offline support and app-like experience
@@ -121,30 +115,25 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React libraries
-          "vendor-react": ["react", "react-dom"],
-          // Animation library
-          "vendor-motion": ["framer-motion"],
-          // UI components from Radix
-          "vendor-radix": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-select",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-switch",
-            "@radix-ui/react-label",
-            "@radix-ui/react-slot",
-          ],
-          // Data fetching
-          "vendor-query": ["@tanstack/react-query"],
-          // Supabase
-          "vendor-supabase": ["@supabase/supabase-js"],
-          // Virtualization
-          "vendor-virtual": ["@tanstack/react-virtual"],
-          // Local caching
-          "vendor-dexie": ["dexie"],
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("/react/") || id.includes("/react-dom/")) return "vendor-react";
+          if (id.includes("/framer-motion/")) return "vendor-motion";
+          if (
+            id.includes("@radix-ui/react-dialog") ||
+            id.includes("@radix-ui/react-dropdown-menu") ||
+            id.includes("@radix-ui/react-select") ||
+            id.includes("@radix-ui/react-tabs") ||
+            id.includes("@radix-ui/react-popover") ||
+            id.includes("@radix-ui/react-switch") ||
+            id.includes("@radix-ui/react-label") ||
+            id.includes("@radix-ui/react-slot")
+          )
+            return "vendor-radix";
+          if (id.includes("@tanstack/react-query")) return "vendor-query";
+          if (id.includes("@supabase/supabase-js")) return "vendor-supabase";
+          if (id.includes("@tanstack/react-virtual")) return "vendor-virtual";
+          if (id.includes("/dexie/")) return "vendor-dexie";
         },
       },
     },
