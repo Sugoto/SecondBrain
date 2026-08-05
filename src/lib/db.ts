@@ -1,11 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
-import type {
-  Transaction,
-  UserStats,
-  ShoppingItem,
-  OmscsCourse,
-  Workout,
-} from "./supabase";
+import type { Transaction, UserStats, ShoppingItem, OmscsCourse, Workout } from "./supabase";
 
 interface CachedTransaction extends Transaction {
   _cachedAt: number;
@@ -82,9 +76,7 @@ const STALE_TTL = 24 * 60 * 60 * 1000;
  * Get cached transactions
  * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
-export async function getCachedTransactions(
-  allowStale = false,
-): Promise<Transaction[] | null> {
+export async function getCachedTransactions(allowStale = false): Promise<Transaction[] | null> {
   try {
     const cached = await db.transactions.toArray();
     if (cached.length === 0) return null;
@@ -97,7 +89,7 @@ export async function getCachedTransactions(
       return null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line @typescript-eslint/no-unused-vars
     return cached.map(({ _cachedAt, ...t }) => t as Transaction);
   } catch {
     return null;
@@ -107,9 +99,7 @@ export async function getCachedTransactions(
 /**
  * Store transactions in cache
  */
-export async function cacheTransactions(
-  transactions: Transaction[],
-): Promise<void> {
+export async function cacheTransactions(transactions: Transaction[]): Promise<void> {
   try {
     const now = Date.now();
     const cached: CachedTransaction[] = transactions.map((t) => ({
@@ -129,9 +119,7 @@ export async function cacheTransactions(
  * Get cached user stats
  * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
-export async function getCachedUserStats(
-  allowStale = false,
-): Promise<UserStats | null> {
+export async function getCachedUserStats(allowStale = false): Promise<UserStats | null> {
   try {
     const cached = await db.userStats.toArray();
     if (cached.length === 0) return null;
@@ -145,7 +133,7 @@ export async function getCachedUserStats(
       return null; // Cache expired
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line @typescript-eslint/no-unused-vars
     const { _cachedAt, ...userStats } = stats;
     return userStats as UserStats;
   } catch {
@@ -195,9 +183,7 @@ export async function getCacheMeta(key: string): Promise<string | null> {
  * Get cached shopping list
  * @param allowStale - If true, returns data even if older than CACHE_TTL (for instant load)
  */
-export async function getCachedShoppingList(
-  allowStale = false,
-): Promise<ShoppingItem[] | null> {
+export async function getCachedShoppingList(allowStale = false): Promise<ShoppingItem[] | null> {
   try {
     const cached = await db.shoppingList.toArray();
     if (cached.length === 0) return null;
@@ -210,7 +196,7 @@ export async function getCachedShoppingList(
       return null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line @typescript-eslint/no-unused-vars
     return cached.map(({ _cachedAt, ...item }) => item as ShoppingItem);
   } catch {
     return null;
@@ -239,9 +225,7 @@ export async function cacheShoppingList(items: ShoppingItem[]): Promise<void> {
 /**
  * Get cached OMSCS courses
  */
-export async function getCachedOmscsCourses(
-  allowStale = false,
-): Promise<OmscsCourse[] | null> {
+export async function getCachedOmscsCourses(allowStale = false): Promise<OmscsCourse[] | null> {
   try {
     const cached = await db.omscsCourses.toArray();
     if (cached.length === 0) return null;
@@ -249,7 +233,7 @@ export async function getCachedOmscsCourses(
     const age = Date.now() - oldestCache;
     const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
     if (age > maxAge) return null;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line @typescript-eslint/no-unused-vars
     return cached.map(({ _cachedAt, ...c }) => c as OmscsCourse);
   } catch {
     return null;
@@ -259,9 +243,7 @@ export async function getCachedOmscsCourses(
 /**
  * Store OMSCS courses in cache
  */
-export async function cacheOmscsCourses(
-  courses: OmscsCourse[],
-): Promise<void> {
+export async function cacheOmscsCourses(courses: OmscsCourse[]): Promise<void> {
   try {
     const now = Date.now();
     const cached: CachedOmscsCourse[] = courses.map((c) => ({
@@ -278,9 +260,7 @@ export async function cacheOmscsCourses(
 /**
  * Get cached workouts
  */
-export async function getCachedWorkouts(
-  allowStale = false,
-): Promise<Workout[] | null> {
+export async function getCachedWorkouts(allowStale = false): Promise<Workout[] | null> {
   try {
     const cached = await db.workouts.toArray();
     if (cached.length === 0) return null;
@@ -288,7 +268,7 @@ export async function getCachedWorkouts(
     const age = Date.now() - oldestCache;
     const maxAge = allowStale ? STALE_TTL : CACHE_TTL;
     if (age > maxAge) return null;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line @typescript-eslint/no-unused-vars
     return cached.map(({ _cachedAt, ...w }) => w as Workout);
   } catch {
     return null;
