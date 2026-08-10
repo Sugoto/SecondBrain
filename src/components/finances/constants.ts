@@ -2,29 +2,10 @@
 export const VALUE_RATING_LABELS: Record<number, string> = {
   1: "Regret",
   2: "Meh",
-  3: "Fine",
-  4: "Good",
-  5: "Worth it",
+  3: "Expected",
+  4: "Satisfied",
+  5: "Valuable",
 };
-
-// Subtle background tint for a 1-5 value rating - blends a hue
-// (red at 1, green at 5) into the current theme background.
-//
-// Mixed in oklab (Cartesian a/b), not oklch (polar hue angle): --background
-// isn't perfectly gray (oklch(.. 0.005 275), a faint blue-violet), and polar
-// hue interpolation would weight that stray 275° hue by its full 93% share
-// regardless of how little chroma it carries - dragging every rating's tint
-// toward blue/purple instead of red-to-green. oklab interpolates a/b
-// linearly, so a near-zero-chroma background barely perturbs the result.
-export function getValueRatingTint(
-  rating: number | null,
-  mixPercent = 7,
-): string {
-  if (!rating) return "var(--background)";
-  const clamped = Math.min(5, Math.max(1, rating));
-  const hue = 25 + ((clamped - 1) / 4) * (145 - 25);
-  return `color-mix(in oklab, var(--background) ${100 - mixPercent}%, oklch(60% 0.15 ${hue}) ${mixPercent}%)`;
-}
 
 export const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-IN", {
@@ -48,9 +29,7 @@ export const formatCurrencyCompact = (amount: number) => {
   if (absAmount >= 1000) {
     // Thousands: 1k, 2.5k, 10k, etc.
     const thousands = absAmount / 1000;
-    return `₹${
-      thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(1)
-    }k`;
+    return `₹${thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(1)}k`;
   }
 
   // Regular format for smaller amounts (under 1000)

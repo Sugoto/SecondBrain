@@ -3,7 +3,7 @@ import type { Transaction } from "@/lib/supabase";
 import { Info, CalendarRange } from "lucide-react";
 import { getMonthlyAmount } from "./utils";
 import { hapticFeedback } from "@/hooks/useHaptics";
-import { formatDate, getValueRatingTint } from "./constants";
+import { formatDate } from "./constants";
 import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
 
 interface TransactionCardProps {
@@ -29,14 +29,9 @@ export const TransactionCard = memo(function TransactionCard({
     <button
       type="button"
       onClick={handleClick}
-      style={{ backgroundColor: getValueRatingTint(txn.value_rating) }}
-      className="w-full text-left border-b border-outline-variant/60 transition-[filter,background-color] duration-300 active:brightness-95"
+      className="w-full text-left border-b border-outline-variant/60 transition-[filter] duration-300 active:brightness-95"
     >
-      <div
-        className={`flex items-center gap-3 py-3 ${
-          isExcluded ? "opacity-40" : ""
-        }`}
-      >
+      <div className={`flex items-center gap-3 py-3 ${isExcluded ? "opacity-40" : ""}`}>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <p className="text-[13px] text-foreground truncate">

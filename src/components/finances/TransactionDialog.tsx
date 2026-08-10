@@ -1,17 +1,11 @@
 import type { Transaction } from "@/lib/supabase";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { VALUE_RATING_LABELS, getValueRatingTint } from "./constants";
+import { VALUE_RATING_LABELS } from "./constants";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { Loader2, Trash2, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,10 +56,18 @@ function evaluateExpression(expr: string): number | null {
       const b = output.pop()!;
       const a = output.pop()!;
       switch (op) {
-        case "+": output.push(a + b); break;
-        case "-": output.push(a - b); break;
-        case "*": output.push(a * b); break;
-        case "/": output.push(a / b); break;
+        case "+":
+          output.push(a + b);
+          break;
+        case "-":
+          output.push(a - b);
+          break;
+        case "*":
+          output.push(a * b);
+          break;
+        case "/":
+          output.push(a / b);
+          break;
       }
     };
 
@@ -106,15 +108,15 @@ export function TransactionDialog({
   const [amountInput, setAmountInput] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [trackedId, setTrackedId] = useState<string | undefined>(transaction?.id);
 
-  useEffect(() => {
-    if (transaction) {
-      setAmountInput(transaction.amount === 0 ? "" : transaction.amount.toString());
-      setShowAdvanced(
-        Boolean(transaction.prorate_months) || Boolean(transaction.excluded_from_budget)
-      );
-    }
-  }, [transaction?.id]);
+  if (transaction && transaction.id !== trackedId) {
+    setTrackedId(transaction.id);
+    setAmountInput(transaction.amount === 0 ? "" : transaction.amount.toString());
+    setShowAdvanced(
+      Boolean(transaction.prorate_months) || Boolean(transaction.excluded_from_budget),
+    );
+  }
 
   if (!transaction) return null;
 
@@ -169,19 +171,13 @@ export function TransactionDialog({
   const valueRating = transaction.value_rating ?? 3;
 
   return (
-    <Dialog
-      open={!!transaction}
-      onOpenChange={(open) => !open && !saving && onClose()}
-    >
+    <Dialog open={!!transaction} onOpenChange={(open) => !open && !saving && onClose()}>
       <DialogContent
-        style={{ backgroundColor: getValueRatingTint(valueRating) }}
-        className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant transition-colors duration-300"
+        className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
-          <p className={EYEBROW}>
-            {isNew ? "New expense" : "Edit expense"}
-          </p>
+          <p className={EYEBROW}>{isNew ? "New expense" : "Edit expense"}</p>
           <DialogTitle className="sr-only">
             {transaction.merchant || (isNew ? "New expense" : "Edit expense")}
           </DialogTitle>
@@ -218,20 +214,24 @@ export function TransactionDialog({
           </div>
 
           <div>
-            <div className="flex items-baseline justify-between mb-4">
-              <p className={EYEBROW}>Value</p>
-              <span className="font-mono tabular-nums text-[12px] text-foreground">
-                {valueRating} · {VALUE_RATING_LABELS[valueRating]}
-              </span>
+            <p className={`${EYEBROW} mb-3`}>Value</p>
+            <div className="grid grid-cols-5 gap-1.5">
+              {[1, 2, 3, 4, 5].map((rating) => (
+                <button
+                  key={rating}
+                  type="button"
+                  onClick={() => onChange({ ...transaction, value_rating: rating })}
+                  disabled={saving}
+                  className={`h-9 rounded-lg text-[10px] uppercase tracking-wide transition-colors disabled:opacity-50 ${
+                    valueRating === rating
+                      ? "bg-foreground text-background"
+                      : "border border-outline-variant text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {VALUE_RATING_LABELS[rating]}
+                </button>
+              ))}
             </div>
-            <Slider
-              min={1}
-              max={5}
-              step={1}
-              value={[valueRating]}
-              onValueChange={([v]) => onChange({ ...transaction, value_rating: v })}
-              disabled={saving}
-            />
           </div>
 
           <div>
@@ -274,13 +274,9 @@ export function TransactionDialog({
               onClick={() => setShowAdvanced((s) => !s)}
               className="w-full flex items-center justify-between text-muted-foreground hover:text-foreground transition-colors py-2"
             >
-              <span className="text-[10px] uppercase">
-                More options
-              </span>
+              <span className="text-[10px] uppercase">More options</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  showAdvanced ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
                 strokeWidth={1.5}
               />
             </button>
@@ -381,7 +377,8 @@ export function TransactionDialog({
             <AlertDialogDescription className="text-[13px] text-muted-foreground pt-1">
               {transaction.merchant ? (
                 <>
-                  Your record from <span className="text-foreground">{transaction.merchant}</span> will be removed permanently.
+                  Your record from <span className="text-foreground">{transaction.merchant}</span>{" "}
+                  will be removed permanently.
                 </>
               ) : (
                 "This record will be removed permanently."
