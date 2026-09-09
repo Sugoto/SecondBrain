@@ -29,9 +29,6 @@ export function NutritionSummary() {
 
   if (!hasHealthData || !tdee) return null;
 
-  const adjustment = tdee.targetCalories - tdee.tdee;
-  const adjustmentLabel = adjustment === 0 ? "Maintaining" : adjustment > 0 ? "Surplus" : "Deficit";
-
   const macros = [
     { value: tdee.protein, unit: "g", label: "Protein" },
     { value: tdee.carbs, unit: "g", label: "Carbs" },
@@ -54,12 +51,7 @@ export function NutritionSummary() {
         </div>
 
         <dl className="shrink-0 text-right">
-          <dt className="text-[11px] text-[var(--ui-ink-softer)]">{adjustmentLabel}</dt>
-          <dd className="ui-num mt-1 text-[13px] text-[var(--ui-ink-soft)]">
-            {adjustment === 0 ? "±0" : adjustment > 0 ? "+" : "−"}
-            {formatNumber(Math.abs(adjustment))}
-          </dd>
-          <dt className="mt-2.5 text-[11px] text-[var(--ui-ink-softer)]">Burn</dt>
+          <dt className="text-[11px] text-[var(--ui-ink-softer)]">Burn</dt>
           <dd className="ui-num mt-1 text-[13px] text-[var(--ui-ink-soft)]">
             {formatNumber(tdee.tdee)}
           </dd>

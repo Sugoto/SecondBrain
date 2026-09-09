@@ -696,8 +696,20 @@ input[type="number"] {
   }
 
   .ui-plate {
-    background-color: var(--ui-plate);
     color: var(--ui-plate-ink);
+    /* Solid base, then a soft glass sheen: a cool highlight pooling top-left,
+       a faint diagonal lift, and a gentle shade settling bottom-right. Stops
+       are derived from the plate colour so it tracks either theme. */
+    background-color: var(--ui-plate);
+    background-image:
+      radial-gradient(
+        135% 120% at 6% 0%,
+        oklch(from var(--ui-plate) calc(l + 0.09) calc(c + 0.02) h / 0.85),
+        transparent 58%
+      ),
+      linear-gradient(158deg, oklch(from var(--ui-plate) calc(l + 0.04) c h) 0%, transparent 46%),
+      linear-gradient(200deg, transparent 52%, oklch(from var(--ui-plate) calc(l - 0.04) c h) 100%);
+    box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.06);
   }
 
   .ui-inset {

@@ -7,10 +7,10 @@ import { getMonthlyAmount } from "./utils";
 import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-const TXN_HEIGHT = 46;
-const HEADER_HEIGHT = 42;
+const TXN_HEIGHT = 38;
+const HEADER_HEIGHT = 34;
 /** Air between one day card and the next. */
-const CARD_GAP = 14;
+const CARD_GAP = 10;
 const OVERSCAN = 8;
 
 type ListRow =
@@ -75,7 +75,7 @@ function DayHeader({
   const fmt = useFormatCurrencyCompact();
   return (
     <div className="flex h-full flex-col justify-end" style={{ paddingTop: gap ? CARD_GAP : 0 }}>
-      <div className="flex items-center justify-between gap-3 rounded-t-[14px] border-x border-t border-[var(--ui-edge)] bg-[var(--ui-panel)] px-4 pt-3 pb-2">
+      <div className="flex items-center justify-between gap-3 rounded-t-[14px] border-x border-t border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 pt-2 pb-1.5">
         {/* leading-5 matches the chip's line box, so the header is the same
             height with or without it and the card gap does not wobble. */}
         <span className="text-[12px] leading-5 font-medium text-[var(--ui-accent)]">

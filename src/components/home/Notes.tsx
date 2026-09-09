@@ -22,7 +22,6 @@ export function Notes() {
         id="home-notes"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Anything you want to remember"
         className="ui-ruled mt-3 min-h-44 w-full resize-none bg-transparent px-5 pb-5 text-[15px] text-foreground outline-none placeholder:text-[var(--ui-ink-softer)]"
       />
     </section>

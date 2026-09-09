@@ -55,15 +55,15 @@ export const TransactionCard = memo(function TransactionCard({
     <button
       type="button"
       onClick={handleClick}
-      className={`ui-type h-full w-full border-x border-[var(--ui-edge)] bg-[var(--ui-panel)] px-4 text-left transition-colors hover:bg-[var(--ui-inset)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:bg-[var(--ui-inset)] ${
+      className={`ui-type h-full w-full border-x border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 text-left transition-colors hover:bg-[var(--ui-inset)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:bg-[var(--ui-inset)] ${
         isLastOfDay
           ? "rounded-b-[14px] border-b border-[var(--ui-edge)]"
           : "border-b border-[var(--ui-rule)]"
       }`}
     >
-      <div className={`flex h-full items-center gap-3 ${isExcluded ? "opacity-45" : ""}`}>
+      <div className={`flex h-full items-center gap-2.5 ${isExcluded ? "opacity-45" : ""}`}>
         <div className="flex min-w-0 flex-1 items-center gap-1.5">
-          <p className="truncate text-[14px] text-[var(--ui-ink)]">
+          <p className="truncate text-[13px] text-[var(--ui-ink)]">
             {txn.merchant || "Unknown merchant"}
           </p>
           {txn.details && (
@@ -88,7 +88,7 @@ export const TransactionCard = memo(function TransactionCard({
           </span>
         )}
 
-        <span className="ui-num shrink-0 text-right text-[15px] text-[var(--ui-ink)]">
+        <span className="ui-num shrink-0 text-right text-[14px] text-[var(--ui-ink)]">
           <span className="text-[var(--ui-ink-softer)]">−</span>
           {fmt(getMonthlyAmount(txn))}
         </span>
