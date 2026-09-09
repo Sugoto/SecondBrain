@@ -8,13 +8,13 @@ import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 const TXN_HEIGHT = 46;
-const HEADER_HEIGHT = 40;
+const HEADER_HEIGHT = 42;
 /** Air between one day card and the next. */
 const CARD_GAP = 14;
 const OVERSCAN = 8;
 
 type ListRow =
-  | { kind: "header"; key: string; date: string; total: number; gap: boolean }
+  | { kind: "header"; key: string; date: string; total: number; count: number; gap: boolean }
   | { kind: "txn"; key: string; txn: Transaction; isLastOfDay: boolean };
 
 /** Flattens the date-sorted transactions into one addressable row list so the
@@ -29,15 +29,18 @@ function buildRows(transactions: Transaction[]): ListRow[] {
 
     if (!prev || prev.date !== txn.date) {
       let total = 0;
+      let count = 0;
       for (let j = i; j < transactions.length; j++) {
         if (transactions[j].date !== txn.date) break;
         total += getMonthlyAmount(transactions[j]);
+        count++;
       }
       rows.push({
         kind: "header",
         key: `h-${txn.date}`,
         date: txn.date,
         total,
+        count,
         gap: rows.length > 0,
       });
     }
@@ -58,15 +61,32 @@ function rowHeight(row: ListRow): number {
   return HEADER_HEIGHT + (row.gap ? CARD_GAP : 0);
 }
 
-function DayHeader({ date, total, gap }: { date: string; total: number; gap: boolean }) {
+function DayHeader({
+  date,
+  total,
+  count,
+  gap,
+}: {
+  date: string;
+  total: number;
+  count: number;
+  gap: boolean;
+}) {
   const fmt = useFormatCurrencyCompact();
   return (
     <div className="flex h-full flex-col justify-end" style={{ paddingTop: gap ? CARD_GAP : 0 }}>
       <div className="flex items-center justify-between gap-3 rounded-t-[14px] border-x border-t border-[var(--ui-edge)] bg-[var(--ui-panel)] px-4 pt-3 pb-2">
-        <span className="text-[12px] font-medium text-[var(--ui-accent)]">
+        {/* leading-5 matches the chip's line box, so the header is the same
+            height with or without it and the card gap does not wobble. */}
+        <span className="text-[12px] leading-5 font-medium text-[var(--ui-accent)]">
           {formatDayLabel(date)}
         </span>
-        <span className="ui-num text-[12px] text-[var(--ui-ink-softer)]">{fmt(total)}</span>
+        {/* One transaction needs no total: the row below already says it. */}
+        {count > 1 && (
+          <span className="ui-chip ui-chip-quiet ui-num px-2 py-0.5 text-[12px] leading-4">
+            {fmt(total)}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -142,7 +162,7 @@ export const ExpensesView = memo(function ExpensesView({
                 }}
               >
                 {row.kind === "header" ? (
-                  <DayHeader date={row.date} total={row.total} gap={row.gap} />
+                  <DayHeader date={row.date} total={row.total} count={row.count} gap={row.gap} />
                 ) : (
                   <TransactionCard
                     transaction={row.txn}

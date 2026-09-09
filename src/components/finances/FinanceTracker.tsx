@@ -40,7 +40,7 @@ function BudgetBar({ budgetInfo }: { budgetInfo: ReturnType<typeof calculateBudg
             {!hasBudget ? "Spent this month" : isOver ? "Over budget" : "Left this month"}
           </span>
           <span
-            className={`ui-num text-[14px] ${isOver ? "text-destructive" : "text-[var(--ui-ink)]"}`}
+            className={`ui-num text-[14px] ${isOver ? "text-[var(--ui-danger)]" : "text-[var(--ui-ink)]"}`}
           >
             {formatCurrency(hasBudget ? Math.abs(remaining) : budgetInfo.spent)}
           </span>
@@ -51,7 +51,7 @@ function BudgetBar({ budgetInfo }: { budgetInfo: ReturnType<typeof calculateBudg
             animate={{ scaleX: Math.min(percent, 100) / 100 }}
             transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
             style={{ transformOrigin: "left" }}
-            className={`h-full ${isOver ? "bg-destructive" : "bg-[var(--ui-accent)]"}`}
+            className={`h-full ${isOver ? "bg-[var(--ui-danger)]" : "bg-[var(--ui-accent)]"}`}
           />
         </div>
       </div>
@@ -211,7 +211,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
   }, [transactions, userStats?.monthly_budget]);
 
   return (
-    <div className="ui-surface flex h-[100dvh] flex-col overflow-hidden">
+    <div className="ui-surface flex h-full flex-col overflow-hidden">
       <header className="fixed top-0 right-0 left-0 z-20 bg-[var(--ui-page)] md:relative md:shrink-0">
         <div className="max-w-6xl mx-auto">
           <TopTabs

@@ -100,12 +100,14 @@
   --outline-variant: oklch(85% 0.01 275);
   --border: var(--outline-variant);
   --input: var(--outline-variant);
-  --ring: oklch(42% 0.2 275);
+  /* One blue. Every indigo in the app resolves to --ui-accent, declared at the
+     bottom of this file; nothing else may state a blue literally. */
+  --ring: var(--ui-accent);
 
   /* Primary (indigo) */
-  --primary: oklch(42% 0.2 275);
-  --primary-foreground: oklch(99% 0.005 275);
-  --primary-container: oklch(90% 0.06 275);
+  --primary: var(--ui-accent);
+  --primary-foreground: var(--ui-accent-ink);
+  --primary-container: var(--ui-accent-soft);
   --on-primary-container: oklch(15% 0.06 275);
 
   /* Secondary — muted indigo */
@@ -125,14 +127,16 @@
 
   /* Pastel category tints (functional) */
   --pastel-pink: oklch(96% 0.02 15);
-  --pastel-blue: oklch(96% 0.02 240);
+  --pastel-blue: oklch(96% 0.02 275);
   --pastel-green: oklch(96% 0.02 155);
   --pastel-yellow: oklch(96% 0.025 90);
   --pastel-purple: oklch(96% 0.02 295);
   --pastel-orange: oklch(96% 0.025 50);
 
-  /* Charts — single-hue indigo ramp anchored on brand */
-  --chart-1: oklch(42% 0.2 275);
+  /* Charts — single-hue indigo ramp anchored on brand. Only --chart-1 is tied
+     to the accent; steps 2-5 are unused today (both charts build their own
+     grayscale ramps inline) and are not a monotonic ramp. */
+  --chart-1: var(--ui-accent);
   --chart-2: oklch(55% 0.2 275);
   --chart-3: oklch(67% 0.16 275);
   --chart-4: oklch(78% 0.1 275);
@@ -167,11 +171,11 @@
   --outline-variant: oklch(35% 0.01 275);
   --border: var(--outline-variant);
   --input: var(--outline-variant);
-  --ring: oklch(76% 0.12 275);
+  --ring: var(--ui-accent);
 
-  --primary: oklch(76% 0.12 275);
-  --primary-foreground: oklch(20% 0.1 275);
-  --primary-container: oklch(33% 0.16 275);
+  --primary: var(--ui-accent);
+  --primary-foreground: var(--ui-accent-ink);
+  --primary-container: var(--ui-accent-soft);
   --on-primary-container: oklch(90% 0.06 275);
 
   --secondary: oklch(76% 0.03 275);
@@ -187,13 +191,13 @@
   --success: oklch(72% 0.13 155);
 
   --pastel-pink: oklch(28% 0.05 15);
-  --pastel-blue: oklch(28% 0.05 240);
+  --pastel-blue: oklch(28% 0.05 275);
   --pastel-green: oklch(28% 0.05 155);
   --pastel-yellow: oklch(28% 0.05 90);
   --pastel-purple: oklch(28% 0.05 295);
   --pastel-orange: oklch(28% 0.05 50);
 
-  --chart-1: oklch(76% 0.12 275);
+  --chart-1: var(--ui-accent);
   --chart-2: oklch(67% 0.16 275);
   --chart-3: oklch(58% 0.2 275);
   --chart-4: oklch(86% 0.06 275);
@@ -210,10 +214,17 @@
     display: none;
   }
 
+  /* This is an app shell, not a document: the chrome stays put and each page
+     owns one internal scroller. That only works if the height chain is
+     *definite* all the way down. `min-height` does not make a height definite,
+     so with min-height alone every `h-full` page root resolved to `auto`, the
+     inner `overflow-y-auto` region never became scrollable, and the App root's
+     `overflow-hidden` clipped the overflow instead. Home, OMSCS, Health and
+     Profile were all unscrollable; Finances escaped only because it hardcodes
+     `h-[100dvh]`. Keep all three of these as `height`. */
   html {
     background-color: var(--background);
-    min-height: 100%;
-    min-height: 100dvh;
+    height: 100%;
   }
 
   body {
@@ -221,11 +232,16 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    min-height: 100%;
-    min-height: 100dvh;
+    height: 100%;
     padding-top: env(safe-area-inset-top, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Border-box comes from preflight, so the safe-area padding above is
+     subtracted here rather than added to the viewport height. */
+  #root {
+    height: 100%;
   }
 
   h1,
@@ -579,7 +595,9 @@ input[type="number"] {
 
   --ui-page: oklch(96.6% 0.006 275);
   --ui-panel: oklch(99.6% 0.002 275);
-  --ui-inset: oklch(96.2% 0.007 275);
+  /* Sits below the page, not level with it: an inset track has to read when it
+     is laid straight onto the page, as the budget bar and the tab tracks are. */
+  --ui-inset: oklch(92.5% 0.01 275);
   --ui-edge: oklch(89.5% 0.009 275);
   --ui-rule: oklch(92% 0.008 275);
 
@@ -590,17 +608,27 @@ input[type="number"] {
   /* Accent — the brand indigo, tuned to sit on panels rather than fill them. */
   --ui-accent: oklch(48% 0.17 275);
   --ui-accent-soft: oklch(90% 0.045 275);
+  /* Ink for text sitting *on* an accent fill. Flips with theme, because the
+     accent is dark in light mode and light in dark mode. */
+  --ui-accent-ink: oklch(98.5% 0.006 275);
 
-  /* Section identity hues for the launcher. Low chroma so three can coexist. */
-  --ui-hue-study: oklch(72% 0.09 275);
-  --ui-hue-money: oklch(74% 0.09 155);
-  --ui-hue-body: oklch(75% 0.08 20);
+  /* Destructive. Same contract: -ink is what reads on a danger fill. */
+  --ui-danger: oklch(50% 0.2 25);
+  --ui-danger-ink: oklch(98.5% 0.006 25);
+
+  /* Section identity hues for the launcher. One lightness and one chroma for
+     all three, so they read as a set, and so the blue one is the *same* blue
+     the accent uses at the lightness the dark plate needs. */
+  --ui-accent-plate: oklch(76% 0.12 275);
+  --ui-hue-study: var(--ui-accent-plate);
+  --ui-hue-money: oklch(76% 0.12 155);
+  --ui-hue-body: oklch(76% 0.12 20);
 
   --ui-plate: oklch(23% 0.045 275);
   --ui-plate-ink: oklch(97% 0.008 275);
   --ui-plate-ink-soft: oklch(80% 0.012 275);
   --ui-plate-edge: oklch(32% 0.05 275);
-  --ui-plate-accent: oklch(74% 0.13 155);
+  --ui-plate-accent: var(--ui-hue-money);
 
   --ui-lift: 0 1px 2px oklch(25% 0.03 275 / 0.05), 0 10px 28px -14px oklch(25% 0.04 275 / 0.16);
 }
@@ -608,7 +636,7 @@ input[type="number"] {
 .dark {
   --ui-page: oklch(11.5% 0.006 275);
   --ui-panel: oklch(17.5% 0.008 275);
-  --ui-inset: oklch(21% 0.01 275);
+  --ui-inset: oklch(24% 0.012 275);
   --ui-edge: oklch(27% 0.012 275);
   --ui-rule: oklch(24% 0.01 275);
 
@@ -618,6 +646,10 @@ input[type="number"] {
 
   --ui-accent: oklch(76% 0.12 275);
   --ui-accent-soft: oklch(33% 0.08 275);
+  --ui-accent-ink: oklch(18% 0.03 275);
+
+  --ui-danger: oklch(72% 0.18 25);
+  --ui-danger-ink: oklch(18% 0.04 25);
 
   --ui-plate: oklch(20% 0.028 275);
   --ui-plate-ink: oklch(93% 0.006 275);
@@ -671,6 +703,30 @@ input[type="number"] {
   .ui-inset {
     background-color: var(--ui-inset);
     border-radius: 10px;
+  }
+
+  /* Chip — a pill carrying one short fact, usually a quantity. Material only:
+     the caller sets the padding and the line box. */
+  .ui-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 999px;
+    background-color: var(--ui-accent-soft);
+    color: var(--ui-accent);
+    font-weight: 500;
+  }
+
+  /* The same pill when the fact is neutral rather than notable. */
+  .ui-chip-quiet {
+    background-color: var(--ui-inset);
+    color: var(--ui-ink-soft);
+  }
+
+  /* The one primary action on a surface. Ink flips with the theme. */
+  .ui-cta {
+    background-color: var(--ui-accent);
+    color: var(--ui-accent-ink);
   }
 
   /* Notes: a ruled writing surface. background-attachment:local keeps the

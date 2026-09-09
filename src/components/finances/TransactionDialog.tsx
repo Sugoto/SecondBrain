@@ -92,7 +92,49 @@ function evaluateExpression(expr: string): number | null {
   }
 }
 
-const EYEBROW = "text-[10px] uppercase tracking-wider text-muted-foreground";
+/** Field caption. Quiet and sentence case, so the one accent label at the top
+ *  of the dialog stays the only thing pulling the eye. */
+const CAPTION = "text-[12px] text-[var(--ui-ink-softer)]";
+
+/** An inset well for a single-line input. */
+const WELL =
+  "ui-inset h-11 w-full px-3 text-[15px] text-[var(--ui-ink)] outline-none transition-shadow placeholder:text-[var(--ui-ink-softer)] focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)] disabled:opacity-50";
+
+const RATING_STEPS = [1, 2, 3, 4, 5];
+
+/** The editor for value_rating, drawn as the same five ticks TransactionCard
+ *  reads back. Each tick is its own 44px tap target. */
+function RatingStrip({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number;
+  onChange: (rating: number) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div role="group" aria-label="Worth it" className="grid grid-cols-5 gap-1.5">
+      {RATING_STEPS.map((step) => (
+        <button
+          key={step}
+          type="button"
+          aria-pressed={value === step}
+          aria-label={VALUE_RATING_LABELS[step]}
+          onClick={() => onChange(step)}
+          disabled={disabled}
+          className="group flex h-11 items-center justify-center rounded-[8px] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)] disabled:opacity-50"
+        >
+          <span
+            className={`h-[7px] w-full rounded-full transition-colors ${
+              step <= value ? "bg-[var(--ui-accent)]" : "bg-[var(--ui-edge)]"
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function TransactionDialog({
   transaction,
@@ -173,26 +215,26 @@ export function TransactionDialog({
   return (
     <Dialog open={!!transaction} onOpenChange={(open) => !open && !saving && onClose()}>
       <DialogContent
-        className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant"
+        showCloseButton={false}
+        className="ui-type flex max-h-[90vh] w-[calc(100%-1.5rem)] max-w-md flex-col sm:max-w-md gap-0 overflow-hidden rounded-[18px] border-[var(--ui-edge)] bg-[var(--ui-panel)] p-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
-          <p className={EYEBROW}>{isNew ? "New expense" : "Edit expense"}</p>
-          <DialogTitle className="sr-only">
-            {transaction.merchant || (isNew ? "New expense" : "Edit expense")}
+        <DialogHeader className="shrink-0 px-5 pt-5 pb-0">
+          <DialogTitle className="text-[13px] font-medium text-[var(--ui-accent)]">
+            {isNew ? "New expense" : "Edit expense"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pt-4 pb-3 overflow-y-auto flex-1 space-y-7">
-          <div>
-            <div className="flex items-baseline justify-center gap-2 border-b border-outline-variant/60 pb-3">
-              <span className="font-mono text-muted-foreground text-[28px] leading-none">₹</span>
+        <div className="flex-1 space-y-6 overflow-y-auto px-5 pt-4 pb-4">
+          <div className="ui-inset px-4 py-5">
+            <div className="flex items-baseline justify-center gap-1.5">
+              <span className="ui-num text-[26px] leading-none text-[var(--ui-ink-softer)]">₹</span>
               <input
                 id="amount"
                 type="text"
                 inputMode="text"
                 placeholder="0"
-                className="flex-none w-auto max-w-[65%] font-mono tabular-nums text-[40px] leading-none tracking-[-0.03em] text-foreground bg-transparent outline-none placeholder:text-muted-foreground/40 text-center"
+                className="ui-num w-auto max-w-[65%] flex-none bg-transparent text-center text-[40px] leading-none tracking-[-0.02em] text-[var(--ui-ink)] outline-none placeholder:text-[var(--ui-ink-softer)]"
                 size={amountInput.length || 1}
                 value={amountInput}
                 onChange={(e) => handleAmountInputChange(e.target.value)}
@@ -201,66 +243,70 @@ export function TransactionDialog({
                 onFocus={(e) => setTimeout(() => e.target.select(), 0)}
                 disabled={saving}
               />
-              {isExpression && (
-                <span
-                  className={`font-mono text-[12px] ${
-                    evaluatedAmount !== null ? "text-muted-foreground" : "text-destructive"
-                  }`}
-                >
-                  {evaluatedAmount !== null ? `= ${evaluatedAmount}` : "?"}
-                </span>
-              )}
             </div>
+            {isExpression && (
+              <p
+                className={`ui-num mt-2 text-center text-[12px] ${
+                  evaluatedAmount !== null ? "text-[var(--ui-ink-soft)]" : "text-[var(--ui-danger)]"
+                }`}
+              >
+                {evaluatedAmount !== null ? `= ${evaluatedAmount}` : "That does not add up"}
+              </p>
+            )}
           </div>
 
           <div>
-            <p className={`${EYEBROW} mb-3`}>Value</p>
-            <div className="grid grid-cols-5 gap-1.5">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <button
-                  key={rating}
-                  type="button"
-                  onClick={() => onChange({ ...transaction, value_rating: rating })}
-                  disabled={saving}
-                  className={`h-9 rounded-lg text-[10px] uppercase tracking-wide transition-colors disabled:opacity-50 ${
-                    valueRating === rating
-                      ? "bg-foreground text-background"
-                      : "border border-outline-variant text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  }`}
-                >
-                  {VALUE_RATING_LABELS[rating]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className={`${EYEBROW} mb-2`}>Where?</p>
+            <label htmlFor="merchant" className={CAPTION}>
+              Where did it go?
+            </label>
             <input
+              id="merchant"
               placeholder="Amazon, Swiggy, Uber…"
-              className="w-full h-10 text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none placeholder:text-muted-foreground/40"
+              className={`${WELL} mt-1.5`}
               value={transaction.merchant || ""}
               onChange={(e) => onChange({ ...transaction, merchant: e.target.value })}
               disabled={saving}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className={CAPTION}>Worth it?</span>
+              <span className="text-[12px] text-[var(--ui-ink)]">
+                {VALUE_RATING_LABELS[valueRating]}
+              </span>
+            </div>
+            <div className="mt-0.5">
+              <RatingStrip
+                value={valueRating}
+                onChange={(rating) => onChange({ ...transaction, value_rating: rating })}
+                disabled={saving}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className={`${EYEBROW} mb-2`}>Date</p>
+              <label htmlFor="txn-date" className={CAPTION}>
+                Date
+              </label>
               <input
+                id="txn-date"
                 type="date"
-                className="w-full h-10 text-[14px] font-mono text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
+                className={`${WELL} ui-num mt-1.5 text-[14px]`}
                 value={transaction.date}
                 onChange={(e) => onChange({ ...transaction, date: e.target.value })}
                 disabled={saving}
               />
             </div>
             <div>
-              <p className={`${EYEBROW} mb-2`}>Time</p>
+              <label htmlFor="txn-time" className={CAPTION}>
+                Time
+              </label>
               <input
+                id="txn-time"
                 type="time"
-                className="w-full h-10 text-[14px] font-mono text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
+                className={`${WELL} ui-num mt-1.5 text-[14px]`}
                 value={transaction.time?.slice(0, 5) || ""}
                 onChange={(e) => handleTimeChange(e.target.value)}
                 disabled={saving}
@@ -272,12 +318,13 @@ export function TransactionDialog({
             <button
               type="button"
               onClick={() => setShowAdvanced((s) => !s)}
-              className="w-full flex items-center justify-between text-muted-foreground hover:text-foreground transition-colors py-2"
+              aria-expanded={showAdvanced}
+              className="flex h-11 w-full items-center justify-between rounded-[8px] text-[var(--ui-ink-soft)] transition-colors hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)]"
             >
-              <span className="text-[10px] uppercase">More options</span>
+              <span className="text-[13px]">More options</span>
               <ChevronDown
                 className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
-                strokeWidth={1.5}
+                strokeWidth={1.75}
               />
             </button>
 
@@ -290,22 +337,25 @@ export function TransactionDialog({
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-3 space-y-4">
-                    <div className="flex items-center justify-between gap-3 py-2 border-b border-outline-variant/60">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] text-foreground">Spread over months</p>
+                  <div className="pt-1">
+                    <div className="flex items-center justify-between gap-3 border-b border-[var(--ui-rule)] py-3">
+                      <div className="min-w-0 flex-1">
+                        <label htmlFor="prorate" className="text-[13px] text-[var(--ui-ink)]">
+                          Spread over months
+                        </label>
                         {transaction.prorate_months && transaction.prorate_months > 1 && (
-                          <p className="font-mono text-[11px] text-muted-foreground">
+                          <p className="ui-num text-[11px] text-[var(--ui-ink-softer)]">
                             {formatCurrency(transaction.amount / transaction.prorate_months)}/mo
                           </p>
                         )}
                       </div>
                       <input
+                        id="prorate"
                         type="number"
                         min="1"
                         max="60"
                         placeholder="1"
-                        className="h-8 w-14 text-center font-mono text-[14px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
+                        className="ui-inset ui-num h-9 w-16 text-center text-[14px] text-[var(--ui-ink)] outline-none transition-shadow placeholder:text-[var(--ui-ink-softer)] focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]"
                         value={transaction.prorate_months ?? ""}
                         onChange={(e) => handleProrateChange(e.target.value)}
                         onBlur={handleProrateBlur}
@@ -313,14 +363,15 @@ export function TransactionDialog({
                       />
                     </div>
 
-                    <div className="flex items-center justify-between gap-3 py-2 border-b border-outline-variant/60">
-                      <p className="text-[13px] text-foreground">Exclude from budget</p>
+                    <div className="flex items-center justify-between gap-3 py-3">
+                      <p className="text-[13px] text-[var(--ui-ink)]">Exclude from budget</p>
                       <Switch
                         checked={transaction.excluded_from_budget}
                         onCheckedChange={(checked) =>
                           onChange({ ...transaction, excluded_from_budget: checked })
                         }
                         disabled={saving}
+                        className="border-[var(--ui-edge)] data-[state=checked]:bg-[var(--ui-accent)] data-[state=unchecked]:bg-[var(--ui-inset)]"
                       />
                     </div>
 
@@ -329,10 +380,10 @@ export function TransactionDialog({
                         type="button"
                         onClick={() => setShowDeleteConfirm(true)}
                         disabled={saving || deleting}
-                        className="w-full flex items-center justify-center gap-2 h-10 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                        className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-[13px] text-[var(--ui-ink-soft)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-danger)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-danger)] disabled:opacity-50"
                       >
-                        <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                        Delete transaction
+                        <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                        Delete this expense
                       </button>
                     )}
                   </div>
@@ -342,55 +393,57 @@ export function TransactionDialog({
           </div>
         </div>
 
-        <div className="flex gap-2 px-6 pb-6 pt-3 shrink-0 border-t border-outline-variant">
+        <div className="flex shrink-0 gap-2 border-t border-[var(--ui-edge)] px-5 pt-3 pb-5">
           <button
             onClick={onClose}
             disabled={saving || deleting}
-            className="flex-1 h-11 rounded-lg border border-outline-variant text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+            className="h-11 flex-1 rounded-[10px] border border-[var(--ui-edge)] text-[14px] text-[var(--ui-ink-soft)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)] disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(transaction)}
             disabled={saving || deleting}
-            className="flex-1 h-11 rounded-lg bg-foreground text-background text-[11px] uppercase tracking-wider transition-opacity active:opacity-90 disabled:opacity-30 flex items-center justify-center gap-2"
+            className="ui-cta flex h-11 flex-[1.4] items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:opacity-90 disabled:opacity-40"
           >
             {saving ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Saving
               </>
+            ) : isNew ? (
+              "Add expense"
             ) : (
-              "Save"
+              "Save changes"
             )}
           </button>
         </div>
       </DialogContent>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-sm rounded-2xl border border-outline-variant bg-background p-6">
+        <AlertDialogContent className="ui-type max-w-sm gap-0 sm:max-w-sm rounded-[18px] border-[var(--ui-edge)] bg-[var(--ui-panel)] p-5">
           <AlertDialogHeader>
-            <p className={`${EYEBROW} mb-3`}>Confirm</p>
-            <AlertDialogTitle className="text-[20px] font-heading tracking-[-0.02em] text-foreground">
-              Delete this transaction?
+            <AlertDialogTitle className="text-[19px] font-semibold tracking-[-0.01em] text-[var(--ui-ink)]">
+              Delete this expense?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground pt-1">
+            <AlertDialogDescription className="pt-1 text-[13px] text-[var(--ui-ink-soft)]">
               {transaction.merchant ? (
                 <>
-                  Your record from <span className="text-foreground">{transaction.merchant}</span>{" "}
-                  will be removed permanently.
+                  Your record from{" "}
+                  <span className="text-[var(--ui-ink)]">{transaction.merchant}</span> will be
+                  removed permanently.
                 </>
               ) : (
                 "This record will be removed permanently."
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2 mt-5">
+          <AlertDialogFooter className="mt-5 gap-2 sm:gap-2">
             <AlertDialogCancel
               disabled={deleting}
-              className="rounded-lg h-11 px-5 border border-outline-variant bg-transparent text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+              className="h-11 rounded-[10px] border-[var(--ui-edge)] bg-transparent px-5 text-[14px] text-[var(--ui-ink-soft)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-ink)]"
             >
-              Cancel
+              Keep it
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -398,11 +451,11 @@ export function TransactionDialog({
                 setShowDeleteConfirm(false);
               }}
               disabled={deleting}
-              className="rounded-lg h-11 px-5 bg-destructive text-background text-[11px] uppercase tracking-wider border-0"
+              className="h-11 rounded-[10px] border-0 bg-[var(--ui-danger)] px-5 text-[14px] font-medium text-[var(--ui-danger-ink)] hover:bg-[var(--ui-danger)] hover:opacity-90"
             >
               {deleting ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting
                 </>
               ) : (
