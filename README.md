@@ -1,73 +1,66 @@
-# React + TypeScript + Vite
+# SecondBrain
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A private, single-user dashboard for the things worth tracking daily: net worth and spending, calorie targets and lifts, and OMSCS coursework. Built as an installable PWA, mobile first, with a bottom-nav launcher and swipe navigation between views.
 
-Currently, two official plugins are available:
+Amounts are in INR with lakh grouping, and the workout schedule reads the current day in `Asia/Kolkata`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Stack
 
-## React Compiler
+|                             |                                                                             |
+| --------------------------- | --------------------------------------------------------------------------- |
+| Runtime and package manager | Bun                                                                         |
+| Toolchain                   | [Vite+](https://viteplus.dev) (`vp`) — wraps Vite, Rolldown, Vitest, Oxlint |
+| UI                          | React 19 with the React Compiler, TypeScript                                |
+| Styling                     | Tailwind CSS v4, Radix primitives, OKLCH design tokens                      |
+| Data                        | Supabase (Postgres + Google OAuth), Dexie for the IndexedDB cache           |
+| State                       | TanStack Query, TanStack Virtual for long lists                             |
+| Charts                      | ECharts                                                                     |
+| Motion                      | Framer Motion, plus the View Transitions API                                |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting started
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun run dev
 ```
+
+The dev server comes up on `http://localhost:5173`. Sign-in is Google OAuth through Supabase, so a session is required to see anything past the login screen.
+
+| Script            | What it does                                  |
+| ----------------- | --------------------------------------------- |
+| `bun run dev`     | Dev server with HMR                           |
+| `bun run build`   | Typecheck, then production build into `dist/` |
+| `bun run lint`    | Oxlint over the project                       |
+| `bun run preview` | Serve the built output                        |
+
+`vp <command>` runs a built-in Vite+ command; `vp run <name>` runs a `package.json` script. See [AGENTS.md](AGENTS.md).
+
+## Layout
+
+```
+src/
+  components/
+    home/        dashboard: net worth masthead, calorie target, today's lifts, notes
+    finances/    portfolio, expenses, insights, budget, transaction dialog
+    fitness/     nutrition, workouts, shopping list, meal planner
+    omscs/       courses and semester tracking
+    navigation/  bottom-nav launcher and in-section top tabs
+    profile/     settings
+    ui/          shadcn/Radix primitives
+  hooks/         data fetching, auth, theme, privacy, haptics, swipe nav
+  lib/           supabase client, Dexie schema, motion helpers
+  index.css      M3 token base plus the --ui-* dashboard layer
+```
+
+Sections are `home`, `finances`, `fitness`, `omscs`, and `profile` (see [navigation.ts](src/types/navigation.ts)). Supabase tables in use: `transactions`, `user_stats`, `workouts`, `shopping_list`, `omscs_courses`.
+
+## Privacy mode
+
+`usePrivacy` masks holdings-level figures — net worth, assets, salary — behind `₹•••`, while leaving transactions, budgets, and analysis tools readable. Use the asset-aware formatters (`useAssetCurrency`, `useAssetCurrencyCompact`) for anything that should mask, and the plain ones for anything that should not.
+
+## Design
+
+[DESIGN.md](DESIGN.md) is the source of truth for surfaces, ink, type, and the accent role, including which screens have been migrated to the current visual system and which have not. Read it before touching UI.

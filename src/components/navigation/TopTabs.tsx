@@ -21,50 +21,52 @@ export const TopTabs = memo(function TopTabs({
   rightContent,
 }: TopTabsProps) {
   return (
-    <div className="bg-background">
-      <div className="px-6 pt-6 pb-4">
-        <div className="flex items-center justify-between gap-3 h-8">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={onGoHome}
-              aria-label="Back to home"
-              className="text-muted-foreground hover:text-foreground transition-colors active:scale-95 shrink-0"
-            >
-              <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
-            </button>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
-              {title}
-            </span>
-          </div>
-          {rightContent && <div className="shrink-0">{rightContent}</div>}
+    <div className="ui-type bg-[var(--ui-page)] px-4 pt-4 pb-3">
+      <div className="flex h-9 items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onGoHome}
+            aria-label="Back to home"
+            className="-ml-2 shrink-0 rounded-lg p-2 text-[var(--ui-ink-softer)] transition-colors hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)] active:scale-95"
+          >
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.75} />
+          </button>
+          <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[var(--ui-ink)]">
+            {title}
+          </h1>
         </div>
+        {rightContent && <div className="shrink-0">{rightContent}</div>}
       </div>
 
-      <div className="border-t border-zinc-300 dark:border-zinc-700">
-        <div
-          className="grid divide-x divide-zinc-300 dark:divide-zinc-700"
-          style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
-        >
-          {navItems.map(({ id, label }) => {
-            const isActive = activeView === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => onViewChange(id)}
-                className={cn(
-                  "h-10 text-[10px] uppercase tracking-wider transition-colors",
-                  isActive
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+      <div
+        role="tablist"
+        aria-label={`${title} views`}
+        className="ui-inset mt-3 grid gap-1 p-1"
+        style={{
+          gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))`,
+        }}
+      >
+        {navItems.map(({ id, label }) => {
+          const isActive = activeView === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onViewChange(id)}
+              className={cn(
+                "h-9 rounded-[7px] text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)]",
+                isActive
+                  ? "bg-[var(--ui-panel)] font-medium text-[var(--ui-accent)] shadow-[var(--ui-lift)]"
+                  : "text-[var(--ui-ink-softer)] hover:text-[var(--ui-ink)]",
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

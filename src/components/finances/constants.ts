@@ -36,6 +36,18 @@ export const formatCurrencyCompact = (amount: number) => {
   return `₹${Math.round(absAmount)}`;
 };
 
+/** Reads a `YYYY-MM-DD` date without going through Date, which would treat a
+ *  bare date string as UTC midnight and shift the day in some timezones. */
+export const formatDayLabel = (dateStr: string) => {
+  const [y, m, d] = dateStr.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return dateStr;
+  return new Date(y, m - 1, d).toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+};
+
 export const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-IN", {

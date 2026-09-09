@@ -18,3 +18,23 @@ Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.de
 - [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
 
 <!--VITE PLUS END-->
+
+# SecondBrain
+
+A private single-user PWA dashboard: finances, health, and OMSCS coursework. Mobile first, INR with lakh grouping, workout schedule keyed to `Asia/Kolkata`. See [README.md](README.md) for the stack and layout.
+
+## Before touching UI
+
+Read [DESIGN.md](DESIGN.md). It defines the current visual system — panel surfaces on a recessed page, semantic ink tokens, monospace numerics, one accent role — and lists which screens have been migrated to it and which are still on the retired hairline vocabulary. The two look nothing alike, so matching the file you happen to open is not a reliable guide.
+
+Three traps worth knowing before you start:
+
+- **Never use alpha modifiers for muted text** (`text-foreground/60`). Use `--ui-ink-soft` / `--ui-ink-softer`. Opacity compositing is not symmetric between light and dark, so one alpha cannot pass contrast in both.
+- **Transaction row heights are exact constants** in [ExpensesView.tsx](src/components/finances/ExpensesView.tsx), because the virtualizer runs without a measurement pass. Change a row's padding or font size and you must update the constant.
+- **Do not display a date via `new Date(txn.date)`.** A bare `YYYY-MM-DD` parses as UTC midnight and can render the previous day. Use `formatDayLabel` in [constants.ts](src/components/finances/constants.ts).
+
+## Verification
+
+`bun run build` typechecks and builds. `bun run lint` currently reports 64 pre-existing `no-floating-promises` warnings and exits non-zero — compare the count against `main` rather than expecting zero.
+
+Auth is Google OAuth through Supabase, so a real session is needed to reach anything past the login screen. There is no fixture or dev bypass.

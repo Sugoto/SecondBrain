@@ -10,12 +10,9 @@
    ============================================================ */
 
 @theme inline {
-  --font-sans:
-    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading:
-    "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono:
-    "Geist Mono", "JetBrains Mono", "SF Mono", "Fira Code", Consolas, monospace;
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", "SF Mono", "Fira Code", Consolas, monospace;
 
   /* Shape scale */
   --radius-xs: 4px;
@@ -103,10 +100,10 @@
   --outline-variant: oklch(85% 0.01 275);
   --border: var(--outline-variant);
   --input: var(--outline-variant);
-  --ring: oklch(42% 0.20 275);
+  --ring: oklch(42% 0.2 275);
 
   /* Primary (indigo) */
-  --primary: oklch(42% 0.20 275);
+  --primary: oklch(42% 0.2 275);
   --primary-foreground: oklch(99% 0.005 275);
   --primary-container: oklch(90% 0.06 275);
   --on-primary-container: oklch(15% 0.06 275);
@@ -118,12 +115,12 @@
   --on-secondary-container: oklch(15% 0.03 275);
 
   /* Tertiary — warm complement (rose) */
-  --tertiary: oklch(45% 0.10 335);
+  --tertiary: oklch(45% 0.1 335);
   --tertiary-container: oklch(90% 0.04 335);
   --on-tertiary-container: oklch(15% 0.05 335);
 
   /* Semantic */
-  --destructive: oklch(50% 0.20 25);
+  --destructive: oklch(50% 0.2 25);
   --success: oklch(55% 0.13 155);
 
   /* Pastel category tints (functional) */
@@ -135,10 +132,10 @@
   --pastel-orange: oklch(96% 0.025 50);
 
   /* Charts — single-hue indigo ramp anchored on brand */
-  --chart-1: oklch(42% 0.20 275);
-  --chart-2: oklch(55% 0.20 275);
+  --chart-1: oklch(42% 0.2 275);
+  --chart-2: oklch(55% 0.2 275);
   --chart-3: oklch(67% 0.16 275);
-  --chart-4: oklch(78% 0.10 275);
+  --chart-4: oklch(78% 0.1 275);
   --chart-5: oklch(30% 0.16 275);
 }
 
@@ -173,7 +170,7 @@
   --ring: oklch(76% 0.12 275);
 
   --primary: oklch(76% 0.12 275);
-  --primary-foreground: oklch(20% 0.10 275);
+  --primary-foreground: oklch(20% 0.1 275);
   --primary-container: oklch(33% 0.16 275);
   --on-primary-container: oklch(90% 0.06 275);
 
@@ -198,9 +195,9 @@
 
   --chart-1: oklch(76% 0.12 275);
   --chart-2: oklch(67% 0.16 275);
-  --chart-3: oklch(58% 0.20 275);
+  --chart-3: oklch(58% 0.2 275);
   --chart-4: oklch(86% 0.06 275);
-  --chart-5: oklch(45% 0.20 275);
+  --chart-5: oklch(45% 0.2 275);
 }
 
 @layer base {
@@ -209,7 +206,9 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  *::-webkit-scrollbar { display: none; }
+  *::-webkit-scrollbar {
+    display: none;
+  }
 
   html {
     background-color: var(--background);
@@ -229,8 +228,17 @@
     padding-right: env(safe-area-inset-right, 0px);
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family:
+      "Geist",
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
   }
 
   .font-mono {
@@ -241,51 +249,164 @@
 
 @layer utilities {
   /* ====== M3 Type roles — exact spec values ====== */
-  .text-display-l, .text-display-m, .text-display-s,
-  .text-headline-l, .text-headline-m, .text-headline-s,
+  .text-display-l,
+  .text-display-m,
+  .text-display-s,
+  .text-headline-l,
+  .text-headline-m,
+  .text-headline-s,
   .text-title-l {
-    font-family: "Geist", -apple-system, sans-serif;
+    font-family:
+      "Geist",
+      -apple-system,
+      sans-serif;
   }
-  .text-display-l  { font-size: 57px; line-height: 64px; letter-spacing: -0.25px; font-weight: 400; }
-  .text-display-m  { font-size: 45px; line-height: 52px; letter-spacing: 0;       font-weight: 400; }
-  .text-display-s  { font-size: 36px; line-height: 44px; letter-spacing: 0;       font-weight: 400; }
-  .text-headline-l { font-size: 32px; line-height: 40px; letter-spacing: 0;       font-weight: 400; }
-  .text-headline-m { font-size: 28px; line-height: 36px; letter-spacing: 0;       font-weight: 400; }
-  .text-headline-s { font-size: 24px; line-height: 32px; letter-spacing: 0;       font-weight: 400; }
-  .text-title-l    { font-size: 22px; line-height: 28px; letter-spacing: 0;       font-weight: 400; }
-  .text-title-m    { font-size: 16px; line-height: 24px; letter-spacing: 0.15px;  font-weight: 500; }
-  .text-title-s    { font-size: 14px; line-height: 20px; letter-spacing: 0.1px;   font-weight: 500; }
-  .text-body-l     { font-size: 16px; line-height: 24px; letter-spacing: 0.5px;   font-weight: 400; }
-  .text-body-m     { font-size: 14px; line-height: 20px; letter-spacing: 0.25px;  font-weight: 400; }
-  .text-body-s     { font-size: 12px; line-height: 16px; letter-spacing: 0.4px;   font-weight: 400; }
-  .text-label-l    { font-size: 14px; line-height: 20px; letter-spacing: 0.1px;   font-weight: 500; }
-  .text-label-m    { font-size: 12px; line-height: 16px; letter-spacing: 0.5px;   font-weight: 500; }
-  .text-label-s    { font-size: 11px; line-height: 16px; letter-spacing: 0.5px;   font-weight: 500; }
+  .text-display-l {
+    font-size: 57px;
+    line-height: 64px;
+    letter-spacing: -0.25px;
+    font-weight: 400;
+  }
+  .text-display-m {
+    font-size: 45px;
+    line-height: 52px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .text-display-s {
+    font-size: 36px;
+    line-height: 44px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .text-headline-l {
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .text-headline-m {
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .text-headline-s {
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .text-title-l {
+    font-size: 22px;
+    line-height: 28px;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .text-title-m {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.15px;
+    font-weight: 500;
+  }
+  .text-title-s {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-weight: 500;
+  }
+  .text-body-l {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.5px;
+    font-weight: 400;
+  }
+  .text-body-m {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+    font-weight: 400;
+  }
+  .text-body-s {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+    font-weight: 400;
+  }
+  .text-label-l {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+    font-weight: 500;
+  }
+  .text-label-m {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  .text-label-s {
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
 
   /* ====== Safe area ====== */
-  .safe-area-pt { padding-top: env(safe-area-inset-top, 0px); }
-  .safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 0px); }
-  .safe-area-pl { padding-left: env(safe-area-inset-left, 0px); }
-  .safe-area-pr { padding-right: env(safe-area-inset-right, 0px); }
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-area-pl {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .safe-area-pr {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
   .safe-area-inset {
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
   }
-  .safe-area-inset-x { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
-  .safe-area-inset-y { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .safe-area-inset-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .safe-area-inset-y {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 
   /* Pastel category tints — used as small icon backgrounds */
-  .bg-pastel-pink { background-color: var(--pastel-pink); }
-  .bg-pastel-blue { background-color: var(--pastel-blue); }
-  .bg-pastel-green { background-color: var(--pastel-green); }
-  .bg-pastel-yellow { background-color: var(--pastel-yellow); }
-  .bg-pastel-purple { background-color: var(--pastel-purple); }
-  .bg-pastel-orange { background-color: var(--pastel-orange); }
+  .bg-pastel-pink {
+    background-color: var(--pastel-pink);
+  }
+  .bg-pastel-blue {
+    background-color: var(--pastel-blue);
+  }
+  .bg-pastel-green {
+    background-color: var(--pastel-green);
+  }
+  .bg-pastel-yellow {
+    background-color: var(--pastel-yellow);
+  }
+  .bg-pastel-purple {
+    background-color: var(--pastel-purple);
+  }
+  .bg-pastel-orange {
+    background-color: var(--pastel-orange);
+  }
 
   .scroll-optimized {
     overscroll-behavior: contain;
@@ -299,16 +420,27 @@
   }
 
   .skeleton-shimmer {
-    background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklab, var(--muted) 50%, transparent) 50%, var(--muted) 75%);
+    background: linear-gradient(
+      90deg,
+      var(--muted) 25%,
+      color-mix(in oklab, var(--muted) 50%, transparent) 50%,
+      var(--muted) 75%
+    );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite ease-in-out;
   }
   @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 
-  .pull-indicator { transition: transform 0.2s ease-out; }
+  .pull-indicator {
+    transition: transform 0.2s ease-out;
+  }
 
   .touch-feedback {
     -webkit-tap-highlight-color: transparent;
@@ -316,13 +448,27 @@
   }
 
   /* ====== M3 surface utilities ====== */
-  .bg-surface-container { background-color: var(--surface-container); }
-  .bg-surface-container-low { background-color: var(--surface-container-low); }
-  .bg-surface-container-high { background-color: var(--surface-container-high); }
-  .bg-primary-container { background-color: var(--primary-container); color: var(--on-primary-container); }
-  .bg-secondary-container { background-color: var(--secondary-container); color: var(--on-secondary-container); }
-  .bg-tertiary-container { background-color: var(--tertiary-container); color: var(--on-tertiary-container); }
-
+  .bg-surface-container {
+    background-color: var(--surface-container);
+  }
+  .bg-surface-container-low {
+    background-color: var(--surface-container-low);
+  }
+  .bg-surface-container-high {
+    background-color: var(--surface-container-high);
+  }
+  .bg-primary-container {
+    background-color: var(--primary-container);
+    color: var(--on-primary-container);
+  }
+  .bg-secondary-container {
+    background-color: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+  .bg-tertiary-container {
+    background-color: var(--tertiary-container);
+    color: var(--on-tertiary-container);
+  }
 }
 
 /* ============================================================
@@ -350,23 +496,57 @@ body > nav.no-view-transition {
   transition: none !important;
 }
 
-::view-transition-old(page-content) { animation: slide-out-left 0.25s ease-out forwards; }
-::view-transition-new(page-content) { animation: slide-in-right 0.25s ease-out forwards; }
+::view-transition-old(page-content) {
+  animation: slide-out-left 0.25s ease-out forwards;
+}
+::view-transition-new(page-content) {
+  animation: slide-in-right 0.25s ease-out forwards;
+}
 
 @keyframes slide-out-left {
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(-30px); }
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
 }
 @keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(30px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-::view-transition-old(card) { animation: fade-out 0.15s ease-out forwards; }
-::view-transition-new(card) { animation: fade-in 0.15s ease-out forwards; }
+::view-transition-old(card) {
+  animation: fade-out 0.15s ease-out forwards;
+}
+::view-transition-new(card) {
+  animation: fade-in 0.15s ease-out forwards;
+}
 
-@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 .page-transition {
   will-change: transform, opacity;
@@ -382,4 +562,128 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+/* ============================================================
+   Dashboard surface — surfaces, ink, type and materials.
+   Layered on top of the M3 tokens above: panels and plates
+   instead of hairlines, semantic ink instead of alpha, and a
+   mono face for every numeric. Applied per component via
+   .ui-surface / .ui-type so untouched screens keep their
+   existing hairline vocabulary.
+   ============================================================ */
+
+:root {
+  --ui-sans: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ui-mono: "Spline Sans Mono", "Geist Mono", "Roboto Mono", ui-monospace, monospace;
+
+  --ui-page: oklch(96.6% 0.006 275);
+  --ui-panel: oklch(99.6% 0.002 275);
+  --ui-inset: oklch(96.2% 0.007 275);
+  --ui-edge: oklch(89.5% 0.009 275);
+  --ui-rule: oklch(92% 0.008 275);
+
+  --ui-ink: oklch(20% 0.008 275);
+  --ui-ink-soft: oklch(38% 0.012 275);
+  --ui-ink-softer: oklch(50% 0.012 275);
+
+  /* Accent — the brand indigo, tuned to sit on panels rather than fill them. */
+  --ui-accent: oklch(48% 0.17 275);
+  --ui-accent-soft: oklch(90% 0.045 275);
+
+  /* Section identity hues for the launcher. Low chroma so three can coexist. */
+  --ui-hue-study: oklch(72% 0.09 275);
+  --ui-hue-money: oklch(74% 0.09 155);
+  --ui-hue-body: oklch(75% 0.08 20);
+
+  --ui-plate: oklch(23% 0.045 275);
+  --ui-plate-ink: oklch(97% 0.008 275);
+  --ui-plate-ink-soft: oklch(80% 0.012 275);
+  --ui-plate-edge: oklch(32% 0.05 275);
+  --ui-plate-accent: oklch(74% 0.13 155);
+
+  --ui-lift: 0 1px 2px oklch(25% 0.03 275 / 0.05), 0 10px 28px -14px oklch(25% 0.04 275 / 0.16);
+}
+
+.dark {
+  --ui-page: oklch(11.5% 0.006 275);
+  --ui-panel: oklch(17.5% 0.008 275);
+  --ui-inset: oklch(21% 0.01 275);
+  --ui-edge: oklch(27% 0.012 275);
+  --ui-rule: oklch(24% 0.01 275);
+
+  --ui-ink: oklch(91% 0.006 275);
+  --ui-ink-soft: oklch(70% 0.012 275);
+  --ui-ink-softer: oklch(63% 0.012 275);
+
+  --ui-accent: oklch(76% 0.12 275);
+  --ui-accent-soft: oklch(33% 0.08 275);
+
+  --ui-plate: oklch(20% 0.028 275);
+  --ui-plate-ink: oklch(93% 0.006 275);
+  --ui-plate-ink-soft: oklch(78% 0.01 275);
+  --ui-plate-edge: oklch(29% 0.035 275);
+
+  --ui-lift: inset 0 1px 0 oklch(100% 0 0 / 0.04);
+}
+
+@layer utilities {
+  /* Page-level: sets the type and the recessed page colour. */
+  .ui-surface {
+    font-family: var(--ui-sans);
+    background-color: var(--ui-page);
+  }
+
+  /* Type only, for components living inside an untouched page. */
+  .ui-type {
+    font-family: var(--ui-sans);
+  }
+
+  /* Beat the base h1..h6 { font-family: Geist } rule in these subtrees. */
+  .ui-surface h1,
+  .ui-surface h2,
+  .ui-surface h3,
+  .ui-type h1,
+  .ui-type h2,
+  .ui-type h3 {
+    font-family: var(--ui-sans);
+  }
+
+  /* Numerics. Carries tnum/zero itself so it does not depend on .font-mono. */
+  .ui-num {
+    font-family: var(--ui-mono);
+    font-feature-settings: "tnum", "zero";
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-panel {
+    background-color: var(--ui-panel);
+    border: 1px solid var(--ui-edge);
+    border-radius: 14px;
+    box-shadow: var(--ui-lift);
+  }
+
+  .ui-plate {
+    background-color: var(--ui-plate);
+    color: var(--ui-plate-ink);
+  }
+
+  .ui-inset {
+    background-color: var(--ui-inset);
+    border-radius: 10px;
+  }
+
+  /* Notes: a ruled writing surface. background-attachment:local keeps the
+     rules locked to the text as the textarea scrolls. */
+  .ui-ruled {
+    line-height: 28px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      var(--ui-rule) 27px,
+      var(--ui-rule) 28px
+    );
+    background-attachment: local;
+  }
 }

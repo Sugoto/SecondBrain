@@ -34,11 +34,11 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
   return createPortal(
     <nav
       aria-label="Primary"
-      className="md:hidden fixed inset-x-0 bottom-0 z-[9999] no-view-transition bg-background border-t border-outline-variant"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className="no-view-transition fixed inset-x-0 bottom-0 z-[9999] px-4 pt-2 md:hidden"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}
     >
-      <div className="flex h-14">
-        {navItems.map(({ id, icon: Icon, label }) => (
+      <div className="ui-plate ui-type flex h-[60px] items-stretch rounded-[18px] shadow-[0_10px_30px_-12px_oklch(20%_0.04_275/0.45)]">
+        {navItems.map(({ id, icon: Icon, label, color }) => (
           <button
             key={id}
             type="button"
@@ -47,17 +47,18 @@ export const DynamicBottomNav = memo(function DynamicBottomNav({
               onViewChange(id);
             }}
             onPointerEnter={() => onPrefetch?.(id)}
-            aria-label={label}
-            className="group flex flex-1 flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-[0.97]"
+            className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-none first:rounded-l-[18px] last:rounded-r-[18px] text-[var(--ui-plate-ink)] focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-[var(--ui-plate-ink)] active:scale-[0.97]"
           >
-            <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            <span className="text-[9px] uppercase tracking-wider leading-none">
-              {label}
-            </span>
+            <Icon
+              className="h-[19px] w-[19px]"
+              strokeWidth={2}
+              style={color ? { color } : undefined}
+            />
+            <span className="text-[11px] leading-none font-semibold">{label}</span>
           </button>
         ))}
       </div>
     </nav>,
-    document.body
+    document.body,
   );
 });

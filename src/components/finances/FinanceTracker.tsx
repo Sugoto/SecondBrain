@@ -15,9 +15,7 @@ import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
 import { InvestmentsView } from "./InvestmentsView";
 
-const TrendsView = lazy(() =>
-  import("./TrendsView").then((m) => ({ default: m.TrendsView }))
-);
+const TrendsView = lazy(() => import("./TrendsView").then((m) => ({ default: m.TrendsView })));
 
 import type { TimeFilter, ActiveView, DateRange } from "./types";
 import {
@@ -27,11 +25,7 @@ import {
   createEmptyTransaction,
 } from "./utils";
 
-function BudgetBar({
-  budgetInfo,
-}: {
-  budgetInfo: ReturnType<typeof calculateBudgetInfo>;
-}) {
+function BudgetBar({ budgetInfo }: { budgetInfo: ReturnType<typeof calculateBudgetInfo> }) {
   const formatCurrency = useFormatCurrency();
   const hasBudget = budgetInfo.budget > 0;
   const remaining = budgetInfo.budget - budgetInfo.spent;
@@ -39,30 +33,25 @@ function BudgetBar({
   const percent = hasBudget ? (budgetInfo.spent / budgetInfo.budget) * 100 : 0;
 
   return (
-    <div className="sticky top-0 z-30 bg-background border-y border-zinc-300 dark:border-zinc-700">
-      <div className="max-w-6xl mx-auto px-6 pt-3 pb-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
-            Budget
+    <div className="ui-type sticky top-0 z-30 bg-[var(--ui-page)] px-4 pt-1 pb-3">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <span className="text-[12px] text-[var(--ui-ink-softer)]">
+            {!hasBudget ? "Spent this month" : isOver ? "Over budget" : "Left this month"}
           </span>
           <span
-            className={`font-mono tabular-nums text-[12px] ${
-              isOver ? "text-destructive" : "text-foreground"
-            }`}
+            className={`ui-num text-[14px] ${isOver ? "text-destructive" : "text-[var(--ui-ink)]"}`}
           >
             {formatCurrency(hasBudget ? Math.abs(remaining) : budgetInfo.spent)}
-            <span className="ml-1 font-sans text-[9px] uppercase tracking-wider">
-              {!hasBudget ? "spent" : isOver ? "over" : "left"}
-            </span>
           </span>
         </div>
-        <div className="h-[2px] rounded-full overflow-hidden bg-outline-variant/40">
+        <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ui-inset)]">
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: Math.min(percent, 100) / 100 }}
             transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
             style={{ transformOrigin: "left" }}
-            className={`h-full ${isOver ? "bg-destructive" : "bg-foreground"}`}
+            className={`h-full ${isOver ? "bg-destructive" : "bg-[var(--ui-accent)]"}`}
           />
         </div>
       </div>
@@ -90,13 +79,8 @@ interface FinanceTrackerProps {
   onGoHome: () => void;
 }
 
-export function FinanceTracker({
-  activeView,
-  onViewChange,
-  onGoHome,
-}: FinanceTrackerProps) {
-  const { transactions, addToCache, updateInCache, removeFromCache } =
-    useExpenseData();
+export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTrackerProps) {
+  const { transactions, addToCache, updateInCache, removeFromCache } = useExpenseData();
 
   const { userStats } = useUserStats();
 
@@ -172,10 +156,7 @@ export function FinanceTracker({
   async function deleteTransaction(txn: Transaction) {
     setDeleting(true);
     try {
-      const { error: deleteError } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", txn.id);
+      const { error: deleteError } = await supabase.from("transactions").delete().eq("id", txn.id);
 
       if (deleteError) throw deleteError;
       removeFromCache(txn.id);
@@ -208,12 +189,9 @@ export function FinanceTracker({
   }
 
   const filteredTransactions = useMemo(() => {
-    const result = filterByTimeRange(
-      transactions,
-      timeFilter,
-      customDateRange,
-      { disableProrationSpreading: true }
-    );
+    const result = filterByTimeRange(transactions, timeFilter, customDateRange, {
+      disableProrationSpreading: true,
+    });
 
     return sortTransactions(result, "date", "desc");
   }, [transactions, timeFilter, customDateRange]);
@@ -225,7 +203,7 @@ export function FinanceTracker({
         customRange: customDateRange,
         disableProrationSpreading: true,
       }),
-    [transactions, timeFilter, customDateRange]
+    [transactions, timeFilter, customDateRange],
   );
 
   const budgetInfo = useMemo(() => {
@@ -233,8 +211,8 @@ export function FinanceTracker({
   }, [transactions, userStats?.monthly_budget]);
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden">
-      <header className="md:shrink-0 md:relative fixed top-0 left-0 right-0 z-20 bg-background border-b border-zinc-300 dark:border-zinc-700">
+    <div className="ui-surface flex h-[100dvh] flex-col overflow-hidden">
+      <header className="fixed top-0 right-0 left-0 z-20 bg-[var(--ui-page)] md:relative md:shrink-0">
         <div className="max-w-6xl mx-auto">
           <TopTabs
             navItems={FINANCE_NAV_ITEMS}
@@ -258,7 +236,7 @@ export function FinanceTracker({
       </header>
 
       <main
-        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y pb-28 md:pb-0 pt-[112px] md:pt-0"
+        className="ui-surface flex-1 touch-pan-y overflow-y-auto overscroll-contain pt-[120px] pb-28 md:pt-0 md:pb-0"
         {...swipeHandlers}
       >
         {activeView === "expenses" && <BudgetBar budgetInfo={budgetInfo} />}

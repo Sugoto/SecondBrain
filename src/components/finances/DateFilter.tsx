@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarDays } from "lucide-react";
 import {
@@ -123,11 +119,9 @@ export function DateFilter({
       }}
     >
       <PopoverTrigger asChild>
-        <button className="inline-flex items-center gap-2 h-8 px-3 border border-outline-variant rounded-full text-muted-foreground hover:text-foreground transition-colors">
-          <CalendarDays className="h-3 w-3" strokeWidth={1.5} />
-          <span className="font-mono tabular-nums text-[11px]">
-            {getFilterLabel()}
-          </span>
+        <button className="ui-type inline-flex h-9 items-center gap-2 rounded-[9px] border border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 text-[var(--ui-ink-soft)] transition-colors hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)]">
+          <CalendarDays className="h-3.5 w-3.5" strokeWidth={1.75} />
+          <span className="ui-num text-[12px]">{getFilterLabel()}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent

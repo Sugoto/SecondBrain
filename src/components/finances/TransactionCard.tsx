@@ -3,18 +3,44 @@ import type { Transaction } from "@/lib/supabase";
 import { Info, CalendarRange } from "lucide-react";
 import { getMonthlyAmount } from "./utils";
 import { hapticFeedback } from "@/hooks/useHaptics";
-import { formatDate } from "./constants";
+import { VALUE_RATING_LABELS } from "./constants";
 import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
+
+const RATING_STEPS = [1, 2, 3, 4, 5];
+
+/** Five ticks filled to the rating. One hue, ordinal by count, so a high
+ *  rating reads as "more" rather than as a green light. */
+function ValueTicks({ rating }: { rating: number }) {
+  return (
+    <span
+      role="img"
+      className="inline-flex items-center gap-[3px]"
+      aria-label={`Worth it: ${VALUE_RATING_LABELS[rating] ?? rating} (${rating} of 5)`}
+    >
+      {RATING_STEPS.map((step) => (
+        <span
+          key={step}
+          className={`h-[3px] w-[6px] rounded-full ${
+            step <= rating ? "bg-[var(--ui-accent)]" : "bg-[var(--ui-edge)]"
+          }`}
+        />
+      ))}
+    </span>
+  );
+}
 
 interface TransactionCardProps {
   transaction: Transaction;
   onClick: (transaction: Transaction) => void;
   index?: number;
+  /** Last row of its day card: closes the card instead of ruling into the next row. */
+  isLastOfDay?: boolean;
 }
 
 export const TransactionCard = memo(function TransactionCard({
   transaction: txn,
   onClick,
+  isLastOfDay = false,
 }: TransactionCardProps) {
   const fmt = useFormatCurrencyCompact();
 
@@ -29,36 +55,42 @@ export const TransactionCard = memo(function TransactionCard({
     <button
       type="button"
       onClick={handleClick}
-      className="w-full text-left border-b border-outline-variant/60 transition-[filter] duration-300 active:brightness-95"
+      className={`ui-type h-full w-full border-x border-[var(--ui-edge)] bg-[var(--ui-panel)] px-4 text-left transition-colors hover:bg-[var(--ui-inset)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:bg-[var(--ui-inset)] ${
+        isLastOfDay
+          ? "rounded-b-[14px] border-b border-[var(--ui-edge)]"
+          : "border-b border-[var(--ui-rule)]"
+      }`}
     >
-      <div className={`flex items-center gap-3 py-3 ${isExcluded ? "opacity-40" : ""}`}>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="text-[13px] text-foreground truncate">
-              {txn.merchant || "Unknown merchant"}
-            </p>
-            {txn.details && (
-              <Info
-                className="h-3 w-3 shrink-0 text-muted-foreground/60"
-                strokeWidth={1.5}
-                aria-label={txn.details}
-              />
-            )}
-            {txn.prorate_months && txn.prorate_months > 1 && (
-              <CalendarRange
-                className="h-3 w-3 shrink-0 text-muted-foreground/60"
-                strokeWidth={1.5}
-                aria-label={`Over ${txn.prorate_months} months`}
-              />
-            )}
-          </div>
-          <p className="text-[11px] text-muted-foreground/80 truncate mt-0.5">
-            {formatDate(txn.date)}
+      <div className={`flex h-full items-center gap-3 ${isExcluded ? "opacity-45" : ""}`}>
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <p className="truncate text-[14px] text-[var(--ui-ink)]">
+            {txn.merchant || "Unknown merchant"}
           </p>
+          {txn.details && (
+            <Info
+              className="h-3.5 w-3.5 shrink-0 text-[var(--ui-ink-softer)]"
+              strokeWidth={1.75}
+              aria-label={txn.details}
+            />
+          )}
+          {txn.prorate_months && txn.prorate_months > 1 && (
+            <CalendarRange
+              className="h-3.5 w-3.5 shrink-0 text-[var(--ui-ink-softer)]"
+              strokeWidth={1.75}
+              aria-label={`Spread over ${txn.prorate_months} months`}
+            />
+          )}
         </div>
 
-        <span className="font-mono tabular-nums text-[15px] shrink-0 text-right text-foreground">
-          −{fmt(getMonthlyAmount(txn))}
+        {txn.value_rating && (
+          <span className="shrink-0">
+            <ValueTicks rating={txn.value_rating} />
+          </span>
+        )}
+
+        <span className="ui-num shrink-0 text-right text-[15px] text-[var(--ui-ink)]">
+          <span className="text-[var(--ui-ink-softer)]">−</span>
+          {fmt(getMonthlyAmount(txn))}
         </span>
       </div>
     </button>

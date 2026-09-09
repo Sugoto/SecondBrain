@@ -13,16 +13,18 @@ export function Notes() {
   }, [value]);
 
   return (
-    <div>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+    <section className="ui-panel overflow-hidden focus-within:border-[var(--ui-ink-softer)]">
+      <h2 className="px-5 pt-5 text-[13px] font-medium text-[var(--ui-accent)]">Notes</h2>
+      <label className="sr-only" htmlFor="home-notes">
         Notes
-      </p>
+      </label>
       <textarea
+        id="home-notes"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Jot anything down…"
-        className="w-full min-h-40 resize-none bg-transparent text-[15px] leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none"
+        placeholder="Anything you want to remember"
+        className="ui-ruled mt-3 min-h-44 w-full resize-none bg-transparent px-5 pb-5 text-[15px] text-foreground outline-none placeholder:text-[var(--ui-ink-softer)]"
       />
-    </div>
+    </section>
   );
 }
