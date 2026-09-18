@@ -2,7 +2,7 @@ function syncAxisBankToSupabase() {
   const threads = GmailApp.search(
     `from:(alerts@axisbank.com OR "axis bank") newer_than:1h in:anywhere`,
     0,
-    100
+    100,
   );
   let saved = 0,
     skipped = 0;
@@ -10,9 +10,8 @@ function syncAxisBankToSupabase() {
   threads.forEach((t) =>
     t.getMessages().forEach((m) => {
       const parsed = parseAxisBankEmail(m.getPlainBody());
-      if (parsed.amount && parsed.isExpense)
-        saveToSupabase(parsed) ? saved++ : skipped++;
-    })
+      if (parsed.amount && parsed.isExpense) saveToSupabase(parsed) ? saved++ : skipped++;
+    }),
   );
 
   Logger.log(`✅ Saved: ${saved} | ⏭️ Skipped: ${skipped}`);
@@ -24,6 +23,8 @@ function parseAxisBankEmail(body) {
     merchant: null,
     date: null,
     time: null,
+    bankAccount: null,
+    cardNumber: null,
     isExpense: false,
   };
   const c = body.replace(/\r\n/g, "\n").replace(/\t/g, " ");
@@ -33,6 +34,12 @@ function parseAxisBankEmail(body) {
 
   const amt = c.match(/INR\s*([\d,]+\.?\d*)/i);
   if (amt) r.amount = parseFloat(amt[1].replace(/,/g, ""));
+
+  const acc = c.match(/a\/c\s*no\.?\s*[xX*]+(\d{3,})/i);
+  if (acc) r.bankAccount = "Axis …" + acc[1];
+
+  const card = c.match(/BLOCKCARD\s+(\d{3,})/i);
+  if (card) r.cardNumber = "…" + card[1];
 
   const dt =
     c.match(/(\d{2}-\d{2}-\d{4})\s+(\d{2}:\d{2}:\d{2})/) ||
@@ -80,6 +87,8 @@ function saveToSupabase(txn) {
         merchant: txn.merchant,
         date: `${year}-${p[1]}-${p[0]}`,
         time: txn.time,
+        bank_account: txn.bankAccount,
+        card_number: txn.cardNumber,
       }),
       muteHttpExceptions: true,
     });

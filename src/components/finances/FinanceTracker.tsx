@@ -18,12 +18,7 @@ import { InvestmentsView } from "./InvestmentsView";
 const TrendsView = lazy(() => import("./TrendsView").then((m) => ({ default: m.TrendsView })));
 
 import type { TimeFilter, ActiveView, DateRange } from "./types";
-import {
-  filterByTimeRange,
-  sortTransactions,
-  getValueRatingTotals,
-  createEmptyTransaction,
-} from "./utils";
+import { filterByTimeRange, sortTransactions, createEmptyTransaction } from "./utils";
 
 function BudgetBar({ budgetInfo }: { budgetInfo: ReturnType<typeof calculateBudgetInfo> }) {
   const formatCurrency = useFormatCurrency();
@@ -87,8 +82,6 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
 
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
-
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -119,6 +112,8 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details || null,
             prorate_months: updated.prorate_months || null,
+            bank_account: updated.bank_account || null,
+            card_number: updated.card_number || null,
           })
           .select()
           .single();
@@ -139,6 +134,8 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
             excluded_from_budget: updated.excluded_from_budget,
             details: updated.details,
             prorate_months: updated.prorate_months || null,
+            bank_account: updated.bank_account || null,
+            card_number: updated.card_number || null,
           })
           .eq("id", updated.id);
 
@@ -196,16 +193,6 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
     return sortTransactions(result, "date", "desc");
   }, [transactions, timeFilter, customDateRange]);
 
-  const valueRatingTotals = useMemo(
-    () =>
-      getValueRatingTotals(transactions, timeFilter, {
-        excludeBudgetExcluded: true,
-        customRange: customDateRange,
-        disableProrationSpreading: true,
-      }),
-    [transactions, timeFilter, customDateRange],
-  );
-
   const budgetInfo = useMemo(() => {
     return calculateBudgetInfo(transactions, userStats?.monthly_budget);
   }, [transactions, userStats?.monthly_budget]);
@@ -258,12 +245,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
           {activeView === "trends" && (
             <motion.div key="trends" {...VIEW_ANIMATION}>
               <Suspense fallback={null}>
-                <TrendsView
-                  valueRatingTotals={valueRatingTotals}
-                  expandedGroup={expandedGroup}
-                  onToggleGroup={setExpandedGroup}
-                  onTransactionClick={handleEditTransaction}
-                />
+                <TrendsView transactions={transactions} />
               </Suspense>
             </motion.div>
           )}

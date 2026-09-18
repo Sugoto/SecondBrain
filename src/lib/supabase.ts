@@ -16,6 +16,8 @@ export type Transaction = {
   details: string | null;
   created_at: string;
   prorate_months: number | null;
+  bank_account: string | null;
+  card_number: string | null;
 };
 
 export type Investment = {

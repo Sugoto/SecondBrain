@@ -3,13 +3,7 @@ import type { TimeFilter, DateRange } from "./types";
 
 export function calculateNetWorth(stats: UserStats | null): number {
   if (!stats) return 0;
-  return (
-    stats.bank_savings +
-    stats.mutual_funds +
-    stats.us_etfs +
-    stats.ppf +
-    stats.epf
-  );
+  return stats.bank_savings + stats.mutual_funds + stats.us_etfs + stats.ppf + stats.epf;
 }
 
 // Proration helpers
@@ -26,10 +20,7 @@ export function getMonthlyAmount(txn: Transaction): number {
 /**
  * Check if a prorated transaction applies to a given month
  */
-function isProratedInMonth(
-  txn: Transaction,
-  targetMonth: Date,
-): boolean {
+function isProratedInMonth(txn: Transaction, targetMonth: Date): boolean {
   if (!txn.prorate_months || txn.prorate_months <= 1) {
     // Not prorated - just check if date is in the month
     const txnDate = new Date(txn.date);
@@ -45,11 +36,7 @@ function isProratedInMonth(
   const endMonth = new Date(startMonth);
   endMonth.setMonth(endMonth.getMonth() + txn.prorate_months - 1);
 
-  const targetStart = new Date(
-    targetMonth.getFullYear(),
-    targetMonth.getMonth(),
-    1,
-  );
+  const targetStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
   return targetStart >= startMonth && targetStart <= endMonth;
 }
 
@@ -129,7 +116,7 @@ export function sortTransactions(
   sortOrder: "asc" | "desc",
 ): Transaction[] {
   return [...transactions].sort((a, b) => {
-    let comparison = 0;
+    let comparison: number;
     if (sortBy === "date") {
       comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
       if (comparison === 0 && a.time && b.time) {
@@ -155,14 +142,15 @@ export const VALUE_RATING_KEYS = ["5", "4", "3", "2", "1", "Unrated"] as const;
 export function getValueRatingTotals(
   transactions: Transaction[],
   timeFilter: TimeFilter,
-  options?: { excludeBudgetExcluded?: boolean; customRange?: DateRange; disableProrationSpreading?: boolean },
+  options?: {
+    excludeBudgetExcluded?: boolean;
+    customRange?: DateRange;
+    disableProrationSpreading?: boolean;
+  },
 ): Record<string, GroupTotal> {
-  const filtered = filterByTimeRange(
-    transactions,
-    timeFilter,
-    options?.customRange,
-    { disableProrationSpreading: options?.disableProrationSpreading },
-  );
+  const filtered = filterByTimeRange(transactions, timeFilter, options?.customRange, {
+    disableProrationSpreading: options?.disableProrationSpreading,
+  });
 
   const totals: Record<string, GroupTotal> = {};
   VALUE_RATING_KEYS.forEach((key) => {
@@ -200,6 +188,8 @@ export function createEmptyTransaction(): Transaction {
     details: null,
     created_at: now.toISOString(),
     prorate_months: null,
+    bank_account: null,
+    card_number: null,
   };
 }
 
@@ -236,10 +226,7 @@ export function calculateBudgetInfo(
     return txnDate >= startOfMonth;
   });
 
-  const spent = monthlyTransactions.reduce(
-    (sum, t) => sum + getMonthlyAmount(t),
-    0,
-  );
+  const spent = monthlyTransactions.reduce((sum, t) => sum + getMonthlyAmount(t), 0);
 
   return {
     spent,

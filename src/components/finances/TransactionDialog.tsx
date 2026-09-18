@@ -338,6 +338,39 @@ export function TransactionDialog({
                   className="overflow-hidden"
                 >
                   <div className="pt-1">
+                    <div className="grid grid-cols-2 gap-3 border-b border-[var(--ui-rule)] py-3">
+                      <div>
+                        <label htmlFor="bank-account" className={CAPTION}>
+                          Paid from
+                        </label>
+                        <input
+                          id="bank-account"
+                          placeholder="Axis …286591"
+                          className={`${WELL} mt-1.5`}
+                          value={transaction.bank_account || ""}
+                          onChange={(e) =>
+                            onChange({ ...transaction, bank_account: e.target.value || null })
+                          }
+                          disabled={saving}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="card-number" className={CAPTION}>
+                          Card
+                        </label>
+                        <input
+                          id="card-number"
+                          placeholder="…6555"
+                          className={`${WELL} mt-1.5`}
+                          value={transaction.card_number || ""}
+                          onChange={(e) =>
+                            onChange({ ...transaction, card_number: e.target.value || null })
+                          }
+                          disabled={saving}
+                        />
+                      </div>
+                    </div>
+
                     <div className="flex items-center justify-between gap-3 border-b border-[var(--ui-rule)] py-3">
                       <div className="min-w-0 flex-1">
                         <label htmlFor="prorate" className="text-[13px] text-[var(--ui-ink)]">
