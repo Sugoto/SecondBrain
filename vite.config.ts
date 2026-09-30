@@ -1,11 +1,8 @@
 import path from "path";
 import { defineConfig, lazyPlugins } from "vite-plus";
-import react, { reactCompilerPreset } from "@vitejs/plugin-react";
-import babel from "@rolldown/plugin-babel";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
-import compression from "vite-plugin-compression";
-import million from "million/compiler";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -109,13 +106,6 @@ export default defineConfig({
           "typescript/triple-slash-reference": "error",
           "react/rules-of-hooks": "error",
           "react/exhaustive-deps": "warn",
-          "react/react-compiler": "error",
-          "react/only-export-components": [
-            "error",
-            {
-              allowConstantExport: true,
-            },
-          ],
         },
         env: {
           es2020: true,
@@ -138,18 +128,7 @@ export default defineConfig({
     },
   },
   plugins: lazyPlugins(() => [
-    // Million.js - 70% faster React rendering via compilation
-    million.vite({
-      auto: {
-        // Automatically optimize all components
-        threshold: 0.05,
-        // Skip components that use unsupported features
-        skip: ["framer-motion"],
-      },
-    }),
-    react(),
-    // React Compiler, targeting React 19
-    babel({ presets: [reactCompilerPreset({ target: "19" })] }),
+    react({ compiler: true }),
     tailwindcss(),
 
     // PWA configuration for offline support and app-like experience
@@ -221,20 +200,10 @@ export default defineConfig({
         ],
       },
     }),
-
-    // Brotli compression for smaller bundle sizes
-    compression({
-      algorithm: "brotliCompress",
-      ext: ".br",
-      threshold: 1024, // Only compress files > 1KB
-    }),
-    // Also generate gzip for broader compatibility
-    compression({
-      algorithm: "gzip",
-      ext: ".gz",
-      threshold: 1024,
-    }),
   ]),
+  optimizeDeps: {
+    include: ["react/compiler-runtime"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
@@ -246,18 +215,13 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
           if (id.includes("/react/") || id.includes("/react-dom/")) return "vendor-react";
-          if (id.includes("/framer-motion/")) return "vendor-motion";
           if (
-            id.includes("@radix-ui/react-dialog") ||
-            id.includes("@radix-ui/react-dropdown-menu") ||
-            id.includes("@radix-ui/react-select") ||
-            id.includes("@radix-ui/react-tabs") ||
-            id.includes("@radix-ui/react-popover") ||
-            id.includes("@radix-ui/react-switch") ||
-            id.includes("@radix-ui/react-label") ||
-            id.includes("@radix-ui/react-slot")
+            id.includes("/motion/") ||
+            id.includes("/motion-dom/") ||
+            id.includes("/motion-utils/")
           )
-            return "vendor-radix";
+            return "vendor-motion";
+          if (id.includes("@radix-ui") || id.includes("/radix-ui/")) return "vendor-radix";
           if (id.includes("@tanstack/react-query")) return "vendor-query";
           if (id.includes("@supabase/supabase-js")) return "vendor-supabase";
           if (id.includes("@tanstack/react-virtual")) return "vendor-virtual";

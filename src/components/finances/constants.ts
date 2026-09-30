@@ -41,27 +41,9 @@ export const formatCurrencyCompact = (amount: number) => {
 export const formatDayLabel = (dateStr: string) => {
   const [y, m, d] = dateStr.slice(0, 10).split("-").map(Number);
   if (!y || !m || !d) return dateStr;
-  return new Date(y, m - 1, d).toLocaleDateString("en-IN", {
+  return Temporal.PlainDate.from({ year: y, month: m, day: d }).toLocaleString("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
   });
-};
-
-export const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-IN", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-};
-
-export const formatTime = (timeStr: string) => {
-  if (!timeStr || !timeStr.includes(":")) return "";
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  if (isNaN(hours) || isNaN(minutes)) return "";
-  const period = hours >= 12 ? "PM" : "AM";
-  const hour12 = hours % 12 || 12;
-  return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };

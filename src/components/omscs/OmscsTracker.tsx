@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { TopTabs } from "@/components/navigation/TopTabs";
 import { OMSCS_NAV_ITEMS } from "@/components/navigation/constants";
@@ -26,7 +26,6 @@ export function OmscsTracker({ activeView, onViewChange, onGoHome }: OmscsTracke
     views: OMSCS_VIEWS,
     currentView: activeView,
     onViewChange,
-    useViewTransitions: false,
   });
 
   return (

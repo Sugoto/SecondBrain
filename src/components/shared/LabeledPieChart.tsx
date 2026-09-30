@@ -1,5 +1,6 @@
 import { memo, useMemo } from "react";
-import ReactECharts from "echarts-for-react";
+import ReactECharts from "echarts-for-react/lib/core";
+import { echarts } from "@/lib/echarts";
 import type { EChartsOption } from "echarts";
 
 interface PieChartDataItem {
@@ -29,10 +30,7 @@ export const LabeledPieChart = memo(function LabeledPieChart({
   formatValue = (v) => `₹${v.toLocaleString("en-IN")}`,
   formatLabel,
 }: LabeledPieChartProps) {
-  const total = useMemo(
-    () => data.reduce((sum, d) => sum + d.value, 0),
-    [data],
-  );
+  const total = useMemo(() => data.reduce((sum, d) => sum + d.value, 0), [data]);
 
   const option: EChartsOption = useMemo(() => {
     const isDark = theme === "dark";
@@ -155,6 +153,7 @@ export const LabeledPieChart = memo(function LabeledPieChart({
     <ReactECharts
       option={option}
       style={{ width: "100%", height: size }}
+      echarts={echarts}
       opts={{ renderer: "canvas" }}
       onChartReady={(chart) => {
         requestAnimationFrame(() => chart.resize());

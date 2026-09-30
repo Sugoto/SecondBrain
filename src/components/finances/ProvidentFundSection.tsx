@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import type { UserStats } from "@/lib/supabase";
 import { useMaskedAssetRupee } from "@/hooks/usePrivacy";
 
@@ -54,10 +54,7 @@ export function ProvidentFundSection({ userStats }: ProvidentFundSectionProps) {
             <div className="pt-4">
               <div className="h-[3px] flex w-full bg-outline-variant/30 mb-4 overflow-hidden">
                 {ppf > 0 && (
-                  <div
-                    className="h-full bg-foreground"
-                    style={{ width: `${ppfPercent}%` }}
-                  />
+                  <div className="h-full bg-foreground" style={{ width: `${ppfPercent}%` }} />
                 )}
                 {epf > 0 && (
                   <div

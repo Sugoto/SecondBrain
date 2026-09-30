@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Trash2 } from "lucide-react";
 import type { OmscsCourse } from "@/lib/supabase";
+import { today } from "@/lib/utils";
 
 export type CourseStatus = "planned" | "pursuing" | "done";
 type Term = "Spring" | "Summer" | "Fall";
@@ -36,7 +32,7 @@ function parseCurrentTerm(currentSemester: string): Term {
 
 function parseCurrentYear(currentSemester: string): number {
   const parsed = parseSemester(currentSemester);
-  return parsed?.year ?? new Date().getFullYear();
+  return parsed?.year ?? today().year;
 }
 
 interface CourseDialogProps {
@@ -71,7 +67,7 @@ export function CourseDialog({
   const [year, setYear] = useState<number>(parseCurrentYear(currentSemester));
 
   const years = useMemo(() => {
-    const max = Math.max(new Date().getFullYear() + 2, START_YEAR + 3);
+    const max = Math.max(today().year + 2, START_YEAR + 3);
     return Array.from({ length: max - START_YEAR + 1 }, (_, i) => START_YEAR + i);
   }, []);
 
@@ -100,8 +96,7 @@ export function CourseDialog({
     e.preventDefault();
     if (!code.trim() || !name.trim()) return;
 
-    const enrolledSemester =
-      status === "planned" ? null : `${term} ${year}`;
+    const enrolledSemester = status === "planned" ? null : `${term} ${year}`;
     const finalGrade = status === "done" ? grade : null;
 
     await onSubmit({
@@ -126,10 +121,7 @@ export function CourseDialog({
           <DialogTitle className="sr-only">{title}</DialogTitle>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col flex-1 overflow-hidden"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="px-6 pt-4 pb-4 overflow-y-auto flex-1 space-y-6">
             <div>
               <p className={`${EYEBROW} mb-2`}>Code</p>

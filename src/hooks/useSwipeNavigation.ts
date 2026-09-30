@@ -1,5 +1,4 @@
 import { useRef, useEffect, type RefObject } from "react";
-import { useViewTransition } from "./useViewTransition";
 
 const MIN_SWIPE_DISTANCE = 50; // Reduced for easier swiping
 const MAX_SWIPE_TIME = 500; // Increased for more forgiving swipe detection
@@ -11,8 +10,6 @@ interface UseSwipeNavigationOptions<T extends string> {
   onViewChange: (view: T) => void;
   /** Minimum swipe distance in pixels (default: 50) */
   minDistance?: number;
-  /** Use View Transitions API for swipe navigation (default: true) */
-  useViewTransitions?: boolean;
 }
 
 interface SwipeHandlers {
@@ -24,9 +21,7 @@ export function useSwipeNavigation<T extends string>({
   currentView,
   onViewChange,
   minDistance = MIN_SWIPE_DISTANCE,
-  useViewTransitions = true,
 }: UseSwipeNavigationOptions<T>): SwipeHandlers {
-  const { startTransition } = useViewTransition();
   const containerRef = useRef<HTMLElement | null>(null);
 
   const touchStartX = useRef<number>(0);
@@ -64,8 +59,7 @@ export function useSwipeNavigation<T extends string>({
       // Determine direction on first significant movement
       if (
         !hasLockedDirection.current &&
-        (absDeltaX > DIRECTION_LOCK_THRESHOLD ||
-          absDeltaY > DIRECTION_LOCK_THRESHOLD)
+        (absDeltaX > DIRECTION_LOCK_THRESHOLD || absDeltaY > DIRECTION_LOCK_THRESHOLD)
       ) {
         // Use angle-based detection: horizontal if angle < 30 degrees from horizontal axis
         // tan(30°) ≈ 0.577, so it's horizontal if deltaY/deltaX < 0.577
@@ -122,17 +116,9 @@ export function useSwipeNavigation<T extends string>({
       const currentIndex = views.indexOf(currentView);
 
       if (isLeftSwipe && currentIndex < views.length - 1) {
-        if (useViewTransitions) {
-          startTransition(() => onViewChange(views[currentIndex + 1]));
-        } else {
-          onViewChange(views[currentIndex + 1]);
-        }
+        onViewChange(views[currentIndex + 1]);
       } else if (isRightSwipe && currentIndex > 0) {
-        if (useViewTransitions) {
-          startTransition(() => onViewChange(views[currentIndex - 1]));
-        } else {
-          onViewChange(views[currentIndex - 1]);
-        }
+        onViewChange(views[currentIndex - 1]);
       }
     };
 
@@ -149,14 +135,7 @@ export function useSwipeNavigation<T extends string>({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [
-    views,
-    currentView,
-    onViewChange,
-    startTransition,
-    minDistance,
-    useViewTransitions,
-  ]);
+  }, [views, currentView, onViewChange, minDistance]);
 
   return {
     ref: containerRef,

@@ -3,6 +3,7 @@ import { RefreshCw } from "lucide-react";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import { useMaskedRupee } from "@/hooks/usePrivacy";
 import type { ShoppingItem } from "@/lib/supabase";
+import { today } from "@/lib/utils";
 
 const DEFAULT_COST = 150;
 const DEFAULT_PROTEIN = 100;
@@ -94,12 +95,7 @@ function fillInOrder(
     const gramsForRemainingProtein = remainingProtein / proteinPerGram;
     const gramsAffordable = costPerGram > 0 ? remainingCost / costPerGram : cap;
     const gramsForContribCap = maxContribution / proteinPerGram;
-    const grams = Math.min(
-      cap,
-      gramsForRemainingProtein,
-      gramsAffordable,
-      gramsForContribCap,
-    );
+    const grams = Math.min(cap, gramsForRemainingProtein, gramsAffordable, gramsForContribCap);
     if (grams < MIN_PER_ITEM_GRAMS) continue;
     allocations.push({ item: it, grams });
     remainingProtein -= proteinPerGram * grams;
@@ -142,8 +138,8 @@ function fillInOrder(
 }
 
 function byProteinPerRupeeDesc(a: ShoppingItem, b: ShoppingItem) {
-  const aRatio = (a.protein / 100) / (a.cost / a.weight_grams);
-  const bRatio = (b.protein / 100) / (b.cost / b.weight_grams);
+  const aRatio = a.protein / 100 / (a.cost / a.weight_grams);
+  const bRatio = b.protein / 100 / (b.cost / b.weight_grams);
   return bRatio - aRatio;
 }
 
@@ -181,9 +177,7 @@ function planWeek(
   targetProtein: number,
   seed: number,
 ): DayPlan[] {
-  const usable = pool.filter(
-    (it) => it.protein > 0 && it.weight_grams > 0 && it.cost > 0,
-  );
+  const usable = pool.filter((it) => it.protein > 0 && it.weight_grams > 0 && it.cost > 0);
   if (usable.length === 0 || selectedDays.length === 0) return [];
 
   const count = Math.min(PICK_COUNT, usable.length);
@@ -247,15 +241,13 @@ export function MealPlanner() {
 
   const week = useMemo(
     () =>
-      hasEnough && feasible
-        ? planWeek(pool, selectedDays, costTarget, proteinTarget, seed)
-        : [],
+      hasEnough && feasible ? planWeek(pool, selectedDays, costTarget, proteinTarget, seed) : [],
     [pool, selectedDays, costTarget, proteinTarget, seed, hasEnough, feasible],
   );
 
   const reroll = useCallback(() => setSeed((s) => s + 1), []);
 
-  const todayIndex = new Date().getDay();
+  const todayIndex = today().dayOfWeek % 7;
 
   const toggleDay = (day: number) => {
     setSelectedDays((prev) =>
@@ -341,7 +333,9 @@ export function MealPlanner() {
         </p>
       ) : !feasible ? (
         <p className="text-[12px] text-muted-foreground/80 py-4 text-center">
-          Can't reach {proteinTarget}g protein under {rupee(costTarget, { maximumFractionDigits: 0 })} per day. Raise the cost, lower the protein, or add more food.
+          Can't reach {proteinTarget}g protein under{" "}
+          {rupee(costTarget, { maximumFractionDigits: 0 })} per day. Raise the cost, lower the
+          protein, or add more food.
         </p>
       ) : selectedDays.length === 0 ? (
         <p className="text-[12px] text-muted-foreground/80 py-4 text-center">
@@ -376,16 +370,14 @@ export function MealPlanner() {
                     )}
                   </p>
                   <span className="font-mono tabular-nums text-[11px] text-muted-foreground/70">
-                    {totals.calories} kcal · {totals.protein}g · {rupee(totals.cost, { maximumFractionDigits: 0 })}
+                    {totals.calories} kcal · {totals.protein}g ·{" "}
+                    {rupee(totals.cost, { maximumFractionDigits: 0 })}
                   </span>
                 </div>
                 {plan.length > 0 && (
                   <div className="space-y-1.5">
                     {plan.map(({ item, grams, protein, cost }) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between gap-2"
-                      >
+                      <div key={item.id} className="flex items-center justify-between gap-2">
                         <span className="text-[12px] text-foreground truncate flex-1">
                           {item.name}
                         </span>

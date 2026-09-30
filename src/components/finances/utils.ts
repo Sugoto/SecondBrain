@@ -1,4 +1,5 @@
 import type { Transaction, UserStats } from "@/lib/supabase";
+import { TIME_ZONE, today } from "@/lib/utils";
 import type { TimeFilter, DateRange } from "./types";
 
 export function calculateNetWorth(stats: UserStats | null): number {
@@ -20,38 +21,31 @@ export function getMonthlyAmount(txn: Transaction): number {
 /**
  * Check if a prorated transaction applies to a given month
  */
-function isProratedInMonth(txn: Transaction, targetMonth: Date): boolean {
+function isProratedInMonth(txn: Transaction, targetMonth: Temporal.PlainDate): boolean {
+  const target = targetMonth.toPlainYearMonth();
+  const startMonth = Temporal.PlainDate.from(txn.date).toPlainYearMonth();
+
   if (!txn.prorate_months || txn.prorate_months <= 1) {
     // Not prorated - just check if date is in the month
-    const txnDate = new Date(txn.date);
-    return (
-      txnDate.getFullYear() === targetMonth.getFullYear() &&
-      txnDate.getMonth() === targetMonth.getMonth()
-    );
+    return startMonth.equals(target);
   }
 
   // Prorated - check if targetMonth falls within the proration window
-  const txnDate = new Date(txn.date);
-  const startMonth = new Date(txnDate.getFullYear(), txnDate.getMonth(), 1);
-  const endMonth = new Date(startMonth);
-  endMonth.setMonth(endMonth.getMonth() + txn.prorate_months - 1);
-
-  const targetStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
-  return targetStart >= startMonth && targetStart <= endMonth;
+  const endMonth = startMonth.add({ months: txn.prorate_months - 1 });
+  return (
+    Temporal.PlainYearMonth.compare(target, startMonth) >= 0 &&
+    Temporal.PlainYearMonth.compare(target, endMonth) <= 0
+  );
 }
 
 // Date range helpers - centralized to avoid duplication
 function getDateRanges() {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  const startOfWeek = new Date(today);
-  const day = startOfWeek.getDay();
-  startOfWeek.setDate(startOfWeek.getDate() - (day === 0 ? 6 : day - 1));
-
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  return { now, today, startOfWeek, startOfMonth };
+  const now = today();
+  return {
+    today: now,
+    startOfWeek: now.subtract({ days: now.dayOfWeek - 1 }),
+    startOfMonth: now.with({ day: 1 }),
+  };
 }
 
 export function filterByTimeRange(
@@ -60,27 +54,17 @@ export function filterByTimeRange(
   customRange?: DateRange,
   options?: { disableProrationSpreading?: boolean },
 ): Transaction[] {
-  const { today, startOfWeek, startOfMonth } = getDateRanges();
+  const { today: startOfDay, startOfWeek, startOfMonth } = getDateRanges();
 
   return transactions.filter((txn) => {
-    const txnDate = new Date(txn.date);
+    const txnDate = Temporal.PlainDate.from(txn.date);
 
     // Handle custom date range
     if (timeFilter === "custom" && customRange) {
-      const from = new Date(
-        customRange.from.getFullYear(),
-        customRange.from.getMonth(),
-        customRange.from.getDate(),
+      return (
+        Temporal.PlainDate.compare(txnDate, customRange.from) >= 0 &&
+        Temporal.PlainDate.compare(txnDate, customRange.to) <= 0
       );
-      const to = new Date(
-        customRange.to.getFullYear(),
-        customRange.to.getMonth(),
-        customRange.to.getDate(),
-        23,
-        59,
-        59,
-      );
-      return txnDate >= from && txnDate <= to;
     }
 
     // For prorated transactions in "month" view, check if proration period overlaps
@@ -96,11 +80,11 @@ export function filterByTimeRange(
 
     switch (timeFilter) {
       case "today":
-        return txnDate >= today;
+        return Temporal.PlainDate.compare(txnDate, startOfDay) >= 0;
       case "week":
-        return txnDate >= startOfWeek;
+        return Temporal.PlainDate.compare(txnDate, startOfWeek) >= 0;
       case "month":
-        return txnDate >= startOfMonth;
+        return Temporal.PlainDate.compare(txnDate, startOfMonth) >= 0;
       case "custom":
         // If custom but no range, return all
         return true;
@@ -118,7 +102,7 @@ export function sortTransactions(
   return [...transactions].sort((a, b) => {
     let comparison: number;
     if (sortBy === "date") {
-      comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+      comparison = Temporal.PlainDate.compare(a.date, b.date);
       if (comparison === 0 && a.time && b.time) {
         comparison = a.time.localeCompare(b.time);
       }
@@ -129,64 +113,18 @@ export function sortTransactions(
   });
 }
 
-// Grouped totals (used for value-rating breakdown)
-export type GroupTotal = {
-  total: number;
-  count: number;
-  transactions: Transaction[];
-};
-
-// Value rating buckets, highest to lowest, with "Unrated" last
-export const VALUE_RATING_KEYS = ["5", "4", "3", "2", "1", "Unrated"] as const;
-
-export function getValueRatingTotals(
-  transactions: Transaction[],
-  timeFilter: TimeFilter,
-  options?: {
-    excludeBudgetExcluded?: boolean;
-    customRange?: DateRange;
-    disableProrationSpreading?: boolean;
-  },
-): Record<string, GroupTotal> {
-  const filtered = filterByTimeRange(transactions, timeFilter, options?.customRange, {
-    disableProrationSpreading: options?.disableProrationSpreading,
-  });
-
-  const totals: Record<string, GroupTotal> = {};
-  VALUE_RATING_KEYS.forEach((key) => {
-    totals[key] = { total: 0, count: 0, transactions: [] };
-  });
-
-  filtered.forEach((txn) => {
-    // Skip budget-excluded transactions if option is set
-    if (options?.excludeBudgetExcluded && txn.excluded_from_budget) {
-      return;
-    }
-
-    const key = txn.value_rating ? String(txn.value_rating) : "Unrated";
-    // Use full amount when proration spreading is disabled, otherwise prorated amount
-    const amount = options?.disableProrationSpreading ? txn.amount : getMonthlyAmount(txn);
-    totals[key].total += amount;
-    totals[key].count += 1;
-    totals[key].transactions.push(txn);
-  });
-
-  return totals;
-}
-
 // Create empty transaction template
 export function createEmptyTransaction(): Transaction {
-  const now = new Date();
   return {
     id: "",
     amount: 0,
     merchant: "",
-    date: now.toISOString().split("T")[0],
-    time: now.toTimeString().slice(0, 8),
+    date: today().toString(),
+    time: Temporal.Now.plainTimeISO(TIME_ZONE).toString({ smallestUnit: "second" }),
     value_rating: 3,
     excluded_from_budget: false,
     details: null,
-    created_at: now.toISOString(),
+    created_at: new Date().toISOString(),
     prorate_months: null,
     bank_account: null,
     card_number: null,
@@ -222,8 +160,7 @@ export function calculateBudgetInfo(
       return isProratedInMonth(t, startOfMonth);
     }
 
-    const txnDate = new Date(t.date);
-    return txnDate >= startOfMonth;
+    return Temporal.PlainDate.compare(t.date, startOfMonth) >= 0;
   });
 
   const spent = monthlyTransactions.reduce((sum, t) => sum + getMonthlyAmount(t), 0);

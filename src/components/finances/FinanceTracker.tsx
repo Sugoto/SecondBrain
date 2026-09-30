@@ -1,9 +1,8 @@
 import { useState, useMemo, lazy, Suspense } from "react";
-import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/lib/supabase";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { calculateBudgetInfo } from "./utils";
@@ -13,8 +12,10 @@ import { FINANCE_NAV_ITEMS } from "@/components/navigation/constants";
 import { DateFilter } from "./DateFilter";
 import { TransactionDialog } from "./TransactionDialog";
 import { ExpensesView } from "./ExpensesView";
-import { InvestmentsView } from "./InvestmentsView";
 
+const InvestmentsView = lazy(() =>
+  import("./InvestmentsView").then((m) => ({ default: m.InvestmentsView })),
+);
 const TrendsView = lazy(() => import("./TrendsView").then((m) => ({ default: m.TrendsView })));
 
 import type { TimeFilter, ActiveView, DateRange } from "./types";
@@ -75,7 +76,7 @@ interface FinanceTrackerProps {
 }
 
 export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTrackerProps) {
-  const { transactions, addToCache, updateInCache, removeFromCache } = useExpenseData();
+  const { transactions, addTransaction, updateTransaction, deleteTransaction } = useExpenseData();
 
   const { userStats } = useUserStats();
 
@@ -90,7 +91,6 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
     views: VIEWS,
     currentView: activeView,
     onViewChange,
-    useViewTransitions: false,
   });
 
   async function saveTransaction(updated: Transaction) {
@@ -100,48 +100,15 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
     const isNew = dialogState.mode === "new";
 
     try {
-      if (isNew) {
-        const { data, error: insertError } = await supabase
-          .from("transactions")
-          .insert({
-            amount: updated.amount,
-            merchant: updated.merchant || null,
-            date: updated.date,
-            time: updated.time,
-            value_rating: updated.value_rating,
-            excluded_from_budget: updated.excluded_from_budget,
-            details: updated.details || null,
-            prorate_months: updated.prorate_months || null,
-            bank_account: updated.bank_account || null,
-            card_number: updated.card_number || null,
-          })
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        if (data) {
-          addToCache(data);
-        }
-      } else {
-        const { error: updateError } = await supabase
-          .from("transactions")
-          .update({
-            amount: updated.amount,
-            merchant: updated.merchant,
-            date: updated.date,
-            time: updated.time,
-            value_rating: updated.value_rating,
-            excluded_from_budget: updated.excluded_from_budget,
-            details: updated.details,
-            prorate_months: updated.prorate_months || null,
-            bank_account: updated.bank_account || null,
-            card_number: updated.card_number || null,
-          })
-          .eq("id", updated.id);
-
-        if (updateError) throw updateError;
-        updateInCache(updated);
-      }
+      const fields = {
+        ...updated,
+        merchant: updated.merchant || null,
+        details: updated.details || null,
+        prorate_months: updated.prorate_months || null,
+        bank_account: updated.bank_account || null,
+        card_number: updated.card_number || null,
+      };
+      await (isNew ? addTransaction(fields) : updateTransaction(fields));
       setDialogState(null);
     } catch (err) {
       console.error("Failed to save:", err);
@@ -150,13 +117,10 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
     }
   }
 
-  async function deleteTransaction(txn: Transaction) {
+  async function removeTransaction(txn: Transaction) {
     setDeleting(true);
     try {
-      const { error: deleteError } = await supabase.from("transactions").delete().eq("id", txn.id);
-
-      if (deleteError) throw deleteError;
-      removeFromCache(txn.id);
+      await deleteTransaction(txn.id);
       setDialogState(null);
     } catch (err) {
       console.error("Failed to delete:", err);
@@ -231,7 +195,9 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
         <AnimatePresence mode="wait">
           {activeView === "investments" && (
             <motion.div key="investments" {...VIEW_ANIMATION}>
-              <InvestmentsView />
+              <Suspense fallback={null}>
+                <InvestmentsView />
+              </Suspense>
             </motion.div>
           )}
           {activeView === "expenses" && (
@@ -260,7 +226,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
         onClose={() => setDialogState(null)}
         onSave={saveTransaction}
         onChange={handleDialogChange}
-        onDelete={deleteTransaction}
+        onDelete={removeTransaction}
       />
 
       <AnimatePresence>

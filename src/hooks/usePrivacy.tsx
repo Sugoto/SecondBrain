@@ -48,8 +48,7 @@ export function useFormatCurrencyCompact() {
 }
 
 export function useMaskedRupee() {
-  return (n: number, opts?: Intl.NumberFormatOptions) =>
-    `₹${n.toLocaleString("en-IN", opts)}`;
+  return (n: number, opts?: Intl.NumberFormatOptions) => `₹${n.toLocaleString("en-IN", opts)}`;
 }
 
 /**
@@ -59,11 +58,6 @@ export function useMaskedRupee() {
 export function useAssetCurrency() {
   const { hidden } = usePrivacy();
   return (n: number) => (hidden ? MASK : formatCurrency(n));
-}
-
-export function useAssetCurrencyCompact() {
-  const { hidden } = usePrivacy();
-  return (n: number) => (hidden ? MASK : formatCurrencyCompact(n));
 }
 
 export function useMaskedAssetRupee() {

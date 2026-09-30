@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { MONTHS, today } from "@/lib/utils";
 
 interface ScheduleItem {
   title: string;
@@ -12,10 +13,7 @@ interface ScheduleDay {
 const SCHEDULE: ScheduleDay[] = [
   {
     date: "Mon May 25, 2026",
-    items: [
-      { title: "Start-of-Course Survey" },
-      { title: "Syllabus Comprehension Quiz" },
-    ],
+    items: [{ title: "Start-of-Course Survey" }, { title: "Syllabus Comprehension Quiz" }],
   },
   {
     date: "Mon Jun 1, 2026",
@@ -110,11 +108,15 @@ const UNDATED_ITEMS: ScheduleItem[] = [
 
 const STORAGE_KEY = "omscs-semester-done";
 
-function parseDate(s: string): Date {
+function parseDate(s: string) {
   const match = s.match(/^\w+ (\w+) (\d+), (\d+)$/);
-  if (!match) return new Date(0);
+  if (!match) return Temporal.PlainDate.from({ year: 1970, month: 1, day: 1 });
   const [, month, day, year] = match;
-  return new Date(`${month} ${day}, ${year}`);
+  return Temporal.PlainDate.from({
+    year: Number(year),
+    month: MONTHS.indexOf(month) + 1,
+    day: Number(day),
+  });
 }
 
 function loadDone(): Set<string> {
@@ -146,16 +148,12 @@ export function SemesterView() {
     });
   };
 
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
   const activeDate = useMemo(() => {
-    const upcoming = SCHEDULE.find((d) => parseDate(d.date) >= today);
+    const upcoming = SCHEDULE.find(
+      (d) => Temporal.PlainDate.compare(parseDate(d.date), today()) >= 0,
+    );
     return upcoming?.date ?? null;
-  }, [today]);
+  }, []);
 
   return (
     <div>

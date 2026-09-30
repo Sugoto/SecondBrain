@@ -17,6 +17,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useWorkouts, type Workout } from "@/hooks/useWorkouts";
 import { WorkoutDialog } from "./WorkoutDialog";
+import { today } from "@/lib/utils";
 
 const DAYS = [
   { label: "Mon", session: "Push" as const },
@@ -26,14 +27,9 @@ const DAYS = [
   { label: "Fri", session: "Pull" as const },
 ];
 
-const jsDay = new Date(
-  new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
-).getDay();
-const isRestDay = jsDay === 0 || jsDay === 6;
-const todayIndex = (() => {
-  const map: Record<number, number> = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
-  return map[jsDay] ?? 0;
-})();
+const { dayOfWeek } = today();
+const isRestDay = dayOfWeek > 5;
+const todayIndex = isRestDay ? 0 : dayOfWeek - 1;
 
 function SortableRow({
   w,
@@ -44,8 +40,9 @@ function SortableRow({
   isLast: boolean;
   onEdit: (w: Workout) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: w.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: w.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -125,7 +122,11 @@ export function WorkoutsView() {
     setEditing(null);
   };
 
-  const handleSubmit = async (values: { name: string; max_weight: number; muscle_group: string }) => {
+  const handleSubmit = async (values: {
+    name: string;
+    max_weight: number;
+    muscle_group: string;
+  }) => {
     setSubmitting(true);
     try {
       if (editing) await updateWorkout(editing.id, values);
@@ -174,7 +175,7 @@ export function WorkoutsView() {
     const newIndex = ids.indexOf(over.id as string);
     setOrderOverrides((prev) => {
       const next = { ...prev, [orderKey]: arrayMove(ids, oldIndex, newIndex) };
-      try { localStorage.setItem("workout-order", JSON.stringify(next)); } catch {}
+      localStorage.setItem("workout-order", JSON.stringify(next));
       return next;
     });
   };
@@ -217,15 +218,14 @@ export function WorkoutsView() {
             No exercises yet. Add one below.
           </p>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext items={sorted.map((w) => w.id)} strategy={verticalListSortingStrategy}>
               {sorted.map((w, i) => (
-                <SortableRow
-                  key={w.id}
-                  w={w}
-                  isLast={i === sorted.length - 1}
-                  onEdit={openEdit}
-                />
+                <SortableRow key={w.id} w={w} isLast={i === sorted.length - 1} onEdit={openEdit} />
               ))}
             </SortableContext>
           </DndContext>
@@ -248,9 +248,7 @@ export function WorkoutsView() {
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
             Rest day
           </p>
-          <p className="text-[13px] text-muted-foreground/60">
-            It's the weekend — recover well.
-          </p>
+          <p className="text-[13px] text-muted-foreground/60">It's the weekend — recover well.</p>
         </div>
       )}
 

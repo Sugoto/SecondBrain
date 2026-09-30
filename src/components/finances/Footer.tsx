@@ -1,4 +1,6 @@
-const CURRENT_YEAR = new Date().getFullYear();
+import { today } from "@/lib/utils";
+
+const CURRENT_YEAR = today().year;
 
 export function Footer() {
   return (

@@ -13,9 +13,9 @@ Amounts are in INR with lakh grouping, and the workout schedule reads the curren
 | UI                          | React 19 with the React Compiler, TypeScript                                |
 | Styling                     | Tailwind CSS v4, Radix primitives, OKLCH design tokens                      |
 | Data                        | Supabase (Postgres + Google OAuth), Dexie for the IndexedDB cache           |
-| State                       | TanStack Query, TanStack Virtual for long lists                             |
+| State                       | TanStack Query and DB, TanStack Virtual for long lists                      |
 | Charts                      | ECharts                                                                     |
-| Motion                      | Framer Motion, plus the View Transitions API                                |
+| Motion                      | motion, plus React `<ViewTransition>`                                       |
 
 ## Getting started
 
@@ -51,7 +51,7 @@ src/
     profile/     settings
     ui/          shadcn/Radix primitives
   hooks/         data fetching, auth, theme, privacy, haptics, swipe nav
-  lib/           supabase client, Dexie schema, motion helpers
+  lib/           supabase client, Dexie schema, TanStack DB collections, ECharts setup
   index.css      M3 token base plus the --ui-* dashboard layer
 ```
 

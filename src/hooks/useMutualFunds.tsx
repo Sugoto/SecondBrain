@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { getCacheMeta, setCacheMeta } from "@/lib/db";
+import { today } from "@/lib/utils";
 
 // Mutual fund scheme codes for the watchlist
 const WATCHLIST_FUNDS = [
@@ -82,14 +83,14 @@ async function fetchMutualFund(schemeCode: number): Promise<MutualFundData> {
 // Fetch NAV for a specific date (for recording investments)
 export async function fetchNavForDate(
   schemeCode: number,
-  targetDate: string // YYYY-MM-DD
+  targetDate: string, // YYYY-MM-DD
 ): Promise<number | null> {
   const data = await fetchMutualFund(schemeCode);
-  const target = new Date(targetDate);
+  const target = Temporal.PlainDate.from(targetDate);
 
   for (const entry of data.data) {
     const entryDate = parseNavDate(entry.date);
-    if (entryDate <= target) {
+    if (Temporal.PlainDate.compare(entryDate, target) <= 0) {
       return parseFloat(entry.nav);
     }
   }
@@ -97,19 +98,19 @@ export async function fetchNavForDate(
 }
 
 // Parse date from "DD-MM-YYYY" format
-function parseNavDate(dateStr: string): Date {
+function parseNavDate(dateStr: string) {
   const [day, month, year] = dateStr.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  return Temporal.PlainDate.from({ year, month, day });
 }
 
 // Find NAV closest to target date
 function findNavAtDate(
   navData: Array<{ date: string; nav: string }>,
-  targetDate: Date
+  targetDate: Temporal.PlainDate,
 ): number | null {
   for (const entry of navData) {
     const entryDate = parseNavDate(entry.date);
-    if (entryDate <= targetDate) {
+    if (Temporal.PlainDate.compare(entryDate, targetDate) <= 0) {
       return parseFloat(entry.nav);
     }
   }
@@ -118,27 +119,20 @@ function findNavAtDate(
 
 function calculateFundStats(
   fund: (typeof WATCHLIST_FUNDS)[number],
-  data: MutualFundData
+  data: MutualFundData,
 ): FundWithStats {
   const navData = data.data; // Full history
 
   const currentNav = parseFloat(navData[0]?.nav || "0");
   const previousNav = parseFloat(navData[1]?.nav || "0");
 
-  const now = new Date();
+  const now = today();
 
   // Calculate target dates
-  const oneMonthAgo = new Date(now);
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-  const oneYearAgo = new Date(now);
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-  const threeYearsAgo = new Date(now);
-  threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
-
-  const fiveYearsAgo = new Date(now);
-  fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+  const oneMonthAgo = now.subtract({ months: 1 });
+  const oneYearAgo = now.subtract({ years: 1 });
+  const threeYearsAgo = now.subtract({ years: 3 });
+  const fiveYearsAgo = now.subtract({ years: 5 });
 
   // Find NAVs at target dates
   const monthAgoNav = findNavAtDate(navData, oneMonthAgo) || currentNav;
@@ -148,17 +142,14 @@ function calculateFundStats(
 
   // Calculate changes
   const dailyChange = currentNav - previousNav;
-  const dailyChangePercent =
-    previousNav > 0 ? (dailyChange / previousNav) * 100 : 0;
+  const dailyChangePercent = previousNav > 0 ? (dailyChange / previousNav) * 100 : 0;
 
   const monthChange = currentNav - monthAgoNav;
-  const monthChangePercent =
-    monthAgoNav > 0 ? (monthChange / monthAgoNav) * 100 : 0;
+  const monthChangePercent = monthAgoNav > 0 ? (monthChange / monthAgoNav) * 100 : 0;
 
   // 1Y - already annualized (it's 1 year)
   const yearChange = yearAgoNav ? currentNav - yearAgoNav : 0;
-  const yearChangePercent =
-    yearAgoNav && yearAgoNav > 0 ? (yearChange / yearAgoNav) * 100 : 0;
+  const yearChangePercent = yearAgoNav && yearAgoNav > 0 ? (yearChange / yearAgoNav) * 100 : 0;
 
   // 3Y - Calculate CAGR (Compound Annual Growth Rate)
   // CAGR = ((EndValue / StartValue) ^ (1/years)) - 1
@@ -215,7 +206,7 @@ const MF_CACHE_KEY = "mutualFundWatchlist";
 
 // Pre-load cached data on module load (same pattern as useExpenseData)
 let cachedMFPromise: Promise<FundWithStats[] | null> | null = null;
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   cachedMFPromise = getCacheMeta(MF_CACHE_KEY).then((cached) => {
     if (cached) {
       try {
@@ -244,27 +235,18 @@ export function useMutualFundWatchlist() {
     });
   }, [queryClient]);
 
-  const {
-    data,
-    isLoading,
-    isRefetching,
-    error,
-    dataUpdatedAt,
-  } = useQuery({
+  const { data, isLoading, isRefetching, error, dataUpdatedAt } = useQuery({
     queryKey: mutualFundKeys.watchlist(),
     queryFn: async (): Promise<FundWithStats[]> => {
       const results = await Promise.allSettled(
         WATCHLIST_FUNDS.map(async (fund) => {
           const fetchedData = await fetchMutualFund(fund.schemeCode);
           return calculateFundStats(fund, fetchedData);
-        })
+        }),
       );
 
       const funds = results
-        .filter(
-          (r): r is PromiseFulfilledResult<FundWithStats> =>
-            r.status === "fulfilled"
-        )
+        .filter((r): r is PromiseFulfilledResult<FundWithStats> => r.status === "fulfilled")
         .map((r) => r.value);
 
       // Cache for next time
@@ -300,46 +282,3 @@ export function useMutualFundWatchlist() {
 }
 
 // Utility to calculate portfolio totals from funds and investments
-type PortfolioTotals = {
-  invested: number;
-  current: number;
-  dailyChange: number;
-  netChange: number;
-};
-
-export function calculateMFPortfolioTotals(
-  funds: FundWithStats[],
-  investments: Array<{ schemeCode: number; units: number; amount: number }>
-): PortfolioTotals {
-  let invested = 0;
-  let current = 0;
-  let dailyChange = 0;
-
-  for (const fund of funds) {
-    const fundInvestments = investments.filter(
-      (inv) => inv.schemeCode === fund.schemeCode
-    );
-
-    let totalUnits = 0;
-    let totalInvested = 0;
-
-    for (const inv of fundInvestments) {
-      totalUnits += inv.units;
-      totalInvested += inv.amount;
-    }
-
-    const currentValue = totalUnits * fund.currentNav;
-    const previousValue = totalUnits * fund.previousNav;
-
-    invested += totalInvested;
-    current += currentValue;
-    dailyChange += currentValue - previousValue;
-  }
-
-  return {
-    invested,
-    current,
-    dailyChange,
-    netChange: current - invested,
-  };
-}

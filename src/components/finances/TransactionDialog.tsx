@@ -1,10 +1,10 @@
 import type { Transaction } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { VALUE_RATING_LABELS } from "./constants";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { hapticFeedback, hapticSelection } from "@/hooks/useHaptics";
 import { Loader2, Trash2, ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -100,41 +100,15 @@ const CAPTION = "text-[12px] text-[var(--ui-ink-softer)]";
 const WELL =
   "ui-inset h-11 w-full px-3 text-[15px] text-[var(--ui-ink)] outline-none transition-shadow placeholder:text-[var(--ui-ink-softer)] focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)] disabled:opacity-50";
 
-const RATING_STEPS = [1, 2, 3, 4, 5];
-
-/** The editor for value_rating, drawn as the same five ticks TransactionCard
- *  reads back. Each tick is its own 44px tap target. */
-function RatingStrip({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: number;
-  onChange: (rating: number) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <div role="group" aria-label="Worth it" className="grid grid-cols-5 gap-1.5">
-      {RATING_STEPS.map((step) => (
-        <button
-          key={step}
-          type="button"
-          aria-pressed={value === step}
-          aria-label={VALUE_RATING_LABELS[step]}
-          onClick={() => onChange(step)}
-          disabled={disabled}
-          className="group flex h-11 items-center justify-center rounded-[8px] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)] disabled:opacity-50"
-        >
-          <span
-            className={`h-[7px] w-full rounded-full transition-colors ${
-              step <= value ? "bg-[var(--ui-accent)]" : "bg-[var(--ui-edge)]"
-            }`}
-          />
-        </button>
-      ))}
-    </div>
-  );
-}
+/** One-tap names for the merchant field, for the spends that have no real
+ *  merchant worth typing. */
+const QUICK_NAMES = [
+  { name: "Groceries", hue: 150 },
+  { name: "Snacks", hue: 70 },
+  { name: "Travel", hue: 230 },
+  { name: "Shopping", hue: 330 },
+  { name: "Restaurant", hue: 30 },
+];
 
 export function TransactionDialog({
   transaction,
@@ -210,8 +184,6 @@ export function TransactionDialog({
     onChange({ ...transaction, time: value ? value + ":00" : null });
   };
 
-  const valueRating = transaction.value_rating ?? 3;
-
   return (
     <Dialog open={!!transaction} onOpenChange={(open) => !open && !saving && onClose()}>
       <DialogContent
@@ -267,21 +239,23 @@ export function TransactionDialog({
               onChange={(e) => onChange({ ...transaction, merchant: e.target.value })}
               disabled={saving}
             />
-          </div>
-
-          <div>
-            <div className="flex items-baseline justify-between gap-3">
-              <span className={CAPTION}>Worth it?</span>
-              <span className="text-[12px] text-[var(--ui-ink)]">
-                {VALUE_RATING_LABELS[valueRating]}
-              </span>
-            </div>
-            <div className="mt-0.5">
-              <RatingStrip
-                value={valueRating}
-                onChange={(rating) => onChange({ ...transaction, value_rating: rating })}
-                disabled={saving}
-              />
+            <div role="group" aria-label="Quick names" className="mt-2 flex flex-wrap gap-1">
+              {QUICK_NAMES.map(({ name, hue }) => (
+                <button
+                  key={name}
+                  type="button"
+                  aria-pressed={transaction.merchant === name}
+                  onClick={() => {
+                    hapticSelection();
+                    onChange({ ...transaction, merchant: name });
+                  }}
+                  disabled={saving}
+                  style={{ "--tag-h": hue } as React.CSSProperties}
+                  className="ui-tag h-6 px-2.5 text-[11px] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)] disabled:opacity-50"
+                >
+                  {name}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -435,7 +409,10 @@ export function TransactionDialog({
             Cancel
           </button>
           <button
-            onClick={() => onSave(transaction)}
+            onClick={() => {
+              hapticFeedback("medium");
+              onSave(transaction);
+            }}
             disabled={saving || deleting}
             className="ui-cta flex h-11 flex-[1.4] items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:opacity-90 disabled:opacity-40"
           >
@@ -480,6 +457,7 @@ export function TransactionDialog({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
+                hapticFeedback("heavy");
                 if (onDelete) onDelete(transaction);
                 setShowDeleteConfirm(false);
               }}

@@ -2,6 +2,7 @@ import { useMemo, memo } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { Footer } from "./Footer";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
+import { today } from "@/lib/utils";
 
 interface TrendsViewProps {
   transactions: Transaction[];
@@ -11,12 +12,11 @@ export const TrendsView = memo(function TrendsView({ transactions }: TrendsViewP
   const formatCurrency = useFormatCurrency();
 
   const cardTotals = useMemo(() => {
-    const cutoff = new Date();
-    cutoff.setMonth(cutoff.getMonth() - 3);
+    const cutoff = today().subtract({ months: 3 });
     const totals = new Map<string, number>();
     for (const txn of transactions) {
       if (!txn.card_number) continue;
-      if (new Date(txn.date) < cutoff) continue;
+      if (Temporal.PlainDate.compare(txn.date, cutoff) < 0) continue;
       totals.set(txn.card_number, (totals.get(txn.card_number) ?? 0) + txn.amount);
     }
     return [...totals.entries()]

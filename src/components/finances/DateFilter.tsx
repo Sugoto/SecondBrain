@@ -2,15 +2,7 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarDays } from "lucide-react";
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  isSameMonth,
-  subMonths,
-} from "date-fns";
+import { MONTHS, fromDate, toDate, today } from "@/lib/utils";
 import type { TimeFilter, ActiveView, DateRange } from "./types";
 
 interface DateFilterProps {
@@ -27,18 +19,18 @@ const TIME_LABELS: Record<Exclude<TimeFilter, "custom">, string> = {
   month: "Month",
 };
 
+const monthName = ({ month }: { month: number }) => MONTHS[month - 1];
+
+const dayMonth = (date: Temporal.PlainDate) => `${date.day} ${monthName(date)}`;
+
+const formatRange = (from: Temporal.PlainDate, to: Temporal.PlainDate) =>
+  from.toPlainYearMonth().equals(to.toPlainYearMonth())
+    ? `${from.day}–${dayMonth(to)}`
+    : `${dayMonth(from)}–${dayMonth(to)}`;
+
 function getRecentMonths() {
-  const months = [];
-  const now = new Date();
-  for (let i = 0; i < 6; i++) {
-    const date = subMonths(now, i);
-    months.push({
-      date,
-      label: format(date, "MMM yyyy"),
-      shortLabel: format(date, "MMM"),
-    });
-  }
-  return months;
+  const thisMonth = today().toPlainYearMonth();
+  return Array.from({ length: 6 }, (_, i) => thisMonth.subtract({ months: i }));
 }
 
 export function DateFilter({
@@ -49,27 +41,32 @@ export function DateFilter({
   onCustomDateRangeChange,
 }: DateFilterProps) {
   const [filterOpen, setFilterOpen] = useState(false);
-  const [pendingRange, setPendingRange] = useState<{ from?: Date; to?: Date }>({});
+  const [pendingRange, setPendingRange] = useState<{
+    from?: Temporal.PlainDate;
+    to?: Temporal.PlainDate;
+  }>({});
 
   const recentMonths = getRecentMonths();
 
-  const handleMonthSelect = (monthDate: Date) => {
-    const from = startOfMonth(monthDate);
-    const to = endOfMonth(monthDate);
-    onCustomDateRangeChange({ from, to });
+  const handleMonthSelect = (month: Temporal.PlainYearMonth) => {
+    onCustomDateRangeChange({
+      from: month.toPlainDate({ day: 1 }),
+      to: month.toPlainDate({ day: month.daysInMonth }),
+    });
     onTimeFilterChange("custom");
     setPendingRange({});
     setFilterOpen(false);
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    if (!date) return;
+  const handleDateSelect = (selected: Date | undefined) => {
+    if (!selected) return;
+    const date = fromDate(selected);
     if (!pendingRange.from) {
       setPendingRange({ from: date });
     } else if (!pendingRange.to) {
       const from = pendingRange.from;
       const to = date;
-      if (to >= from) {
+      if (Temporal.PlainDate.compare(to, from) >= 0) {
         onCustomDateRangeChange({ from, to });
         onTimeFilterChange("custom");
       } else {
@@ -82,30 +79,24 @@ export function DateFilter({
   };
 
   const getFilterLabel = () => {
-    const now = new Date();
-    if (timeFilter === "today") return format(now, "d MMM");
+    const now = today();
+    if (timeFilter === "today") return dayMonth(now);
     if (timeFilter === "week") {
-      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-      if (isSameMonth(weekStart, weekEnd)) {
-        return `${format(weekStart, "d")}–${format(weekEnd, "d MMM")}`;
-      }
-      return `${format(weekStart, "d MMM")}–${format(weekEnd, "d MMM")}`;
+      const weekStart = now.subtract({ days: now.dayOfWeek - 1 });
+      return formatRange(weekStart, weekStart.add({ days: 6 }));
     }
-    if (timeFilter === "month") return format(now, "MMM");
     if (timeFilter === "custom" && customDateRange) {
       const { from, to } = customDateRange;
       if (
-        isSameMonth(from, to) &&
-        from.getDate() === 1 &&
-        to.getDate() === endOfMonth(to).getDate()
+        from.day === 1 &&
+        to.day === to.daysInMonth &&
+        from.toPlainYearMonth().equals(to.toPlainYearMonth())
       ) {
-        return format(from, "MMM");
+        return monthName(from);
       }
-      if (isSameMonth(from, to)) return `${format(from, "d")}–${format(to, "d MMM")}`;
-      return `${format(from, "d MMM")}–${format(to, "d MMM")}`;
+      return formatRange(from, to);
     }
-    return format(now, "MMM");
+    return monthName(now);
   };
 
   if (activeView === "trends") return null;
@@ -160,11 +151,11 @@ export function DateFilter({
             <div className="grid grid-cols-3 gap-2">
               {recentMonths.map((month) => (
                 <button
-                  key={month.label}
-                  onClick={() => handleMonthSelect(month.date)}
+                  key={month.toString()}
+                  onClick={() => handleMonthSelect(month)}
                   className="h-8 text-[11px] uppercase tracking-wider border border-outline-variant rounded-full text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                 >
-                  {month.shortLabel}
+                  {monthName(month)}
                 </button>
               ))}
             </div>
@@ -173,17 +164,17 @@ export function DateFilter({
           <div className="border-t border-outline-variant/60 pt-4">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
               {pendingRange.from
-                ? `From ${format(pendingRange.from, "d MMM")} — pick end`
+                ? `From ${dayMonth(pendingRange.from)} — pick end`
                 : "Custom range"}
             </p>
             <Calendar
               mode="single"
-              selected={pendingRange.from}
+              selected={pendingRange.from && toDate(pendingRange.from)}
               onSelect={handleDateSelect}
               captionLayout="dropdown"
               startMonth={new Date(2020, 0)}
-              endMonth={new Date(new Date().getFullYear(), 11)}
-              defaultMonth={customDateRange?.from || new Date()}
+              endMonth={new Date(today().year, 11)}
+              defaultMonth={toDate(customDateRange?.from ?? today())}
               className="rounded-xl border border-outline-variant"
             />
             {pendingRange.from && (

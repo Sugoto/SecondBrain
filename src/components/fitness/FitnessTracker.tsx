@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { TopTabs } from "@/components/navigation/TopTabs";
 import { HEALTH_NAV_ITEMS } from "@/components/navigation/constants";
@@ -40,16 +40,11 @@ function ShoppingView() {
   );
 }
 
-export function HealthTracker({
-  activeView,
-  onViewChange,
-  onGoHome,
-}: HealthTrackerProps) {
+export function HealthTracker({ activeView, onViewChange, onGoHome }: HealthTrackerProps) {
   const { ref: swipeRef } = useSwipeNavigation({
     views: HEALTH_VIEWS,
     currentView: activeView,
     onViewChange,
-    useViewTransitions: false,
   });
 
   return (

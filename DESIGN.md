@@ -93,6 +93,7 @@ All in `@layer utilities`, so they beat the `@layer base` `h1..h6 { font-family:
 - `.ui-inset` — inset well, 10px radius. Also the resting state of a text input
 - `.ui-chip` — pill carrying one short fact, on the accent wash. Sizing is the caller's
 - `.ui-chip-quiet` — the same pill when the fact is neutral. Declared after `.ui-chip`, so it overrides it by source order
+- `.ui-tag` — tappable pill in its own hue (`--tag-h`, set inline). Shared lightness/chroma so a row reads as a set; `aria-pressed="true"` fills it solid. Used for the quick names in the transaction modal
 - `.ui-cta` — the one primary action: accent fill, `--ui-accent-ink` text
 - `.ui-ruled` — notebook rules for the notes textarea; `background-attachment: local` keeps them locked to the text while it scrolls
 

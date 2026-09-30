@@ -6,15 +6,8 @@ import {
 } from "@/hooks/useMutualFunds";
 import { useUserStats } from "@/hooks/useExpenseData";
 import type { Investment } from "@/lib/supabase";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  RefreshCw,
-  ChevronDown,
-  Plus,
-  Trash2,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { RefreshCw, ChevronDown, Plus, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 import { useMaskedAssetRupee } from "@/hooks/usePrivacy";
 
 interface FundSectionProps {
@@ -26,7 +19,6 @@ interface FundSectionProps {
   onDeleteInvestment: (id: string) => Promise<void>;
 }
 
-// million-ignore - SVG sparkline not compatible with Million.js
 const FundSection = memo(function FundSection({
   fund,
   isExpanded,
@@ -97,19 +89,12 @@ const FundSection = memo(function FundSection({
 
   return (
     <div className="border-b border-outline-variant/60 last:border-b-0">
-      <button
-        onClick={onToggle}
-        className="w-full py-3 flex items-center gap-3 text-left"
-      >
+      <button onClick={onToggle} className="w-full py-3 flex items-center gap-3 text-left">
         <Trend
-          className={`h-3.5 w-3.5 shrink-0 ${
-            isPositiveDay ? "text-success" : "text-destructive"
-          }`}
+          className={`h-3.5 w-3.5 shrink-0 ${isPositiveDay ? "text-success" : "text-destructive"}`}
           strokeWidth={1.5}
         />
-        <span className="text-[13px] text-foreground truncate flex-1">
-          {fund.shortName}
-        </span>
+        <span className="text-[13px] text-foreground truncate flex-1">{fund.shortName}</span>
         {hasInvestments && (
           <span className="font-mono tabular-nums text-[13px] text-foreground shrink-0">
             {rupee(currentValue, { maximumFractionDigits: 0 })}
@@ -133,9 +118,7 @@ const FundSection = memo(function FundSection({
             className="overflow-hidden"
           >
             <div className="pb-4 pt-1">
-              <p className="text-[11px] text-muted-foreground truncate mb-3">
-                {fund.fullName}
-              </p>
+              <p className="text-[11px] text-muted-foreground truncate mb-3">{fund.fullName}</p>
 
               <svg
                 width="100%"
@@ -190,7 +173,7 @@ const FundSection = memo(function FundSection({
                           {rupee(inv.amount)}
                         </span>
                         <span className="text-[10px] text-muted-foreground">
-                          {new Date(inv.date).toLocaleDateString("en-IN", {
+                          {Temporal.PlainDate.from(inv.date).toLocaleString("en-IN", {
                             day: "numeric",
                             month: "short",
                             year: "2-digit",
@@ -253,17 +236,13 @@ const FundSection = memo(function FundSection({
 });
 
 export function MutualFundWatchlist() {
-  const { funds, error, isRefetching, refresh, lastUpdated } =
-    useMutualFundWatchlist();
+  const { funds, error, isRefetching, refresh, lastUpdated } = useMutualFundWatchlist();
   const { userStats, addInvestment, deleteInvestment } = useUserStats();
   const rupee = useMaskedAssetRupee();
   const [isCardExpanded, setIsCardExpanded] = useState(false);
   const [expandedFunds, setExpandedFunds] = useState<Set<number>>(new Set());
 
-  const investments = useMemo(
-    () => userStats?.investments || [],
-    [userStats?.investments],
-  );
+  const investments = useMemo(() => userStats?.investments || [], [userStats?.investments]);
 
   const handleToggle = useCallback((schemeCode: number) => {
     setExpandedFunds((prev) => {
@@ -317,9 +296,7 @@ export function MutualFundWatchlist() {
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
           Mutual Funds
         </p>
-        <p className="text-[13px] text-muted-foreground mb-3">
-          Failed to load mutual fund data.
-        </p>
+        <p className="text-[13px] text-muted-foreground mb-3">Failed to load mutual fund data.</p>
         <button
           onClick={refresh}
           className="text-[11px] uppercase tracking-wider text-foreground hover:opacity-80 transition-opacity"
@@ -333,9 +310,7 @@ export function MutualFundWatchlist() {
   return (
     <section className="px-6 pt-7 pb-8">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Mutual Funds
-        </p>
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Mutual Funds</p>
         <div className="flex items-center gap-3">
           {lastUpdated && (
             <span className="font-mono tabular-nums text-[10px] text-muted-foreground/70">

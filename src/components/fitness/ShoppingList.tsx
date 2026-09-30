@@ -1,20 +1,7 @@
 import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  ShoppingCart,
-  Plus,
-  Trash2,
-  Check,
-  Loader2,
-  Pencil,
-  ArrowUpDown,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { AnimatePresence, motion } from "motion/react";
+import { ShoppingCart, Plus, Trash2, Check, Loader2, Pencil, ArrowUpDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import type { ShoppingItem } from "@/lib/supabase";
 
@@ -45,13 +32,7 @@ interface ItemFormProps {
   submitLabel: string;
 }
 
-function FieldRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3 border-b border-outline-variant/60">
       <label className="text-[13px] text-muted-foreground">{label}</label>
@@ -121,10 +102,7 @@ function ItemForm({
           <DialogTitle className="sr-only">{title}</DialogTitle>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col flex-1 overflow-hidden"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="px-6 pt-4 pb-4 overflow-y-auto flex-1">
             <div className="mb-4">
               <p className={`${EYEBROW} mb-2`}>Name</p>
@@ -241,12 +219,7 @@ function calcPer100g(value: number, weightGrams: number): number {
   return (value / weightGrams) * 100;
 }
 
-function ShoppingItemRow({
-  item,
-  onToggle,
-  onEdit,
-  displayMode,
-}: ShoppingItemRowProps) {
+function ShoppingItemRow({ item, onToggle, onEdit, displayMode }: ShoppingItemRowProps) {
   const weight = item.weight_grams || 100;
   const serving = item.serving_grams || 100;
   const costPer100g = calcPer100g(item.cost, weight);
@@ -294,9 +267,7 @@ function ShoppingItemRow({
         onClick={() => onToggle(item.id, !item.checked)}
         aria-label={item.checked ? "Uncheck" : "Check"}
         className={`w-4 h-4 rounded-sm flex items-center justify-center transition-colors shrink-0 border ${
-          item.checked
-            ? "bg-foreground border-foreground"
-            : "border-outline-variant"
+          item.checked ? "bg-foreground border-foreground" : "border-outline-variant"
         }`}
       >
         {item.checked && <Check className="h-2.5 w-2.5 text-background" strokeWidth={2.5} />}
@@ -313,9 +284,7 @@ function ShoppingItemRow({
             {displayProtein}
             <span className="text-muted-foreground/60">g</span>
           </span>
-          <span title={`₹${item.cost} for ${weight}g`}>
-            ₹{displayCost}
-          </span>
+          <span title={`₹${item.cost} for ${weight}g`}>₹{displayCost}</span>
           <span title={`${costPerProtein.toFixed(2)} per g protein`}>
             ₹/g {costPerProtein.toFixed(2)}
           </span>
@@ -373,15 +342,8 @@ export function ShoppingList() {
     return null;
   };
 
-  const {
-    items,
-    addItem,
-    toggleChecked,
-    updateItem,
-    deleteItem,
-    isAdding,
-    isUpdating,
-  } = useShoppingList();
+  const { items, addItem, toggleChecked, updateItem, deleteItem, isAdding, isUpdating } =
+    useShoppingList();
 
   const baseTotals = items
     .filter((item) => item.checked)
@@ -447,17 +409,28 @@ export function ShoppingList() {
     const caloriesPerProteinB = b.protein > 0 ? b.calories / b.protein : Infinity;
 
     switch (sortBy) {
-      case "protein_asc": return a.protein - b.protein;
-      case "protein_desc": return b.protein - a.protein;
-      case "cost_asc": return costPer100gA - costPer100gB;
-      case "cost_desc": return costPer100gB - costPer100gA;
-      case "calories_asc": return a.calories - b.calories;
-      case "calories_desc": return b.calories - a.calories;
-      case "costPerProtein_asc": return costPerProteinA - costPerProteinB;
-      case "costPerProtein_desc": return costPerProteinB - costPerProteinA;
-      case "caloriesPerProtein_asc": return caloriesPerProteinA - caloriesPerProteinB;
-      case "caloriesPerProtein_desc": return caloriesPerProteinB - caloriesPerProteinA;
-      default: return 0;
+      case "protein_asc":
+        return a.protein - b.protein;
+      case "protein_desc":
+        return b.protein - a.protein;
+      case "cost_asc":
+        return costPer100gA - costPer100gB;
+      case "cost_desc":
+        return costPer100gB - costPer100gA;
+      case "calories_asc":
+        return a.calories - b.calories;
+      case "calories_desc":
+        return b.calories - a.calories;
+      case "costPerProtein_asc":
+        return costPerProteinA - costPerProteinB;
+      case "costPerProtein_desc":
+        return costPerProteinB - costPerProteinA;
+      case "caloriesPerProtein_asc":
+        return caloriesPerProteinA - caloriesPerProteinB;
+      case "caloriesPerProtein_desc":
+        return caloriesPerProteinB - caloriesPerProteinA;
+      default:
+        return 0;
     }
   });
 
@@ -487,11 +460,27 @@ export function ShoppingList() {
   };
 
   const sortCells = [
-    { key: "calories" as const, label: "kcal", value: Math.round(displayTotals.calories).toLocaleString() },
+    {
+      key: "calories" as const,
+      label: "kcal",
+      value: Math.round(displayTotals.calories).toLocaleString(),
+    },
     { key: "protein" as const, label: "Protein", value: `${Math.round(displayTotals.protein)}g` },
-    { key: "cost" as const, label: "Cost", value: `₹${Math.round(displayTotals.cost).toLocaleString()}` },
-    { key: "costPerProtein" as const, label: "₹/g", value: `₹${displayTotals.costPerProtein.toFixed(2)}` },
-    { key: "caloriesPerProtein" as const, label: "Cal/g", value: displayTotals.caloriesPerProtein.toFixed(1) },
+    {
+      key: "cost" as const,
+      label: "Cost",
+      value: `₹${Math.round(displayTotals.cost).toLocaleString()}`,
+    },
+    {
+      key: "costPerProtein" as const,
+      label: "₹/g",
+      value: `₹${displayTotals.costPerProtein.toFixed(2)}`,
+    },
+    {
+      key: "caloriesPerProtein" as const,
+      label: "Cal/g",
+      value: displayTotals.caloriesPerProtein.toFixed(1),
+    },
   ];
 
   return (
@@ -530,8 +519,7 @@ export function ShoppingList() {
 
       <div className="grid grid-cols-5 divide-x divide-outline-variant/60 border-y border-outline-variant/60">
         {sortCells.map((cell) => {
-          const isSorted =
-            sortBy.startsWith(cell.key) && sortBy !== "none";
+          const isSorted = sortBy.startsWith(cell.key) && sortBy !== "none";
           return (
             <button
               key={cell.key}
@@ -546,9 +534,7 @@ export function ShoppingList() {
               <p className="text-[8px] uppercase tracking-wider text-muted-foreground flex items-center gap-0.5">
                 {cell.label}
                 {getSortIndicator(cell.key) ? (
-                  <span className="text-foreground">
-                    {getSortIndicator(cell.key)}
-                  </span>
+                  <span className="text-foreground">{getSortIndicator(cell.key)}</span>
                 ) : (
                   <ArrowUpDown className="h-2 w-2 opacity-40" />
                 )}
@@ -611,7 +597,10 @@ export function ShoppingList() {
 
         {items.length === 0 && !showAddForm && (
           <div className="text-center py-12">
-            <ShoppingCart className="h-6 w-6 mx-auto mb-3 text-muted-foreground/60" strokeWidth={1.5} />
+            <ShoppingCart
+              className="h-6 w-6 mx-auto mb-3 text-muted-foreground/60"
+              strokeWidth={1.5}
+            />
             <p className="text-[13px] text-foreground mb-1">No items yet</p>
             <p className="text-[11px] text-muted-foreground">Tap + to add grocery items</p>
           </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Brain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { today } from "@/lib/utils";
 
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = today().year;
 
 function readOAuthErrorFromUrl(): string | null {
   if (typeof window === "undefined") return null;
@@ -41,10 +42,7 @@ export function LoginScreen() {
   return (
     <div className="h-[100dvh] w-full bg-background flex flex-col px-6">
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto">
-        <Brain
-          className="h-9 w-9 text-foreground mb-10"
-          strokeWidth={1.25}
-        />
+        <Brain className="h-9 w-9 text-foreground mb-10" strokeWidth={1.25} />
 
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
           SecondBrain

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
+import { today } from "@/lib/utils";
 import type { OmscsCourse } from "@/lib/supabase";
 import { getCachedOmscsCourses, cacheOmscsCourses } from "@/lib/db";
 
@@ -11,9 +12,7 @@ if (typeof window !== "undefined") {
 
 // Calculate current semester based on date
 function getCurrentSemester(): string {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+  const { month, year } = today();
 
   if (month >= 1 && month <= 4) return `Spring ${year}`;
   if (month >= 5 && month <= 7) return `Summer ${year}`;
@@ -22,7 +21,11 @@ function getCurrentSemester(): string {
 
 // GPA calculation
 const GRADE_POINTS: Record<string, number> = {
-  A: 4.0, B: 3.0, C: 2.0, D: 1.0, F: 0.0,
+  A: 4.0,
+  B: 3.0,
+  C: 2.0,
+  D: 1.0,
+  F: 0.0,
 };
 
 function calculateGPA(grades: string[]): number {
@@ -77,44 +80,38 @@ export function useOmscsData() {
   // Enrolled courses (have enrolled_semester set)
   const enrolledCourses = useMemo(
     () => courses.filter((c) => c.enrolled_semester !== null),
-    [courses]
+    [courses],
   );
 
   // Current semester courses (enrolled this semester, no final grade yet)
   const currentCourses = useMemo(
     () => courses.filter((c) => c.enrolled_semester === currentSemester && !c.final_grade),
-    [courses, currentSemester]
+    [courses, currentSemester],
   );
 
   // Completed courses (have final grade)
-  const completedCourses = useMemo(
-    () => courses.filter((c) => c.final_grade !== null),
-    [courses]
-  );
+  const completedCourses = useMemo(() => courses.filter((c) => c.final_grade !== null), [courses]);
 
   // Not enrolled courses
   const availableCourses = useMemo(
     () => courses.filter((c) => c.enrolled_semester === null),
-    [courses]
+    [courses],
   );
 
   // Cumulative GPA
   const cumulativeGPA = useMemo(
     () => calculateGPA(completedCourses.map((c) => c.final_grade!)),
-    [completedCourses]
+    [completedCourses],
   );
 
   // Apply a state change and persist to local cache
-  const applyCourses = useCallback(
-    (updater: (prev: OmscsCourse[]) => OmscsCourse[]) => {
-      setCourses((prev) => {
-        const next = updater(prev);
-        cacheOmscsCourses(next);
-        return next;
-      });
-    },
-    [],
-  );
+  const applyCourses = useCallback((updater: (prev: OmscsCourse[]) => OmscsCourse[]) => {
+    setCourses((prev) => {
+      const next = updater(prev);
+      cacheOmscsCourses(next);
+      return next;
+    });
+  }, []);
 
   // Enroll in a course
   const enrollCourse = useCallback(
@@ -127,9 +124,7 @@ export function useOmscsData() {
       if (updateError) throw updateError;
 
       applyCourses((prev) =>
-        prev.map((c) =>
-          c.id === courseId ? { ...c, enrolled_semester: semester } : c,
-        ),
+        prev.map((c) => (c.id === courseId ? { ...c, enrolled_semester: semester } : c)),
       );
     },
     [applyCourses],
@@ -147,9 +142,7 @@ export function useOmscsData() {
 
       applyCourses((prev) =>
         prev.map((c) =>
-          c.id === courseId
-            ? { ...c, enrolled_semester: null, final_grade: null }
-            : c,
+          c.id === courseId ? { ...c, enrolled_semester: null, final_grade: null } : c,
         ),
       );
     },
@@ -197,9 +190,7 @@ export function useOmscsData() {
       if (insertError) throw insertError;
 
       if (data) {
-        applyCourses((prev) =>
-          [...prev, data].sort((a, b) => a.code.localeCompare(b.code)),
-        );
+        applyCourses((prev) => [...prev, data].sort((a, b) => a.code.localeCompare(b.code)));
       }
       return data;
     },

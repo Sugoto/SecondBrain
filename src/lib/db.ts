@@ -69,6 +69,15 @@ db.version(4).stores({
   workouts: "id, _cachedAt",
 });
 
+db.version(5).stores({
+  transactions: "id, date, _cachedAt",
+  userStats: "id, _cachedAt",
+  meta: "key, updatedAt",
+  shoppingList: "id, _cachedAt",
+  omscsCourses: "id, code, _cachedAt",
+  workouts: "id, _cachedAt",
+});
+
 const CACHE_TTL = 5 * 60 * 1000;
 const STALE_TTL = 24 * 60 * 60 * 1000;
 

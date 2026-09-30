@@ -1,12 +1,16 @@
-import { useCallback, useMemo } from "react";
+import {
+  Activity,
+  ViewTransition,
+  useCallback,
+  useDeferredValue,
+  useMemo,
+  type ReactNode,
+} from "react";
 import { ThemeProvider } from "./hooks/useTheme";
 import { PrivacyProvider } from "./hooks/usePrivacy";
 import { AuthProvider } from "./hooks/useAuth";
 import { AuthGate } from "./components/auth/AuthGate";
-import {
-  ExpenseDataProvider,
-  usePrefetchTransactions,
-} from "./hooks/useExpenseData";
+import { ExpenseDataProvider, usePrefetchTransactions } from "./hooks/useExpenseData";
 import { DynamicBottomNav } from "./components/navigation/DynamicBottomNav";
 import {
   HOME_NAV_ITEMS,
@@ -22,6 +26,28 @@ import { HealthTracker } from "./components/fitness/FitnessTracker";
 import { OmscsTracker } from "./components/omscs/OmscsTracker";
 import { ProfilePage } from "./components/profile/ProfilePage";
 
+function Section({
+  active,
+  home,
+  children,
+}: {
+  active: boolean;
+  home?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Activity mode={active ? "visible" : "hidden"}>
+      <ViewTransition
+        default="none"
+        enter={home ? "slide-from-left" : "slide-from-right"}
+        exit={home ? "slide-to-left" : "slide-to-right"}
+      >
+        {children}
+      </ViewTransition>
+    </Activity>
+  );
+}
+
 function AppContent() {
   const {
     currentSection,
@@ -34,6 +60,7 @@ function AppContent() {
     navigateOmscsView,
     goHome,
   } = useAppNavigation();
+  const section = useDeferredValue(currentSection);
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
 
   // Prefetch data when hovering over nav items
@@ -43,7 +70,7 @@ function AppContent() {
         prefetchTransactions();
       }
     },
-    [prefetchTransactions]
+    [prefetchTransactions],
   );
 
   // Memoize nav items to avoid recreation every render
@@ -60,7 +87,6 @@ function AppContent() {
     }
   }, [currentSection]);
 
-
   // Handle nav view changes
   const handleViewChange = useCallback(
     (view: string) => {
@@ -74,35 +100,35 @@ function AppContent() {
         navigateOmscsView(view as import("./types/navigation").OmscsView);
       }
     },
-    [currentSection, navigateToSection, navigateFinanceView, navigateHealthView, navigateOmscsView]
+    [currentSection, navigateToSection, navigateFinanceView, navigateHealthView, navigateOmscsView],
   );
 
   return (
     <div className="h-full bg-background overflow-hidden relative">
       <div className="h-full relative">
-        {currentSection === "home" && <HomePage />}
-        {currentSection === "omscs" && (
-          <OmscsTracker
-            activeView={omscsView}
-            onViewChange={navigateOmscsView}
-            onGoHome={goHome}
-          />
-        )}
-        {currentSection === "finances" && (
+        <Section active={section === "home"} home>
+          <HomePage />
+        </Section>
+        <Section active={section === "omscs"}>
+          <OmscsTracker activeView={omscsView} onViewChange={navigateOmscsView} onGoHome={goHome} />
+        </Section>
+        <Section active={section === "finances"}>
           <FinanceTracker
             activeView={financeView}
             onViewChange={navigateFinanceView}
             onGoHome={goHome}
           />
-        )}
-        {currentSection === "fitness" && (
+        </Section>
+        <Section active={section === "fitness"}>
           <HealthTracker
             activeView={healthView}
             onViewChange={navigateHealthView}
             onGoHome={goHome}
           />
-        )}
-        {currentSection === "profile" && <ProfilePage onGoHome={goHome} />}
+        </Section>
+        <Section active={section === "profile"}>
+          <ProfilePage onGoHome={goHome} />
+        </Section>
       </div>
 
       {/* Only show bottom nav on home page */}
@@ -113,7 +139,6 @@ function AppContent() {
           onPrefetch={handlePrefetch}
         />
       )}
-
     </div>
   );
 }

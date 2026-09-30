@@ -64,14 +64,12 @@
   --color-surface-container-highest: var(--surface-container-highest);
 
   --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
 }
 
 /* Light theme — Tonal Spot, indigo seed (hue 275) */
 :root {
+  interpolate-size: allow-keywords;
+
   /* Neutrals — tinted toward primary hue, never pure black/white */
   --background: oklch(98% 0.005 275);
   --foreground: oklch(15% 0.005 275);
@@ -125,22 +123,7 @@
   --destructive: oklch(50% 0.2 25);
   --success: oklch(55% 0.13 155);
 
-  /* Pastel category tints (functional) */
-  --pastel-pink: oklch(96% 0.02 15);
-  --pastel-blue: oklch(96% 0.02 275);
-  --pastel-green: oklch(96% 0.02 155);
-  --pastel-yellow: oklch(96% 0.025 90);
-  --pastel-purple: oklch(96% 0.02 295);
-  --pastel-orange: oklch(96% 0.025 50);
-
-  /* Charts — single-hue indigo ramp anchored on brand. Only --chart-1 is tied
-     to the accent; steps 2-5 are unused today (both charts build their own
-     grayscale ramps inline) and are not a monotonic ramp. */
   --chart-1: var(--ui-accent);
-  --chart-2: oklch(55% 0.2 275);
-  --chart-3: oklch(67% 0.16 275);
-  --chart-4: oklch(78% 0.1 275);
-  --chart-5: oklch(30% 0.16 275);
 }
 
 .dark {
@@ -190,18 +173,7 @@
   --destructive: oklch(72% 0.18 25);
   --success: oklch(72% 0.13 155);
 
-  --pastel-pink: oklch(28% 0.05 15);
-  --pastel-blue: oklch(28% 0.05 275);
-  --pastel-green: oklch(28% 0.05 155);
-  --pastel-yellow: oklch(28% 0.05 90);
-  --pastel-purple: oklch(28% 0.05 295);
-  --pastel-orange: oklch(28% 0.05 50);
-
   --chart-1: var(--ui-accent);
-  --chart-2: oklch(67% 0.16 275);
-  --chart-3: oklch(58% 0.2 275);
-  --chart-4: oklch(86% 0.06 275);
-  --chart-5: oklch(45% 0.2 275);
 }
 
 @layer base {
@@ -264,138 +236,6 @@
 }
 
 @layer utilities {
-  /* ====== M3 Type roles — exact spec values ====== */
-  .text-display-l,
-  .text-display-m,
-  .text-display-s,
-  .text-headline-l,
-  .text-headline-m,
-  .text-headline-s,
-  .text-title-l {
-    font-family:
-      "Geist",
-      -apple-system,
-      sans-serif;
-  }
-  .text-display-l {
-    font-size: 57px;
-    line-height: 64px;
-    letter-spacing: -0.25px;
-    font-weight: 400;
-  }
-  .text-display-m {
-    font-size: 45px;
-    line-height: 52px;
-    letter-spacing: 0;
-    font-weight: 400;
-  }
-  .text-display-s {
-    font-size: 36px;
-    line-height: 44px;
-    letter-spacing: 0;
-    font-weight: 400;
-  }
-  .text-headline-l {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: 0;
-    font-weight: 400;
-  }
-  .text-headline-m {
-    font-size: 28px;
-    line-height: 36px;
-    letter-spacing: 0;
-    font-weight: 400;
-  }
-  .text-headline-s {
-    font-size: 24px;
-    line-height: 32px;
-    letter-spacing: 0;
-    font-weight: 400;
-  }
-  .text-title-l {
-    font-size: 22px;
-    line-height: 28px;
-    letter-spacing: 0;
-    font-weight: 400;
-  }
-  .text-title-m {
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 0.15px;
-    font-weight: 500;
-  }
-  .text-title-s {
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.1px;
-    font-weight: 500;
-  }
-  .text-body-l {
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 0.5px;
-    font-weight: 400;
-  }
-  .text-body-m {
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.25px;
-    font-weight: 400;
-  }
-  .text-body-s {
-    font-size: 12px;
-    line-height: 16px;
-    letter-spacing: 0.4px;
-    font-weight: 400;
-  }
-  .text-label-l {
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.1px;
-    font-weight: 500;
-  }
-  .text-label-m {
-    font-size: 12px;
-    line-height: 16px;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-  }
-  .text-label-s {
-    font-size: 11px;
-    line-height: 16px;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-  }
-
-  /* ====== Safe area ====== */
-  .safe-area-pt {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  .safe-area-pb {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .safe-area-pl {
-    padding-left: env(safe-area-inset-left, 0px);
-  }
-  .safe-area-pr {
-    padding-right: env(safe-area-inset-right, 0px);
-  }
-  .safe-area-inset {
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
-  }
-  .safe-area-inset-x {
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
-  }
-  .safe-area-inset-y {
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -404,86 +244,10 @@
     display: none;
   }
 
-  /* Pastel category tints — used as small icon backgrounds */
-  .bg-pastel-pink {
-    background-color: var(--pastel-pink);
-  }
-  .bg-pastel-blue {
-    background-color: var(--pastel-blue);
-  }
-  .bg-pastel-green {
-    background-color: var(--pastel-green);
-  }
-  .bg-pastel-yellow {
-    background-color: var(--pastel-yellow);
-  }
-  .bg-pastel-purple {
-    background-color: var(--pastel-purple);
-  }
-  .bg-pastel-orange {
-    background-color: var(--pastel-orange);
-  }
-
   .scroll-optimized {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     contain: content;
-  }
-
-  .will-animate {
-    will-change: transform, opacity;
-    contain: layout style paint;
-  }
-
-  .skeleton-shimmer {
-    background: linear-gradient(
-      90deg,
-      var(--muted) 25%,
-      color-mix(in oklab, var(--muted) 50%, transparent) 50%,
-      var(--muted) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite ease-in-out;
-  }
-  @keyframes shimmer {
-    0% {
-      background-position: 200% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
-  }
-
-  .pull-indicator {
-    transition: transform 0.2s ease-out;
-  }
-
-  .touch-feedback {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  /* ====== M3 surface utilities ====== */
-  .bg-surface-container {
-    background-color: var(--surface-container);
-  }
-  .bg-surface-container-low {
-    background-color: var(--surface-container-low);
-  }
-  .bg-surface-container-high {
-    background-color: var(--surface-container-high);
-  }
-  .bg-primary-container {
-    background-color: var(--primary-container);
-    color: var(--on-primary-container);
-  }
-  .bg-secondary-container {
-    background-color: var(--secondary-container);
-    color: var(--on-secondary-container);
-  }
-  .bg-tertiary-container {
-    background-color: var(--tertiary-container);
-    color: var(--on-tertiary-container);
   }
 }
 
@@ -512,61 +276,34 @@ body > nav.no-view-transition {
   transition: none !important;
 }
 
-::view-transition-old(page-content) {
-  animation: slide-out-left 0.25s ease-out forwards;
+::view-transition-old(.slide-to-left) {
+  --shift: -30px;
+  animation: slide-out 0.25s ease-out both;
 }
-::view-transition-new(page-content) {
-  animation: slide-in-right 0.25s ease-out forwards;
+::view-transition-old(.slide-to-right) {
+  --shift: 30px;
+  animation: slide-out 0.25s ease-out both;
 }
-
-@keyframes slide-out-left {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
+::view-transition-new(.slide-from-left) {
+  --shift: -30px;
+  animation: slide-in 0.25s ease-out both;
 }
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+::view-transition-new(.slide-from-right) {
+  --shift: 30px;
+  animation: slide-in 0.25s ease-out both;
 }
 
-::view-transition-old(card) {
-  animation: fade-out 0.15s ease-out forwards;
-}
-::view-transition-new(card) {
-  animation: fade-in 0.15s ease-out forwards;
-}
-
-@keyframes fade-out {
-  from {
-    opacity: 1;
-  }
+@keyframes slide-out {
   to {
     opacity: 0;
+    transform: translateX(var(--shift));
   }
 }
-@keyframes fade-in {
+@keyframes slide-in {
   from {
     opacity: 0;
+    transform: translateX(var(--shift));
   }
-  to {
-    opacity: 1;
-  }
-}
-
-.page-transition {
-  will-change: transform, opacity;
-  contain: layout style paint;
 }
 
 /* Remove spinner arrows on number inputs across browsers */
@@ -735,6 +472,33 @@ input[type="number"] {
     color: var(--ui-ink-soft);
   }
 
+  /* Tag — a tappable pill in its own hue, set by the caller as --tag-h. Every
+     tag shares one lightness and chroma, like the section hues, so a row of
+     them reads as a set. Resting is a pale wash; pressed is a solid fill. */
+  .ui-tag {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background-color: oklch(94% 0.035 var(--tag-h));
+    color: oklch(42% 0.11 var(--tag-h));
+    font-weight: 500;
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+  .ui-tag[aria-pressed="true"] {
+    background-color: oklch(50% 0.13 var(--tag-h));
+    color: oklch(98.5% 0.006 var(--tag-h));
+  }
+  .dark .ui-tag {
+    background-color: oklch(27% 0.045 var(--tag-h));
+    color: oklch(82% 0.09 var(--tag-h));
+  }
+  .dark .ui-tag[aria-pressed="true"] {
+    background-color: oklch(76% 0.11 var(--tag-h));
+    color: oklch(18% 0.03 var(--tag-h));
+  }
+
   /* The one primary action on a surface. Ink flips with the theme. */
   .ui-cta {
     background-color: var(--ui-accent);
@@ -753,5 +517,72 @@ input[type="number"] {
       var(--ui-rule) 28px
     );
     background-attachment: local;
+  }
+}
+
+.home-surface {
+  timeline-scope: --home-scroll;
+}
+.home-scroller {
+  scroll-timeline: --home-scroll y;
+}
+.home-plate,
+.home-greeting,
+.home-worth,
+.home-amount,
+.home-earning {
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  animation-timeline: --home-scroll;
+  animation-range: 0 64px;
+}
+.home-plate {
+  animation-name: home-plate;
+}
+.home-greeting {
+  animation-name: home-greeting;
+}
+.home-worth {
+  animation-name: home-worth;
+}
+.home-amount {
+  animation-name: home-amount;
+}
+.home-earning {
+  animation-name: home-earning;
+}
+
+@keyframes home-plate {
+  to {
+    padding-block: 1rem;
+  }
+}
+@keyframes home-greeting {
+  from {
+    height: auto;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+@keyframes home-worth {
+  to {
+    margin-top: 0;
+  }
+}
+@keyframes home-amount {
+  to {
+    font-size: 28px;
+  }
+}
+@keyframes home-earning {
+  from {
+    height: auto;
+  }
+  to {
+    height: 0;
+    margin-top: 0;
+    opacity: 0;
   }
 }

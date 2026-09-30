@@ -1,5 +1,6 @@
 import { useMemo, memo } from "react";
-import ReactECharts from "echarts-for-react";
+import ReactECharts from "echarts-for-react/lib/core";
+import { echarts } from "@/lib/echarts";
 import type { EChartsOption } from "echarts";
 import { usePrivacy } from "@/hooks/usePrivacy";
 
@@ -89,6 +90,7 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
         <ReactECharts
           option={option}
           style={{ width: "100%", height: "100%" }}
+          echarts={echarts}
           opts={{ renderer: "canvas" }}
           onChartReady={(chart) => {
             requestAnimationFrame(() => chart.resize());
