@@ -1,11 +1,4 @@
-import {
-  Activity,
-  ViewTransition,
-  useCallback,
-  useDeferredValue,
-  useMemo,
-  type ReactNode,
-} from "react";
+import { Activity, ViewTransition, useCallback, useMemo, type ReactNode } from "react";
 import { ThemeProvider } from "./hooks/useTheme";
 import { PrivacyProvider } from "./hooks/usePrivacy";
 import { AuthProvider } from "./hooks/useAuth";
@@ -60,7 +53,6 @@ function AppContent() {
     navigateOmscsView,
     goHome,
   } = useAppNavigation();
-  const section = useDeferredValue(currentSection);
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
 
   // Prefetch data when hovering over nav items
@@ -106,27 +98,27 @@ function AppContent() {
   return (
     <div className="h-full bg-background overflow-hidden relative">
       <div className="h-full relative">
-        <Section active={section === "home"} home>
+        <Section active={currentSection === "home"} home>
           <HomePage />
         </Section>
-        <Section active={section === "omscs"}>
+        <Section active={currentSection === "omscs"}>
           <OmscsTracker activeView={omscsView} onViewChange={navigateOmscsView} onGoHome={goHome} />
         </Section>
-        <Section active={section === "finances"}>
+        <Section active={currentSection === "finances"}>
           <FinanceTracker
             activeView={financeView}
             onViewChange={navigateFinanceView}
             onGoHome={goHome}
           />
         </Section>
-        <Section active={section === "fitness"}>
+        <Section active={currentSection === "fitness"}>
           <HealthTracker
             activeView={healthView}
             onViewChange={navigateHealthView}
             onGoHome={goHome}
           />
         </Section>
-        <Section active={section === "profile"}>
+        <Section active={currentSection === "profile"}>
           <ProfilePage onGoHome={goHome} />
         </Section>
       </div>

@@ -1,20 +1,8 @@
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { Plus, AlertTriangle, GripVertical } from "lucide-react";
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { DragDropProvider } from "@dnd-kit/react";
+import { useSortable } from "@dnd-kit/react/sortable";
+import { move } from "@dnd-kit/helpers";
 import { useWorkouts, type Workout } from "@/hooks/useWorkouts";
 import { WorkoutDialog } from "./WorkoutDialog";
 import { today } from "@/lib/utils";
@@ -33,33 +21,26 @@ const todayIndex = isRestDay ? 0 : dayOfWeek - 1;
 
 function SortableRow({
   w,
+  index,
   isLast,
   onEdit,
 }: {
   w: Workout;
+  index: number;
   isLast: boolean;
   onEdit: (w: Workout) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: w.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-  };
+  const { ref, handleRef, isDragging } = useSortable({ id: w.id, index });
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
+      ref={ref}
+      style={{ opacity: isDragging ? 0.4 : 1 }}
       className={`flex items-center gap-2 ${isLast ? "" : "border-b border-foreground/15"}`}
     >
       <button
         type="button"
-        {...attributes}
-        {...listeners}
+        ref={handleRef}
         className="shrink-0 text-muted-foreground/30 hover:text-muted-foreground/60 touch-none py-3"
       >
         <GripVertical className="h-4 w-4" strokeWidth={1.5} />
@@ -103,8 +84,6 @@ export function WorkoutsView() {
       return {};
     }
   });
-
-  const sensors = useSensors(useSensor(PointerSensor));
 
   const openEdit = (w: Workout) => {
     setEditing(w);
@@ -167,14 +146,13 @@ export function WorkoutsView() {
       })
     : [...filtered].sort((a, b) => a.name.localeCompare(b.name));
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
+  const handleDragEnd: ComponentProps<typeof DragDropProvider>["onDragEnd"] = (event) => {
+    if (event.canceled) return;
     const ids = sorted.map((w) => w.id);
-    const oldIndex = ids.indexOf(active.id as string);
-    const newIndex = ids.indexOf(over.id as string);
+    const moved = move(ids, event);
+    if (moved.every((id, i) => id === ids[i])) return;
     setOrderOverrides((prev) => {
-      const next = { ...prev, [orderKey]: arrayMove(ids, oldIndex, newIndex) };
+      const next = { ...prev, [orderKey]: moved };
       localStorage.setItem("workout-order", JSON.stringify(next));
       return next;
     });
@@ -218,17 +196,17 @@ export function WorkoutsView() {
             No exercises yet. Add one below.
           </p>
         ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={sorted.map((w) => w.id)} strategy={verticalListSortingStrategy}>
-              {sorted.map((w, i) => (
-                <SortableRow key={w.id} w={w} isLast={i === sorted.length - 1} onEdit={openEdit} />
-              ))}
-            </SortableContext>
-          </DndContext>
+          <DragDropProvider onDragEnd={handleDragEnd}>
+            {sorted.map((w, i) => (
+              <SortableRow
+                key={w.id}
+                w={w}
+                index={i}
+                isLast={i === sorted.length - 1}
+                onEdit={openEdit}
+              />
+            ))}
+          </DragDropProvider>
         )}
       </section>
 

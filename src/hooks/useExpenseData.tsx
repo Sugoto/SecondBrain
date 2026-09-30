@@ -1,43 +1,8 @@
-import { useQuery, useQueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useLiveQuery } from "@tanstack/react-db";
-import { supabase } from "@/lib/supabase";
 import type { Transaction, UserStats, Investment } from "@/lib/supabase";
-import { useState, useEffect, type ReactNode } from "react";
-import { getCachedUserStats, cacheUserStats } from "@/lib/db";
-import { queryClient, transactionsCollection } from "@/lib/collections";
-
-let cachedUserStatsPromise: Promise<UserStats | null> | null = null;
-
-if (typeof window !== "undefined") {
-  cachedUserStatsPromise = getCachedUserStats(true);
-}
-
-const userStatsKeys = {
-  all: ["userStats"] as const,
-  detail: () => [...userStatsKeys.all, "detail"] as const,
-};
-
-/**
- * Fetch user stats with IndexedDB cache
- */
-async function fetchUserStats(): Promise<UserStats | null> {
-  // Try cache first
-  const cached = await getCachedUserStats();
-
-  const { data, error } = await supabase.from("user_stats").select("*").limit(1).single();
-
-  if (error) {
-    console.error("Error fetching user stats:", error);
-    return cached; // Return cache on error
-  }
-
-  // Cache fresh data
-  if (data) {
-    cacheUserStats(data);
-  }
-
-  return data || cached;
-}
+import type { ReactNode } from "react";
+import { queryClient, transactionsCollection, userStatsCollection } from "@/lib/collections";
 
 export function ExpenseDataProvider({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
@@ -82,92 +47,31 @@ export function usePrefetchTransactions() {
 }
 
 export function useUserStats() {
-  const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useLiveQuery((q) => q.from({ s: userStatsCollection }));
+  const userStats: UserStats | null = data[0] ?? null;
 
-  // Get initial cached data for instant display (same pattern as useExpenseData)
-  const [initialData, setInitialData] = useState<UserStats | undefined>(undefined);
-
-  // Load initial data from IndexedDB on mount
-  useEffect(() => {
-    cachedUserStatsPromise?.then((cached) => {
-      if (!cached) return;
-      // Skip if React Query already has fresher data (e.g. after a save).
-      if (queryClient.getQueryData(userStatsKeys.detail())) return;
-      queryClient.setQueryData(userStatsKeys.detail(), cached);
-      setInitialData(cached);
-    });
-  }, [queryClient]);
-
-  const {
-    data: userStats = null,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: userStatsKeys.detail(),
-    queryFn: fetchUserStats,
-    placeholderData: initialData,
-    staleTime: 10 * 60 * 1000, // 10 minutes - user stats change less frequently
-  });
-
-  const loading = isLoading && !userStats && !initialData;
-
-  const updateUserStats = (updated: UserStats) => {
-    queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
-    // Also update IndexedDB cache
-    cacheUserStats(updated);
+  const saveInvestments = (investments: Investment[]) => {
+    if (!userStats) throw new Error("No user stats");
+    return userStatsCollection.update(userStats.id, (draft) => {
+      draft.investments = investments;
+    }).isPersisted.promise;
   };
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: userStatsKeys.all });
-
-  // Investment management
   const addInvestment = async (investment: Omit<Investment, "id">) => {
-    if (!userStats?.id) throw new Error("No user stats");
-
-    const newInvestment: Investment = {
-      ...investment,
-      id: crypto.randomUUID(),
-    };
-
-    const currentInvestments = userStats.investments || [];
-    const updatedInvestments = [...currentInvestments, newInvestment];
-
-    const { error } = await supabase
-      .from("user_stats")
-      .update({ investments: updatedInvestments })
-      .eq("id", userStats.id);
-
-    if (error) throw error;
-
-    const updated = { ...userStats, investments: updatedInvestments };
-    queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
-    cacheUserStats(updated);
+    const newInvestment: Investment = { ...investment, id: crypto.randomUUID() };
+    await saveInvestments([...(userStats?.investments ?? []), newInvestment]);
     return newInvestment;
   };
 
-  const deleteInvestment = async (investmentId: string) => {
-    if (!userStats?.id) throw new Error("No user stats");
-
-    const currentInvestments = userStats.investments || [];
-    const updatedInvestments = currentInvestments.filter((i) => i.id !== investmentId);
-
-    const { error } = await supabase
-      .from("user_stats")
-      .update({ investments: updatedInvestments })
-      .eq("id", userStats.id);
-
-    if (error) throw error;
-
-    const updated = { ...userStats, investments: updatedInvestments };
-    queryClient.setQueryData<UserStats | null>(userStatsKeys.detail(), updated);
-    cacheUserStats(updated);
-  };
+  const deleteInvestment = (investmentId: string) =>
+    saveInvestments((userStats?.investments ?? []).filter((i) => i.id !== investmentId));
 
   return {
     userStats,
-    loading,
-    error: error ? (error as Error).message : null,
-    updateUserStats,
-    invalidate,
+    loading: isLoading && !userStats,
+    error: isError ? (userStatsCollection.utils.lastError as Error).message : null,
+    updateUserStats: (updated: UserStats) => userStatsCollection.utils.writeUpdate(updated),
+    invalidate: () => userStatsCollection.utils.refetch(),
     addInvestment,
     deleteInvestment,
   };

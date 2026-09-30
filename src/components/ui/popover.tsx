@@ -1,37 +1,74 @@
-"use client";
-
 import * as React from "react";
-import { Popover as PopoverPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
+type PopoverState = {
+  id: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+const PopoverContext = React.createContext<PopoverState>({ id: "" });
+
+function Popover({
+  open,
+  onOpenChange,
+  children,
+}: Omit<PopoverState, "id"> & { children?: React.ReactNode }) {
+  const id = React.useId();
+  const state = React.useMemo(() => ({ id, open, onOpenChange }), [id, open, onOpenChange]);
+  return <PopoverContext value={state}>{children}</PopoverContext>;
 }
 
-function PopoverTrigger({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
+function PopoverTrigger({ style, ...props }: React.ComponentProps<"button">) {
+  const { id } = React.useContext(PopoverContext);
+  return (
+    <button
+      type="button"
+      data-slot="popover-trigger"
+      popoverTarget={id}
+      style={{ anchorName: `--${id}`, ...style }}
+      {...props}
+    />
+  );
 }
+
+const AREAS = { start: "bottom span-right", center: "bottom", end: "bottom span-left" };
 
 function PopoverContent({
   className,
+  style,
   align = "center",
   sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+}: React.ComponentProps<"div"> & { align?: keyof typeof AREAS; sideOffset?: number }) {
+  const { id, open, onOpenChange } = React.useContext(PopoverContext);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (open !== undefined) ref.current?.togglePopover(open);
+  }, [open]);
+
   return (
-    <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Content
-        data-slot="popover-content"
-        align={align}
-        sideOffset={sideOffset}
-        className={cn(
-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-72 origin-(--radix-popover-content-transform-origin) rounded-md border p-4 shadow-md outline-hidden",
-          className,
-        )}
-        {...props}
-      />
-    </PopoverPrimitive.Portal>
+    <div
+      ref={ref}
+      id={id}
+      popover="auto"
+      data-slot="popover-content"
+      onToggle={(e) => onOpenChange?.((e.nativeEvent as ToggleEvent).newState === "open")}
+      style={{
+        positionAnchor: `--${id}`,
+        positionArea: AREAS[align],
+        positionTryFallbacks: "flip-block",
+        marginTop: sideOffset,
+        ...style,
+      }}
+      className={cn(
+        "bg-popover text-popover-foreground inset-auto m-0 w-72 rounded-md border p-4 shadow-md outline-hidden",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 

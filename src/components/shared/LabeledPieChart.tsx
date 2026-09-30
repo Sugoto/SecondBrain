@@ -1,6 +1,5 @@
 import { memo, useMemo } from "react";
-import ReactECharts from "echarts-for-react/lib/core";
-import { echarts } from "@/lib/echarts";
+import { useECharts } from "@/lib/echarts";
 import type { EChartsOption } from "echarts";
 
 interface PieChartDataItem {
@@ -147,19 +146,9 @@ export const LabeledPieChart = memo(function LabeledPieChart({
     };
   }, [data, theme, innerRadius, outerRadius, labelThreshold, formatValue, formatLabel]);
 
+  const chartRef = useECharts(option);
+
   if (!data || data.length === 0 || total === 0) return null;
 
-  return (
-    <ReactECharts
-      option={option}
-      style={{ width: "100%", height: size }}
-      echarts={echarts}
-      opts={{ renderer: "canvas" }}
-      onChartReady={(chart) => {
-        requestAnimationFrame(() => chart.resize());
-      }}
-      notMerge
-      lazyUpdate
-    />
-  );
+  return <div ref={chartRef} style={{ width: "100%", height: size }} />;
 });

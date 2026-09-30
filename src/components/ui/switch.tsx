@@ -1,14 +1,25 @@
-"use client";
-
 import * as React from "react";
-import { Switch as SwitchPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimitive.Root>) {
+function Switch({
+  className,
+  checked = false,
+  onCheckedChange,
+  ...props
+}: Omit<React.ComponentProps<"button">, "role" | "onChange"> & {
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+}) {
+  const state = checked ? "checked" : "unchecked";
   return (
-    <SwitchPrimitive.Root
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
       data-slot="switch"
+      data-state={state}
+      onClick={() => onCheckedChange?.(!checked)}
       className={cn(
         "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full",
         "border border-border",
@@ -20,8 +31,9 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
       )}
       {...props}
     >
-      <SwitchPrimitive.Thumb
+      <span
         data-slot="switch-thumb"
+        data-state={state}
         className={cn(
           "pointer-events-none block size-4 rounded-full",
           "bg-background shadow-sm",
@@ -29,7 +41,7 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
           "data-[state=checked]:translate-x-[calc(100%+2px)] data-[state=unchecked]:translate-x-0.5",
         )}
       />
-    </SwitchPrimitive.Root>
+    </button>
   );
 }
 

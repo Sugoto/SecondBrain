@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { CalendarDays } from "lucide-react";
-import { MONTHS, fromDate, toDate, today } from "@/lib/utils";
+import { MONTHS, today } from "@/lib/utils";
 import type { TimeFilter, ActiveView, DateRange } from "./types";
 
 interface DateFilterProps {
@@ -41,10 +40,6 @@ export function DateFilter({
   onCustomDateRangeChange,
 }: DateFilterProps) {
   const [filterOpen, setFilterOpen] = useState(false);
-  const [pendingRange, setPendingRange] = useState<{
-    from?: Temporal.PlainDate;
-    to?: Temporal.PlainDate;
-  }>({});
 
   const recentMonths = getRecentMonths();
 
@@ -54,28 +49,19 @@ export function DateFilter({
       to: month.toPlainDate({ day: month.daysInMonth }),
     });
     onTimeFilterChange("custom");
-    setPendingRange({});
     setFilterOpen(false);
   };
 
-  const handleDateSelect = (selected: Date | undefined) => {
-    if (!selected) return;
-    const date = fromDate(selected);
-    if (!pendingRange.from) {
-      setPendingRange({ from: date });
-    } else if (!pendingRange.to) {
-      const from = pendingRange.from;
-      const to = date;
-      if (Temporal.PlainDate.compare(to, from) >= 0) {
-        onCustomDateRangeChange({ from, to });
-        onTimeFilterChange("custom");
-      } else {
-        onCustomDateRangeChange({ from: to, to: from });
-        onTimeFilterChange("custom");
-      }
-      setPendingRange({});
-      setFilterOpen(false);
-    }
+  const range = customDateRange ?? { from: today(), to: today() };
+
+  const handleDateChange = (edge: "from" | "to", value: string) => {
+    if (!value) return;
+    const date = Temporal.PlainDate.from(value);
+    const [from, to] = edge === "from" ? [date, range.to] : [range.from, date];
+    onCustomDateRangeChange(
+      Temporal.PlainDate.compare(from, to) <= 0 ? { from, to } : { from: to, to: from },
+    );
+    onTimeFilterChange("custom");
   };
 
   const getFilterLabel = () => {
@@ -102,18 +88,10 @@ export function DateFilter({
   if (activeView === "trends") return null;
 
   return (
-    <Popover
-      open={filterOpen}
-      onOpenChange={(open) => {
-        setFilterOpen(open);
-        if (open) setPendingRange({});
-      }}
-    >
-      <PopoverTrigger asChild>
-        <button className="ui-type inline-flex h-9 items-center gap-2 rounded-[9px] border border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 text-[var(--ui-ink-soft)] transition-colors hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)]">
-          <CalendarDays className="h-3.5 w-3.5" strokeWidth={1.75} />
-          <span className="ui-num text-[12px]">{getFilterLabel()}</span>
-        </button>
+    <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+      <PopoverTrigger className="ui-type inline-flex h-9 items-center gap-2 rounded-[9px] border border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 text-[var(--ui-ink-soft)] transition-colors hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)]">
+        <CalendarDays className="h-3.5 w-3.5" strokeWidth={1.75} />
+        <span className="ui-num text-[12px]">{getFilterLabel()}</span>
       </PopoverTrigger>
       <PopoverContent
         className="w-auto p-0 rounded-2xl border border-outline-variant bg-background shadow-2xl"
@@ -163,28 +141,20 @@ export function DateFilter({
 
           <div className="border-t border-outline-variant/60 pt-4">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-              {pendingRange.from
-                ? `From ${dayMonth(pendingRange.from)} — pick end`
-                : "Custom range"}
+              Custom range
             </p>
-            <Calendar
-              mode="single"
-              selected={pendingRange.from && toDate(pendingRange.from)}
-              onSelect={handleDateSelect}
-              captionLayout="dropdown"
-              startMonth={new Date(2020, 0)}
-              endMonth={new Date(today().year, 11)}
-              defaultMonth={toDate(customDateRange?.from ?? today())}
-              className="rounded-xl border border-outline-variant"
-            />
-            {pendingRange.from && (
-              <button
-                onClick={() => setPendingRange({})}
-                className="w-full h-8 mt-3 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Clear selection
-              </button>
-            )}
+            <div className="grid grid-cols-2 gap-2">
+              {(["from", "to"] as const).map((edge) => (
+                <input
+                  key={edge}
+                  type="date"
+                  aria-label={edge === "from" ? "From date" : "To date"}
+                  className="ui-inset ui-num h-11 w-full px-3 text-[14px] text-[var(--ui-ink)] outline-none transition-shadow focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]"
+                  value={range[edge].toString()}
+                  onChange={(e) => handleDateChange(edge, e.target.value)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </PopoverContent>

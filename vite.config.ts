@@ -221,11 +221,9 @@ export default defineConfig({
             id.includes("/motion-utils/")
           )
             return "vendor-motion";
-          if (id.includes("@radix-ui") || id.includes("/radix-ui/")) return "vendor-radix";
           if (id.includes("@tanstack/react-query")) return "vendor-query";
           if (id.includes("@supabase/supabase-js")) return "vendor-supabase";
           if (id.includes("@tanstack/react-virtual")) return "vendor-virtual";
-          if (id.includes("/dexie/")) return "vendor-dexie";
         },
       },
     },

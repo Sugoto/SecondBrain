@@ -114,7 +114,9 @@ export function CourseDialog({
     <Dialog open={open} onOpenChange={(o) => !o && !isSubmitting && onClose()}>
       <DialogContent
         className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant bg-background"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => {
+          if (initial) e.preventDefault();
+        }}
       >
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
           <p className={EYEBROW}>{title}</p>
@@ -130,7 +132,6 @@ export function CourseDialog({
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="w-full h-10 font-mono text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none placeholder:text-muted-foreground/40 uppercase"
-                autoFocus={!initial}
                 disabled={isSubmitting}
               />
             </div>

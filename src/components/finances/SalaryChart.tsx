@@ -1,6 +1,5 @@
 import { useMemo, memo } from "react";
-import ReactECharts from "echarts-for-react/lib/core";
-import { echarts } from "@/lib/echarts";
+import { useECharts } from "@/lib/echarts";
 import type { EChartsOption } from "echarts";
 import { usePrivacy } from "@/hooks/usePrivacy";
 
@@ -79,6 +78,8 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
     };
   }, [theme]);
 
+  const chartRef = useECharts(option);
+
   if (hidden) return null;
 
   return (
@@ -86,19 +87,7 @@ export const SalaryChart = memo(function SalaryChart({ theme }: SalaryChartProps
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
         Salary Progression
       </p>
-      <div className="h-40">
-        <ReactECharts
-          option={option}
-          style={{ width: "100%", height: "100%" }}
-          echarts={echarts}
-          opts={{ renderer: "canvas" }}
-          onChartReady={(chart) => {
-            requestAnimationFrame(() => chart.resize());
-          }}
-          notMerge
-          lazyUpdate
-        />
-      </div>
+      <div ref={chartRef} className="h-40" />
     </section>
   );
 });

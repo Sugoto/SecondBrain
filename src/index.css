@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -303,6 +302,51 @@ body > nav.no-view-transition {
   from {
     opacity: 0;
     transform: translateX(var(--shift));
+  }
+}
+
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+dialog:not([open]) {
+  display: none;
+}
+
+dialog,
+[popover] {
+  opacity: 0;
+  transition:
+    opacity 200ms,
+    scale 200ms,
+    display 200ms allow-discrete,
+    overlay 200ms allow-discrete;
+}
+dialog {
+  scale: 0.95;
+}
+dialog[open],
+[popover]:popover-open {
+  opacity: 1;
+  scale: 1;
+  @starting-style {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+dialog::backdrop {
+  background: oklch(0% 0 0 / 0.5);
+  opacity: 0;
+  transition:
+    opacity 200ms,
+    display 200ms allow-discrete,
+    overlay 200ms allow-discrete;
+}
+dialog[open]::backdrop {
+  opacity: 1;
+  @starting-style {
+    opacity: 0;
   }
 }
 

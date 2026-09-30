@@ -1,6 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { getCacheMeta, setCacheMeta } from "@/lib/db";
 import { today } from "@/lib/utils";
 
 // Mutual fund scheme codes for the watchlist
@@ -202,38 +200,8 @@ const mutualFundKeys = {
   watchlist: () => [...mutualFundKeys.all, "watchlist"] as const,
 };
 
-const MF_CACHE_KEY = "mutualFundWatchlist";
-
-// Pre-load cached data on module load (same pattern as useExpenseData)
-let cachedMFPromise: Promise<FundWithStats[] | null> | null = null;
-if (typeof window !== "undefined") {
-  cachedMFPromise = getCacheMeta(MF_CACHE_KEY).then((cached) => {
-    if (cached) {
-      try {
-        return JSON.parse(cached) as FundWithStats[];
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  });
-}
-
 export function useMutualFundWatchlist() {
   const queryClient = useQueryClient();
-
-  // Get initial cached data for instant display (same pattern as useExpenseData)
-  const [initialData, setInitialData] = useState<FundWithStats[]>([]);
-
-  // Load initial data from IndexedDB on mount
-  useEffect(() => {
-    cachedMFPromise?.then((cached) => {
-      if (cached && cached.length > 0) {
-        queryClient.setQueryData(mutualFundKeys.watchlist(), cached);
-        setInitialData(cached);
-      }
-    });
-  }, [queryClient]);
 
   const { data, isLoading, isRefetching, error, dataUpdatedAt } = useQuery({
     queryKey: mutualFundKeys.watchlist(),
@@ -248,27 +216,19 @@ export function useMutualFundWatchlist() {
       const funds = results
         .filter((r): r is PromiseFulfilledResult<FundWithStats> => r.status === "fulfilled")
         .map((r) => r.value);
-
-      // Cache for next time
-      if (funds.length > 0) {
-        setCacheMeta(MF_CACHE_KEY, JSON.stringify(funds));
-      }
-
+      if (funds.length === 0) throw new Error("Failed to fetch mutual funds");
       return funds;
     },
-    placeholderData: initialData.length > 0 ? initialData : undefined,
     staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
     refetchOnWindowFocus: false,
     retry: 2,
   });
 
-  // Use fetched data or cached initial data
-  const funds: FundWithStats[] = data || initialData;
+  const funds: FundWithStats[] = data ?? [];
   const loading = isLoading && funds.length === 0;
 
   const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: mutualFundKeys.watchlist() });
+    void queryClient.invalidateQueries({ queryKey: mutualFundKeys.watchlist() });
   };
 
   return {

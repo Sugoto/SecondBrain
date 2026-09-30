@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Trash2 } from "lucide-react";
 import type { Workout } from "@/hooks/useWorkouts";
 
@@ -58,17 +53,16 @@ export function WorkoutDialog({
     <Dialog open={open} onOpenChange={(o) => !o && !isSubmitting && onClose()}>
       <DialogContent
         className="max-w-md w-[calc(100%-1.5rem)] rounded-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-outline-variant bg-background"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => {
+          if (initial) e.preventDefault();
+        }}
       >
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
           <p className={EYEBROW}>{title}</p>
           <DialogTitle className="sr-only">{title}</DialogTitle>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col flex-1 overflow-hidden"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="px-6 pt-4 pb-4 overflow-y-auto flex-1 space-y-6">
             <div>
               <p className={`${EYEBROW} mb-2`}>Name</p>
@@ -77,7 +71,6 @@ export function WorkoutDialog({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full h-10 text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none placeholder:text-muted-foreground/40"
-                autoFocus={!initial}
                 disabled={isSubmitting}
               />
             </div>
@@ -91,8 +84,22 @@ export function WorkoutDialog({
                 className="w-full h-10 text-[15px] text-foreground bg-transparent border-b border-outline-variant/60 focus:border-foreground transition-colors outline-none"
               >
                 <option value="">— Select</option>
-                {["Back", "Biceps", "Calves", "Chest", "Core", "Forearms", "Hamstrings", "Quads", "Rear Delts", "Shoulders", "Triceps"].map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                {[
+                  "Back",
+                  "Biceps",
+                  "Calves",
+                  "Chest",
+                  "Core",
+                  "Forearms",
+                  "Hamstrings",
+                  "Quads",
+                  "Rear Delts",
+                  "Shoulders",
+                  "Triceps",
+                ].map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
                 ))}
               </select>
             </div>

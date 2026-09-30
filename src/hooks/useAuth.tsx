@@ -1,12 +1,7 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { queryClient } from "@/lib/collections";
 
 interface AuthContextValue {
   session: Session | null;
@@ -22,9 +17,7 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => {},
 });
 
-const DEV_BYPASS =
-  import.meta.env.DEV &&
-  import.meta.env.VITE_DEV_BYPASS_AUTH === "true";
+const DEV_BYPASS = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === "true";
 
 const FAKE_SESSION = {
   access_token: "dev",
@@ -47,9 +40,7 @@ const FAKE_SESSION = {
 } as unknown as Session;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(
-    DEV_BYPASS ? FAKE_SESSION : null,
-  );
+  const [session, setSession] = useState<Session | null>(DEV_BYPASS ? FAKE_SESSION : null);
   const [loading, setLoading] = useState(!DEV_BYPASS);
 
   useEffect(() => {
@@ -81,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    queryClient.clear();
   };
 
   return (

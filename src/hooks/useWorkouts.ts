@@ -1,114 +1,49 @@
-import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useLiveQuery } from "@tanstack/react-db";
+import { workoutsCollection } from "@/lib/collections";
 import type { Workout } from "@/lib/supabase";
-import { getCachedWorkouts, cacheWorkouts } from "@/lib/db";
-
-// Pre-warm cache before React kicks in so the first render is instant
-let cachedWorkoutsPromise: Promise<Workout[] | null> | null = null;
-if (typeof window !== "undefined") {
-  cachedWorkoutsPromise = getCachedWorkouts(true);
-}
 
 export type { Workout } from "@/lib/supabase";
 
 export function useWorkouts() {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, isLoading, isError } = useLiveQuery((q) =>
+    q.from({ w: workoutsCollection }).orderBy(({ w }) => w.max_weight, "desc"),
+  );
+  const workouts: Workout[] = data;
 
-  const fetchWorkouts = useCallback(async () => {
-    try {
-      const { data, error: fetchError } = await supabase
-        .from("workouts")
-        .select("*")
-        .order("max_weight", { ascending: false });
-
-      if (fetchError) throw fetchError;
-      setWorkouts(data || []);
-      setError(null);
-      if (data) cacheWorkouts(data);
-    } catch (err) {
-      console.error("Failed to fetch workouts:", err);
-      setError(err as Error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Hydrate from cache instantly, then revalidate from network
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const cached = await (cachedWorkoutsPromise ?? getCachedWorkouts(true));
-      if (!cancelled && cached && cached.length > 0) {
-        setWorkouts(cached);
-        setLoading(false);
-      }
-      if (!cancelled) fetchWorkouts();
-    })();
-    return () => {
-      cancelled = true;
+  const addWorkout = async (values: {
+    name: string;
+    max_weight: number;
+    session: "push" | "pull" | "legs";
+    muscle_group?: string;
+  }) => {
+    const now = new Date().toISOString();
+    const workout: Workout = {
+      muscle_group: null,
+      ...values,
+      id: crypto.randomUUID(),
+      created_at: now,
+      updated_at: now,
     };
-  }, [fetchWorkouts]);
+    await workoutsCollection.insert(workout).isPersisted.promise;
+    return workout;
+  };
 
-  const applyWorkouts = useCallback(
-    (updater: (prev: Workout[]) => Workout[]) => {
-      setWorkouts((prev) => {
-        const next = updater(prev);
-        cacheWorkouts(next);
-        return next;
-      });
-    },
-    [],
-  );
+  const updateWorkout = (
+    id: string,
+    values: { name?: string; max_weight?: number; muscle_group?: string },
+  ) =>
+    workoutsCollection.update(id, (draft) => {
+      Object.assign(draft, values, { updated_at: new Date().toISOString() });
+    }).isPersisted.promise;
 
-  const addWorkout = useCallback(
-    async (values: { name: string; max_weight: number; session: "push" | "pull" | "legs"; muscle_group?: string }) => {
-      const { data, error: insertError } = await supabase
-        .from("workouts")
-        .insert(values)
-        .select()
-        .single();
+  const deleteWorkout = (id: string) => workoutsCollection.delete(id).isPersisted.promise;
 
-      if (insertError) throw insertError;
-      if (data) {
-        applyWorkouts((prev) => [...prev, data]);
-      }
-      return data;
-    },
-    [applyWorkouts],
-  );
-
-  const updateWorkout = useCallback(
-    async (
-      id: string,
-      values: { name?: string; max_weight?: number; muscle_group?: string },
-    ) => {
-      const { error: updateError } = await supabase
-        .from("workouts")
-        .update({ ...values, updated_at: new Date().toISOString() })
-        .eq("id", id);
-
-      if (updateError) throw updateError;
-      applyWorkouts((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, ...values } : w)),
-      );
-    },
-    [applyWorkouts],
-  );
-
-  const deleteWorkout = useCallback(
-    async (id: string) => {
-      const { error: deleteError } = await supabase
-        .from("workouts")
-        .delete()
-        .eq("id", id);
-
-      if (deleteError) throw deleteError;
-      applyWorkouts((prev) => prev.filter((w) => w.id !== id));
-    },
-    [applyWorkouts],
-  );
-
-  return { workouts, loading, error, addWorkout, updateWorkout, deleteWorkout };
+  return {
+    workouts,
+    loading: isLoading && workouts.length === 0,
+    error: isError ? (workoutsCollection.utils.lastError as Error) : null,
+    addWorkout,
+    updateWorkout,
+    deleteWorkout,
+  };
 }

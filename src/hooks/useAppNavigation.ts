@@ -1,10 +1,5 @@
-import { useCallback, useSyncExternalStore } from "react";
-import type {
-  AppSection,
-  HealthView,
-  FinanceView,
-  OmscsView,
-} from "@/types/navigation";
+import { startTransition, useCallback, useEffect, useState } from "react";
+import type { AppSection, HealthView, FinanceView, OmscsView } from "@/types/navigation";
 
 interface NavigationState {
   section: AppSection;
@@ -34,17 +29,10 @@ function parseHash(hash: string): NavigationState | null {
   return {
     section,
     healthView:
-      section === "fitness" && parts[1]
-        ? (parts[1] as HealthView)
-        : DEFAULT_STATE.healthView,
+      section === "fitness" && parts[1] ? (parts[1] as HealthView) : DEFAULT_STATE.healthView,
     financeView:
-      section === "finances" && parts[1]
-        ? (parts[1] as FinanceView)
-        : DEFAULT_STATE.financeView,
-    omscsView:
-      section === "omscs" && parts[1]
-        ? (parts[1] as OmscsView)
-        : DEFAULT_STATE.omscsView,
+      section === "finances" && parts[1] ? (parts[1] as FinanceView) : DEFAULT_STATE.financeView,
+    omscsView: section === "omscs" && parts[1] ? (parts[1] as OmscsView) : DEFAULT_STATE.omscsView,
   };
 }
 
@@ -57,111 +45,48 @@ function toHash(state: NavigationState): string {
   return `#${state.section}`;
 }
 
-// ============ SHARED STATE STORE ============
-// Module-level shared state that all hook instances subscribe to
-let sharedState: NavigationState = (() => {
-  if (typeof window === "undefined") return DEFAULT_STATE;
-  return parseHash(window.location.hash.slice(1)) ?? DEFAULT_STATE;
-})();
-
-const listeners = new Set<() => void>();
-
-function getSnapshot(): NavigationState {
-  return sharedState;
+function readState(): NavigationState {
+  const saved = navigation.currentEntry?.getState() as NavigationState | undefined;
+  return saved ?? parseHash(window.location.hash.slice(1)) ?? DEFAULT_STATE;
 }
 
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function emitChange() {
-  listeners.forEach((listener) => listener());
-}
-
-function setSharedState(updater: (prev: NavigationState) => NavigationState) {
-  sharedState = updater(sharedState);
-  emitChange();
-}
-
-// Detect OAuth response fragments — Supabase puts tokens in the URL hash and
-// reads them asynchronously. If we rewrite the hash before then, the session
-// is lost and the user gets bounced back to the login screen.
-function isOAuthHash(hash: string): boolean {
-  return (
-    hash.includes("access_token=") ||
-    hash.includes("error=") ||
-    hash.includes("error_description=")
-  );
-}
-
-// Initialize history state on module load
-if (typeof window !== "undefined") {
-  if (!isOAuthHash(window.location.hash)) {
-    window.history.replaceState(sharedState, "", toHash(sharedState));
-  }
-
-  // Handle browser back/forward navigation
-  window.addEventListener("popstate", (e: PopStateEvent) => {
-    const newState = (e.state as NavigationState) ?? DEFAULT_STATE;
-    sharedState = newState;
-    emitChange();
-  });
+function commit(next: NavigationState, history: NavigationHistoryBehavior) {
+  navigation.navigate(toHash(next), { state: next, history }).finished?.catch(() => {});
 }
 
 /**
- * Syncs app navigation with browser history for proper back gesture support.
- * Uses a shared store so all consumers stay in sync.
+ * Syncs app navigation with the Navigation API for proper back gesture support.
+ * Never rewrites the URL on load, so OAuth hash fragments reach Supabase intact.
  */
 export function useAppNavigation() {
-  // Use useSyncExternalStore to subscribe to shared state
-  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const [state, setState] = useState(readState);
 
-  // Navigate to a section (pushes history for non-home sections)
-  const navigateToSection = useCallback((section: AppSection) => {
-    setSharedState((prev) => {
-      const next = { ...prev, section };
-      if (section !== "home") {
-        window.history.pushState(next, "", toHash(next));
-      } else {
-        window.history.replaceState(next, "", toHash(next));
-      }
-      return next;
-    });
+  useEffect(() => {
+    const sync = () => startTransition(() => setState(readState()));
+    navigation.addEventListener("currententrychange", sync);
+    return () => navigation.removeEventListener("currententrychange", sync);
   }, []);
 
-  // Update sub-view within a section (replaces history, doesn't add entry)
+  const navigateToSection = useCallback((section: AppSection) => {
+    commit({ ...readState(), section }, section === "home" ? "replace" : "push");
+  }, []);
+
   const navigateHealthView = useCallback((healthView: HealthView) => {
-    setSharedState((prev) => {
-      const next = { ...prev, healthView };
-      window.history.replaceState(next, "", toHash(next));
-      return next;
-    });
+    commit({ ...readState(), healthView }, "replace");
   }, []);
 
   const navigateFinanceView = useCallback((financeView: FinanceView) => {
-    setSharedState((prev) => {
-      const next = { ...prev, financeView };
-      window.history.replaceState(next, "", toHash(next));
-      return next;
-    });
+    commit({ ...readState(), financeView }, "replace");
   }, []);
 
   const navigateOmscsView = useCallback((omscsView: OmscsView) => {
-    setSharedState((prev) => {
-      const next = { ...prev, omscsView };
-      window.history.replaceState(next, "", toHash(next));
-      return next;
-    });
+    commit({ ...readState(), omscsView }, "replace");
   }, []);
 
   const goHome = useCallback(() => {
-    if (state.section === "home") return;
-
-    const homeState = { ...DEFAULT_STATE, section: "home" as AppSection };
-    window.history.replaceState(homeState, "", "#");
-    setSharedState(() => homeState);
-  }, [state.section]);
+    if (readState().section === "home") return;
+    commit(DEFAULT_STATE, "replace");
+  }, []);
 
   return {
     currentSection: state.section,
