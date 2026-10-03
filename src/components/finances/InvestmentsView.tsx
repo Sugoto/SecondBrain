@@ -11,7 +11,7 @@ import { calculateNetWorth } from "./utils";
 
 const ASSETS = [
   { key: "bank_savings", label: "Bank savings" },
-  { key: "mutual_funds", label: "Indian mutual funds" },
+  { key: "mutual_funds", label: "Indian MFs" },
   { key: "us_etfs", label: "US ETFs" },
   { key: "ppf", label: "PPF" },
   { key: "epf", label: "EPF" },

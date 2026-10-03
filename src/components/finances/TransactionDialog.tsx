@@ -307,28 +307,32 @@ export function TransactionDialog({
               <label htmlFor="bank-account" className={ROW_LABEL}>
                 Paid from
               </label>
-              <input
-                id="bank-account"
-                placeholder="Axis …286591"
-                className={ROW_INPUT}
-                value={transaction.bank_account || ""}
-                onChange={(e) => onChange({ ...transaction, bank_account: e.target.value || null })}
-                disabled={saving}
-              />
-            </div>
-
-            <div className={ROW}>
-              <label htmlFor="card-number" className={ROW_LABEL}>
-                Card
-              </label>
-              <input
-                id="card-number"
-                placeholder="…6555"
-                className={ROW_INPUT}
-                value={transaction.card_number || ""}
-                onChange={(e) => onChange({ ...transaction, card_number: e.target.value || null })}
-                disabled={saving}
-              />
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                <input
+                  id="bank-account"
+                  placeholder="Axis …286591"
+                  className={ROW_INPUT}
+                  value={transaction.bank_account || ""}
+                  onChange={(e) =>
+                    onChange({ ...transaction, bank_account: e.target.value || null })
+                  }
+                  disabled={saving}
+                />
+                <span aria-hidden className="text-[var(--ui-ink-softer)]">
+                  ·
+                </span>
+                <input
+                  id="card-number"
+                  aria-label="Card"
+                  placeholder="Card …6555"
+                  className={`${ROW_INPUT} w-24 flex-none`}
+                  value={transaction.card_number || ""}
+                  onChange={(e) =>
+                    onChange({ ...transaction, card_number: e.target.value || null })
+                  }
+                  disabled={saving}
+                />
+              </div>
             </div>
 
             <div className={ROW}>

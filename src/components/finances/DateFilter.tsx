@@ -94,68 +94,74 @@ export function DateFilter({
         <span className="ui-num text-[12px]">{getFilterLabel()}</span>
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto p-0 rounded-2xl border border-outline-variant bg-background shadow-2xl"
+        className="ui-type w-[min(320px,calc(100vw-2rem))] rounded-[18px] border border-[var(--ui-edge)] bg-[var(--ui-panel)] p-4 shadow-[var(--ui-lift)]"
         align="end"
       >
-        <div className="p-5 space-y-5 min-w-[280px]">
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-              Quick select
-            </p>
-            <div className="grid grid-cols-3 border-y border-outline-variant divide-x divide-outline-variant">
-              {(["today", "week", "last30"] as const).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => {
-                    onTimeFilterChange(filter);
-                    setFilterOpen(false);
-                  }}
-                  className={`h-9 text-[10px] uppercase tracking-wider transition-colors ${
-                    timeFilter === filter
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {TIME_LABELS[filter]}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div role="group" aria-label="Quick range" className="ui-inset grid grid-cols-3 gap-1 p-1">
+          {(["today", "week", "last30"] as const).map((filter) => {
+            const active = timeFilter === filter;
+            return (
+              <button
+                key={filter}
+                type="button"
+                aria-pressed={active}
+                onClick={() => {
+                  onTimeFilterChange(filter);
+                  setFilterOpen(false);
+                }}
+                className={`h-9 rounded-[7px] text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)] ${
+                  active
+                    ? "bg-[var(--ui-panel)] font-medium text-[var(--ui-accent)] shadow-[var(--ui-lift)]"
+                    : "text-[var(--ui-ink-softer)] hover:text-[var(--ui-ink)]"
+                }`}
+              >
+                {TIME_LABELS[filter]}
+              </button>
+            );
+          })}
+        </div>
 
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-              Recent months
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {recentMonths.map((month) => (
-                <button
-                  key={month.toString()}
-                  onClick={() => handleMonthSelect(month)}
-                  className="h-8 text-[11px] uppercase tracking-wider border border-outline-variant rounded-full text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-                >
-                  {monthName(month)}
-                </button>
-              ))}
-            </div>
-          </div>
+        <h3 className="mt-4 text-[13px] font-medium text-[var(--ui-accent)]">Months</h3>
+        <div className="mt-2 grid grid-cols-3 gap-1.5">
+          {recentMonths.map((month) => {
+            const active =
+              timeFilter === "custom" &&
+              customDateRange !== null &&
+              customDateRange.from.equals(month.toPlainDate({ day: 1 })) &&
+              customDateRange.to.equals(month.toPlainDate({ day: month.daysInMonth }));
+            return (
+              <button
+                key={month.toString()}
+                type="button"
+                aria-pressed={active}
+                onClick={() => handleMonthSelect(month)}
+                className={`h-9 rounded-full text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)] ${
+                  active
+                    ? "ui-chip justify-center font-medium"
+                    : "text-[var(--ui-ink-soft)] hover:bg-[var(--ui-inset)] hover:text-[var(--ui-ink)]"
+                }`}
+              >
+                {monthName(month)}
+              </button>
+            );
+          })}
+        </div>
 
-          <div className="border-t border-outline-variant/60 pt-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-              Custom range
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {(["from", "to"] as const).map((edge) => (
-                <input
-                  key={edge}
-                  type="date"
-                  aria-label={edge === "from" ? "From date" : "To date"}
-                  className="ui-inset ui-num h-11 w-full px-3 text-[14px] text-[var(--ui-ink)] outline-none transition-shadow focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]"
-                  value={range[edge].toString()}
-                  onChange={(e) => handleDateChange(edge, e.target.value)}
-                />
-              ))}
-            </div>
-          </div>
+        <h3 className="mt-4 text-[13px] font-medium text-[var(--ui-accent)]">Custom range</h3>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {(["from", "to"] as const).map((edge) => (
+            <label key={edge} className="block">
+              <span className="text-[12px] text-[var(--ui-ink-softer)]">
+                {edge === "from" ? "From" : "To"}
+              </span>
+              <input
+                type="date"
+                className="ui-inset ui-num mt-1 h-11 w-full px-3 text-[14px] text-[var(--ui-ink)] outline-none transition-shadow focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]"
+                value={range[edge].toString()}
+                onChange={(e) => handleDateChange(edge, e.target.value)}
+              />
+            </label>
+          ))}
         </div>
       </PopoverContent>
     </Popover>

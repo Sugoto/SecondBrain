@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { User } from "lucide-react";
 import { useAssetCurrency } from "@/hooks/usePrivacy";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
@@ -24,6 +24,19 @@ const SESSION_TITLE: Record<"push" | "pull" | "legs", string> = {
   pull: "Pull day",
   legs: "Leg day",
 };
+
+const COLLAPSED_INSET = 16;
+const COLLAPSED_AMOUNT = 28;
+
+function offsetWithin(el: HTMLElement, ancestor: HTMLElement) {
+  let top = 0;
+  let node: HTMLElement | null = el;
+  while (node && node !== ancestor) {
+    top += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return top;
+}
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined" || !window.matchMedia) return false;
@@ -101,27 +114,71 @@ export function HomePage() {
 
   const animate = !prefersReducedMotion();
 
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const plateRef = useRef<HTMLElement>(null);
+  const worthRef = useRef<HTMLDivElement>(null);
+  const amountRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const surface = surfaceRef.current;
+    const plate = plateRef.current;
+    const worth = worthRef.current;
+    const amount = amountRef.current;
+    if (!surface || !plate || !worth || !amount) return;
+
+    const measure = () => {
+      const full = plate.offsetHeight;
+      const shift = offsetWithin(worth, plate) - COLLAPSED_INSET;
+      const fontSize = parseFloat(getComputedStyle(amount).fontSize) || COLLAPSED_AMOUNT;
+      const scale = COLLAPSED_AMOUNT / fontSize;
+      const collapsed =
+        offsetWithin(amount, plate) - shift + amount.offsetHeight * scale + COLLAPSED_INSET;
+      surface.style.setProperty("--plate-full", `${full}px`);
+      surface.style.setProperty("--plate-shift", `${shift}px`);
+      surface.style.setProperty("--amount-scale", `${scale}`);
+      surface.style.setProperty("--plate-collapse", `${Math.max(0, full - collapsed)}px`);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(plate);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="ui-surface home-surface relative flex h-full flex-col overflow-hidden">
-      <header className="ui-plate home-plate relative rounded-b-[22px] px-6 pt-7 pb-6">
+    <div
+      ref={surfaceRef}
+      className="ui-surface home-surface relative flex h-full flex-col overflow-hidden"
+    >
+      <header
+        ref={plateRef}
+        className="home-plate pointer-events-none absolute inset-x-0 top-0 z-10 isolate px-6 pt-7 pb-6 text-[var(--ui-plate-ink)]"
+      >
+        <div
+          aria-hidden
+          className="ui-plate home-plate-bg pointer-events-auto absolute inset-0 -z-10 rounded-b-[22px]"
+        />
         <button
           onClick={() => navigateToSection("profile")}
           aria-label="Open profile"
-          className="absolute right-6 top-5 shrink-0 rounded-full border border-[var(--ui-plate-edge)] p-3 text-[var(--ui-plate-ink-soft)] transition-colors hover:text-[var(--ui-plate-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-plate-ink)] active:scale-95"
+          className="pointer-events-auto absolute right-6 top-5 shrink-0 rounded-full border border-[var(--ui-plate-edge)] p-3 text-[var(--ui-plate-ink-soft)] transition-colors hover:text-[var(--ui-plate-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-plate-ink)] active:scale-95"
         >
           <User className="h-4 w-4" strokeWidth={1.75} />
         </button>
 
-        <div className="home-greeting overflow-hidden pr-14">
+        <div className="home-greeting pr-14">
           <p className="text-[13px] text-[var(--ui-plate-ink-soft)]">{getGreeting()}</p>
           <h1 className="mt-0.5 truncate text-[30px] font-semibold leading-[1.15] tracking-[-0.02em]">
             {firstName}
           </h1>
         </div>
 
-        <div className="home-worth mt-7">
+        <div ref={worthRef} className="home-worth mt-7">
           <p className="text-[12px] text-[var(--ui-plate-ink-soft)]">Net worth</p>
-          <div className="home-amount ui-num mt-2 text-[clamp(38px,11.5vw,54px)] font-medium leading-none tracking-[-0.02em]">
+          <div
+            ref={amountRef}
+            className="home-amount ui-num mt-2 w-fit text-[clamp(38px,11.5vw,54px)] font-medium leading-none tracking-[-0.02em]"
+          >
             {animate ? (
               <AnimatedNumber value={netWorth} formatFn={fmt} animateOnMount />
             ) : (
@@ -129,7 +186,7 @@ export function HomePage() {
             )}
           </div>
           {dailySalary && (
-            <p className="home-earning mt-3.5 flex items-center gap-2 overflow-hidden text-[12px] text-[var(--ui-plate-ink-soft)]">
+            <p className="home-earning mt-3.5 flex items-center gap-2 text-[12px] text-[var(--ui-plate-ink-soft)]">
               <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--ui-plate-accent)]" />
               <span>
                 Earning{" "}
@@ -141,12 +198,17 @@ export function HomePage() {
         </div>
       </header>
 
-      <main className="home-scroller scroll-optimized flex-1 overflow-y-auto px-4 pt-5 pb-32">
-        <NutritionSummary />
-        <div className="py-7">
-          <TodayWorkout />
+      <main
+        className="home-scroller scroll-optimized flex-1 overflow-y-auto px-4 pb-32"
+        style={{ paddingTop: "calc(var(--plate-full, 260px) + 20px)" }}
+      >
+        <div style={{ minHeight: "calc(100% + var(--plate-collapse, 64px))" }}>
+          <NutritionSummary />
+          <div className="py-7">
+            <TodayWorkout />
+          </div>
+          <Notes />
         </div>
-        <Notes />
       </main>
     </div>
   );

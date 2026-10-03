@@ -77,22 +77,6 @@ async function fetchMutualFund(schemeCode: number): Promise<MutualFundData> {
   return response.json();
 }
 
-export async function fetchNavForDate(
-  schemeCode: number,
-  targetDate: string,
-): Promise<number | null> {
-  const data = await fetchMutualFund(schemeCode);
-  const target = Temporal.PlainDate.from(targetDate);
-
-  for (const entry of data.data) {
-    const entryDate = parseNavDate(entry.date);
-    if (Temporal.PlainDate.compare(entryDate, target) <= 0) {
-      return parseFloat(entry.nav);
-    }
-  }
-  return null;
-}
-
 function parseNavDate(dateStr: string) {
   const [day, month, year] = dateStr.split("-").map(Number);
   return Temporal.PlainDate.from({ year, month, day });

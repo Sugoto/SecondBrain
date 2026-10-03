@@ -509,7 +509,7 @@ input[type="number"] {
 .home-scroller {
   scroll-timeline: --home-scroll y;
 }
-.home-plate,
+.home-plate-bg,
 .home-greeting,
 .home-worth,
 .home-amount,
@@ -517,55 +517,51 @@ input[type="number"] {
   animation-timing-function: linear;
   animation-fill-mode: both;
   animation-timeline: --home-scroll;
-  animation-range: 0 64px;
+  animation-range: 0 var(--plate-collapse, 64px);
 }
-.home-plate {
-  animation-name: home-plate;
+.home-plate-bg {
+  animation-name: home-plate-bg;
+  clip-path: inset(0 0 0 0 round 0 0 22px 22px);
 }
 .home-greeting {
   animation-name: home-greeting;
+  animation-range: 0 40px;
 }
 .home-worth {
   animation-name: home-worth;
 }
 .home-amount {
   animation-name: home-amount;
+  transform-origin: left top;
 }
 .home-earning {
   animation-name: home-earning;
+  animation-range: 0 32px;
 }
 
-@keyframes home-plate {
+@keyframes home-plate-bg {
   to {
-    padding-block: 1rem;
+    clip-path: inset(0 0 var(--plate-collapse, 0px) 0 round 0 0 22px 22px);
   }
 }
 @keyframes home-greeting {
-  from {
-    height: auto;
-  }
   to {
-    height: 0;
     opacity: 0;
+    translate: 0 -12px;
   }
 }
 @keyframes home-worth {
   to {
-    margin-top: 0;
+    translate: 0 calc(-1 * var(--plate-shift, 0px));
   }
 }
 @keyframes home-amount {
   to {
-    font-size: 28px;
+    scale: var(--amount-scale, 1);
   }
 }
 @keyframes home-earning {
-  from {
-    height: auto;
-  }
   to {
-    height: 0;
-    margin-top: 0;
     opacity: 0;
   }
 }

@@ -106,7 +106,18 @@ function DialogContent({
       autoFocus(event);
       dialog.autofocus = event.defaultPrevented;
       dialog.showModal();
-      if (event.defaultPrevented) dialog.focus({ preventScroll: true });
+      if (event.defaultPrevented) {
+        const park = () => {
+          const active = document.activeElement;
+          if (active instanceof HTMLElement && active !== dialog && dialog.contains(active)) {
+            active.blur();
+          }
+          dialog.focus({ preventScroll: true });
+        };
+        park();
+        const frame = requestAnimationFrame(park);
+        return () => cancelAnimationFrame(frame);
+      }
     }
   }, [open]);
 

@@ -100,6 +100,8 @@ All in `@layer utilities`, so they beat the `@layer base` `h1..h6 { font-family:
 
 Greeting, first name, profile button, hero net worth, and a daily-rate line with a green status dot. Fixed, not scrolling, because it holds the only route to the profile page. Rounded bottom corners only.
 
+It collapses over exactly `--plate-collapse` px of scroll (so the content stays glued to the plate's bottom edge) with a scroll-driven animation, and it must only use transform, opacity and clip-path. The plate is absolutely positioned over the scroller, which reserves its full height as top padding; the background is a separate layer clipped from the bottom, the greeting fades, the net-worth block translates up and the amount scales to 28px. `HomePage` measures the plate and writes `--plate-full`, `--plate-shift`, `--amount-scale` and `--plate-collapse`. Never animate height, padding or font-size here: resizing the plate resizes the scroller mid-scroll, and on a phone that feedback loop stutters or sticks half-collapsed.
+
 ### Panel
 
 ```tsx
@@ -143,7 +145,7 @@ The sheet always slides up from the bottom edge, whichever row or button opened 
 
 Shape: `--ui-panel` surface, `--ui-edge` border, no internal gap.
 
-The transaction sheet is the row opened up, so it keeps the row's hierarchy: the amount is the heading (34px mono, small ₹, left-aligned) with the merchant beneath it at 17px, both editable in place with no caption. The visible title is dropped; `DialogTitle` stays as `sr-only`. Every other field lives in one `.ui-inset` group of 44px rows (label left in `--ui-ink-soft`, value right in mono), separated by `--ui-rule`. A focused row draws the 1.5px accent inset ring. Date and time share one row. Nothing hides behind "More options". Quick-name tags appear only when adding. Delete is a quiet trash icon beside the amount, safe because of Undo. The footer is a single full-width `.ui-cta` that names its action ("Add expense", "Save changes") and stays disabled until something changes. There is no Cancel, because swipe, backdrop tap and back already close the sheet.
+The transaction sheet is the row opened up, so it keeps the row's hierarchy: the amount is the heading (34px mono, small ₹, left-aligned) with the merchant beneath it at 17px, both editable in place with no caption. The visible title is dropped; `DialogTitle` stays as `sr-only`. Every other field lives in one `.ui-inset` group of 44px rows (label left in `--ui-ink-soft`, value right in mono), separated by `--ui-rule`. A focused row draws the 1.5px accent inset ring. Date and time share one row, as do bank account and card under "Paid from". Nothing hides behind "More options". Quick-name tags appear only when adding. Delete is a quiet trash icon beside the amount, safe because of Undo. The footer is a single full-width `.ui-cta` that names its action ("Add expense", "Save changes") and stays disabled until something changes. There is no Cancel, because swipe, backdrop tap and back already close the sheet.
 
 ### Undo, not confirmation
 
@@ -155,7 +157,7 @@ A 56px `.ui-cta` square with an 18px radius, centred at the bottom above the saf
 
 ### Investments
 
-Silhouettes alternate so the page reads by shape: net worth as a hero figure straight on the page; Allocation as a panel with one segmented bar over ruled rows (dot, name, share, amount); Mutual funds as a panel with a 34px metric over ruled fund rows that expand in place; Salary as a chart in a panel; the cost calculator as a panel built from inset wells. PPF and EPF are rows in Allocation, not their own section.
+Silhouettes alternate so the page reads by shape: net worth as a hero figure straight on the page; Allocation as a panel with one segmented bar over ruled rows (dot, name, share, amount); Indian MFs as a panel whose 34px total is typed in by hand (tap to edit, saved on blur or Enter), over ruled fund rows that show only the day change and expand to 1M to 5Y returns. Per-fund holdings are deliberately not shown, because they go stale; Salary as a chart in a panel; the cost calculator as a panel built from inset wells. PPF and EPF are rows in Allocation, not their own section.
 
 Allocation shades are one hue: `color-mix(in oklch, var(--ui-accent) N%, var(--ui-inset))` at 100/72/50/34/22, so the bar is ordinal by size rather than five unrelated colours. Charts drawn by ECharts read tokens at runtime through `useCssVars` in [tokens.ts](src/lib/tokens.ts) instead of restating colours in JS.
 
@@ -204,9 +206,9 @@ Never `new Date("2026-09-08")` for display. A bare `YYYY-MM-DD` parses as UTC mi
 
 ## Migration status
 
-**Migrated:** home (`HomePage`, `NutritionSummary`, `Notes`), navigation (`DynamicBottomNav`, `TopTabs`, `constants`), finances (`ExpensesView`, `TransactionCard`, `TransactionDialog`, `FinanceTracker` chrome and budget bar, `DateFilter` trigger, `InvestmentsView`, `MutualFundWatchlist`, `SalaryChart`, `CostCalculator`), `ProfilePage`.
+**Migrated:** home (`HomePage`, `NutritionSummary`, `Notes`), navigation (`DynamicBottomNav`, `TopTabs`, `constants`), finances (`ExpensesView`, `TransactionCard`, `TransactionDialog`, `FinanceTracker` chrome and budget bar, `DateFilter` trigger, `InvestmentsView`, `MutualFundWatchlist`, `SalaryChart`, `CostCalculator`, `DateFilter` popover), `ProfilePage`.
 
-**Not migrated:** login, OMSCS, the fitness views, the OMSCS and fitness dialogs, and the `DateFilter` popover — that one is still all-caps behind a migrated trigger and is the most visible remaining seam.
+**Not migrated:** login, OMSCS, the fitness views, the OMSCS and fitness dialogs.
 
 **Known seams inside migrated surfaces:** `DialogOverlay` in [dialog.tsx](src/components/ui/dialog.tsx) still scrims with `bg-black/50`, a raw black. Fixing it means editing the shared primitive, which would change every dialog in the app at once, so it is left for a deliberate pass. `Switch` is restyled per caller via `className` for the same reason.
 
