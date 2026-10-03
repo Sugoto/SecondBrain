@@ -104,19 +104,14 @@ function DialogContent({
     } else if (!dialog.open) {
       const event = new Event("openautofocus", { cancelable: true });
       autoFocus(event);
-      dialog.autofocus = event.defaultPrevented;
+      // Chrome ignores autofocus on the dialog itself and focuses the first input,
+      // which opens the keyboard on Android even if blurred right after. Inert
+      // during showModal leaves it nothing to focus.
+      dialog.inert = event.defaultPrevented;
       dialog.showModal();
       if (event.defaultPrevented) {
-        const park = () => {
-          const active = document.activeElement;
-          if (active instanceof HTMLElement && active !== dialog && dialog.contains(active)) {
-            active.blur();
-          }
-          dialog.focus({ preventScroll: true });
-        };
-        park();
-        const frame = requestAnimationFrame(park);
-        return () => cancelAnimationFrame(frame);
+        dialog.inert = false;
+        dialog.focus({ preventScroll: true });
       }
     }
   }, [open]);
