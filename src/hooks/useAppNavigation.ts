@@ -15,7 +15,6 @@ const DEFAULT_STATE: NavigationState = {
   omscsView: "semester",
 };
 
-// Parse hash into navigation state
 function parseHash(hash: string): NavigationState | null {
   if (!hash) return null;
 
@@ -36,7 +35,6 @@ function parseHash(hash: string): NavigationState | null {
   };
 }
 
-// Generate hash from navigation state
 function toHash(state: NavigationState): string {
   if (state.section === "home") return "#";
   if (state.section === "finances") return `#finances/${state.financeView}`;
@@ -54,10 +52,6 @@ function commit(next: NavigationState, history: NavigationHistoryBehavior) {
   navigation.navigate(toHash(next), { state: next, history }).finished?.catch(() => {});
 }
 
-/**
- * Syncs app navigation with the Navigation API for proper back gesture support.
- * Never rewrites the URL on load, so OAuth hash fragments reach Supabase intact.
- */
 export function useAppNavigation() {
   const [state, setState] = useState(readState);
 

@@ -3,8 +3,8 @@ import { defineConfig, lazyPlugins } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { LAUNCH_COLOR } from "./src/lib/launchColor";
 
-// https://vite.dev/config/
 export default defineConfig({
   staged: {
     "*": "vp check --fix",
@@ -130,8 +130,11 @@ export default defineConfig({
   plugins: lazyPlugins(() => [
     react({ compiler: true }),
     tailwindcss(),
+    {
+      name: "launch-color",
+      transformIndexHtml: (html: string) => html.replaceAll("%LAUNCH_COLOR%", LAUNCH_COLOR),
+    },
 
-    // PWA configuration for offline support and app-like experience
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
@@ -139,8 +142,9 @@ export default defineConfig({
         name: "Second Brain",
         short_name: "SecondBrain",
         description: "Personal finance and health tracker",
-        theme_color: "#070709",
-        background_color: "#070709",
+        theme_color: LAUNCH_COLOR,
+        background_color: LAUNCH_COLOR,
+        launch_handler: { client_mode: "focus-existing" },
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
@@ -160,40 +164,16 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Cache strategies for different resource types
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}", "**/*latin*wght-normal*.woff2"],
         runtimeCaching: [
           {
-            // Cache API responses for mutual funds (stale-while-revalidate)
             urlPattern: /^https:\/\/api\.mfapi\.in\/.*/i,
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "mf-api-cache",
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 30, // 30 minutes
-              },
-            },
-          },
-          {
-            // Cache Google Fonts
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "gstatic-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 30,
               },
             },
           },

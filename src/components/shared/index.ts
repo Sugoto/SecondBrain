@@ -1,1 +1,0 @@
-export { LabeledPieChart } from "./LabeledPieChart";

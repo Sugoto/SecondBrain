@@ -1,9 +1,6 @@
 import type { HealthStats, TDEEResult } from "./types";
 import { ACTIVITY_LEVELS } from "./types";
 
-/**
- * Calculate BMR using the Mifflin-St Jeor equation
- */
 function calculateBMR(
   weight_kg: number,
   height_cm: number,
@@ -14,9 +11,6 @@ function calculateBMR(
   return gender === "male" ? base + 5 : base - 161;
 }
 
-/**
- * Calculate TDEE and macro recommendations
- */
 export function calculateTDEE(stats: HealthStats, multiplierOverride?: number): TDEEResult | null {
   const { height_cm, weight_kg, age, gender, activity_level } = stats;
 

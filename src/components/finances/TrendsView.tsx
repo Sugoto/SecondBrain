@@ -1,6 +1,5 @@
 import { useMemo, memo } from "react";
 import type { Transaction } from "@/lib/supabase";
-import { Footer } from "./Footer";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { today } from "@/lib/utils";
 
@@ -51,10 +50,6 @@ export const TrendsView = memo(function TrendsView({ transactions }: TrendsViewP
           </p>
         </section>
       )}
-
-      <div className="px-6 pt-6">
-        <Footer />
-      </div>
     </div>
   );
 });

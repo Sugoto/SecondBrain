@@ -27,15 +27,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.remove("dark");
     }
     localStorage.setItem("theme", theme);
-
-    // Match the blue plate that sits under the status bar, so the Android PWA
-    // status bar blends into the header. Hex of --ui-plate:
-    // oklch(23% 0.045 275) light / oklch(20% 0.028 275) dark.
-    const themeColor = theme === "dark" ? "#121523" : "#171b32";
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", themeColor);
-    }
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));

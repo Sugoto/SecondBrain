@@ -121,16 +121,10 @@ export function WorkoutsView() {
 
   const handleDelete = async () => {
     if (!editing) return;
-    setSubmitting(true);
-    try {
-      await deleteWorkout(editing.id);
-      setDialogOpen(false);
-      setEditing(null);
-    } catch (err) {
-      console.error("Failed to delete workout:", err);
-    } finally {
-      setSubmitting(false);
-    }
+    const id = editing.id;
+    setDialogOpen(false);
+    setEditing(null);
+    await deleteWorkout(id).catch((err) => console.error("Failed to delete workout:", err));
   };
 
   const session = DAYS[activeDay].session.toLowerCase() as "push" | "pull" | "legs";

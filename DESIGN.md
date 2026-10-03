@@ -33,6 +33,7 @@ Declared at `:root` and overridden in `.dark`, at the end of [src/index.css](src
 | Accent ink      | `--ui-accent-ink`   | Text on an accent fill. Light in light mode, dark in dark mode                  |
 | Accent on plate | `--ui-accent-plate` | The accent at plate-safe lightness. Same in both themes                         |
 | Danger          | `--ui-danger`       | Destructive action and error text                                               |
+| Gain            | `--ui-gain`         | Positive returns only (fund performance). Loss uses `--ui-danger`               |
 | Danger ink      | `--ui-danger-ink`   | Text on a danger fill                                                           |
 | Elevation       | `--ui-lift`         | Soft shadow in light, a 1px inset top highlight in dark                         |
 
@@ -54,16 +55,12 @@ Never introduce raw `#000`/`#fff`, and never reach for untinted Tailwind palette
 
 ## Typography
 
-Loaded in [index.html](index.html).
+Self-hosted from `@fontsource-variable/*` packages imported in [main.tsx](src/main.tsx), so there is no request to Google on launch. The service worker precaches only the `latin` and `latin-ext` weight-axis files (about 200 KB). Each family has a `... Fallback` face in [src/index.css](src/index.css) built on Roboto (sans) or Droid Sans Mono (mono), with `size-adjust` and ascent/descent overrides measured from the real font files, so text does not reflow when the webfont arrives. Re-measure them if you swap a face.
 
 - **UI and headings:** Instrument Sans (400/500/600/700) via `--ui-sans`
 - **Numerics:** Spline Sans Mono (400/500/600) via `--ui-mono`, which covers `U+20B9` (₹) in its latin-ext subset
 
-Before swapping either face, confirm the new one serves `U+20AD-20C0` from Google Fonts, or ₹ will fall back mid-number at hero size:
-
-```bash
-curl -s "https://fonts.googleapis.com/css2?family=Your+Font&display=swap" | grep "U+20AD-20C0"
-```
+Before swapping either face, confirm its `latin-ext` file covers `U+20AD-20C0` (check the package's `wght.css`), or ₹ will fall back mid-number at hero size.
 
 The global Tailwind tokens (`--font-sans`, `--font-heading`, `--font-mono`) still point at Geist for unmigrated screens. Both font pairs load on every page as a result.
 
@@ -112,13 +109,13 @@ Greeting, first name, profile button, hero net worth, and a daily-rate line with
 </section>
 ```
 
-### Day card (transactions)
+### Transaction list
 
-Assembled from separately positioned virtual rows: a header with `rounded-t-[14px] border-x border-t`, rows with `border-x` and a `--ui-rule` bottom, and a last row with `rounded-b-[14px]` and a `--ui-edge` bottom. No shadow, because a box-shadow on each piece would seam.
+One continuous list on the page background, not a card per day. Each day opens with a plain header: the date in the accent colour on the left, the day's total as a quiet chip (`.ui-chip-quiet`) on the right, and a `--ui-edge` rule underneath. Rows sit directly on the page, separated by `--ui-rule`, with no rule under the last row of a day. The total is suppressed when the day holds a single transaction, because the row below already states that number.
 
-The header carries the date in the accent colour and the day's total as a quiet chip. The chip is suppressed when the day holds a single transaction, because the row below already states that number.
+The list is virtualised against the page's own scroller (`main` in `FinanceTracker`, via `scrollMargin`), so there is exactly one scroll region. Do not reintroduce a fixed-height inner scroller.
 
-Row heights are exact constants in [ExpensesView.tsx](src/components/finances/ExpensesView.tsx) (`TXN_HEIGHT`, `HEADER_HEIGHT`, `CARD_GAP`) so `useVirtualizer` needs no measurement pass. **If you change a row's padding or font size, update the constant.** Headers use `justify-end`, so a constant that is slightly too large shows as extra gap rather than clipping the card top.
+Row heights are exact constants in [ExpensesView.tsx](src/components/finances/ExpensesView.tsx) (`TXN_HEIGHT` 36, `HEADER_HEIGHT` 24, `DAY_GAP` 24) so `useVirtualizer` needs no measurement pass. The list is deliberately compact, since it is for scanning synced spend. 36px is the floor for a row; going lower makes taps unreliable. **If you change a row's padding or font size, update the constant.** Headers align to the bottom, so a constant that is slightly too large shows as extra gap rather than clipping.
 
 ### Segmented control
 
@@ -132,15 +129,35 @@ A floating `.ui-plate` bar, inset from the edges, above the safe area. 60px tall
 
 Five 3×6px bars, filled to the rating in `--ui-accent`, unfilled in `--ui-edge`. `role="img"` with an `aria-label` naming the rating from `VALUE_RATING_LABELS`.
 
-The editor in `TransactionDialog` draws the same five bars, each in its own 44px tap target, with the selected label spelled out beside the caption. Display and edit share one vocabulary on purpose.
+The rating is display-only; the transaction sheet has no editor for it (removed in 51fc9ef). If one comes back, draw the same five bars, each in its own 44px tap target, so display and edit share one vocabulary.
 
 Groups of one-tap options (the rating strip, the settings segmented controls) are plain buttons with `aria-pressed` inside a `role="group"`, **not** `role="radiogroup"`. Radio semantics promise arrow-key navigation and a single tab stop; nothing here implements that, so claiming it would be a lie to a screen reader.
 
-### Dialog
+### Dialog and sheet
 
-`DialogContent` and `AlertDialogContent` render through a portal, so they are **not** inside `.ui-surface` and need `ui-type` on the content element or the whole modal falls back to Geist. Pass `showCloseButton={false}` when the footer already offers Cancel. Clamp the responsive width too (`sm:max-w-md`), because the primitive sets `sm:max-w-lg` in a variant your base class cannot merge away.
+`DialogContent` renders through a portal, so it is **not** inside `.ui-surface` and needs `ui-type` on the content element or the whole modal falls back to Geist. Pass `showCloseButton={false}` when the footer already offers Cancel.
 
-Shape: 18px radius, `--ui-panel` surface, `--ui-edge` border, no internal gap. A 13px accent label is the `DialogTitle`; inputs are `.ui-inset` wells that grow a 1.5px accent inset ring on focus; the footer is a `--ui-edge` rule with Cancel and a `.ui-cta` that names its action ("Add expense", "Save changes").
+Pass `sheet` for a bottom sheet (the transaction editor). It anchors to the bottom edge with a 24px top radius, draws a grabber, and closes on a downward swipe from any element marked `data-sheet-drag` (the grabber always is; mark the header too). It lifts above the Android keyboard through `--kb`, measured from `visualViewport`. The footer pads for `env(safe-area-inset-bottom)`.
+
+The sheet always slides up from the bottom edge, whichever row or button opened it. Do not morph it out of the tapped row: a row near the top of the list makes the sheet appear to fall from the top of the screen.
+
+Shape: `--ui-panel` surface, `--ui-edge` border, no internal gap.
+
+The transaction sheet is the row opened up, so it keeps the row's hierarchy: the amount is the heading (34px mono, small ₹, left-aligned) with the merchant beneath it at 17px, both editable in place with no caption. The visible title is dropped; `DialogTitle` stays as `sr-only`. Every other field lives in one `.ui-inset` group of 44px rows (label left in `--ui-ink-soft`, value right in mono), separated by `--ui-rule`. A focused row draws the 1.5px accent inset ring. Date and time share one row. Nothing hides behind "More options". Quick-name tags appear only when adding. Delete is a quiet trash icon beside the amount, safe because of Undo. The footer is a single full-width `.ui-cta` that names its action ("Add expense", "Save changes") and stays disabled until something changes. There is no Cancel, because swipe, backdrop tap and back already close the sheet.
+
+### Undo, not confirmation
+
+Destructive actions happen immediately and offer Undo for five seconds in a snackbar (`showUndo` in [snackbar.tsx](src/components/ui/snackbar.tsx), or `deleteWithUndo` in [undo.ts](src/lib/undo.ts) for a collection row). There are no "Are you sure?" dialogs. Close any modal before the snackbar appears, because `showModal()` makes the rest of the page inert. Only one snackbar is live at a time; a new one replaces the last.
+
+### + button
+
+A 56px `.ui-cta` square with an 18px radius, centred at the bottom above the safe area, where the thumb lands. Pressing morphs it towards a circle (`.ui-fab`). It moves up while a snackbar is showing. Manual entry is rare (transactions sync from email), so it stays this size and does not grow into an extended FAB.
+
+### Investments
+
+Silhouettes alternate so the page reads by shape: net worth as a hero figure straight on the page; Allocation as a panel with one segmented bar over ruled rows (dot, name, share, amount); Mutual funds as a panel with a 34px metric over ruled fund rows that expand in place; Salary as a chart in a panel; the cost calculator as a panel built from inset wells. PPF and EPF are rows in Allocation, not their own section.
+
+Allocation shades are one hue: `color-mix(in oklch, var(--ui-accent) N%, var(--ui-inset))` at 100/72/50/34/22, so the bar is ordinal by size rather than five unrelated colours. Charts drawn by ECharts read tokens at runtime through `useCssVars` in [tokens.ts](src/lib/tokens.ts) instead of restating colours in JS.
 
 ### Settings page
 
@@ -150,7 +167,8 @@ Segmented controls use text labels. Icon-only activity levels and goals are a gu
 
 ## Motion
 
-- `transition-colors` for state changes. No bounce, no spring.
+- `transition-colors` for state changes. No bounce, no spring, with one exception below.
+- **Springs, used lightly (Material 3 Expressive).** Only the + button (press morph, entrance, snackbar lift), the bottom sheet's entrance and the snackbar entrance use `--ui-spring`, a `linear()` curve with about 4% overshoot in [src/index.css](src/index.css). Spring spatial properties only (translate, scale, radius), never colour or opacity. Exits use `--ui-ease-out`. Do not spread springs to other components.
 - `active:scale-95` on icon buttons, `active:scale-[0.97]` on nav items.
 - Animate opacity and transform only.
 - **Respect `prefers-reduced-motion` by gating the render, not the prop.** `AnimatedNumber`'s `animateOnMount` only sets initial state; when the value later arrives from the network it animates regardless. Home does `animate ? <AnimatedNumber/> : <span>{value}</span>`.
@@ -186,7 +204,7 @@ Never `new Date("2026-09-08")` for display. A bare `YYYY-MM-DD` parses as UTC mi
 
 ## Migration status
 
-**Migrated:** home (`HomePage`, `NutritionSummary`, `Notes`), navigation (`DynamicBottomNav`, `TopTabs`, `constants`), finances (`ExpensesView`, `TransactionCard`, `TransactionDialog`, `FinanceTracker` chrome and budget bar, `DateFilter` trigger, `Footer` border), `ProfilePage`.
+**Migrated:** home (`HomePage`, `NutritionSummary`, `Notes`), navigation (`DynamicBottomNav`, `TopTabs`, `constants`), finances (`ExpensesView`, `TransactionCard`, `TransactionDialog`, `FinanceTracker` chrome and budget bar, `DateFilter` trigger, `InvestmentsView`, `MutualFundWatchlist`, `SalaryChart`, `CostCalculator`), `ProfilePage`.
 
 **Not migrated:** login, OMSCS, the fitness views, the OMSCS and fitness dialogs, and the `DateFilter` popover — that one is still all-caps behind a migrated trigger and is the most visible remaining seam.
 

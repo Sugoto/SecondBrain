@@ -30,6 +30,10 @@ release. Add a tool name to select part of the graph. For example, run
 
 A private single-user PWA dashboard: finances, health, and OMSCS coursework. Mobile first, INR with lakh grouping, workout schedule keyed to `Asia/Kolkata`. See [README.md](README.md) for the stack and layout.
 
+## How it is used
+
+Transactions are auto-synced from email, so adding or editing an expense by hand is rare. The finance screens are for reviewing spend, not data entry. Optimise for scanning and reviewing; do not make manual entry (the + button, the transaction sheet) more prominent or faster at the expense of the list.
+
 ## Before touching UI
 
 Read [DESIGN.md](DESIGN.md). It defines the current visual system — panel surfaces on a recessed page, semantic ink tokens, monospace numerics, one accent role — and lists which screens have been migrated to it and which are still on the retired hairline vocabulary. The two look nothing alike, so matching the file you happen to open is not a reliable guide.

@@ -20,17 +20,13 @@ export function NutritionCard() {
   const waterLiters = 3;
 
   const hasHealthData =
-    userStats?.height_cm &&
-    userStats?.weight_kg &&
-    userStats?.age &&
-    userStats?.gender;
+    userStats?.height_cm && userStats?.weight_kg && userStats?.age && userStats?.gender;
 
   if (!hasHealthData || !tdee) return null;
 
   const activity = tdee.tdee - tdee.bmr;
   const adjustment = tdee.targetCalories - tdee.tdee;
-  const adjustmentLabel =
-    adjustment === 0 ? "Maintain" : adjustment > 0 ? "Surplus" : "Deficit";
+  const adjustmentLabel = adjustment === 0 ? "Maintain" : adjustment > 0 ? "Surplus" : "Deficit";
 
   const breakdown = [
     { value: tdee.bmr, label: "BMR", sign: "" },
@@ -52,9 +48,7 @@ export function NutritionCard() {
 
   return (
     <section className="px-6 pt-7 pb-8">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-        Nutrition
-      </p>
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">Nutrition</p>
 
       <div className="flex items-baseline gap-2 mb-5">
         <span className="font-mono tabular-nums tracking-[-0.04em] text-foreground leading-[0.9] text-[clamp(44px,13vw,64px)]">
@@ -75,19 +69,13 @@ export function NutritionCard() {
           >
             <p className="font-mono tabular-nums text-foreground text-[15px] leading-none">
               {sign && (
-                <span
-                  className={`mr-0.5 ${
-                    sign === "+" ? "text-success" : "text-destructive"
-                  }`}
-                >
+                <span className={`mr-0.5 ${sign === "+" ? "text-success" : "text-destructive"}`}>
                   {sign}
                 </span>
               )}
               {formatNumber(value)}
             </p>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70">
-              {label}
-            </p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70">{label}</p>
           </div>
         ))}
       </div>
@@ -104,9 +92,7 @@ export function NutritionCard() {
               {value}
               <span className="text-muted-foreground/60 text-[11px] ml-0.5">{unit}</span>
             </p>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70">
-              {label}
-            </p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70">{label}</p>
           </div>
         ))}
       </div>

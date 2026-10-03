@@ -3,6 +3,8 @@ import { useLiveQuery } from "@tanstack/react-db";
 import type { Transaction, UserStats, Investment } from "@/lib/supabase";
 import type { ReactNode } from "react";
 import { queryClient, transactionsCollection, userStatsCollection } from "@/lib/collections";
+import { deleteWithUndo } from "@/lib/undo";
+import { showUndo } from "@/components/ui/snackbar";
 
 export function ExpenseDataProvider({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
@@ -31,13 +33,11 @@ export function useExpenseData() {
       transactionsCollection.update(transaction.id, (draft) => {
         Object.assign(draft, transaction);
       }).isPersisted.promise,
-    deleteTransaction: (id: string) => transactionsCollection.delete(id).isPersisted.promise,
+    deleteTransaction: (id: string) =>
+      deleteWithUndo(transactionsCollection, id, "Expense deleted"),
   };
 }
 
-/**
- * Prefetch transactions data - call this on home page to warm the cache
- */
 export function usePrefetchTransactions() {
   return {
     prefetch: () => {
@@ -63,8 +63,19 @@ export function useUserStats() {
     return newInvestment;
   };
 
-  const deleteInvestment = (investmentId: string) =>
-    saveInvestments((userStats?.investments ?? []).filter((i) => i.id !== investmentId));
+  const deleteInvestment = async (investmentId: string) => {
+    const removed = userStats?.investments?.find((i) => i.id === investmentId);
+    const statsId = userStats?.id;
+    await saveInvestments((userStats?.investments ?? []).filter((i) => i.id !== investmentId));
+    if (!removed || !statsId) return;
+    showUndo("Investment deleted", () => {
+      const latest = userStatsCollection.get(statsId)?.investments ?? [];
+      if (latest.some((i) => i.id === removed.id)) return;
+      return userStatsCollection.update(statsId, (draft) => {
+        draft.investments = [...latest, removed];
+      }).isPersisted.promise;
+    });
+  };
 
   return {
     userStats,

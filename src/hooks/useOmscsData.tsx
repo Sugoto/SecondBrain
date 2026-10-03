@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "@tanstack/react-db";
 import { omscsCoursesCollection } from "@/lib/collections";
+import { deleteWithUndo } from "@/lib/undo";
 import { today } from "@/lib/utils";
 import type { OmscsCourse } from "@/lib/supabase";
 
-// Calculate current semester based on date
 function getCurrentSemester(): string {
   const { month, year } = today();
 
@@ -13,7 +13,6 @@ function getCurrentSemester(): string {
   return `Fall ${year}`;
 }
 
-// GPA calculation
 const GRADE_POINTS: Record<string, number> = {
   A: 4.0,
   B: 3.0,
@@ -110,6 +109,7 @@ export function useOmscsData() {
       updateCourse(courseId, { final_grade: grade }),
     addCourse,
     updateCourse,
-    deleteCourse: (courseId: string) => omscsCoursesCollection.delete(courseId).isPersisted.promise,
+    deleteCourse: (courseId: string) =>
+      deleteWithUndo(omscsCoursesCollection, courseId, "Course deleted"),
   };
 }

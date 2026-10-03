@@ -40,84 +40,76 @@ export function CostCalculator({ dailySalary }: CostCalculatorProps) {
       ? `${sliderValue} ${sliderValue === 1 ? "month" : "months"}`
       : `${sliderValue} ${sliderValue === 1 ? "year" : "years"}`;
 
-  return (
-    <section className="px-6 pt-7 pb-8">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-5">
-        Cost Calculator
-      </p>
+  const cells = [
+    { label: "Per day", value: result ? fmt(result.perDay) : "–" },
+    { label: "Work time", value: result ? formatWorkTime(result.workHoursToEarn) : "–" },
+    { label: "Of daily pay", value: result ? `${result.pctOfDaily.toFixed(1)}%` : "–" },
+  ];
 
-      <div className="flex items-baseline gap-2 mb-6 border-b border-outline-variant/60 pb-4">
-        <span className="font-mono text-muted-foreground text-[28px] leading-none">₹</span>
+  return (
+    <section className="ui-panel px-5 pt-5 pb-5">
+      <h2 className="text-[13px] font-medium text-[var(--ui-accent)]">What it really costs</h2>
+
+      <label className="ui-inset mt-3 flex items-baseline gap-1.5 px-4 py-3 transition-shadow focus-within:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]">
+        <span className="ui-num text-[20px] leading-none text-[var(--ui-ink-softer)]">₹</span>
+        <span className="sr-only">Price</span>
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
-          pattern="[0-9]*"
           placeholder="0"
           value={cost}
           onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
-          className="flex-1 font-mono tabular-nums text-[40px] leading-none tracking-[-0.03em] text-foreground bg-transparent outline-none placeholder:text-muted-foreground/40"
+          className="ui-num min-w-0 flex-1 bg-transparent text-[32px] leading-none font-medium tracking-[-0.02em] text-[var(--ui-ink)] outline-none placeholder:text-[var(--ui-ink-softer)]"
         />
-      </div>
+      </label>
 
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Spread over
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <span className="text-[13px] text-[var(--ui-ink-soft)]">
+          Spread over <span className="ui-num text-[var(--ui-ink)]">{periodLabel}</span>
         </span>
-        <span className="font-mono tabular-nums text-[13px] text-foreground">
-          {periodLabel}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 border-y border-outline-variant divide-x divide-outline-variant mb-5">
-        {(["months", "years"] as const).map((mode) => (
-          <button
-            key={mode}
-            type="button"
-            onClick={() => {
-              setPeriodMode(mode);
-              setSliderValue(1);
-            }}
-            className={`h-9 text-[10px] uppercase tracking-wider transition-colors ${
-              periodMode === mode
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {mode}
-          </button>
-        ))}
+        <div role="group" aria-label="Period" className="ui-inset grid grid-cols-2 gap-1 p-1">
+          {(["months", "years"] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={periodMode === mode}
+              onClick={() => {
+                setPeriodMode(mode);
+                setSliderValue(1);
+              }}
+              className={`h-8 rounded-[7px] px-3 text-[13px] capitalize transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-ink-softer)] ${
+                periodMode === mode
+                  ? "bg-[var(--ui-panel)] font-medium text-[var(--ui-accent)] shadow-[var(--ui-lift)]"
+                  : "text-[var(--ui-ink-softer)] hover:text-[var(--ui-ink)]"
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
+        </div>
       </div>
 
       <input
         type="range"
+        aria-label={`Number of ${periodMode}`}
         min={1}
         max={sliderMax}
         step={1}
         value={sliderValue}
         onChange={(e) => setSliderValue(parseInt(e.target.value))}
-        className="w-full h-[2px] rounded-full appearance-none cursor-pointer accent-foreground bg-outline-variant"
+        className="mt-3 h-11 w-full cursor-pointer accent-[var(--ui-ink)]"
       />
-      <div className="flex justify-between font-mono tabular-nums text-[10px] text-muted-foreground/70 mt-2 mb-6">
-        <span>1</span>
-        <span>{sliderMax}</span>
-      </div>
 
-      <div className="grid grid-cols-3 divide-x divide-outline-variant/60 border-t border-outline-variant/60 pt-4">
-        {[
-          { label: "Per day", value: result ? fmt(result.perDay) : "—" },
-          { label: "Work time", value: result ? formatWorkTime(result.workHoursToEarn) : "—" },
-          { label: "Of daily pay", value: result ? `${result.pctOfDaily.toFixed(1)}%` : "—" },
-        ].map((cell, i) => (
-          <div key={cell.label} className={`flex flex-col gap-1 ${i === 0 ? "pr-3" : i === 1 ? "px-3" : "pl-3"}`}>
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
-              {cell.label}
-            </span>
-            <span className="font-mono tabular-nums text-[15px] text-foreground">
+      <dl className="ui-inset mt-2 grid grid-cols-3 px-4 py-3">
+        {cells.map((cell) => (
+          <div key={cell.label} className="flex flex-col gap-1.5">
+            <dt className="text-[11px] leading-none text-[var(--ui-ink-softer)]">{cell.label}</dt>
+            <dd className="ui-num text-[15px] leading-none font-medium text-[var(--ui-ink)]">
               {cell.value}
-            </span>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
     </section>
   );
 }

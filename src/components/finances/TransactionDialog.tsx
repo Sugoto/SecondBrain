@@ -1,27 +1,15 @@
 import type { Transaction } from "@/lib/supabase";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { hapticFeedback, hapticSelection } from "@/hooks/useHaptics";
-import { Loader2, Trash2, ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface TransactionDialogProps {
   transaction: Transaction | null;
   isNew: boolean;
   saving?: boolean;
-  deleting?: boolean;
   onClose: () => void;
   onSave: (transaction: Transaction) => void;
   onChange: (transaction: Transaction) => void;
@@ -92,16 +80,29 @@ function evaluateExpression(expr: string): number | null {
   }
 }
 
-/** Field caption. Quiet and sentence case, so the one accent label at the top
- *  of the dialog stays the only thing pulling the eye. */
-const CAPTION = "text-[12px] text-[var(--ui-ink-softer)]";
+const ROW =
+  "flex min-h-11 items-center justify-between gap-3 px-4 first:rounded-t-[10px] last:rounded-b-[10px] focus-within:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]";
 
-/** An inset well for a single-line input. */
-const WELL =
-  "ui-inset h-11 w-full px-3 text-[15px] text-[var(--ui-ink)] outline-none transition-shadow placeholder:text-[var(--ui-ink-softer)] focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)] disabled:opacity-50";
+const ROW_LABEL = "shrink-0 text-[14px] text-[var(--ui-ink-soft)]";
 
-/** One-tap names for the merchant field, for the spends that have no real
- *  merchant worth typing. */
+const ROW_INPUT =
+  "ui-num min-w-0 flex-1 bg-transparent text-right text-[14px] text-[var(--ui-ink)] outline-none placeholder:text-[var(--ui-ink-softer)] disabled:opacity-50";
+
+const EDITABLE_FIELDS = [
+  "amount",
+  "merchant",
+  "date",
+  "time",
+  "bank_account",
+  "card_number",
+  "prorate_months",
+  "excluded_from_budget",
+] as const;
+
+function hasChanges(a: Transaction, b: Transaction) {
+  return EDITABLE_FIELDS.some((field) => (a[field] || null) !== (b[field] || null));
+}
+
 const QUICK_NAMES = [
   { name: "Groceries", hue: 150 },
   { name: "Snacks", hue: 70 },
@@ -111,10 +112,9 @@ const QUICK_NAMES = [
 ];
 
 export function TransactionDialog({
-  transaction,
+  transaction: openTransaction,
   isNew,
   saving = false,
-  deleting = false,
   onClose,
   onSave,
   onChange,
@@ -122,16 +122,16 @@ export function TransactionDialog({
 }: TransactionDialogProps) {
   const formatCurrency = useFormatCurrency();
   const [amountInput, setAmountInput] = useState<string>("");
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [trackedId, setTrackedId] = useState<string | undefined>(transaction?.id);
+  const [initial, setInitial] = useState(openTransaction);
+  const [trackedId, setTrackedId] = useState<string | undefined>(openTransaction?.id);
+  const [lastTransaction, setLastTransaction] = useState(openTransaction);
+  if (openTransaction && openTransaction !== lastTransaction) setLastTransaction(openTransaction);
+  const transaction = openTransaction ?? lastTransaction;
 
   if (transaction && transaction.id !== trackedId) {
     setTrackedId(transaction.id);
     setAmountInput(transaction.amount === 0 ? "" : transaction.amount.toString());
-    setShowAdvanced(
-      Boolean(transaction.prorate_months) || Boolean(transaction.excluded_from_budget),
-    );
+    setInitial(transaction);
   }
 
   if (!transaction) return null;
@@ -184,62 +184,80 @@ export function TransactionDialog({
     onChange({ ...transaction, time: value ? value + ":00" : null });
   };
 
+  const amountEdited = amountInput !== (initial?.amount ? initial.amount.toString() : "");
+  const canSave = isNew
+    ? transaction.amount > 0 || (isExpression && evaluatedAmount !== null)
+    : amountEdited || (initial ? hasChanges(initial, transaction) : false);
+
   return (
-    <Dialog open={!!transaction} onOpenChange={(open) => !open && !saving && onClose()}>
+    <Dialog open={!!openTransaction} onOpenChange={(open) => !open && !saving && onClose()}>
       <DialogContent
+        sheet
         showCloseButton={false}
-        className="ui-type flex max-h-[90vh] w-[calc(100%-1.5rem)] max-w-md flex-col sm:max-w-md gap-0 overflow-hidden rounded-[18px] border-[var(--ui-edge)] bg-[var(--ui-panel)] p-0"
+        className="ui-type flex flex-col gap-0 overflow-hidden border-[var(--ui-edge)] bg-[var(--ui-panel)] p-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader className="shrink-0 px-5 pt-5 pb-0">
-          <DialogTitle className="text-[13px] font-medium text-[var(--ui-accent)]">
-            {isNew ? "New expense" : "Edit expense"}
-          </DialogTitle>
-        </DialogHeader>
+        <DialogTitle className="sr-only">{isNew ? "New expense" : "Edit expense"}</DialogTitle>
 
-        <div className="flex-1 space-y-6 overflow-y-auto px-5 pt-4 pb-4">
-          <div className="ui-inset px-4 py-5">
-            <div className="flex items-baseline justify-center gap-1.5">
-              <span className="ui-num text-[26px] leading-none text-[var(--ui-ink-softer)]">₹</span>
-              <input
-                id="amount"
-                type="text"
-                inputMode="text"
-                placeholder="0"
-                className="ui-num w-auto max-w-[65%] flex-none bg-transparent text-center text-[40px] leading-none tracking-[-0.02em] text-[var(--ui-ink)] outline-none placeholder:text-[var(--ui-ink-softer)]"
-                size={amountInput.length || 1}
-                value={amountInput}
-                onChange={(e) => handleAmountInputChange(e.target.value)}
-                onBlur={handleAmountBlur}
-                onKeyDown={handleAmountKeyDown}
-                onFocus={(e) => setTimeout(() => e.target.select(), 0)}
-                disabled={saving}
-              />
+        <div className="flex-1 overflow-y-auto px-5 pb-4">
+          <div data-sheet-drag className="touch-none pt-1">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-baseline gap-1">
+                <span className="ui-num text-[20px] leading-none text-[var(--ui-ink-softer)]">
+                  ₹
+                </span>
+                <input
+                  id="amount"
+                  type="text"
+                  inputMode="text"
+                  aria-label="Amount"
+                  placeholder="0"
+                  className="ui-num min-w-0 flex-1 bg-transparent text-[34px] leading-tight font-medium tracking-[-0.02em] text-[var(--ui-ink)] outline-none placeholder:text-[var(--ui-ink-softer)]"
+                  value={amountInput}
+                  onChange={(e) => handleAmountInputChange(e.target.value)}
+                  onBlur={handleAmountBlur}
+                  onKeyDown={handleAmountKeyDown}
+                  onFocus={(e) => setTimeout(() => e.target.select(), 0)}
+                  disabled={saving}
+                />
+              </div>
+              {!isNew && onDelete && (
+                <button
+                  type="button"
+                  aria-label="Delete expense"
+                  onClick={() => {
+                    hapticFeedback("heavy");
+                    onDelete(transaction);
+                  }}
+                  disabled={saving}
+                  className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--ui-ink-softer)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-danger)] focus-visible:outline-2 focus-visible:outline-[var(--ui-danger)] disabled:opacity-50"
+                >
+                  <Trash2 className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                </button>
+              )}
             </div>
             {isExpression && (
               <p
-                className={`ui-num mt-2 text-center text-[12px] ${
+                className={`ui-num text-[12px] ${
                   evaluatedAmount !== null ? "text-[var(--ui-ink-soft)]" : "text-[var(--ui-danger)]"
                 }`}
               >
                 {evaluatedAmount !== null ? `= ${evaluatedAmount}` : "That does not add up"}
               </p>
             )}
-          </div>
-
-          <div>
-            <label htmlFor="merchant" className={CAPTION}>
-              Where did it go?
-            </label>
             <input
               id="merchant"
-              placeholder="Amazon, Swiggy, Uber…"
-              className={`${WELL} mt-1.5`}
+              aria-label="Merchant"
+              placeholder="Merchant"
+              className="mt-0.5 w-full bg-transparent text-[17px] font-medium text-[var(--ui-ink)] outline-none placeholder:text-[var(--ui-ink-softer)] disabled:opacity-50"
               value={transaction.merchant || ""}
               onChange={(e) => onChange({ ...transaction, merchant: e.target.value })}
               disabled={saving}
             />
-            <div role="group" aria-label="Quick names" className="mt-2 flex flex-wrap gap-1">
+          </div>
+
+          {isNew && (
+            <div role="group" aria-label="Quick names" className="mt-2.5 flex flex-wrap gap-1">
               {QUICK_NAMES.map(({ name, hue }) => (
                 <button
                   key={name}
@@ -257,164 +275,117 @@ export function TransactionDialog({
                 </button>
               ))}
             </div>
-          </div>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="txn-date" className={CAPTION}>
+          <div className="ui-inset mt-4 divide-y divide-[var(--ui-rule)]">
+            <div className={ROW}>
+              <label htmlFor="txn-date" className={ROW_LABEL}>
                 Date
               </label>
-              <input
-                id="txn-date"
-                type="date"
-                className={`${WELL} ui-num mt-1.5 text-[14px]`}
-                value={transaction.date}
-                onChange={(e) => onChange({ ...transaction, date: e.target.value })}
-                disabled={saving}
-              />
+              <div className="flex min-w-0 items-center justify-end gap-2">
+                <input
+                  id="txn-date"
+                  type="date"
+                  className={`${ROW_INPUT} flex-none`}
+                  value={transaction.date}
+                  onChange={(e) => onChange({ ...transaction, date: e.target.value })}
+                  disabled={saving}
+                />
+                <input
+                  id="txn-time"
+                  type="time"
+                  aria-label="Time"
+                  className={`${ROW_INPUT} flex-none`}
+                  value={transaction.time?.slice(0, 5) || ""}
+                  onChange={(e) => handleTimeChange(e.target.value)}
+                  disabled={saving}
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="txn-time" className={CAPTION}>
-                Time
+
+            <div className={ROW}>
+              <label htmlFor="bank-account" className={ROW_LABEL}>
+                Paid from
               </label>
               <input
-                id="txn-time"
-                type="time"
-                className={`${WELL} ui-num mt-1.5 text-[14px]`}
-                value={transaction.time?.slice(0, 5) || ""}
-                onChange={(e) => handleTimeChange(e.target.value)}
+                id="bank-account"
+                placeholder="Axis …286591"
+                className={ROW_INPUT}
+                value={transaction.bank_account || ""}
+                onChange={(e) => onChange({ ...transaction, bank_account: e.target.value || null })}
                 disabled={saving}
               />
             </div>
-          </div>
 
-          <div>
-            <button
-              type="button"
-              onClick={() => setShowAdvanced((s) => !s)}
-              aria-expanded={showAdvanced}
-              className="flex h-11 w-full items-center justify-between rounded-[8px] text-[var(--ui-ink-soft)] transition-colors hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)]"
-            >
-              <span className="text-[13px]">More options</span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
-                strokeWidth={1.75}
+            <div className={ROW}>
+              <label htmlFor="card-number" className={ROW_LABEL}>
+                Card
+              </label>
+              <input
+                id="card-number"
+                placeholder="…6555"
+                className={ROW_INPUT}
+                value={transaction.card_number || ""}
+                onChange={(e) => onChange({ ...transaction, card_number: e.target.value || null })}
+                disabled={saving}
               />
-            </button>
+            </div>
 
-            <AnimatePresence initial={false}>
-              {showAdvanced && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="pt-1">
-                    <div className="grid grid-cols-2 gap-3 border-b border-[var(--ui-rule)] py-3">
-                      <div>
-                        <label htmlFor="bank-account" className={CAPTION}>
-                          Paid from
-                        </label>
-                        <input
-                          id="bank-account"
-                          placeholder="Axis …286591"
-                          className={`${WELL} mt-1.5`}
-                          value={transaction.bank_account || ""}
-                          onChange={(e) =>
-                            onChange({ ...transaction, bank_account: e.target.value || null })
-                          }
-                          disabled={saving}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="card-number" className={CAPTION}>
-                          Card
-                        </label>
-                        <input
-                          id="card-number"
-                          placeholder="…6555"
-                          className={`${WELL} mt-1.5`}
-                          value={transaction.card_number || ""}
-                          onChange={(e) =>
-                            onChange({ ...transaction, card_number: e.target.value || null })
-                          }
-                          disabled={saving}
-                        />
-                      </div>
-                    </div>
+            <div className={ROW}>
+              <label htmlFor="prorate" className={ROW_LABEL}>
+                Spread over
+                {transaction.prorate_months && transaction.prorate_months > 1 && (
+                  <span className="ui-num ml-2 text-[12px] text-[var(--ui-ink-softer)]">
+                    {formatCurrency(transaction.amount / transaction.prorate_months)}/mo
+                  </span>
+                )}
+              </label>
+              <div className="flex items-baseline gap-1.5">
+                <input
+                  id="prorate"
+                  type="number"
+                  min="1"
+                  max="60"
+                  placeholder="1"
+                  className={`${ROW_INPUT} w-10 flex-none`}
+                  value={transaction.prorate_months ?? ""}
+                  onChange={(e) => handleProrateChange(e.target.value)}
+                  onBlur={handleProrateBlur}
+                  disabled={saving}
+                />
+                <span className="text-[13px] text-[var(--ui-ink-softer)]">
+                  {transaction.prorate_months && transaction.prorate_months > 1
+                    ? "months"
+                    : "month"}
+                </span>
+              </div>
+            </div>
 
-                    <div className="flex items-center justify-between gap-3 border-b border-[var(--ui-rule)] py-3">
-                      <div className="min-w-0 flex-1">
-                        <label htmlFor="prorate" className="text-[13px] text-[var(--ui-ink)]">
-                          Spread over months
-                        </label>
-                        {transaction.prorate_months && transaction.prorate_months > 1 && (
-                          <p className="ui-num text-[11px] text-[var(--ui-ink-softer)]">
-                            {formatCurrency(transaction.amount / transaction.prorate_months)}/mo
-                          </p>
-                        )}
-                      </div>
-                      <input
-                        id="prorate"
-                        type="number"
-                        min="1"
-                        max="60"
-                        placeholder="1"
-                        className="ui-inset ui-num h-9 w-16 text-center text-[14px] text-[var(--ui-ink)] outline-none transition-shadow placeholder:text-[var(--ui-ink-softer)] focus:shadow-[inset_0_0_0_1.5px_var(--ui-accent)]"
-                        value={transaction.prorate_months ?? ""}
-                        onChange={(e) => handleProrateChange(e.target.value)}
-                        onBlur={handleProrateBlur}
-                        disabled={saving}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 py-3">
-                      <p className="text-[13px] text-[var(--ui-ink)]">Exclude from budget</p>
-                      <Switch
-                        checked={transaction.excluded_from_budget}
-                        onCheckedChange={(checked) =>
-                          onChange({ ...transaction, excluded_from_budget: checked })
-                        }
-                        disabled={saving}
-                        className="border-[var(--ui-edge)] data-[state=checked]:bg-[var(--ui-accent)] data-[state=unchecked]:bg-[var(--ui-inset)]"
-                      />
-                    </div>
-
-                    {!isNew && onDelete && (
-                      <button
-                        type="button"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        disabled={saving || deleting}
-                        className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-[13px] text-[var(--ui-ink-soft)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-danger)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-danger)] disabled:opacity-50"
-                      >
-                        <Trash2 className="h-4 w-4" strokeWidth={1.75} />
-                        Delete this expense
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className={ROW}>
+              <label htmlFor="exclude-budget" className={ROW_LABEL}>
+                Exclude from budget
+              </label>
+              <Switch
+                id="exclude-budget"
+                checked={transaction.excluded_from_budget}
+                onCheckedChange={(checked) =>
+                  onChange({ ...transaction, excluded_from_budget: checked })
+                }
+                disabled={saving}
+                className="border-[var(--ui-edge)] data-[state=checked]:bg-[var(--ui-accent)] data-[state=unchecked]:bg-[var(--ui-panel)]"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="flex shrink-0 gap-2 border-t border-[var(--ui-edge)] px-5 pt-3 pb-5">
-          <button
-            onClick={onClose}
-            disabled={saving || deleting}
-            className="h-11 flex-1 rounded-[10px] border border-[var(--ui-edge)] text-[14px] text-[var(--ui-ink-soft)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-ink)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--ui-accent)] disabled:opacity-50"
-          >
-            Cancel
-          </button>
+        <div className="shrink-0 px-5 pt-1 pb-[calc(env(safe-area-inset-bottom,0px)+16px)]">
           <button
             onClick={() => {
               hapticFeedback("medium");
               onSave(transaction);
             }}
-            disabled={saving || deleting}
-            className="ui-cta flex h-11 flex-[1.4] items-center justify-center gap-2 rounded-[10px] text-[14px] font-medium transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:opacity-90 disabled:opacity-40"
+            disabled={saving || !canSave}
+            className="ui-cta flex h-12 w-full items-center justify-center gap-2 rounded-[12px] text-[15px] font-medium transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:opacity-90 disabled:opacity-40"
           >
             {saving ? (
               <>
@@ -429,53 +400,6 @@ export function TransactionDialog({
           </button>
         </div>
       </DialogContent>
-
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="ui-type max-w-sm gap-0 sm:max-w-sm rounded-[18px] border-[var(--ui-edge)] bg-[var(--ui-panel)] p-5">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[19px] font-semibold tracking-[-0.01em] text-[var(--ui-ink)]">
-              Delete this expense?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="pt-1 text-[13px] text-[var(--ui-ink-soft)]">
-              {transaction.merchant ? (
-                <>
-                  Your record from{" "}
-                  <span className="text-[var(--ui-ink)]">{transaction.merchant}</span> will be
-                  removed permanently.
-                </>
-              ) : (
-                "This record will be removed permanently."
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-5 gap-2 sm:gap-2">
-            <AlertDialogCancel
-              disabled={deleting}
-              className="h-11 rounded-[10px] border-[var(--ui-edge)] bg-transparent px-5 text-[14px] text-[var(--ui-ink-soft)] transition-colors hover:bg-[var(--ui-inset)] hover:text-[var(--ui-ink)]"
-            >
-              Keep it
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                hapticFeedback("heavy");
-                if (onDelete) onDelete(transaction);
-                setShowDeleteConfirm(false);
-              }}
-              disabled={deleting}
-              className="h-11 rounded-[10px] border-0 bg-[var(--ui-danger)] px-5 text-[14px] font-medium text-[var(--ui-danger-ink)] hover:bg-[var(--ui-danger)] hover:opacity-90"
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Dialog>
   );
 }

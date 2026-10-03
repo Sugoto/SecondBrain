@@ -18,6 +18,9 @@ export const queryClient = new QueryClient({
   },
 });
 
+export const withoutVirtualProps = <T extends object>(row: T): T =>
+  Object.fromEntries(Object.entries(row).filter(([key]) => !key.startsWith("$"))) as T;
+
 function tableCollection<T extends { id: string }>(
   table: string,
   fetchRows: () => PromiseLike<{ data: T[] | null; error: Error | null }>,
@@ -35,14 +38,14 @@ function tableCollection<T extends { id: string }>(
       onInsert: async ({ transaction }) => {
         const { error } = await supabase
           .from(table)
-          .insert(transaction.mutations.map((m) => m.modified));
+          .insert(transaction.mutations.map((m) => withoutVirtualProps(m.modified)));
         if (error) throw error;
       },
       onUpdate: async ({ transaction }) => {
         for (const m of transaction.mutations) {
           const { error } = await supabase
             .from(table)
-            .update(m.changes as Record<string, unknown>)
+            .update(withoutVirtualProps(m.changes as Record<string, unknown>))
             .eq("id", m.key);
           if (error) throw error;
         }

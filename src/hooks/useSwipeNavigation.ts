@@ -1,14 +1,13 @@
 import { useRef, useEffect, type RefObject } from "react";
 
-const MIN_SWIPE_DISTANCE = 50; // Reduced for easier swiping
-const MAX_SWIPE_TIME = 500; // Increased for more forgiving swipe detection
-const DIRECTION_LOCK_THRESHOLD = 8; // Reduced threshold for faster direction detection
+const MIN_SWIPE_DISTANCE = 50;
+const MAX_SWIPE_TIME = 500;
+const DIRECTION_LOCK_THRESHOLD = 8;
 
 interface UseSwipeNavigationOptions<T extends string> {
   views: readonly T[];
   currentView: T;
   onViewChange: (view: T) => void;
-  /** Minimum swipe distance in pixels (default: 50) */
   minDistance?: number;
 }
 
@@ -31,12 +30,10 @@ export function useSwipeNavigation<T extends string>({
   const isHorizontalSwipe = useRef<boolean | null>(null);
   const hasLockedDirection = useRef<boolean>(false);
 
-  // Use native event listeners with passive: false to properly capture touch events
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Skip if only one view (nothing to swipe to)
     if (views.length <= 1) return;
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -56,43 +53,24 @@ export function useSwipeNavigation<T extends string>({
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
 
-      // Determine direction on first significant movement
       if (
         !hasLockedDirection.current &&
         (absDeltaX > DIRECTION_LOCK_THRESHOLD || absDeltaY > DIRECTION_LOCK_THRESHOLD)
       ) {
-        // Use angle-based detection: horizontal if angle < 30 degrees from horizontal axis
-        // tan(30°) ≈ 0.577, so it's horizontal if deltaY/deltaX < 0.577
-        // Or simply: if horizontal distance is significantly greater than vertical
         isHorizontalSwipe.current = absDeltaX > absDeltaY * 1.2;
         hasLockedDirection.current = true;
       }
 
-      // Track horizontal movement
       if (isHorizontalSwipe.current) {
         touchCurrentX.current = touch.clientX;
-
-        // Check if we're at an edge and trying to swipe further
-        const currentIndex = views.indexOf(currentView);
-        const isAtStart = currentIndex === 0 && deltaX > 0;
-        const isAtEnd = currentIndex === views.length - 1 && deltaX < 0;
-
-        // Only prevent default if we can actually navigate
-        // This prevents scroll jank when at edges
-        if (!isAtStart && !isAtEnd) {
-          // Note: We're not calling preventDefault() to allow scroll to continue
-          // The swipe will be evaluated on touchEnd
-        }
       }
     };
 
     const handleTouchEnd = () => {
-      // Check if this was a valid horizontal swipe
       if (!isHorizontalSwipe.current || !hasLockedDirection.current) {
         return;
       }
 
-      // Check swipe timing
       const swipeTime = Date.now() - touchStartTime.current;
       if (swipeTime > MAX_SWIPE_TIME) {
         return;
@@ -101,11 +79,8 @@ export function useSwipeNavigation<T extends string>({
       const distance = touchStartX.current - touchCurrentX.current;
       const velocity = Math.abs(distance) / swipeTime;
 
-      // Accept swipe if:
-      // 1. Distance is greater than minimum, OR
-      // 2. Velocity is high enough (fast flick)
       const isValidDistance = Math.abs(distance) > minDistance;
-      const isValidVelocity = velocity > 0.3; // 0.3 px/ms = 300 px/s
+      const isValidVelocity = velocity > 0.3;
 
       if (!isValidDistance && !isValidVelocity) {
         return;
@@ -122,8 +97,6 @@ export function useSwipeNavigation<T extends string>({
       }
     };
 
-    // Add event listeners with passive: false to allow preventDefault if needed
-    // Though we're not using preventDefault currently to avoid scroll issues
     container.addEventListener("touchstart", handleTouchStart, {
       passive: true,
     });

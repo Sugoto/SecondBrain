@@ -23,20 +23,78 @@ const isOutside = (e: React.MouseEvent<HTMLDialogElement>) => {
   return e.clientX < left || e.clientX > right || e.clientY < top || e.clientY > bottom;
 };
 
+const DISMISS_DISTANCE = 120;
+const DISMISS_VELOCITY = 0.6;
+
+function useSheetGestures(
+  ref: React.RefObject<HTMLDialogElement | null>,
+  enabled: boolean,
+  open: boolean,
+  close: () => void,
+) {
+  React.useEffect(() => {
+    const dialog = ref.current;
+    const viewport = window.visualViewport;
+    if (!enabled || !open || !dialog || !viewport) return;
+    const sync = () => {
+      const inset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      dialog.style.setProperty("--kb", `${inset}px`);
+    };
+    sync();
+    viewport.addEventListener("resize", sync);
+    return () => viewport.removeEventListener("resize", sync);
+  }, [ref, enabled, open]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDialogElement>) => {
+    const dialog = e.currentTarget;
+    const target = e.target as Element;
+    if (!enabled || !target.closest("[data-sheet-drag]")) return;
+    if (target.closest("input, textarea, select, button, a")) return;
+
+    const startY = e.clientY;
+    const startTime = e.timeStamp;
+    let distance = 0;
+    dialog.setPointerCapture(e.pointerId);
+    dialog.dataset.dragging = "";
+
+    const move = (ev: PointerEvent) => {
+      distance = Math.max(0, ev.clientY - startY);
+      dialog.style.translate = `0 ${distance}px`;
+    };
+    const end = (ev: PointerEvent) => {
+      dialog.removeEventListener("pointermove", move);
+      dialog.removeEventListener("pointerup", end);
+      dialog.removeEventListener("pointercancel", end);
+      delete dialog.dataset.dragging;
+      dialog.style.translate = "";
+      const velocity = distance / Math.max(1, ev.timeStamp - startTime);
+      if (distance > DISMISS_DISTANCE || (distance > 24 && velocity > DISMISS_VELOCITY)) close();
+    };
+    dialog.addEventListener("pointermove", move);
+    dialog.addEventListener("pointerup", end);
+    dialog.addEventListener("pointercancel", end);
+  };
+
+  return { onPointerDown };
+}
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  sheet = false,
   onOpenAutoFocus,
   ...props
 }: React.ComponentProps<"dialog"> & {
   showCloseButton?: boolean;
+  sheet?: boolean;
   onOpenAutoFocus?: (event: Event) => void;
 }) {
   const { open, onOpenChange } = useDialog();
   const ref = React.useRef<HTMLDialogElement>(null);
 
   const autoFocus = React.useEffectEvent((event: Event) => onOpenAutoFocus?.(event));
+  const gestures = useSheetGestures(ref, sheet, open, () => onOpenChange(false));
 
   React.useEffect(() => {
     const dialog = ref.current;
@@ -48,6 +106,7 @@ function DialogContent({
       autoFocus(event);
       dialog.autofocus = event.defaultPrevented;
       dialog.showModal();
+      if (event.defaultPrevented) dialog.focus({ preventScroll: true });
     }
   }, [open]);
 
@@ -67,12 +126,23 @@ function DialogContent({
       onClick={(e) => {
         if (e.target === e.currentTarget && isOutside(e)) onOpenChange(false);
       }}
+      onPointerDown={sheet ? gestures.onPointerDown : undefined}
       className={cn(
         "bg-background text-foreground m-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg outline-none sm:max-w-lg",
+        sheet &&
+          "ui-sheet mx-auto mt-auto mb-[var(--kb,0px)] max-h-[calc(92dvh-var(--kb,0px))] max-w-md rounded-t-[24px] rounded-b-none border-b-0 sm:max-w-md",
         className,
       )}
       {...props}
     >
+      {sheet && (
+        <div
+          data-sheet-drag
+          className="flex h-6 shrink-0 cursor-grab touch-none justify-center pt-2.5"
+        >
+          <span aria-hidden className="h-1 w-9 rounded-full bg-[var(--ui-edge)]" />
+        </div>
+      )}
       {children}
       {showCloseButton && (
         <button

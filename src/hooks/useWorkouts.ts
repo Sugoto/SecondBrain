@@ -1,5 +1,6 @@
 import { useLiveQuery } from "@tanstack/react-db";
 import { workoutsCollection } from "@/lib/collections";
+import { deleteWithUndo } from "@/lib/undo";
 import type { Workout } from "@/lib/supabase";
 
 export type { Workout } from "@/lib/supabase";
@@ -36,7 +37,7 @@ export function useWorkouts() {
       Object.assign(draft, values, { updated_at: new Date().toISOString() });
     }).isPersisted.promise;
 
-  const deleteWorkout = (id: string) => workoutsCollection.delete(id).isPersisted.promise;
+  const deleteWorkout = (id: string) => deleteWithUndo(workoutsCollection, id, "Exercise deleted");
 
   return {
     workouts,

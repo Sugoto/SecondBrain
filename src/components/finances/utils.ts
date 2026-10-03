@@ -7,10 +7,6 @@ export function calculateNetWorth(stats: UserStats | null): number {
   return stats.bank_savings + stats.mutual_funds + stats.us_etfs + stats.ppf + stats.epf;
 }
 
-// Proration helpers
-/**
- * Get the monthly amount for a transaction (handles proration)
- */
 export function getMonthlyAmount(txn: Transaction): number {
   if (txn.prorate_months && txn.prorate_months > 1) {
     return txn.amount / txn.prorate_months;
@@ -18,19 +14,14 @@ export function getMonthlyAmount(txn: Transaction): number {
   return txn.amount;
 }
 
-/**
- * Check if a prorated transaction applies to a given month
- */
 function isProratedInMonth(txn: Transaction, targetMonth: Temporal.PlainDate): boolean {
   const target = targetMonth.toPlainYearMonth();
   const startMonth = Temporal.PlainDate.from(txn.date).toPlainYearMonth();
 
   if (!txn.prorate_months || txn.prorate_months <= 1) {
-    // Not prorated - just check if date is in the month
     return startMonth.equals(target);
   }
 
-  // Prorated - check if targetMonth falls within the proration window
   const endMonth = startMonth.add({ months: txn.prorate_months - 1 });
   return (
     Temporal.PlainYearMonth.compare(target, startMonth) >= 0 &&
@@ -38,13 +29,13 @@ function isProratedInMonth(txn: Transaction, targetMonth: Temporal.PlainDate): b
   );
 }
 
-// Date range helpers - centralized to avoid duplication
 function getDateRanges() {
   const now = today();
   return {
     today: now,
     startOfWeek: now.subtract({ days: now.dayOfWeek - 1 }),
     startOfMonth: now.with({ day: 1 }),
+    last30Start: now.subtract({ days: 29 }),
   };
 }
 
@@ -52,14 +43,12 @@ export function filterByTimeRange(
   transactions: Transaction[],
   timeFilter: TimeFilter,
   customRange?: DateRange,
-  options?: { disableProrationSpreading?: boolean },
 ): Transaction[] {
-  const { today: startOfDay, startOfWeek, startOfMonth } = getDateRanges();
+  const { today: startOfDay, startOfWeek, last30Start } = getDateRanges();
 
   return transactions.filter((txn) => {
     const txnDate = Temporal.PlainDate.from(txn.date);
 
-    // Handle custom date range
     if (timeFilter === "custom" && customRange) {
       return (
         Temporal.PlainDate.compare(txnDate, customRange.from) >= 0 &&
@@ -67,26 +56,14 @@ export function filterByTimeRange(
       );
     }
 
-    // For prorated transactions in "month" view, check if proration period overlaps
-    // (unless proration spreading is disabled)
-    if (
-      !options?.disableProrationSpreading &&
-      timeFilter === "month" &&
-      txn.prorate_months &&
-      txn.prorate_months > 1
-    ) {
-      return isProratedInMonth(txn, startOfMonth);
-    }
-
     switch (timeFilter) {
       case "today":
         return Temporal.PlainDate.compare(txnDate, startOfDay) >= 0;
       case "week":
         return Temporal.PlainDate.compare(txnDate, startOfWeek) >= 0;
-      case "month":
-        return Temporal.PlainDate.compare(txnDate, startOfMonth) >= 0;
+      case "last30":
+        return Temporal.PlainDate.compare(txnDate, last30Start) >= 0;
       case "custom":
-        // If custom but no range, return all
         return true;
       default:
         return true;
@@ -113,7 +90,6 @@ export function sortTransactions(
   });
 }
 
-// Create empty transaction template
 export function createEmptyTransaction(): Transaction {
   return {
     id: "",
@@ -131,7 +107,6 @@ export function createEmptyTransaction(): Transaction {
   };
 }
 
-// Unified budget calculations
 export type BudgetInfo = {
   spent: number;
   budget: number;
@@ -139,10 +114,6 @@ export type BudgetInfo = {
   percent: number;
 };
 
-/**
- * Calculate spending against the single monthly budget.
- * Only considers budget-included expenses for the current month.
- */
 export function calculateBudgetInfo(
   transactions: Transaction[],
   monthlyBudget?: number | null,
@@ -151,11 +122,9 @@ export function calculateBudgetInfo(
 
   const budget = monthlyBudget ?? 0;
 
-  // Filter to current month, expenses only, budget-included
   const monthlyTransactions = transactions.filter((t) => {
     if (t.excluded_from_budget) return false;
 
-    // Handle prorated transactions
     if (t.prorate_months && t.prorate_months > 1) {
       return isProratedInMonth(t, startOfMonth);
     }

@@ -77,16 +77,10 @@ export function GradesView() {
 
   const handleDelete = async () => {
     if (!editing) return;
-    setSubmitting(true);
-    try {
-      await deleteCourse(editing.id);
-      setDialogOpen(false);
-      setEditing(null);
-    } catch (err) {
-      console.error("Failed to delete course:", err);
-    } finally {
-      setSubmitting(false);
-    }
+    const id = editing.id;
+    setDialogOpen(false);
+    setEditing(null);
+    await deleteCourse(id).catch((err) => console.error("Failed to delete course:", err));
   };
 
   const pursuingCourses = useMemo(
@@ -180,12 +174,7 @@ interface CourseSectionProps {
   emptyText: string;
 }
 
-function CourseSection({
-  label,
-  courses,
-  onCourseClick,
-  emptyText,
-}: CourseSectionProps) {
+function CourseSection({ label, courses, onCourseClick, emptyText }: CourseSectionProps) {
   return (
     <section className="px-6 pt-7 pb-8 border-t border-foreground/30">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
@@ -209,9 +198,7 @@ function CourseSection({
                 <p className="font-mono tabular-nums text-[13px] text-foreground truncate">
                   {course.code}
                 </p>
-                <p className="text-[11px] text-muted-foreground/70 truncate">
-                  {course.name}
-                </p>
+                <p className="text-[11px] text-muted-foreground/70 truncate">{course.name}</p>
                 {course.enrolled_semester && (
                   <p className="font-mono tabular-nums text-[10px] uppercase tracking-wider text-muted-foreground/80 mt-1">
                     {course.enrolled_semester}

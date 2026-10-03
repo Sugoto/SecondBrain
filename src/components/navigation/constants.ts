@@ -13,28 +13,24 @@ import {
 } from "lucide-react";
 import type { NavItem } from "./DynamicBottomNav";
 
-// Home page nav items
 export const HOME_NAV_ITEMS: NavItem[] = [
   { id: "omscs", icon: GraduationCap, label: "OMSCS", color: "var(--ui-hue-study)" },
   { id: "finances", icon: Wallet, label: "Finances", color: "var(--ui-hue-money)" },
   { id: "fitness", icon: Activity, label: "Health", color: "var(--ui-hue-body)" },
 ];
 
-// Finance tracker nav items
 export const FINANCE_NAV_ITEMS: NavItem[] = [
   { id: "investments", icon: Landmark, label: "Portfolio" },
   { id: "expenses", icon: Receipt, label: "Expenses" },
   { id: "trends", icon: TrendingUp, label: "Insights" },
 ];
 
-// Health tracker nav items
 export const HEALTH_NAV_ITEMS: NavItem[] = [
   { id: "nutrition", icon: Apple, label: "Nutrition" },
   { id: "workouts", icon: Dumbbell, label: "Workouts" },
   { id: "shopping", icon: ShoppingCart, label: "Shopping" },
 ];
 
-// OMSCS tracker nav items
 export const OMSCS_NAV_ITEMS: NavItem[] = [
   { id: "grades", icon: Calculator, label: "Courses" },
   { id: "semester", icon: CalendarDays, label: "Semester" },

@@ -1,5 +1,6 @@
-import { Activity, ViewTransition, useCallback, useMemo, type ReactNode } from "react";
-import { ThemeProvider } from "./hooks/useTheme";
+import { Activity, ViewTransition, useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { ThemeProvider, useTheme } from "./hooks/useTheme";
+import { syncStatusBar } from "./lib/statusBar";
 import { PrivacyProvider } from "./hooks/usePrivacy";
 import { AuthProvider } from "./hooks/useAuth";
 import { AuthGate } from "./components/auth/AuthGate";
@@ -18,6 +19,7 @@ import { FinanceTracker } from "./components/finances";
 import { HealthTracker } from "./components/fitness/FitnessTracker";
 import { OmscsTracker } from "./components/omscs/OmscsTracker";
 import { ProfilePage } from "./components/profile/ProfilePage";
+import { Snackbar } from "./components/ui/snackbar";
 
 function Section({
   active,
@@ -54,8 +56,17 @@ function AppContent() {
     goHome,
   } = useAppNavigation();
   const { prefetch: prefetchTransactions } = usePrefetchTransactions();
+  const { theme } = useTheme();
 
-  // Prefetch data when hovering over nav items
+  useEffect(() => {
+    const frame = requestAnimationFrame(syncStatusBar);
+    const settled = setTimeout(syncStatusBar, 320);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(settled);
+    };
+  }, [currentSection, theme]);
+
   const handlePrefetch = useCallback(
     (id: string) => {
       if (id === "finances") {
@@ -65,7 +76,6 @@ function AppContent() {
     [prefetchTransactions],
   );
 
-  // Memoize nav items to avoid recreation every render
   const navItems = useMemo(() => {
     switch (currentSection) {
       case "finances":
@@ -79,7 +89,6 @@ function AppContent() {
     }
   }, [currentSection]);
 
-  // Handle nav view changes
   const handleViewChange = useCallback(
     (view: string) => {
       if (currentSection === "home") {
@@ -123,7 +132,6 @@ function AppContent() {
         </Section>
       </div>
 
-      {/* Only show bottom nav on home page */}
       {currentSection === "home" && (
         <DynamicBottomNav
           navItems={navItems}
@@ -131,6 +139,8 @@ function AppContent() {
           onPrefetch={handlePrefetch}
         />
       )}
+
+      <Snackbar />
     </div>
   );
 }

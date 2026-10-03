@@ -30,7 +30,6 @@ export function OmscsTracker({ activeView, onViewChange, onGoHome }: OmscsTracke
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header with TopTabs */}
       <header className="shrink-0 bg-background border-b border-zinc-300 dark:border-zinc-700">
         <TopTabs
           navItems={OMSCS_NAV_ITEMS}

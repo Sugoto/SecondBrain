@@ -11,7 +11,7 @@ export type Transaction = {
   merchant: string | null;
   date: string;
   time: string | null;
-  value_rating: number | null; // 1-5, how worth-it the purchase felt
+  value_rating: number | null;
   excluded_from_budget: boolean;
   details: string | null;
   created_at: string;
@@ -55,8 +55,8 @@ export type ShoppingItem = {
   calories: number;
   protein: number;
   cost: number;
-  weight_grams: number; // Weight in grams for the given cost/nutrition values
-  serving_grams: number; // Serving size in grams
+  weight_grams: number;
+  serving_grams: number;
   checked: boolean;
   created_at: string;
 };

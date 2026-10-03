@@ -19,9 +19,9 @@ export interface TDEEResult {
   bmr: number;
   tdee: number;
   targetCalories: number;
-  protein: number; // grams
-  carbs: number; // grams
-  fat: number; // grams
+  protein: number;
+  carbs: number;
+  fat: number;
 }
 
 export const ACTIVITY_LEVELS: {
@@ -60,4 +60,3 @@ export const ACTIVITY_LEVELS: {
     color: "#262626",
   },
 ];
-

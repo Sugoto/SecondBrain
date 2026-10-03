@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { today } from "@/lib/utils";
 
-// Mutual fund scheme codes for the watchlist
 const WATCHLIST_FUNDS = [
   {
     schemeCode: 122639,
@@ -78,10 +77,9 @@ async function fetchMutualFund(schemeCode: number): Promise<MutualFundData> {
   return response.json();
 }
 
-// Fetch NAV for a specific date (for recording investments)
 export async function fetchNavForDate(
   schemeCode: number,
-  targetDate: string, // YYYY-MM-DD
+  targetDate: string,
 ): Promise<number | null> {
   const data = await fetchMutualFund(schemeCode);
   const target = Temporal.PlainDate.from(targetDate);
@@ -95,13 +93,11 @@ export async function fetchNavForDate(
   return null;
 }
 
-// Parse date from "DD-MM-YYYY" format
 function parseNavDate(dateStr: string) {
   const [day, month, year] = dateStr.split("-").map(Number);
   return Temporal.PlainDate.from({ year, month, day });
 }
 
-// Find NAV closest to target date
 function findNavAtDate(
   navData: Array<{ date: string; nav: string }>,
   targetDate: Temporal.PlainDate,
@@ -119,38 +115,32 @@ function calculateFundStats(
   fund: (typeof WATCHLIST_FUNDS)[number],
   data: MutualFundData,
 ): FundWithStats {
-  const navData = data.data; // Full history
+  const navData = data.data;
 
   const currentNav = parseFloat(navData[0]?.nav || "0");
   const previousNav = parseFloat(navData[1]?.nav || "0");
 
   const now = today();
 
-  // Calculate target dates
   const oneMonthAgo = now.subtract({ months: 1 });
   const oneYearAgo = now.subtract({ years: 1 });
   const threeYearsAgo = now.subtract({ years: 3 });
   const fiveYearsAgo = now.subtract({ years: 5 });
 
-  // Find NAVs at target dates
   const monthAgoNav = findNavAtDate(navData, oneMonthAgo) || currentNav;
   const yearAgoNav = findNavAtDate(navData, oneYearAgo);
   const threeYearAgoNav = findNavAtDate(navData, threeYearsAgo);
   const fiveYearAgoNav = findNavAtDate(navData, fiveYearsAgo);
 
-  // Calculate changes
   const dailyChange = currentNav - previousNav;
   const dailyChangePercent = previousNav > 0 ? (dailyChange / previousNav) * 100 : 0;
 
   const monthChange = currentNav - monthAgoNav;
   const monthChangePercent = monthAgoNav > 0 ? (monthChange / monthAgoNav) * 100 : 0;
 
-  // 1Y - already annualized (it's 1 year)
   const yearChange = yearAgoNav ? currentNav - yearAgoNav : 0;
   const yearChangePercent = yearAgoNav && yearAgoNav > 0 ? (yearChange / yearAgoNav) * 100 : 0;
 
-  // 3Y - Calculate CAGR (Compound Annual Growth Rate)
-  // CAGR = ((EndValue / StartValue) ^ (1/years)) - 1
   const threeYearChange = threeYearAgoNav ? currentNav - threeYearAgoNav : 0;
   let threeYearChangePercent = 0;
   if (threeYearAgoNav && threeYearAgoNav > 0) {
@@ -159,7 +149,6 @@ function calculateFundStats(
     threeYearChangePercent = cagr * 100;
   }
 
-  // 5Y - Calculate CAGR
   const fiveYearChange = fiveYearAgoNav ? currentNav - fiveYearAgoNav : 0;
   let fiveYearChangePercent = 0;
   if (fiveYearAgoNav && fiveYearAgoNav > 0) {
@@ -219,7 +208,7 @@ export function useMutualFundWatchlist() {
       if (funds.length === 0) throw new Error("Failed to fetch mutual funds");
       return funds;
     },
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 2,
   });
@@ -240,5 +229,3 @@ export function useMutualFundWatchlist() {
     lastUpdated: dataUpdatedAt ? new Date(dataUpdatedAt) : null,
   };
 }
-
-// Utility to calculate portfolio totals from funds and investments

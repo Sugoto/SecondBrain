@@ -1,9 +1,10 @@
-import { useState, useMemo, lazy, Suspense } from "react";
+import { useState, useMemo, lazy, Suspense, type CSSProperties } from "react";
 import type { Transaction } from "@/lib/supabase";
 import { useExpenseData, useUserStats } from "@/hooks/useExpenseData";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
+import { useSnackVisible } from "@/components/ui/snackbar";
 import { useFormatCurrency } from "@/hooks/usePrivacy";
 import { calculateBudgetInfo } from "./utils";
 import { TopTabs } from "@/components/navigation/TopTabs";
@@ -80,12 +81,12 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
 
   const { userStats } = useUserStats();
 
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>("month");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("last30");
   const [customDateRange, setCustomDateRange] = useState<DateRange>(null);
 
   const [dialogState, setDialogState] = useState<DialogState>(null);
+  const snackVisible = useSnackVisible();
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   const swipeHandlers = useSwipeNavigation({
     views: VIEWS,
@@ -117,30 +118,17 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
     }
   }
 
-  async function removeTransaction(txn: Transaction) {
-    setDeleting(true);
-    try {
-      await deleteTransaction(txn.id);
-      setDialogState(null);
-    } catch (err) {
-      console.error("Failed to delete:", err);
-    } finally {
-      setDeleting(false);
-    }
+  function removeTransaction(txn: Transaction) {
+    setDialogState(null);
+    deleteTransaction(txn.id).catch((err) => console.error("Failed to delete:", err));
   }
 
   function openAddExpense() {
-    setDialogState({
-      transaction: createEmptyTransaction(),
-      mode: "new",
-    });
+    setDialogState({ transaction: createEmptyTransaction(), mode: "new" });
   }
 
   function handleEditTransaction(txn: Transaction) {
-    setDialogState({
-      transaction: { ...txn },
-      mode: "edit",
-    });
+    setDialogState({ transaction: { ...txn }, mode: "edit" });
   }
 
   function handleDialogChange(updated: Transaction) {
@@ -150,9 +138,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
   }
 
   const filteredTransactions = useMemo(() => {
-    const result = filterByTimeRange(transactions, timeFilter, customDateRange, {
-      disableProrationSpreading: true,
-    });
+    const result = filterByTimeRange(transactions, timeFilter, customDateRange);
 
     return sortTransactions(result, "date", "desc");
   }, [transactions, timeFilter, customDateRange]);
@@ -163,7 +149,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
 
   return (
     <div className="ui-surface flex h-full flex-col overflow-hidden">
-      <header className="fixed top-0 right-0 left-0 z-20 bg-[var(--ui-page)] md:relative md:shrink-0">
+      <header className="relative z-20 shrink-0 bg-[var(--ui-page)]">
         <div className="max-w-6xl mx-auto">
           <TopTabs
             navItems={FINANCE_NAV_ITEMS}
@@ -187,7 +173,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
       </header>
 
       <main
-        className="ui-surface flex-1 touch-pan-y overflow-y-auto overscroll-contain pt-[120px] pb-28 md:pt-0 md:pb-0"
+        className="ui-surface flex-1 touch-pan-y overflow-y-auto overscroll-contain pb-28 md:pb-0"
         {...swipeHandlers}
       >
         {activeView === "expenses" && <BudgetBar budgetInfo={budgetInfo} />}
@@ -205,6 +191,7 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
               <ExpensesView
                 transactions={filteredTransactions}
                 onTransactionClick={handleEditTransaction}
+                scrollRef={swipeHandlers.ref}
               />
             </motion.div>
           )}
@@ -222,7 +209,6 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
         transaction={dialogState?.transaction ?? null}
         isNew={dialogState?.mode === "new"}
         saving={saving}
-        deleting={deleting}
         onClose={() => setDialogState(null)}
         onSave={saveTransaction}
         onChange={handleDialogChange}
@@ -231,18 +217,24 @@ export function FinanceTracker({ activeView, onViewChange, onGoHome }: FinanceTr
 
       <AnimatePresence>
         {activeView === "expenses" && (
-          <motion.button
+          <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 700, damping: 32 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={openAddExpense}
-            className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center h-12 w-12 rounded-full bg-foreground text-background shadow-lg shadow-foreground/20"
-            aria-label="Add expense"
+            transition={{ type: "spring", stiffness: 520, damping: 26 }}
+            className="pointer-events-none fixed inset-x-0 z-40 flex justify-center md:hidden"
+            style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)" }}
           >
-            <Plus className="h-5 w-5" strokeWidth={1.5} />
-          </motion.button>
+            <button
+              type="button"
+              onClick={openAddExpense}
+              style={{ "--fab-lift": snackVisible ? "-60px" : "0px" } as CSSProperties}
+              className="ui-fab ui-cta pointer-events-auto flex h-14 w-14 items-center justify-center shadow-[0_10px_24px_-10px_oklch(30%_0.12_275/0.55)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ui-accent)]"
+              aria-label="Add expense"
+            >
+              <Plus className="h-6 w-6" strokeWidth={2} />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

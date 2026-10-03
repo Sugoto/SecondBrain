@@ -63,8 +63,6 @@ function fromUserStats(stats: UserStats | null | undefined): FormState {
   };
 }
 
-/** Identity of the server value, so a change to any tracked field re-seeds the
- *  form. Mirrors the field list in `fromUserStats`. */
 function statsKey(stats: UserStats | null | undefined): string {
   if (!stats) return "";
   const f = fromUserStats(stats);
@@ -83,8 +81,6 @@ const ASSET_ROWS = [
   { key: "monthly_income", label: "Monthly salary" },
 ] as const;
 
-/** One ruled row inside a panel. The last row closes the panel, so it drops
- *  its rule rather than drawing one against the panel edge. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-[var(--ui-rule)] px-4 py-2.5 last:border-b-0">
@@ -94,8 +90,6 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-/** Right-aligned numeric entry. `prefix`/`suffix` carry the unit so it stays
- *  out of the label. */
 function NumberField({
   id,
   value,
@@ -131,8 +125,6 @@ function NumberField({
   );
 }
 
-/** The documented segmented control: an inset track, the selected segment
- *  raised onto the panel colour. */
 function Segmented<T extends string | number>({
   label,
   options,
@@ -191,9 +183,6 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
   const [form, setForm] = useState<FormState>(baseline);
   const [syncedTo, setSyncedTo] = useState<string>(() => statsKey(stats));
 
-  /* Re-seed the form when the server value changes, compared during render
-     rather than in an effect: setState inside an effect body cascades a second
-     render, and `vp check` rejects it. Same idiom as TransactionDialog. */
   const currentKey = statsKey(stats);
   if (currentKey !== syncedTo) {
     setSyncedTo(currentKey);
@@ -257,7 +246,6 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
       </header>
 
       <main className="min-h-0 flex-1 space-y-7 overflow-y-auto px-4">
-        {/* Identity, on the same dark plate as the home masthead. */}
         <section className="ui-plate flex items-center gap-3 rounded-[14px] px-4 py-3.5">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] text-[var(--ui-plate-ink-soft)]">Signed in as</p>
@@ -338,8 +326,6 @@ export function ProfilePage({ onGoHome }: ProfilePageProps) {
           </div>
         </section>
 
-        {/* Budget gets one emphasised figure rather than another ruled panel,
-            so the page is legible by shape and not only by heading. */}
         <section>
           <h2 className={SECTION_LABEL}>Budget</h2>
           <label

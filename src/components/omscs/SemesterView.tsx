@@ -126,10 +126,10 @@ function loadDone(): Set<string> {
     if (!raw) return new Set();
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return new Set(parsed);
+    return new Set();
   } catch {
-    /* ignore */
+    return new Set();
   }
-  return new Set();
 }
 
 export function SemesterView() {

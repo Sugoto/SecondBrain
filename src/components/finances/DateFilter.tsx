@@ -15,7 +15,7 @@ interface DateFilterProps {
 const TIME_LABELS: Record<Exclude<TimeFilter, "custom">, string> = {
   today: "Day",
   week: "Week",
-  month: "Month",
+  last30: "30 days",
 };
 
 const monthName = ({ month }: { month: number }) => MONTHS[month - 1];
@@ -82,7 +82,7 @@ export function DateFilter({
       }
       return formatRange(from, to);
     }
-    return monthName(now);
+    return TIME_LABELS.last30;
   };
 
   if (activeView === "trends") return null;
@@ -103,7 +103,7 @@ export function DateFilter({
               Quick select
             </p>
             <div className="grid grid-cols-3 border-y border-outline-variant divide-x divide-outline-variant">
-              {(["today", "week", "month"] as const).map((filter) => (
+              {(["today", "week", "last30"] as const).map((filter) => (
                 <button
                   key={filter}
                   onClick={() => {

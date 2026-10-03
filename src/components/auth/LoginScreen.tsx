@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { Brain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { today } from "@/lib/utils";
-
-const CURRENT_YEAR = today().year;
 
 function readOAuthErrorFromUrl(): string | null {
   if (typeof window === "undefined") return null;
@@ -77,14 +74,6 @@ export function LoginScreen() {
           </button>
         </div>
       </div>
-
-      <footer className="shrink-0 text-center pb-8 pt-4">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
-          {CURRENT_YEAR}
-          <span className="mx-2 text-muted-foreground/30">·</span>
-          <span className="text-muted-foreground">Sugoto Basu</span>
-        </p>
-      </footer>
     </div>
   );
 }

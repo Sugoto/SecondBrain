@@ -35,10 +35,6 @@ export function usePrivacy() {
   return useContext(PrivacyContext);
 }
 
-/**
- * General-purpose currency formatter. Always returns the formatted value —
- * privacy mode does NOT mask transactions, budgets, or analysis tools.
- */
 export function useFormatCurrency() {
   return (n: number) => formatCurrency(n);
 }
@@ -51,10 +47,6 @@ export function useMaskedRupee() {
   return (n: number, opts?: Intl.NumberFormatOptions) => `₹${n.toLocaleString("en-IN", opts)}`;
 }
 
-/**
- * Asset-aware formatters. These mask their value when privacy mode is on.
- * Use ONLY for net worth, assets, salary, and other holdings-level numbers.
- */
 export function useAssetCurrency() {
   const { hidden } = usePrivacy();
   return (n: number) => (hidden ? MASK : formatCurrency(n));

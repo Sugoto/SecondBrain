@@ -5,10 +5,6 @@ import { calculateTDEE, formatNumber } from "@/components/fitness/utils";
 const WATER_LITRES = 3;
 const FIBRE_GRAMS = 30;
 
-/**
- * Home-page presentation of the day's calorie target. Shares the TDEE math with
- * the fitness tracker but not the layout, so the fitness page is unaffected.
- */
 export function NutritionSummary() {
   const { userStats } = useUserStats();
 

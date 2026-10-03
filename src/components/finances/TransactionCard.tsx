@@ -8,8 +8,6 @@ import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
 
 const RATING_STEPS = [1, 2, 3, 4, 5];
 
-/** Five ticks filled to the rating. One hue, ordinal by count, so a high
- *  rating reads as "more" rather than as a green light. */
 function ValueTicks({ rating }: { rating: number }) {
   return (
     <span
@@ -33,7 +31,6 @@ interface TransactionCardProps {
   transaction: Transaction;
   onClick: (transaction: Transaction) => void;
   index?: number;
-  /** Last row of its day card: closes the card instead of ruling into the next row. */
   isLastOfDay?: boolean;
 }
 
@@ -55,15 +52,13 @@ export const TransactionCard = memo(function TransactionCard({
     <button
       type="button"
       onClick={handleClick}
-      className={`ui-type h-full w-full border-x border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 text-left transition-colors hover:bg-[var(--ui-inset)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:bg-[var(--ui-inset)] ${
-        isLastOfDay
-          ? "rounded-b-[14px] border-b border-[var(--ui-edge)]"
-          : "border-b border-[var(--ui-rule)]"
+      className={`ui-type h-full w-full px-1 text-left transition-colors hover:bg-[var(--ui-inset)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--ui-accent)] active:bg-[var(--ui-inset)] ${
+        isLastOfDay ? "" : "border-b border-[var(--ui-rule)]"
       }`}
     >
       <div className={`flex h-full items-center gap-2.5 ${isExcluded ? "opacity-45" : ""}`}>
         <div className="flex min-w-0 flex-1 items-center gap-1.5">
-          <p className="truncate text-[13px] text-[var(--ui-ink)]">
+          <p className="truncate text-[14px] text-[var(--ui-ink)]">
             {txn.merchant || "Unknown merchant"}
           </p>
           {txn.details && (

@@ -1,24 +1,28 @@
-import { useCallback, useMemo, memo, useRef } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  memo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import type { Transaction } from "@/lib/supabase";
 import { TransactionCard } from "./TransactionCard";
-import { Footer } from "./Footer";
 import { formatDayLabel } from "./constants";
 import { getMonthlyAmount } from "./utils";
 import { useFormatCurrencyCompact } from "@/hooks/usePrivacy";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-const TXN_HEIGHT = 38;
-const HEADER_HEIGHT = 34;
-/** Air between one day card and the next. */
-const CARD_GAP = 10;
+const TXN_HEIGHT = 36;
+const HEADER_HEIGHT = 24;
+const DAY_GAP = 24;
 const OVERSCAN = 8;
 
 type ListRow =
   | { kind: "header"; key: string; date: string; total: number; count: number; gap: boolean }
   | { kind: "txn"; key: string; txn: Transaction; isLastOfDay: boolean };
 
-/** Flattens the date-sorted transactions into one addressable row list so the
- *  virtualizer keeps working, with a header opening each day card. */
 function buildRows(transactions: Transaction[]): ListRow[] {
   const rows: ListRow[] = [];
 
@@ -58,7 +62,7 @@ function buildRows(transactions: Transaction[]): ListRow[] {
 
 function rowHeight(row: ListRow): number {
   if (row.kind === "txn") return TXN_HEIGHT;
-  return HEADER_HEIGHT + (row.gap ? CARD_GAP : 0);
+  return HEADER_HEIGHT + (row.gap ? DAY_GAP : 0);
 }
 
 function DayHeader({
@@ -74,20 +78,18 @@ function DayHeader({
 }) {
   const fmt = useFormatCurrencyCompact();
   return (
-    <div className="flex h-full flex-col justify-end" style={{ paddingTop: gap ? CARD_GAP : 0 }}>
-      <div className="flex items-center justify-between gap-3 rounded-t-[14px] border-x border-t border-[var(--ui-edge)] bg-[var(--ui-panel)] px-3 pt-2 pb-1.5">
-        {/* leading-5 matches the chip's line box, so the header is the same
-            height with or without it and the card gap does not wobble. */}
-        <span className="text-[12px] leading-5 font-medium text-[var(--ui-accent)]">
-          {formatDayLabel(date)}
+    <div
+      className="flex h-full items-end justify-between gap-3 border-b border-[var(--ui-edge)] px-1 pb-1"
+      style={{ paddingTop: gap ? DAY_GAP : 0 }}
+    >
+      <span className="text-[12px] leading-5 font-medium text-[var(--ui-accent)]">
+        {formatDayLabel(date)}
+      </span>
+      {count > 1 && (
+        <span className="ui-chip ui-chip-quiet ui-num px-2 py-0.5 text-[12px] leading-4">
+          {fmt(total)}
         </span>
-        {/* One transaction needs no total: the row below already says it. */}
-        {count > 1 && (
-          <span className="ui-chip ui-chip-quiet ui-num px-2 py-0.5 text-[12px] leading-4">
-            {fmt(total)}
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 }
@@ -95,13 +97,16 @@ function DayHeader({
 interface ExpensesViewProps {
   transactions: Transaction[];
   onTransactionClick: (txn: Transaction) => void;
+  scrollRef: RefObject<HTMLElement | null>;
 }
 
 export const ExpensesView = memo(function ExpensesView({
   transactions,
   onTransactionClick,
+  scrollRef,
 }: ExpensesViewProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [scrollMargin, setScrollMargin] = useState(0);
 
   const rows = useMemo(() => buildRows(transactions), [transactions]);
 
@@ -114,10 +119,30 @@ export const ExpensesView = memo(function ExpensesView({
 
   const virtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => scrollRef.current,
     estimateSize: (index) => rowHeight(rows[index]),
     overscan: OVERSCAN,
+    scrollMargin,
   });
+
+  const isEmpty = transactions.length === 0;
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const scroller = scrollRef.current;
+    if (!list || !scroller) return;
+    const measure = () => {
+      const offset =
+        list.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top +
+        scroller.scrollTop;
+      setScrollMargin(Math.round(offset));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    return () => observer.disconnect();
+  }, [scrollRef, isEmpty]);
 
   if (transactions.length === 0) {
     return (
@@ -128,7 +153,6 @@ export const ExpensesView = memo(function ExpensesView({
             Add a transaction, or widen the date range to see older spending.
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -136,48 +160,41 @@ export const ExpensesView = memo(function ExpensesView({
   return (
     <div className="ui-type mx-auto max-w-6xl px-4">
       <div
-        ref={parentRef}
-        className="scrollbar-hide h-[70dvh] overflow-auto"
-        style={{ contain: "strict" }}
+        ref={listRef}
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: "100%",
+          position: "relative",
+        }}
       >
-        <div
-          style={{
-            height: `${virtualizer.getTotalSize()}px`,
-            width: "100%",
-            position: "relative",
-          }}
-        >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const row = rows[virtualRow.index];
-            return (
-              <div
-                key={row.key}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                {row.kind === "header" ? (
-                  <DayHeader date={row.date} total={row.total} count={row.count} gap={row.gap} />
-                ) : (
-                  <TransactionCard
-                    transaction={row.txn}
-                    onClick={handleTransactionClick}
-                    index={virtualRow.index}
-                    isLastOfDay={row.isLastOfDay}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const row = rows[virtualRow.index];
+          return (
+            <div
+              key={row.key}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start - scrollMargin}px)`,
+              }}
+            >
+              {row.kind === "header" ? (
+                <DayHeader date={row.date} total={row.total} count={row.count} gap={row.gap} />
+              ) : (
+                <TransactionCard
+                  transaction={row.txn}
+                  onClick={handleTransactionClick}
+                  index={virtualRow.index}
+                  isLastOfDay={row.isLastOfDay}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
-
-      <Footer />
     </div>
   );
 });

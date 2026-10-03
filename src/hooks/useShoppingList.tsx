@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLiveQuery } from "@tanstack/react-db";
 import { shoppingCollection } from "@/lib/collections";
+import { deleteWithUndo } from "@/lib/undo";
 import type { ShoppingItem } from "@/lib/supabase";
 
 type ShoppingInput = Omit<ShoppingItem, "id" | "created_at">;
@@ -66,7 +67,7 @@ export function useShoppingList() {
     updateItem,
 
     deleteItem: (id: string) => {
-      shoppingCollection.delete(id).isPersisted.promise.catch(console.error);
+      deleteWithUndo(shoppingCollection, id, "Item deleted").catch(console.error);
     },
 
     isAdding,

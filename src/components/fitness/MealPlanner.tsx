@@ -212,10 +212,10 @@ function loadSelectedDays(): number[] {
     if (Array.isArray(parsed)) {
       return parsed.filter((n) => typeof n === "number" && n >= 0 && n <= 6);
     }
+    return [];
   } catch {
-    /* ignore */
+    return [];
   }
-  return [];
 }
 
 export function MealPlanner() {
